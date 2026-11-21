@@ -223,6 +223,22 @@ test("a draft keeps the units it began in, and a plain number reads the user's d
   assert.strictEqual(last(p).params.values.ventilation.air_changes_per_hour, 0.5);
 });
 
+test("a draft that matches the value redrawn in new units is still sent", function () {
+  var p = load();
+  click(card(p, "ventilation").querySelector(".pgm-card-head"));
+  var input = labelled(card(p, "ventilation"), "input", "Ventilation per person");
+  var seed = input.value;
+  p.snapshot(programs(), [], { unit_system: "IP" });
+  var redrawn = input.value;
+  p.snapshot(programs(), [], { unit_system: "SI" });
+  type(input, redrawn);
+  p.snapshot(programs(), [], { unit_system: "IP" });
+  assert.notStrictEqual(redrawn, seed, "9 m³/h reads as another number in cfm");
+  enter(input);
+  var sent = last(p).params.values.ventilation.flow_per_person;
+  assert.ok(Math.abs(sent - Number(redrawn) / 3600) < 1e-9, redrawn + " m³/h, as typed in SI");
+});
+
 test("an Equipment Set counts the Zones whose Set it works out to, a house's Segment Set included", function () {
   var p = load();
   click(p.context.document.querySelectorAll("[role='tab']").filter(function (node) {

@@ -296,6 +296,33 @@ test("a Zone with no Faces is checked on its own in Geometry and moves from the 
     ["zon_b"]);
 });
 
+test("a Zone with no Faces joins a Shift-click range and leaves with a new SketchUp selection", function () {
+  function threeInHouse(state) {
+    var overview = state.sections["ph_composer.zones.overview"].value;
+    overview.zones[1].values.building_segment_id = "bsg_house";
+    var third = JSON.parse(JSON.stringify(overview.zones[0]));
+    third.id = "zon_c"; third.reference = { zone_id: "zon_c", zone_path: [300] };
+    third.values = Object.assign({}, third.values, { name: "Zone C" });
+    overview.zones.push(third);
+    var faces = state.sections["ph_composer.zones.faces.faces"].value.faces;
+    faces.splice(1, 1);
+    faces.push(face("zon_c", [300], 301, 9));
+  }
+  var p = load(null, threeInHouse);
+  click(zoneRow(p, "Zone A").querySelector(".row-check"));
+  zoneRow(p, "Zone C").querySelector(".row-check").listeners.click({ shiftKey: true, preventDefault: function () {} });
+  ["Zone A", "Zone B", "Zone C"].forEach(function (name) {
+    assert.strictEqual(zoneRow(p, name).querySelector(".row-check").checked, true, name + " is in the range");
+  });
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot(null, function (state) {
+    threeInHouse(state);
+    state.sections["ph_composer.zones.faces.selection_change"] = { status: "completed", value: { generation: 1 } };
+    state.sections["ph_composer.zones.faces.selected"] = { status: "completed", value: { targets: [] } };
+  }) });
+  assert.strictEqual(zoneRow(p, "Zone B").querySelector(".row-check").checked, false,
+    "a selection with no Faces replaces the checked set, the Zone with no Faces included");
+});
+
 test("Escape keeps a new Segment's given name and sends nothing", function () {
   var p = load();
   click(byLabel(p.section(), "New Building Segment"));

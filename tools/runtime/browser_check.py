@@ -294,7 +294,8 @@ new Promise(function (resolve, reject) {
     }, canonical
     model = json.loads(canonical["hbjson"])
     constructions = {row["identifier"]: row for row in model["properties"]["energy"]["constructions"]}
-    assert set(constructions) == {"ph_composer_asm_Single000001"}
+    # The interior Surface pair exports the one Assembly, reversed on one side.
+    assert set(constructions) == {"ph_composer_asm_Single000001", "ph_composer_asm_Single000001_reversed"}
     for room in model["rooms"]:
         for face in room["faces"]:
             identifier = face["properties"]["energy"]["construction"]
@@ -321,7 +322,7 @@ new Promise(function (resolve, reject) {
     return {
         "shipped_authored_construction_translation": True,
         "native_pyodide_model_parity": True,
-        "comparison": "Normalize upstream PH default UUIDs and unordered global construction definitions only.",
+        "comparison": "Normalize upstream PH default UUIDs, hash-ordered definition lists and int/float only.",
         "synthetic_result": result,
     }
 
@@ -330,7 +331,9 @@ def comparable_result(result: dict[str, Any]) -> dict[str, Any]:
     """Compare exact values and authored references; scope normalization to upstream-created defaults.
 
     HB-PH initializes otherwise unauthored team/site/certification children with uuid4 identifiers.
-    HB-Energy emits its global material/construction sets in hash-set order. Neither difference
+    HB-Energy emits its global material/construction sets, and the Model's own materials, constructions,
+    schedules, schedule type limits and program types, in hash-set order. A number crosses the JavaScript
+    bridge without its int/float distinction, so 1.0 and 1 compare equal. None of these differences
     changes this fixture's authored Room/Face/segment identities or Surface/construction references.
     This is comparison-only: the exported HBJSON is never rewritten or a golden replaced.
     """
@@ -361,16 +364,22 @@ def comparable_result(result: dict[str, Any]) -> dict[str, Any]:
     def replace(value: Any) -> Any:
         if isinstance(value, str):
             return replacements.get(value, value)
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
         if isinstance(value, list):
             return [replace(child) for child in value]
         if isinstance(value, dict):
             return {key: replace(child) for key, child in value.items()}
         return value
 
-    global_set = model["properties"]["energy"]["global_construction_set"]
+    # Sorted after the default UUIDs are replaced, so a definition carrying one sorts the same in both runtimes.
+    model = replace(model)
+    energy = model["properties"]["energy"]
     for field in ("materials", "constructions"):
-        global_set[field].sort(key=lambda definition: definition["identifier"])
-    copied["canonical_model"]["hbjson"] = json.dumps(replace(model), sort_keys=True, separators=(",", ":"))
+        energy["global_construction_set"][field].sort(key=lambda definition: definition["identifier"])
+    for field in ("materials", "constructions", "schedules", "schedule_type_limits", "program_types"):
+        energy.get(field, []).sort(key=lambda definition: definition["identifier"])
+    copied["canonical_model"]["hbjson"] = json.dumps(model, sort_keys=True, separators=(",", ":"))
     return copied
 
 

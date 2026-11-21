@@ -151,6 +151,15 @@ station picker are its owners.
 Persistent fields remain subscribed until `dispose`; `once: true` disposes after closing a one-use
 editor. Owners retain exact mutation parameters, transaction rules and snapshot authority.
 
+The library sidebar (`library/sidebar.js`) also sits beside an editor of one record at a time: a feature's
+record page passes `onOpen(row)` and `active()`, so a local row opens that record in the editor and the shown
+record's row is current, `markKnown` to end a library row already in this file in a check, and
+`dependencyLoading(library)` to hold a copy while a catalog it depends on loads. A local-only placement keeps its
+own + New. The Programs tab is its first owner (`html/features/programs/record_page.js`): one page per kind, whose
+body (`root`, `render(row, context)`, and optionally `headerAction`, the record's primary action in the page
+header, and `guard()` or `typing()` to hold the page) is the kind's editor. The page owns the record lifecycle
+(New, rename in place, Duplicate, Delete with a replacement) through the kind's own operations.
+
 For a drawing editor, `new ui.Bubble(trigger, title, { detachedTrigger: true })` leaves the
 trigger in its original drawing parent. Mount `bubble.root` outside the drawing's scrollport
 and any transformed ancestor. The Bubble retains trigger activation, focus, hover and dismissal;

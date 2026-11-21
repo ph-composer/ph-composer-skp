@@ -35,7 +35,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
 
   /* This view's state for one Model, with the host handle it reaches the shared state through. */
   function create(host) {
-    var vs = { host: host, checked: new CheckedFaces(), emptyChecked: Object.create(null),
+    var vs = { host: host, checked: new CheckedFaces(),
       showAll: Object.create(null), locating: false,
       faces: [], barTargets: [], limit: Infinity, faceTypes: [], boundaries: [] };
     // The Assembly chip keeps the object it was painted with and reads it again when the user chooses, so it
@@ -536,7 +536,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
      first, then the checked set, then Locate's outline. True when this view used the key. */
   function escape(vs) {
     if (classify.showing()) return false;
-    if (vs.checked.among(vs.faces).length || Object.keys(vs.emptyChecked).length) {
+    if (vs.checked.among(vs.faces).length || Object.keys(vs.checked.rows).length) {
       clearChecks(vs); panel.repaint(); return true;
     }
     return clearLocate(vs);
@@ -568,7 +568,6 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
 
   function clearChecks(vs) {
     vs.checked.clear();
-    vs.emptyChecked = Object.create(null);
   }
 
   /* What the shared table's checkboxes do in this view: a Face row checks its Face, a Zone or summary row
@@ -579,32 +578,26 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     vs.checkedZones = context.allZoneRows.filter(function (row) { return vs.checked.state(row) === true; })
       .map(function (row) { return row.record.zone; });
     var live = Object.create(null);
-    context.allZoneRows.forEach(function (row) {
-      if (emptyZone(row) && vs.emptyChecked[row.key]) live[row.key] = row;
-    });
-    vs.emptyChecked = Object.create(null);
-    Object.keys(live).forEach(function (key) { vs.emptyChecked[key] = true; });
+    context.allZoneRows.forEach(function (row) { if (emptyZone(row)) live[row.key] = row; });
     // What the Building Segment choice moves: every fully checked Zone, with or without Faces.
-    vs.moveZones = vs.checkedZones.concat(Object.keys(live).map(function (key) { return live[key].record.zone; }));
+    vs.moveZones = vs.checkedZones.concat(vs.checked.keepRows(live).map(function (row) { return row.record.zone; }));
     vs.hiddenChecked = vs.checked.among(vs.faces).length - vs.checked.among(filterFaces).length;
     return { state: function (row) {
-      return emptyZone(row) ? Boolean(vs.emptyChecked[row.key]) : vs.checked.state(row);
+      return emptyZone(row) ? vs.checked.rowChecked(row) : vs.checked.state(row);
     },
       toggle: function (row, event) {
-        if (emptyZone(row)) {
-          if (vs.emptyChecked[row.key]) delete vs.emptyChecked[row.key]; else vs.emptyChecked[row.key] = true;
-        } else vs.checked.toggle(row, event, visible);
+        vs.checked.toggle(row, event, visible, emptyZone);
         panel.repaint();
       },
       header: function () { return Boolean(filterFaces.length) && vs.checked.stateOf(filterFaces); },
       toggleAll: function () { vs.checked.toggleAll(filterFaces); panel.repaint(); },
       label: function (row) {
-        var checked = emptyZone(row) ? Boolean(vs.emptyChecked[row.key]) : vs.checked.state(row) === true;
+        var checked = emptyZone(row) ? vs.checked.rowChecked(row) : vs.checked.state(row) === true;
         return (checked ? "Uncheck " : "Check ") + row.record.name;
       },
       headerLabel: function (value) { return (value === true ? "Uncheck" : "Check") + " every Face the filter shows"; },
       any: function () {
-        return vs.checked.among(vs.faces).length > 0 || Object.keys(vs.emptyChecked).length > 0;
+        return vs.checked.among(vs.faces).length > 0 || Object.keys(vs.checked.rows).length > 0;
       } };
   }
 
@@ -802,14 +795,13 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
       });
     },
     checkZones: function (vs, keys) {
-      vs.emptyChecked = Object.create(null);
-      keys.forEach(function (key) {
-        if (!((vs.byZone || {})[occurrence(JSON.parse(key)[1])] || []).length) vs.emptyChecked[key] = true;
-      });
       vs.checked.replace(keys.reduce(function (all, key) {
         var faces = (vs.byZone || {})[occurrence(JSON.parse(key)[1])] || [];
         return all.concat(faces.map(function (face) { return face.reference; }));
       }, []));
+      vs.checked.checkRows(keys.filter(function (key) {
+        return !((vs.byZone || {})[occurrence(JSON.parse(key)[1])] || []).length;
+      }));
     },
     leaveReason: function (vs) {
       return classify.draftReason() ||

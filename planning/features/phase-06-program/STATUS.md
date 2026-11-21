@@ -1,7 +1,7 @@
 # Phase 4a status
 
-DATE: 2026-11-20
-STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-11 merged; P4a-11b implemented on branch. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
+DATE: 2026-11-21
+STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-11b merged; P4a-12 implemented on branch, its integrated run and every PG host row owed to one batched sitting. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -34,12 +34,170 @@ The one place this packet's progress is read from.
 | P4a-09 The Zones / Programs view | Merged to main | 2026-11-20 | [#548](https://github.com/ph-composer/ph-composer-skp/pull/548), squash `b7e8af70`. Branch `feature/phase-06-program-p4a-09`, from P4a-08's and moved onto `main` once #547 merged ([stage doc](phases/p4a-09-zones-programs-view.md#implementation-decisions-2026-11-20)). The third Zone view `ph_composer.programs.zones` (`html/features/programs/zones_view.js`, `zones_cells.js`, `zones_selection.js`, `library_programs.js`, `programs.css`): Program, Dwelling, Bedrooms, Occupants, Equipment Set, floor area, iCFA, people, lighting and ventilation, each per-area basis in its header; locked Zones of a single dwelling in the kit's locked pill and the lock bubble (also from the Single dwelling tag) with Open settings; the house row's inputs on the Segment heading; the Dwelling bubble; the selection bar (Building Segment, Program, Dwelling, Equipment Set); the amber "?" with Ruby's reason; findings as row flags; IP and SI. Ruby: `ph_composer.programs.assign_library_program` (library copy through `copy_into_proposal`, then the assignment, one Undo step; Programs requires the library); `programs.zones` adds `dwellings`, `dwelling_units`, `missing` and Segment `sums` (`missing_values.rb`); API 1.82. Zones host: `segmentCell`, a heading tag's `open`, the `segmentSettings` intent. `tests/zones_programs_view_test.rb` 4 runs, 84 assertions (Ruby 3.2.2 and 2.7.2); `tests/zones_programs_panel_test.js` 23 pass; browser check `programs_view_checks.cjs` (journeys 1 to 4, 1280, 420 and 360 px, IP) and `segment_rows_checks.cjs` pass ([evidence](evidence/pg09-zones-programs-view-offline.md)). Departure: the library copy on Zones is Programs' own action, not the coordinator's assignment callback, which cannot write Zones. Sonnet read-through: 18 findings, the real ones fixed before the gate. PR [#548](https://github.com/ph-composer/ph-composer-skp/pull/548): Codex (gpt-6.1-sol) cycle 1 on `62c9ce31`, 4 findings fixed (a typed count or house value is sent at the revision its first keystroke saw; a refused Dwelling field repaints from the Model; an Equipment Set chosen explicitly stays selectable when it is the default; a Dwelling of Zones in no Segment is not offered to a Zone in one) in `46d3be83`; cycle 2 on `46d3be83`, 3 findings fixed after the two-cycle cap (unreviewed commit: Escape drops a typed entry's revision, a Dwelling field writes at the revision it was drawn from, a Zone shared with another occurrence is read only, found by its occurrence path). Host: not launched; every PG09 row owed to the batched sitting under case `PG09` |
 | P4a-10 Program export | Merged to main | 2026-11-21 | [#549](https://github.com/ph-composer/ph-composer-skp/pull/549), squash `9105737e`. Branch `feature/phase-06-program-p4a-10`, stacked on P4a-09's and moved onto `main` once #548 merged ([stage doc](phases/p4a-10-program-export.md#implementation-decisions-2026-11-20)). Pure `ExportPlan` and `RulesetExport`; four export sections, `programs.export.rooms` (claims `programs.zone_assignment` and `programs.segment`, now `required`; its projection is the plan), `schedules`, `program_types` and `set_points`, and their Python sections in `program_sections.py`; `programs.export_preflight` with `programs.value_missing`, `programs.set_points_inverted` (blocking), `programs.no_floor_area`, `programs.rule_without_dwelling`, `programs.counts_missing`, `programs.equipment_set_non_residential`, `programs.text_left_out` and the occupancy reads' findings; the view command `programs.locate` and Zones' `onNavigate` `zones`; the read-only Comfort section; the report's Programs part; the Spaces projection adds floor area and iCFA, the certification section registers its projection; API 1.83. `tests/program_export_test.rb` 19 runs, 373 assertions (Ruby 3.2.2 and 2.7.2), golden `tests/fixtures/programs/extraction.json`; `tests/python/test_program_sections.py` 7 and `test_program_phx_round_trip.py` 2 pass on PHX 1.59.1; two panel tests; six goldens gain the new sections, and four Python test files empty them where they rewrite a fixture's Zones (`tests/python/program_free.py`) ([evidence](evidence/pg10-program-export-offline.md)). Departures: a Dwelling with no counts, and a rule Program over no Dwelling, export with warnings rather than block; hot water follows Set Residential Program's code (shower 1.17); a rule's presence and lighting means are the Schedule's daily mean, as the view derives them, not the exported ruleset's annual mean, which differ only for a rule Schedule of fewer than 7 days or 52 weeks; Program, Schedule, Equipment Set and Dwelling `user_data` stays in the Model. PR [#549](https://github.com/ph-composer/ph-composer-skp/pull/549), opened against `main` after #548 merged: Sonnet read-through, its findings fixed before the gate (a Zone in no Dwelling takes no stale counts, path-like names kept out of finding messages, a Segment set with no record, bounded messages and Locates, the Comfort pair in Zone id order, the preflight answering a refused read as a row); Codex (gpt-6.1-sol) cycle 1 on `63b333c2`, 3 findings fixed in `2676b7d0` (no devices in a non-residential Segment, which PHX counted beside the Program's watts; the preflight counts only written Floors and reports path-like names); cycle 2 on `2676b7d0`, 2 findings fixed after the two-cycle cap (unreviewed commit: a fractional bedroom count kept as entered; a Program naming a Schedule not in the Model blocks). Host: not launched; every PG10 row owed to the batched sitting under case `PG10` |
 | P4a-11 The Programs tab | Merged to main | 2026-11-21 | [#550](https://github.com/ph-composer/ph-composer-skp/pull/550), squash `67899146`. Branch `feature/phase-06-program-p4a-11`, stacked on P4a-10's and moved onto `main` once #549 merged ([stage doc](phases/p4a-11-programs-tab.md#split-and-decisions-2026-11-20)). Split: the Schedule and Equipment Set editors are P4a-11b; their subtabs show records read only. The Programs tab after Zones (`html/features/programs/tab.js`, `record_page.js`, `program_editor.js`, `program_loads.js`, `record_bodies.js`, `programs.css`): Programs, Schedules and Equipment Sets subtabs, each the editor beside the shared library sidebar (new placement options `onOpen`, `active`, `markKnown`, `dependencyLoading`; a local-only placement keeps its + New); the record lifecycle (New, rename in place, Duplicate, Delete with a chosen replacement, Reset on PH-Composer's defaults); the Program editor's accordion cards with rule switch, Schedule slots and + New Schedule, missing-value flags and units. Ruby: snapshot sections `ph_composer.programs.programs`, `schedules`, `equipment_sets`; a Program row's `missing` (`ExportPlan.missing_fields`); a Program or Equipment Set delete with a replacement moves Zone assignments and Segment settings through `stage_extension` (P4a-08's carry-over); Programs' `workedOn` moved to this tab (P4a-10's carry-over); API 1.84. `tests/occupancy_assignments_test.rb` 28 runs, 567 assertions, `tests/program_records_test.rb` 23 runs, 313 assertions (Ruby 3.2.2 and 2.7.2), `tests/programs_tab_panel_test.js` 9 pass, browser check `programs_tab_checks.cjs` passes at 1280, 420 and 360 px with IP ([evidence](evidence/pg11-programs-tab-offline.md)). PR [#550](https://github.com/ph-composer/ph-composer-skp/pull/550), opened against `main` after #549 merged: Sonnet read-through, its findings fixed before the gate (the RBZ's `confirm(` guard, focus kept through a write, a New Schedule kept to the Program that asked, negative set points, a replacement chosen rather than assumed, a rename that cannot apply cancels on leaving, the sidebar refusing a switch mid-write); Codex (gpt-6.1-sol) cycle 1 on `ffd7570e`, 3 findings fixed in `2b3fe5ac` (a rebuilt Schedule select keeps the focus, a long source badge truncates, the delete note claims Zone and Segment moves only for Programs and Equipment Sets); cycle 2 on `2b3fe5ac`, 3 findings fixed in `91fdb172` after the two-cycle cap (unreviewed commit: the focus restore over a NodeList, a draft read in the units it began in, ACH, % and hot water flow in the user's number format); also unreviewed, after the cap: the ledger commit `b0c01812`, and a commit that counts an Equipment Set's Zones by the Set each reaches (no non-residential Zones), names a new Schedule only once a snapshot carries it, documents a Program row's `missing`, and adds the + New Schedule browser step. Follow-ups: the three catalog sections and the occupancy read each read the Zones on every snapshot; hot water flow per area has no IP unit. Host: not launched; every PG11 row owed to the batched sitting under case `PG11` |
-| P4a-11b The Schedule and Equipment Set editors | Implemented on branch | 2026-11-21 | Branch `feature/phase-06-program-p4a-11b`, stacked on P4a-11's and moved onto `main` once #550 merged ([stage doc](phases/p4a-11b-schedule-and-equipment-set-editors.md#decided-while-implementing-2026-11-21)). The Schedule editor (`html/features/programs/schedule_editor.js`, in place of `record_bodies.js`): the PH form by type, each field one guarded `schedules.update`, whole numbers checked at the field; a temperature Schedule one value, with no days or weeks; ventilation's four periods held as one draft, amber, until the hours total 24, then one update of `periods`, Escape restoring them and the draft holding the page; the 24-hour strip and the week row from the row's `profile`; Used by; the hourly editor disabled and planned. The Equipment Set editor (`equipment_set_editor.js`, `device_dialog.js`): the device grid on the kit table with Edit and Delete revealed on hover, a row click editing, **Add device** as the header's primary action (`headerAction` on a record page body); one form dialog (`record_form.js`) laid out from `equipment_sets.device_types`, read once, the type chosen on Add and fixed on Edit, an edit sending only what changed guarded as it opened, a refusal keeping the draft; Delete confirming in the shared dialog with the Set and its Dwellings. Ruby: a Schedule profile's `weekdays` (`ScheduleProfile.weekdays`, now the export's rule too) and a device field's `applies_when` (a clothes dryer's gas fields); API 1.85. `tests/program_records_test.rb` 24 runs, 322 assertions (Ruby 3.2.2 and 2.7.2), with the device types golden `tests/fixtures/programs/device_types.json` the preview answers from; `tests/programs_editors_panel_test.js` 23 pass; browser check `programs_editors_checks.cjs` passes at 1280, 420 and 360 px with IP ([evidence](evidence/pg11b-schedule-and-equipment-set-editors-offline.md)). Host: not launched; every PG11b row owed to the batched sitting under case `PG11b` |
-| P4a-12 | Authorized | 2026-11-20 | The closing outline |
+| P4a-11b The Schedule and Equipment Set editors | Merged to main | 2026-11-21 | [#551](https://github.com/ph-composer/ph-composer-skp/pull/551), squash `182f2f63`. Branch `feature/phase-06-program-p4a-11b`, stacked on P4a-11's and moved onto `main` once #550 merged ([stage doc](phases/p4a-11b-schedule-and-equipment-set-editors.md#decided-while-implementing-2026-11-21)). The Schedule editor (`html/features/programs/schedule_editor.js`, in place of `record_bodies.js`): the PH form by type, each field one guarded `schedules.update`, whole numbers checked at the field; a temperature Schedule one value, with no days or weeks; ventilation's four periods held as one draft, amber, until the hours total 24, then one update of `periods`, Escape restoring them and the draft holding the page; the 24-hour strip and the week row from the row's `profile`; Used by; the hourly editor disabled and planned. The Equipment Set editor (`equipment_set_editor.js`, `device_dialog.js`): the device grid on the kit table with Edit and Delete revealed on hover, a row click editing, **Add device** as the header's primary action (`headerAction` on a record page body); one form dialog (`record_form.js`) laid out from `equipment_sets.device_types`, read once, the type chosen on Add and fixed on Edit, an edit sending only what changed guarded as it opened, a refusal keeping the draft; Delete confirming in the shared dialog with the Set and its Dwellings. Ruby: a Schedule profile's `weekdays` (`ScheduleProfile.weekdays`, now the export's rule too) and a device field's `applies_when` (a clothes dryer's gas fields); API 1.85. `tests/program_records_test.rb` 24 runs, 322 assertions (Ruby 3.2.2 and 2.7.2), with the device types golden `tests/fixtures/programs/device_types.json` the preview answers from; `tests/programs_editors_panel_test.js` 23 pass; browser check `programs_editors_checks.cjs` passes at 1280, 420 and 360 px with IP ([evidence](evidence/pg11b-schedule-and-equipment-set-editors-offline.md)). Host: not launched; every PG11b row owed to the batched sitting under case `PG11b` |
+| P4a-12 Acceptance and handoff | Implemented on branch | 2026-11-21 | Branch `feature/phase-06-program-p4a-12`, from P4a-11b's and moved onto `main` once #551 merged ([stage doc](phases/p4a-12-acceptance-and-handoff.md)). Steps 1, 3, 4 and 5 done; step 2, the integrated run, owed to the [host sitting](#host-sitting). Offline gates in [Closing gates](#closing-gates); the context fold, the [handoff to Phase 7 mechanical](#handoff-to-phase-7-mechanical) and the [catch-up review](#catch-up-review) of the 18 commits that merged after their PR's last review, six findings fixed in this branch. PG12 offline rows recorded, the integrated run owed. PR [#552](https://github.com/ph-composer/ph-composer-skp/pull/552): Sonnet read-through, its findings fixed before the gate (two RuboCop offenses, the parity sort after the UUID replacement, a paragraph placement, a count); Codex (gpt-6.1-sol) cycle 1 on `1c3135c4`, 1 finding fixed in `469aa3c9` (kept device text keeps its seed); cycle 2 on `469aa3c9`, 1 finding fixed in `f65b6db7` after the two-cycle cap (unreviewed commit: the row's unit label follows the kept text). The packet stays here, and #538 open, until the sitting: the archive is a later PR, and its review covers `f65b6db7` |
 | Programs tab review (G1) | Complete | 2026-11-15 | Q4a-21 to Q4a-25 and Q4a-33 to Q4a-36 answered; C4a-5 and C4a-7 to C4a-10 answered |
 | Review against Climate and Shading | Complete | 2026-11-20 | Read against the two archived packets and `main` at `b409bdbc`; no code run. The `phx` test group already exists, so P4a-03 no longer adds it; C4a-11 to C4a-14 raised in [CONTRACTS](CONTRACTS.md#open-contract-questions) and answered by Ed the same day, each as recommended; stage notes added to P4a-03, P4a-04, P4a-06, P4a-07, P4a-10, P4a-11 and P4a-12 |
 | GitHub issue | Created | 2026-11-20 | [#538](https://github.com/ph-composer/ph-composer-skp/issues/538) (Q4a-18) |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
+
+## Closing gates
+
+P4a-12 step 1, on the tree of `077d9d45` with this fold (2026-11-21). Counts are from the commands' own output.
+
+| Gate | Result |
+| --- | --- |
+| `make ci` (Ruby 3.2.2) | Pass: Ruby 3,283 runs, 43,215 assertions, 0 failures, 1 skip; JavaScript 1,138 tests pass; lint, fixtures, manifests, help, runtime and pin checks, hostkit, `ty`, RBZ build and check |
+| `make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby` | Pass: the same counts on Ruby 2.7.2 (3,283 runs, 43,215 assertions, 0 failures, 1 skip; JavaScript 1,138 pass) |
+| `make coverage` | Pass: Ruby 97.3% of 34,169 lines (minimum 93%), JavaScript 96.9% of 23,236 lines (minimum 94%), Python 94.32% (minimum 92%) |
+| `make ui-checks` | 37 of 38 checks pass, the Programs, Segment and Spaces checks among them; `assembly_hover_checks.cjs` fails ("the center has the normal segment hover wash"), as it does on `main`, and is owned by the separate assembly hover fix, not this packet |
+| `uv run tools/runtime/browser_check.py --translation` | Pass on Chromium 88: cross-origin isolation, single-flight boot, cold boot 1,981 ms, warm round trip 0.5 to 1.8 ms, and the Pyodide half: the shipped runtime's translation of the two-Zone fixture with a Space matches the pinned native wheels' (`native_pyodide_model_parity`). P4a-05 had not run this half. It first failed on the check's own expectations, stale since WT-02 (#375): an interior Surface pair now exports its Assembly reversed on one side, and honeybee-energy lists the Model's materials, schedules, schedule type limits and program types in hash-set order, which differs between two Python processes. The check now expects the reversed construction, sorts those lists by identifier and compares 1.0 with 1 as equal (a number crosses the JavaScript bridge without its type); nothing exported changed |
+| Footprint, `make rbz-check` | 26,828,692 bytes installed (706 files, RBZ 8,716,361 bytes): 734,733 bytes over the 26,093,959-byte baseline P4a-01 reset, inside the 2,500,000-byte growth allowance, and 1,171,308 bytes under the 28,000,000-byte ceiling, which binds first (C4a-14) |
+
+## Host sitting
+
+Ed chose to be away while the loop ran, so no stage launched SketchUp after P4a-03 and every host row waits for
+one batched sitting on the final head, under one computer-use card, run by the conductor
+([native acceptance skill](../../../.agents/skills/ph-composer-native-acceptance/SKILL.md)). Each row is recorded with
+`acceptance_case.py begin` and `finish` under its case id in the [case ledger](../../native-acceptance/cases.json);
+none is a Pass until then. **B**: bridge and hostkit, no card. **H**: a full-screen hold (native Edit-menu Undo
+and Redo). **E**: Ed at the mouse.
+
+**Diagnose first.** The two launches of P4a-02 and P4a-03 (`hostkit launch` on `10766bee` among them) reached no
+bridge in 180 s, and SketchUp listed no readable window; each was quit through hostkit. Read-only checks since
+(2026-11-21): no SketchUp crash report in `~/Library/Logs/DiagnosticReports`; Trimble entitlement activation
+succeeded at the last launch (2026-11-20 18:39Z, no error code); the bridge plugin and the extension were
+reinstalled into Plugins at those launches; the bridge console log's last "bridge started" line is
+2026-11-20T16:11:54Z, so on the failed launches the plugin never loaded. Likely cause: SketchUp stopped before
+loading extensions at a modal (Welcome or sign-in, file recovery, or an extension policy prompt). At the sitting,
+read SketchUp's windows first, before any case.
+
+| Case | Owed | Needs |
+| --- | --- | --- |
+| PG01 | Native Edit-menu Undo and Redo of a Segment delete and a move; the ledger row reads `unknown` | H |
+| PG02 | Every host row: the settings dialog's save as one Undo step, a refused payload, the transition contributor and heading contributions on the installed RBZ; panel gestures (heading rows, New Building Segment in place, Move from both bars, Delete with a destination); the host UI polish review | B, H, E |
+| PG03 | The packaged RBZ export with a Zone left out and its read-back; the move-out offer and the move-back notice in the panel | B, E |
+| PG04 | The installed-RBZ export with certification values and their PHX read-back | B |
+| PG05 | Spaces gestures (By Program, the first-entry notice, From Program), native Undo, and the RBZ export | B, H, E |
+| PG06 | The installed-RBZ export of an n50 and a q50 result and their PHX read-back | B |
+| PG07 | The panel-closed walkthrough on the installed RBZ, native Undo and Redo, save and fresh-process reopen | B, H |
+| PG07b | A copy from a library file on the installed RBZ, native Undo and Redo | B, H |
+| PG08 | Single dwelling on and off, native Undo and Redo, copying a Zone; the Single dwelling tag and findings on Segment headings in every view | B, H, E |
+| PG09 | Panel gestures in the Zones / Programs view, native Undo and Redo, the host UI polish review | H, E |
+| PG10 | The packaged RBZ export of the five journeys, its PHX round trip, Comfort and Locate in SketchUp | B, E |
+| PG11 | Panel gestures in the Programs tab, native Undo and Redo, the host UI polish review | H, E |
+| PG11b | Panel gestures in the Schedule and Equipment Set editors, native Undo and Redo, the host UI polish review | H, E |
+| PG12 | The integrated run from a fresh process on the three reference models (P4a-12 step 2); add case `PG12` to the case ledger first | B, H, E |
+
+The Design System artifact was re-synced from `main` at `67899146` by the conductor (`bundle.css` and the
+LibrarySidebar README), covering the kit and stylesheet changes of #548 and #550; P4a-11b changed only
+`features/programs/programs.css`, which is not bundled.
+
+## Catch-up review
+
+Under the two-cycle cap, 18 commits merged after their PR's last Codex review. P4a-12 ran one review of all of
+them together, gpt-6-astra over their concatenated patches read against the code at `afcbdc04` (P4a-11b's head),
+not posted, since squash-merged commits cannot carry inline comments: `53c72dbc` (#539), `50ed6d4a` (#540),
+`10766bee` (#541), `43fb2fc6` (#543), `f71ffe15` (#544), `84771d72` (#545), `6849bee4` and `7e7d1c8a` (#546),
+`c4a8280e`, `5192c7ad`, `5c0e5331` and `08b0c7d1` (#547), `3bcccda8` (#548), `a897827b` (#549), `91fdb172`,
+`b0c01812` and `14b2d1a8` (#550), `afcbdc04` (#551). Thirteen had no finding; the three docs-only commits' claims
+hold. Six findings, each reproduced by a test that failed before its fix, all fixed in ``077d9d45``:
+
+| Commit | Finding | Disposition |
+| --- | --- | --- |
+| `afcbdc04` | A device dialog rebuilt after a unit switch read typed text in the new units (0.1 m³ sent as 0.0028) | Fixed: text that reads goes into the draft before a layout; text that does not keeps the units it was typed in (`device_dialog.js`; `programs_editors_panel_test.js`) |
+| `91fdb172` | A Program value typed before a unit switch was dropped when it matched the field redrawn in the new units | Fixed: a field being typed into keeps its seed (`program_editor.js`; `programs_tab_panel_test.js`) |
+| `50ed6d4a` | A Zone with no Faces stayed checked when a SketchUp selection or another tab replaced the checked set | Fixed: the checked set holds those Zone rows and a replacement clears them (`checked_faces.js`, `faces_view.js`; `segment_rows_panel_test.js`) |
+| `50ed6d4a` | A Shift-click range skipped a Zone with no Faces | Fixed: the range treats it as it treats a row of Faces (same files and test) |
+| `10766bee` | The preflight passed an Attached zone whose data nothing exports, which extraction then refused, and never read an Attached zone no Face names | Fixed: the Faces preflight reports every readable Attached zone's metadata as extraction reads it (`faces/export.rb`; `attached_zone_test.rb`) |
+| `3bcccda8` | Escape kept a count's pinned revision when the text was already back at its seed | Fixed: Escape ends the entry whatever its text, for Zone and house counts (`zones_cells.js`; `zones_programs_panel_test.js`) |
+
+## Departures recorded by the loop
+
+Each stage's ledger row above and its stage document's decisions section hold the detail; in short:
+
+- **P4a-01**: Zone schema 3; the native Edit-menu Undo and Redo owed.
+- **P4a-02**: a rename or new default refuses on a locked member Zone; New with its in-place rename is two Undo
+  steps; the PRD's Planned rows not built.
+- **P4a-03**: built the AttachedZone Face translation, which did not translate before; two Spaces edge cases
+  declined; METr gets no reduction factor (PHX's default 1.0).
+- **P4a-04**: the read is `ph_composer.certification.segment.get`; no `certification` codes; six Phius programs;
+  "copy with the Segment" open, since nothing copies a Segment.
+- **P4a-05**: From Program confirms first, since it discards rates; `segment_certification` added to the fixture
+  owners.
+- **P4a-06**: n50 read back from PHX's Variant (WUFI-Passive and METr carry q50 only); no converted value in the
+  panel; q50 in SI only; refusals at extraction, not preflight.
+- **P4a-07a**: split, the library kinds to P4a-07b; Activity Schedules store watts; whole-number hours; the default
+  Schedules at the daily mean of honeybee-ph's hourly profiles; garage lighting quantity 1 (honeybee-ph 0); a
+  rename is an update of the name. Declined: honeybee-schema's cap on People radiant plus latent; a set point pair
+  naming a Schedule is P4a-10's preflight row.
+- **P4a-07b**: a library export also writes each Program's Schedules; the `ProjectedEngine` change; the
+  walkthrough is a new sibling file; the v2 hosted provider test not run.
+- **P4a-08**: Single dwelling keeps no Dwelling record: the house's counts and Set live on the Segment payload;
+  both extensions `local_only` until P4a-10; a category change alone writes nothing; switch-on is confirmed by the
+  section's note; `segment_rows_checks.cjs` repaired (broken since P4a-04). Declined: the switch's own discard
+  report; the lock tag's bubble went to P4a-09.
+- **P4a-09**: a library Program on Zones is Programs' own action through `copy_into_proposal`, since the
+  coordinator's assignment callback cannot write Zones; Programs requires the library.
+- **P4a-10**: warn and export, not block, for missing bedrooms, a Dwelling with no Floor Face and the residential
+  default on a Zone in no Dwelling; hot water follows honeybee-ph's code (shower 1.17 gal per bedroom, where its
+  table says 4.67); a rule's means are the Schedule's daily mean; a Set in a non-residential Segment exports no
+  devices, which PHX would count twice.
+- **P4a-11**: split, the Schedule and Equipment Set editors to P4a-11b; + New Schedule is two Undo steps; hot
+  water flow in L/h per m² in both unit systems; delete with a replacement moves Zone and Segment payloads in one
+  Undo step (API 1.84); export findings open the Programs tab.
+- **P4a-11b**: a temperature Schedule shows no days, weeks or strip; `profile.weekdays` and `applies_when` on
+  device fields (API 1.85); only `programs.css` changed, which is not bundled.
+
+## Follow-ups
+
+Recorded, not built; each needs its own authorization.
+
+- Cross-repo: a Building Segment name holding a space fails PHX `cleanup.merge_rooms` (reproduced in P4a-03; no
+  PHX issue opened), and PHX's METr writer carries no attached-zone reduction factor. The F4a-13 honeybee-ph and
+  PHX fix (Q4a-08).
+- Footprint: 1,171,308 bytes left under the ceiling; the baseline plus the growth allowance passes the ceiling, so
+  the ceiling is the gate that will bind next.
+- Performance: `zones.all` runs on every snapshot and in the Program and Equipment Set lists (P4a-08), and the
+  three catalog snapshot sections and the occupancy read each read the Zones on every snapshot (P4a-11).
+- `clear_zone_airflows`' result `space_ids` is uncapped (P4a-05).
+- The Segment export rules golden renumbers Segment ids by first appearance and is order-sensitive with two
+  exported Segments (P4a-04).
+- The Attached zone Face airtightness case is untested (P4a-06).
+- Garage lighting reference quantity: the honeybee-ph wheel says 2, the Grasshopper component 8; both accepted
+  (P4a-07a).
+- Schedule library rows always warn `row_optional_absent`, and the unwritten defaults are not exported to a library
+  file (P4a-07b).
+- `tools/examples/phase_one/translate_two_zones.py` fails on its object count, before this packet (P4a-10).
+- Hot water flow per area has no IP unit (P4a-11).
+- The Schedules subtab's + New makes a fractional Schedule only, with no type choice; a focused field holds a
+  subtab switch (`subtabs.js`) (P4a-11b).
+- The "Set Building-Segment" context menu cannot choose none, and Spaces groups no-Segment Zones under the key ""
+  (P4a-01); check whether P4a-02's rows covered both before building anything.
+- Catch-up review test gaps it named and this branch did not add: a fractional bedroom count through the PHX round
+  trip (the HBJSON is tested); native acceptance of the affected transactions and selection sync (owed rows).
+
+## Handoff to Phase 7 mechanical
+
+What Phase 6 leaves for the [Mechanical packet](../phase-07-mechanical/README.md), recorded in its
+[STATUS](../phase-07-mechanical/STATUS.md) as owed from elsewhere. It authorizes nothing there.
+
+- **Mechanical cooling and the mechanical room temperature (C4a-5).** Phase 7 owns them. The Programs export
+  writes each Segment's `BldgSegment.set_points.winter` and `.summer` from its Zones' Programs
+  (`programs.export.set_points`, whose Python section attaches at `SEGMENT`), and the read-only Comfort section (order 50)
+  shows them. `set_points.mechanical_cooling` stays honeybee-ph's default `False` and `BldgSegment.mech_room_temp`
+  its default 20 °C (honeybee-ph 1.33.68). Phase 7 adds them as its own Building Segment settings section and export
+  contributor (EXTENSIBILITY, "Building Segment settings"): its payload on the Segment, claimed by its contributor,
+  its Python section at `SEGMENT` setting only those two fields, so it never overwrites the set points Programs
+  writes. Summer ventilation (`BldgSegment.summer_ventilation`) is Phase 7's too, as the
+  [Building Segments PRD](building-segments/PRD.md) lists it.
+- **The ventilation unit per Space.** Phase 6 ships each Zone's airflow mode (`by_program` or `detailed`) and each
+  Space's supply, extract and transfer rates; a `building_segments` row's `inheriting_count` became
+  `by_program_zone_count`, and a By Program Zone's sums are null. honeybee-ph 1.33.68 carries a ventilation unit on
+  the Room (`honeybee_phhvac` `room.properties.ph_hvac.ventilation_system`); its `Space` carries none. Phase 7's
+  Serves, on the Zone Group, is where a Zone's Spaces get their unit; how a Space would name a unit of its own is
+  Phase 7's to decide against honeybee-ph and PHX. Phase 7's CONTRACTS section 4 still reads `inheriting_count`
+  for the balance, and its balance must skip a By Program Zone, whose sums are null.
 
 ## Blockers and dependencies
 

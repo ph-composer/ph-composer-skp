@@ -29,7 +29,7 @@ appear. See the [modeling guide](../docs/PRODUCT.md) for the current workflow.
 | Assignment | The relationship between an authored object and the definition or system it uses |
 | User data | An authored object's optional `user_data` JSON map for a user's or tool's own data under its own top-level key. Stored, copied and exported where the object has an HBJSON object of its own; never read by a calculation. See the [user data guide](../docs/USER_DATA.md) |
 | Record part | A nested object inside a definition record that has its own id and `user_data`, addressed by `part_ids` from the record down: an Assembly's Layers and Layer-Segments, a Window Type's elements |
-| Derived object | Data PH-Composer calculates or generates from authored objects, such as thermal-bridge runs, schedules and generated Window geometry. It carries no user data of its own |
+| Derived object | Data PH-Composer calculates or generates from authored objects, such as thermal-bridge runs, the honeybee schedule rulesets export writes from Schedules, and generated Window geometry. It carries no user data of its own |
 | Local override | A proposed explicit deviation from a shared definition; supported fields require the owning interview |
 | Display units | The user's SI or IP choice for how the panel shows numbers and reads unsuffixed input. A local preference outside the SKP. It never changes stored values, geometry or SketchUp's own Model units |
 | Dimension format | A builder's choice of how lengths appear within the active display units: mm, cm or m in SI; decimal inches, decimal feet, feet and inches, or fractional inches in IP |
@@ -47,9 +47,9 @@ See [geometry records and occurrence references](CONTRACTS.md#geometry-records-a
 | Term | Meaning | honeybee object | Note |
 | --- | --- | --- | --- |
 | Zone | The fundamental geometry unit: one SketchUp Group, at Model root or inside plain wrapper groups and never inside another Zone, carrying envelope faces, Spaces, loads and schedules. A building may be one Zone; a Zone is required before export | `honeybee.room.Room` | honeybee calls this a Room. PH-Composer never uses Room for it, and honeybee's own `Room.zone` text tag is a different thing that PH-Composer does not surface |
-| Building-Segment | A Model-owned option that groups Zones. A Zone belongs to at most one Building-Segment, and the Model keeps at least one | honeybee-ph `BldgSegment` | Supplies the grouping for the planned METr handoff |
+| Building-Segment | A Model-owned option that groups Zones. A Zone belongs to at most one Building-Segment, and the Model keeps at least one | honeybee-ph `BldgSegment` | Carries the settings export writes to the `BldgSegment`: Phius certification, airtightness, wind exposure and set points |
 | Default Building Segment | The Building-Segment every new Zone joins. Never none: deleting it moves the default to the Segment its Zones moved to, else to the first remaining one | | `default_segment_id` in the Zone option settings |
-| No Building Segment | The state of a Zone in no Building-Segment: `building_segment_id` is null. Such a Zone is left out of export | | Until export leaves these Zones out, export preflight blocks them |
+| No Building Segment | The state of a Zone in no Building-Segment: `building_segment_id` is null. Such a Zone is left out of export | | Export leaves the Zone out with its Faces, Spaces, Edges and Window Units and reports `zone.left_out`; `zone.no_segment` refuses an export in which no Zone is in a Segment |
 | Segment heading row | The row that opens each Building-Segment's group of Zones in every Zone view: its name, tags such as Default, a findings flag, its sums in the view's columns, and Settings and Delete. No Building Segment is the last, muted heading | | `features/zones/segment_rows.js`; tags come from `table_views.heading` contributions |
 | Building Segment settings | The dialog that edits one Building-Segment's name, colour and default (its General section) and the settings sections other features register, saved in one Undo step | | Each section is a structured extension on the Segment, saved by `ph_composer.zones.save_segment_settings`; sections register with `panel.segmentSettingsSection` |
 | Phius certification | The Building Segment settings section for a Segment's Phius building category, certification program, building use, building status and building type. A Segment with none set reads Residential, Phius 2021 CORE, Residential, In planning and New construction | honeybee-ph `BldgSegment.phius_certification` (`PhiusCertification`) | The `ph_composer.certification.segment` extension, read by `ph_composer.certification.segment.get`; values follow the pinned honeybee-ph enums, whose programs stop at Phius 2021 |
@@ -61,6 +61,11 @@ See [geometry records and occurrence references](CONTRACTS.md#geometry-records-a
 | Dwelling | One or more Zones counted as one dwelling unit, or as `units` identical ones; its bedrooms and occupants are its Zones' summed, and occupants with none use the Phius rule, bedrooms + units. A Dwelling with no Equipment Set uses the Model's default Set | honeybee-ph `PhDwellings` on each Room's People | The `ph_composer.programs.dwelling` kind (`dwl_`); Zones name it in their `ph_composer.programs.zone_assignment` |
 | Single dwelling | A Building Segment setting, on unless switched off: every Zone in a residential Segment is one Dwelling, named for the Segment, with the residential default; the house's bedrooms, occupants and Equipment Set are the Segment's own settings. A non-residential Segment is never a single dwelling | | `single_dwelling` in the Segment's `ph_composer.programs.segment` payload; no Dwelling record until it is switched off |
 | Residential default | PH-Composer's built-in residential Program, after honeybee-ph's Set Residential Program, with its Schedules, and its default Equipment Set of the eight Phius devices. The Model's default Program and Set until another is chosen; reads answer them until a write stores them, after which they are ordinary editable records with Reset to PH-Composer default | | Reserved ids `pgm_PHCDEFAULT01` and `eqs_PHCDEFAULT01`; the `ph_composer.programs.settings` dictionary holds the Model's choice, null for these |
+| Rule load | A Program load whose value a rule works out per Dwelling at export: the Phius occupancy and lighting rules, and the Building America hot water rule. **Use a fixed value** switches it to a value of its own and keeps the rule's inputs | | `rule` on the load's values; `ExportPlan` in `features/programs/` works it out |
+| Device | One item of an Equipment Set: its type, which fixes its fields, its quantity and energy values. Added, edited and deleted one at a time | honeybee-ph `PhEquipment` | A part of its Equipment Set (`devices[]`), with its own id and `user_data` |
+| Zones / Programs view | The third Zone view: each Zone's Program, Dwelling, bedrooms, occupants and Equipment Set, with floor area, iCFA and the peak people, lighting and ventilation the export writes, summed on each Segment heading row | | `ph_composer.programs.zones`, registered on the Zone views host |
+| Programs tab | The tab after Zones that edits Programs, Schedules and Equipment Sets one record at a time, each subtab its editor beside the library sidebar | | `html/features/programs/tab.js` and `record_page.js` |
+| Segment envelope | The Faces PHX keeps when it merges one Building-Segment's Rooms: every exported Face of its Zones less each Surface Face whose other side is in the same Segment. Airtightness weights an n50 result by its area | | `Faces::ExportProjection.segment_envelope` |
 | Level | An optional Model-owned choice for grouping and sorting Zones. A Space inherits its Zone's Level | `Room.story` | |
 | Adjacency | A reciprocal pairing of path-qualified face endpoints in different Zones, carrying Zone UUIDs, face persistent ids and solved world-geometry stamps | `Surface` boundary condition while current | Solved on demand, never live; identity and freshness are separate |
 | Interior face | A face of a Zone whose other side is another Zone, solved or not | `Surface` when solved, `Adiabatic` when marked To neighbour | Distinct from an envelope face facing Outdoors or Ground |
@@ -135,7 +140,7 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 
 | Term | Meaning |
 | --- | --- |
-| Space | One unique SketchUp Group hosted in a Zone through the Zone reference on its record, containing one or more Volumes and Space-level data: iCFA, ventilation airflows, occupancy. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
+| Space | One unique SketchUp Group hosted in a Zone through the Zone reference on its record, containing one or more Volumes and Space-level data: iCFA and ventilation airflows. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
 | Volume | A protected structural Group directly inside a Space, holding one logical Space Floor: Faces joined by shared Edges. Create Space and Add New Volume to Space make one Volume per joined set; Faces meeting only at a corner are separate |
 | Space Floor | Logical grouping of Floor Segments in a Volume; not another SketchUp Group |
 | Floor surface | The Face or Faces drawn to define a Space's floor. Create Space turns each one into a Floor Segment. Do not call it an outline in product copy |
@@ -200,7 +205,7 @@ terms are at the end, marked planned.
 
 | Term | Meaning |
 | --- | --- |
-| Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps, fans and appliances a Phius model needs. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
+| Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps and fans a Phius model needs. Appliances and Phius devices are Equipment Sets instead. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
 | Hot Water System | The planned record that groups heaters and tanks and serves Zones. Heaters and tanks are their own rows and each names its System |
 | Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
@@ -216,6 +221,8 @@ terms are at the end, marked planned.
 | Export report | Human-readable account of emitted content, omissions, approximations and failures |
 | Model validation | Checks of Model integrity and supported export inputs |
 | Export contributor | A feature's registration with the export run: what it prepares, which contract section it supplies, which result fields it declares and renders |
+| Export preflight | The checks the Export tab runs before writing: each feature's findings, blocking or not. A finding's **Locate** frames its geometry in the view, or opens the tab and record it names |
+| Left out | Not written to the HBJSON and named in the report: a Zone in no Building-Segment with its Faces, Spaces, Edges and Window Units, or an empty Building-Segment |
 
 ## Evidence and handoff
 

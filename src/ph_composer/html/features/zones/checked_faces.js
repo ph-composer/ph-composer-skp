@@ -8,7 +8,9 @@
  * change: a Group selected and then nothing reads as no Faces both times.
  *
  * A Face is keyed by its occurrence (its Zone's path and its own), not its record id: a Face gains a record
- * when it is first classified, which must not uncheck it.
+ * when it is first classified, which must not uncheck it. A row with no Faces that the view lets check itself
+ * (a Zone with no Faces, so it can still be moved) is kept by its row key in `rows`, and goes with the Faces:
+ * a range, a replacement and a clear treat it as they treat them.
  */
 PhComposerUI.define("features/zones/checked_faces", [], function () {
   "use strict";
@@ -27,9 +29,24 @@ PhComposerUI.define("features/zones/checked_faces", [], function () {
 
   function CheckedFaces() {
     this.keys = Object.create(null);
+    this.rows = Object.create(null);
     this.anchor = null;
     this.synced = undefined;
   }
+
+  CheckedFaces.prototype.rowChecked = function (row) { return Boolean(this.rows[row.key]); };
+
+  /* The checked rows with no Faces, kept only where `live` (row key to row) still has them. */
+  CheckedFaces.prototype.keepRows = function (live) {
+    var rows = this.rows;
+    this.rows = Object.create(null);
+    Object.keys(rows).forEach(function (rowKey) { if (live[rowKey]) this.rows[rowKey] = true; }, this);
+    return Object.keys(this.rows).map(function (rowKey) { return live[rowKey]; });
+  };
+
+  CheckedFaces.prototype.checkRows = function (rowKeys) {
+    rowKeys.forEach(function (rowKey) { this.rows[rowKey] = true; }, this);
+  };
 
   CheckedFaces.prototype.has = function (face) { return Boolean(this.keys[key(face.reference)]); };
 
@@ -49,18 +66,21 @@ PhComposerUI.define("features/zones/checked_faces", [], function () {
     }, this);
   };
 
-  /* A click checks the row's Faces, or unchecks them when they all are. Shift-click applies the same to every
-     row between the last box clicked and this one, in the order the table shows them. */
-  CheckedFaces.prototype.toggle = function (row, event, shown) {
-    var checked = this.state(row) !== true;
+  /* A click checks the row's Faces, or unchecks them when they all are; a row that checks itself (`itself(row)`)
+     checks or unchecks itself. Shift-click applies the same to every row between the last box clicked and this
+     one, in the order the table shows them. */
+  CheckedFaces.prototype.toggle = function (row, event, shown, itself) {
+    itself = itself || function () { return false; };
+    var checked = itself(row) ? !this.rowChecked(row) : this.state(row) !== true;
     var keys = shown.map(function (entry) { return entry.key; });
     var from = event && event.shiftKey && this.anchor ? keys.indexOf(this.anchor) : -1;
     var to = keys.indexOf(row.key);
-    if (from >= 0 && to >= 0) {
-      shown.slice(Math.min(from, to), Math.max(from, to) + 1).forEach(function (entry) {
-        this.set(facesOf(entry), checked);
-      }, this);
-    } else this.set(facesOf(row), checked);
+    var rows = from >= 0 && to >= 0 ? shown.slice(Math.min(from, to), Math.max(from, to) + 1) : [row];
+    rows.forEach(function (entry) {
+      if (!itself(entry)) this.set(facesOf(entry), checked);
+      else if (checked) this.rows[entry.key] = true;
+      else delete this.rows[entry.key];
+    }, this);
     this.anchor = row.key;
   };
 
@@ -72,6 +92,7 @@ PhComposerUI.define("features/zones/checked_faces", [], function () {
 
   CheckedFaces.prototype.replace = function (references) {
     this.keys = Object.create(null);
+    this.rows = Object.create(null);
     references.forEach(function (reference) { this.keys[key(reference)] = true; }, this);
     this.anchor = null;
   };

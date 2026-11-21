@@ -88,8 +88,9 @@ function (fields, units, preferences) {
   /* The display system, which every unit label follows. */
   function system() { return preferences.current().unitSystem; }
 
-  /* The unit a value's row names: the display unit of its quantity, or its plain unit. */
-  function unit(entry) { return entry.plain || units.displayUnit(entry.field, profile(entry)); }
+  /* The unit a value's row names: the display unit of its quantity, or its plain unit; `given` is the profile of a
+     draft typed in other units. */
+  function unit(entry, given) { return entry.plain || units.displayUnit(entry.field, given || profile(entry)); }
 
   /* The text an input shows for a stored value, in the display units. */
   function editText(entry, stored) {

@@ -99,9 +99,10 @@ lists each map it leaves out. See the [library file format](LIBRARY_FILE_FORMAT.
 
 These hold data PH-Composer derives or uses internally, so they take no `user_data`: Zone
 membership stamps on Faces, Zone option settings, the Windows, Spaces and Zones settings, the
-Window definitions and panes PH-Composer generates, thermal-bridge runs and schedules (calculated
-from Edges), the site and design temperatures (Model settings), the export snapshot, and library
-provider, connection and agent-access state.
+Window definitions and panes PH-Composer generates, thermal-bridge runs (calculated from Edges),
+the site and design temperatures (Model settings), the Programs settings stored on Zones and
+Building Segments (assignments, Single dwelling, Phius certification and airtightness), the
+export snapshot, and library provider, connection and agent-access state.
 
 The climate data folders are kept on this computer, not in a Model: in PH-Composer's settings file,
 `~/Library/Application Support/PH-Composer/settings.json`, outside SketchUp's own folders. The file

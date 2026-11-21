@@ -259,9 +259,11 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       });
       cell.input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") { event.preventDefault(); self.commitCount(cell); }
+        // Escape ends the entry and the revision it was pinned to, even when its text is back at the seed.
         if (event.key === "Escape" && cell.input.value !== cell.seed) {
-          event.preventDefault(); cell.input.value = cell.seed; cell.typed = false;
+          event.preventDefault(); cell.input.value = cell.seed;
         }
+        if (event.key === "Escape") cell.typed = false;
       });
     }
     cell.row = row; cell.zone = zone; cell.field = field;
@@ -516,9 +518,11 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       entry.input.addEventListener("change", function () { self.commitHouse(entry); });
       entry.input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") { event.preventDefault(); self.commitHouse(entry); }
+        // Escape ends the entry and the revision it was pinned to, even when its text is back at the seed.
         if (event.key === "Escape" && entry.input.value !== entry.seed) {
-          event.preventDefault(); entry.input.value = entry.seed; entry.typed = false;
+          event.preventDefault(); entry.input.value = entry.seed;
         }
+        if (event.key === "Escape") entry.typed = false;
       });
       entry.input.addEventListener("input", function () {
         if (!entry.typed) entry.revision = self.writes.revision;

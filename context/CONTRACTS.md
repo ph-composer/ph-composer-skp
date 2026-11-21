@@ -661,8 +661,8 @@ form values its type's, and a device's missing fields its type's. An Equipment S
 `use_library` replacement keeps the id and `user_data` of each local device whose place the incoming device of the
 same type takes, and refuses `validation.failed` rather than drop a device holding `user_data`. A Program or
 Equipment Set copy may assign itself as the Model's default (`{"mode": "model_default", "expected_settings"}`,
-through `update_settings`); a Schedule copies without assignment. Copying a library Program onto a Zone waits
-for the Zones / Programs view (P4a-09); `Assignments.assign_program` takes its inputs as arguments for it.
+through `update_settings`); a Schedule copies without assignment. Copying a library Program onto Zones is
+`ph_composer.programs.assign_library_program` ("Occupancy", below), which joins the copy to the assignment.
 
 ## Occupancy
 
@@ -724,7 +724,7 @@ answers every Dwelling as `programs.dwellings` does (each with its Zones' floor 
 bedrooms and occupants of the Dwellings its Zones are in, its floor area and iCFA, and its people, lighting and
 ventilation summed over the Zones that have one, with `incomplete` naming each load some Zone lacks.
 `ph_composer.programs.dwellings` lists every Dwelling, the houses among them with a null id. The derivations are
-CONTRACTS section 6 of the Phase 4a packet: people from the Dwelling's occupants over the presence Schedule's
+pure functions in `features/programs/derive/occupancy.rb`: people from the Dwelling's occupants over the presence Schedule's
 mean (its daily full-load hours over 24, as honeybee-ph's `annual_average_operating_fraction`), shared by floor
 area; lighting from honeybee-ph `phius_residential.lighting_interior` over the Dwelling's iCFA and units, as peak
 watts over the lighting Schedule's mean × 8,760 h, shared by iCFA; other loads per
@@ -1792,7 +1792,7 @@ Surface Face whose other side is in the same Segment; a Surface Face to another 
 an Attached zone's Face stay, and a shading Face is in no Zone's Faces. The net volume is the Spaces section's
 projection, each Zone's Volumes' net floor area times average clear ceiling height. PHX's merge weights each
 Room's flow by its Outdoors and Ground area, which returns the one flow every Room of the Segment carries, so
-that area only has to be greater than 0 (C4a-4, Phase 4a). Export refuses `airtightness.no_exposed_face` for a
+that area only has to be greater than 0. Export refuses `airtightness.no_exposed_face` for a
 Segment with a result and no such Face, and `airtightness.no_net_volume` for an n50 result with no Space net
 volume, where PHX would write an n50 of 1.0. WUFI-Passive (`EnvelopeAirtightnessCoefficient`) and METr
 (`tightEnv50`) carry q50 only; `tests/python/test_airtightness_phx_round_trip.py` reads it back from both and
