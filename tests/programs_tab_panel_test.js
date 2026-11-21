@@ -25,8 +25,8 @@ function load() {
   var modules = panelSource.start(context, ["sections/shell", "features/programs/tab"]);
   var p = { context: context, panel: modules.panel, modules: modules, sent: sent };
   p.actions = function () { return sent.filter(function (message) { return message.type === "action.invoke"; }); };
-  p.snapshot = function (programs, schedules) {
-    p.panel.receive({ type: "panel.snapshot", payload: snapshot(programs, schedules) });
+  p.snapshot = function (programs, schedules, preferences) {
+    p.panel.receive({ type: "panel.snapshot", payload: snapshot(programs, schedules, preferences) });
   };
   p.snapshot(programs());
   p.panel.showTab("programs");
@@ -66,12 +66,12 @@ function programs(changes) {
     use_count: 0, missing: [{ load: "people", field: "people_per_area" }] })];
 }
 
-function snapshot(programRows, extra) {
+function snapshot(programRows, extra, preferences) {
   var schedule = row("schedule", "sch_occ", "Occupancy", { type: "fractional", days_per_week: 7, weeks_per_year: 52,
     start_h: 0, end_h: 24, fraction_on: 1, fraction_off: 0 }, { uses: [], use_count: 0,
     profile: { hours: [], daily_full_load_hours: 24, annual_full_load_hours: 8760 } });
   return { product: "PH-Composer", version: "test", session: "session-a", revision: REVISION, file_name: "a.skp",
-    edit_path: [], preferences: { unit_system: "SI" }, sections: {
+    edit_path: [], preferences: preferences || { unit_system: "SI" }, sections: {
       "ph_composer.programs.programs": { status: "completed", value: { records: programRows, unreadable: [] } },
       "ph_composer.programs.schedules": { status: "completed", value: { records: [schedule].concat(extra || []),
         unreadable: [] } },
@@ -196,4 +196,21 @@ test("a Schedule select made anew when the Schedules change keeps the focus", fu
   var again = labelled(card(p, "lighting"), "select", "Lighting lighting schedule");
   assert.notStrictEqual(again, select, "rebuilt for the new Schedule");
   assert.strictEqual(p.context.document.activeElement, again);
+});
+
+test("a draft keeps the units it began in, and a plain number reads the user's decimal comma", function () {
+  var p = load();
+  click(card(p, "ventilation").querySelector(".pgm-card-head"));
+  var input = labelled(card(p, "ventilation"), "input", "Ventilation per person");
+  type(input, "18");
+  p.snapshot(programs(), [], { unit_system: "IP" });
+  enter(input);
+  assert.strictEqual(last(p).params.values.ventilation.flow_per_person, 0.005, "18 m³/h, as typed in SI");
+  p.panel.receive({ type: "action.result", payload: { request_id: last(p).request_id, session: "session-a",
+    outcome: { status: "completed", code: "ok", effect: "committed", revision: REVISION + 1, value: {} } } });
+  p.snapshot(programs(), [], { unit_system: "SI", number_format: { decimal: ",", locale: "de-DE" } });
+  var air = labelled(card(p, "ventilation"), "input", "Ventilation air changes");
+  type(air, "0,5");
+  enter(air);
+  assert.strictEqual(last(p).params.values.ventilation.air_changes_per_hour, 0.5);
 });

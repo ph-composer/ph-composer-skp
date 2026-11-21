@@ -191,14 +191,14 @@
       "sha256": "4b01ded1845b7c5e7be2c4f507707b18aa1eccd6c46e05a7b5a7341728cf5b98"
     },
     "html/features/programs/program_editor.js": {
-      "bytes": 16470,
+      "bytes": 16670,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6e5077e17538e9087c4bb981981fe20391348315cf830258f1e9217d0f3f798b"
+      "sha256": "89af255b7de88221c08d5fdb10601ccf15e0513b7d5fa91695614312b3aa7869"
     },
     "html/features/programs/program_loads.js": {
-      "bytes": 12052,
+      "bytes": 11960,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ecc28de800c69437b134ee8e89eeca0d6cac986e748fff1ba4e6c69fc4a2a1a5"
+      "sha256": "a580ce593dd394c422a917b3911e27d73d447b5f322034ab859dcc78f7b02e49"
     },
     "html/features/programs/programs.css": {
       "bytes": 10863,

@@ -16,8 +16,13 @@ function (fields, units, preferences) {
   var FRACTION = fields.with(fields.FRACTION, { max: 1 });
 
   function value(key, label, field, extra) { return Object.assign({ key: key, label: label, field: field }, extra); }
+  /* A number with a unit the units core has no quantity for (ACH, %, L/h per m²): read and written in the user's
+     number format as a plain number, its unit the same in either system. */
   function plain(key, label, unit, extra) {
-    return Object.assign({ key: key, label: label, plain: unit, allowBlank: true }, extra);
+    var settings = { allowBlank: true, label: label };
+    if (extra && extra.max !== undefined) settings.max = extra.max;
+    return Object.assign({ key: key, label: label, plain: unit, field: fields.with(fields.FRACTION, settings) },
+      extra);
   }
   function fraction(key, label, extra) { return value(key, label, FRACTION, extra); }
   function slot(key, label, type) { return { key: key, label: label, type: type }; }
@@ -77,7 +82,6 @@ function (fields, units, preferences) {
     building_america: "Building America rule" };
   var NONE = { fractional: "None (always on)", activity: "None", ventilation: "None (full flow)",
     temperature: "None (use the value)" };
-  var NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)$/;
 
   function profile(entry) { return units.profile(entry.field, preferences.current()); }
 
@@ -85,46 +89,38 @@ function (fields, units, preferences) {
   function system() { return preferences.current().unitSystem; }
 
   /* The unit a value's row names: the display unit of its quantity, or its plain unit. */
-  function unit(entry) { return entry.field ? units.displayUnit(entry.field, profile(entry)) : entry.plain; }
+  function unit(entry) { return entry.plain || units.displayUnit(entry.field, profile(entry)); }
 
   /* The text an input shows for a stored value, in the display units. */
   function editText(entry, stored) {
     if (stored === null || stored === undefined) return "";
-    var shown = stored * (entry.scale || 1);
-    if (!entry.field) return String(Math.round(shown * 1e6) / 1e6);
-    return units.formatEdit(shown, entry.field, profile(entry), { showUnit: false });
+    return units.formatEdit(stored * (entry.scale || 1), entry.field, profile(entry), { showUnit: false });
   }
 
   /* A value for a closed card's line and the header: the number and its unit. */
   function shown(entry, stored) {
     if (stored === null || stored === undefined) return "?";
     var number = stored * (entry.scale || 1);
-    if (!entry.field) return String(Math.round(number * 100) / 100) + " " + entry.plain;
+    if (entry.plain) return units.format(number, entry.field, profile(entry), { showUnit: false }) + " " + entry.plain;
     return units.format(number, entry.field, profile(entry));
   }
 
   /* A value as a headline number, without its unit; a dash while it is missing. */
   function number(entry, stored) {
     if (stored === null || stored === undefined) return "\u2014";
-    if (!entry.field) return String(Math.round(stored * (entry.scale || 1) * 100) / 100);
     return units.format(stored * (entry.scale || 1), entry.field, profile(entry), { showUnit: false });
   }
 
-  /* The stored value a typed entry gives, or `{ error }`. A blank is null where the value may be missing. */
-  function parse(entry, text) {
+  /* The stored value a typed entry gives, or `{ error }`, read in `settings`: the unit profile the entry began in,
+     so a unit switch while typing never reinterprets it. A blank is null where the value may be missing. */
+  function parse(entry, text, settings) {
     var trimmed = String(text).trim();
     if (trimmed === "") {
       return entry.allowBlank || (entry.field && entry.field.allowBlank) ? { value: null } :
         { error: entry.label + " needs a value." };
     }
-    if (!entry.field) {
-      if (!NUMBER.test(trimmed) || Number(trimmed) < 0 || (entry.max !== undefined && Number(trimmed) > entry.max)) {
-        return { error: "Enter " + entry.label.toLowerCase() + " as a number from 0" +
-          (entry.max !== undefined ? " to " + entry.max : "") + ", or leave it empty." };
-      }
-      return { value: Number(trimmed) / (entry.scale || 1) };
-    }
-    var context = units.parseContext(entry.field, profile(entry)), result = units.parse(trimmed, entry.field, context);
+    var context = units.parseContext(entry.field, settings || profile(entry));
+    var result = units.parse(trimmed, entry.field, context);
     if (!result.ok) return { error: result.message };
     if (result.value === null) return { value: null };
     if (result.value < 0 && entry.field.quantity !== "temperature") {
@@ -196,7 +192,6 @@ function (fields, units, preferences) {
   }
 
   return { LOADS: LOADS, RULE_LABELS: RULE_LABELS, NONE: NONE, load: load, unit: unit, editText: editText,
-    shown: shown, number: number, system: system, parse: parse, summary: summary, missingByLoad: missingByLoad,
-    fieldLabel: fieldLabel,
-    patched: patched, scheduleName: scheduleName };
+    shown: shown, number: number, system: system, profile: profile, parse: parse, summary: summary,
+    missingByLoad: missingByLoad, fieldLabel: fieldLabel, patched: patched, scheduleName: scheduleName };
 });

@@ -128,7 +128,7 @@ function (ui, loads) {
       var focused = card.body.contains(document.activeElement) ? document.activeElement : null;
       var slot = focused && focused.getAttribute("data-slot");
       this.buildBody(card);
-      var again = slot ? card.body.querySelectorAll("[data-slot]").filter(function (node) {
+      var again = slot ? Array.prototype.filter.call(card.body.querySelectorAll("[data-slot]"), function (node) {
         return node.getAttribute("data-slot") === slot;
       })[0] : focused;
       if (again && again !== document.activeElement && card.body.contains(again)) again.focus({ preventScroll: true });
@@ -191,7 +191,11 @@ function (ui, loads) {
       input.setAttribute("autocomplete", "off"); input.setAttribute("spellcheck", "false");
       input.addEventListener("input", function () {
         // The entry is guarded by the load as it was when typing began.
-        if (!input.typed) input.baseline = JSON.parse(JSON.stringify(self.row.values[definition.key]));
+        // The entry is read in the units it began in, as every unit field's draft is.
+        if (!input.typed) {
+          input.baseline = JSON.parse(JSON.stringify(self.row.values[definition.key]));
+          input.profile = loads.profile(input.entry);
+        }
         input.typed = true;
       });
       input.addEventListener("keydown", function (event) {
@@ -218,7 +222,7 @@ function (ui, loads) {
   ProgramEditor.prototype.commit = function (card, entry, input) {
     if (!input.typed) return;
     input.typed = false;
-    var definition = card.definition, parsed = loads.parse(entry, input.value);
+    var definition = card.definition, parsed = loads.parse(entry, input.value, input.profile);
     if (parsed.error) { this.host.refuse(parsed.error); this.fill(card); return; }
     var baseline = input.baseline;
     if (parsed.value === baseline[entry.key] || input.value.trim() === input.seed) { this.fill(card); return; }
