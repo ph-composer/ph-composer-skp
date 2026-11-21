@@ -468,6 +468,19 @@ residential default Program, and only its bedrooms, occupants and Equipment Set 
    `programs`, `generation`, `library_id`, `record_id` and the `choice` its resolution allows (`create`, or
    `keep_local` with the local id once it is in the file). The copy and the assignment are one Undo step. A Zone row
    whose `people`, `lighting_w` or `ventilation_m3h` is null says why in `missing`.
+7. Before exporting, read `ph_composer.programs.export_preflight`, or the whole `export_preflight`. A
+   `programs.value_missing` or `programs.set_points_inverted` row blocks the export until the Program it names is
+   fixed. `programs.no_floor_area` means a Dwelling's rule loads export at 0 per m² until its Zones have a Floor
+   Face. A `programs.counts_missing` row
+   means a Dwelling exports with no bedrooms or occupants, `programs.set_points_disagree` names the set points its
+   Building Segment exports, `programs.rule_without_dwelling` names Zones in no Dwelling on the residential default,
+   `programs.equipment_set_non_residential` a Set whose devices PHX drops, and `programs.text_left_out` a name that
+   stayed in the Model because it reads as a file path. Each row's `locate` opens the
+   Zones / Programs view at its Zones for the user (`ph_composer.programs.locate`).
+8. The export writes each Zone's Room with a ProgramType (one per Dwelling for the residential default), its own
+   People with the honeybee-ph bedrooms, occupants and dwelling, and its Equipment Set's devices, once per Dwelling
+   on its largest Zone with each quantity times the Dwelling's units; each Building Segment carries the set points
+   of its Zones' Programs. The export result lists what was written, Room by Room and Segment by Segment.
 
 ### Spaces from loose Faces
 
@@ -952,7 +965,8 @@ map goes to its material (the hybrid material when the Layer is divided), and a 
 Layer-Segments' maps go to their cell materials. Every other map stays in the Model with one
 `export.metadata_omitted` finding per entity: a membrane Layer and its Layer-Segment, the one
 Layer-Segment of an undivided Layer, Window Elements, Thermal Bridge Edges, Attached zones, the climate and the definitions (Materials, Frames,
-Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
+Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments, Levels, Programs, Schedules,
+Equipment Sets and their devices, and Dwellings). A
 `ph_composer` key in any map that leaves blocks the export. The finding for a Layer, Layer-Segment
 or Window Element names the part in `object_id` and gives `reference`, the `{kind, id, part_ids}`
 to send to `ph_composer.records.update_metadata`. Read the export's findings rather than

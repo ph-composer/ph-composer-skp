@@ -18196,6 +18196,128 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.export_preflight`
+
+Program export checks: a Program value missing, set points that disagree or are inverted, a Phius rule over no Dwelling, counts not entered, an Equipment Set in a non-residential Segment, and the occupancy findings on exported Zones. Owner: `ph_composer.programs`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.programs.programs.all`
 
 Every Program, PH-Composer's defaults included. Owner: `ph_composer.programs`.
@@ -87673,6 +87795,87 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.locate`
+
+Open the Zones tab on the Programs view with the given Zones checked, and a Building Segment's settings dialog when one is named. Owner: `ph_composer.programs`.
+
+Side effects: Opens or raises the panel on the Zones tab.
+
+Refuses: `session.inactive`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "maxItems": 500,
+      "description": "Zones to check in the Zones / Programs view."
+    },
+    "building_segment_id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "A Building Segment whose settings dialog opens."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "opened"
+  ],
+  "properties": {
+    "opened": {
+      "type": "boolean"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        1201
+      ]
+    }
+  ]
+}
+```
+
 ### `ph_composer.spaces.context.close`
 
 Leave the innermost open Space or Volume for its parent, protecting a Volume being left. Owner: `ph_composer.spaces`.
@@ -94867,16 +95070,23 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | --- | --- |
 | `airtightness.no_exposed_face` | A Building Segment with an airtightness test result has no Outdoors or Ground Face, so PHX would read no infiltration. |
 | `airtightness.no_net_volume` | A Building Segment with an n50 test result has no Space net volume to convert it over. |
+| `programs.counts_missing` | A Dwelling whose Zones use a Phius rule has no bedrooms or occupants, so it exports with none. |
 | `programs.default_in_use` | A Program or Equipment Set is the Model's default; a delete must name a replacement, which becomes the default. |
 | `programs.dwelling_across_segments` | A Dwelling holds Zones in more than one Building Segment. |
+| `programs.equipment_set_non_residential` | A Zone carries an Equipment Set in a non-residential Building Segment, where PHX drops the devices. |
 | `programs.equipment_watts_residential` | A Zone's Program has electric equipment watts in a residential Building Segment; PHX reads only Equipment Set devices there. |
+| `programs.no_floor_area` | A Dwelling on a Phius rule Program has no Floor Face area, so its rule loads export at 0 per m². |
 | `programs.non_residential_dwellings` | A non-residential Building Segment holds Dwellings. |
 | `programs.residential_without_dwelling` | A residential Building Segment has no Dwelling. |
+| `programs.rule_without_dwelling` | A Zone in no Dwelling uses a Program whose Phius rules work over a Dwelling, so it exports as one unit with no occupants. |
 | `programs.set_points_disagree` | The Programs of a Building Segment's Zones give different heating or cooling set points; the Segment carries one pair. |
+| `programs.set_points_inverted` | A Program's heating set point is above its cooling set point. |
 | `programs.single_dwelling` | The Zone is in a Building Segment that is a single dwelling, where the setting decides its Program, Dwelling and counts. |
 | `programs.single_dwelling_no_effect` | Single dwelling is on in a non-residential Building Segment, where it has no effect. |
 | `programs.single_dwelling_overrides` | A Zone in a single dwelling keeps an assignment of its own, which the setting overrides. |
+| `programs.text_left_out` | A name or comment that reads as a local file path stayed in the Model. |
 | `programs.unassigned_zone` | A Zone in a non-residential Building Segment has no Program of its own or from its Segment. |
+| `programs.value_missing` | A Program, or an Equipment Set, an exported Zone uses lacks a value its honeybee ProgramType needs, or is not in the Model. |
 
 ### `ph_composer.shading`
 
@@ -95146,3 +95356,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |
 | 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |
 | 1.82 | 2026-11-20 | The Zones / Programs view's reads and the library Program on Zones. programs.assign_library_program copies a library Program with its Schedules, or reuses its local copy, through ph_composer.library.copy_into_proposal and assigns it to Zones in one Undo step; the programs feature now requires ph_composer.library. programs.zones answers every Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or ventilation_m3h is unknown), and each Building Segment's sums for its heading row. |
+| 1.83 | 2026-11-20 | The Program export. Four export sections, programs.export.rooms, schedules, program_types and set_points, write each exported Zone's ProgramType, People counts, Dwelling and Equipment Set devices and each Building Segment's set points; the programs.zone_assignment and programs.segment extensions are now required, claimed by programs.export.rooms. programs.export_preflight is new, with codes programs.value_missing, programs.set_points_inverted, programs.rule_without_dwelling, programs.counts_missing, programs.equipment_set_non_residential and programs.text_left_out, and the view command programs.locate opens the Zones / Programs view with Zones checked. The Spaces export projection adds each Zone's floor_area_m2 and weighted_area_m2; the certification export section registers its records as its projection. |

@@ -221,6 +221,21 @@ module PhComposer
         found
       end
 
+      # The honeybee-ph class of `device` and the attributes the export sets on a new one, by honeybee-ph's names and
+      # values, with `quantity` in place of the device's own. The translation sets each on the class's instance.
+      def hbph(device, quantity)
+        type = fetch(device.fetch("type"))
+        attributes = { "display_name" => device.fetch("display_name"), "comment" => device.fetch("comment"),
+                       "quantity" => quantity, "in_conditioned_space" => device.fetch("in_conditioned_space"),
+                       "reference_quantity" => device.fetch("reference_quantity") }
+        type.fetch("fields").each do |key|
+          field = FIELDS.fetch(key)
+          value = device.fetch(key)
+          attributes[field.fetch("hbph", key)] = field["values"] ? field["values"].fetch(value) : value
+        end
+        { "class" => type.fetch("hbph_class"), "attributes" => attributes }
+      end
+
       # What the device dialog and an agent read: each type with its label, rule flag, allowed codes, fields with
       # their schemas, and the values a new device takes.
       def catalog

@@ -139,7 +139,7 @@ test("a Segment with no settings reads as a single dwelling with the house's row
   var p = load();
   var dialog = settings(p, "House");
   assert.deepStrictEqual(plain(dialog.querySelectorAll("h3").map(function (node) { return node.textContent; })),
-    ["General", "Occupancy", "Phius certification"]);
+    ["General", "Occupancy", "Phius certification", "Comfort"]);
   var box = control(dialog, "input", "Single dwelling");
   assert.strictEqual(box.checked, true);
   assert.strictEqual(box.disabled, false);
@@ -228,4 +228,22 @@ test("switching on replaces counts the Segment kept with the preview's sums", fu
   box.checked = true; box.listeners.change({});
   assert.strictEqual(control(dialog, "input", "Bedrooms").value, "3", "the Zones' sum, not the kept 1");
   assert.strictEqual(control(dialog, "input", "Occupants").value, "", "the kept 2 gives way to the Phius rule");
+});
+
+test("the Comfort section shows the set points read only and saves nothing", function () {
+  var p = load();
+  var spec = p.panel.segmentSettingsSections().filter(function (item) {
+    return item.namespace === "ph_composer.programs.comfort";
+  })[0];
+  assert.strictEqual(spec.readOnly, true);
+  assert.strictEqual(spec.collect, undefined);
+  var dialog = settings(p, "House");
+  var text = shownText(dialog);
+  assert.ok(/Heating set point \| 20(\.0)? °C/.test(text), text);
+  assert.ok(/Cooling set point \| 25(\.0)? °C/.test(text), text);
+  assert.ok(/From its Zones' Programs/.test(text), text);
+  control(dialog, "input", "Bedrooms").value = "3";
+  control(dialog, "input", "Bedrooms").listeners.input({});
+  click(saveButton(dialog));
+  assert.deepStrictEqual(Object.keys(p.actions()[0].payload.params.extension_payloads), [NAMESPACE]);
 });

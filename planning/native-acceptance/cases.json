@@ -5303,6 +5303,23 @@
         "src/ph_composer/html/features/zones/segment_rows.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG10",
+      "label": "The Program export on the installed RBZ, in a fresh synthetic Model of the five journeys (tests/program_export_test.rb's House, Apartments and School): the export preflight shows the set points and non-residential Set warnings, a Locate opening the Zones / Programs view with its Zones checked; the export writes, and its HBJSON converted by PHX 1.59.1 reads back each Segment's units, occupants, bedrooms, devices and set points; the Comfort section of each Segment's settings shows its set points; a Program value cleared blocks the export",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/export_plan.rb",
+        "src/ph_composer/features/programs/ruleset_export.rb",
+        "src/ph_composer/features/programs/program_export.rb",
+        "src/ph_composer/features/programs/export_preflight.rb",
+        "src/ph_composer/features/programs/program_report.rb",
+        "src/ph_composer/python/ph_composer_translation/program_sections.py",
+        "src/ph_composer/html/features/programs/occupancy.js",
+        "src/ph_composer/html/features/zones/overview.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

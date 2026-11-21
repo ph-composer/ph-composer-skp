@@ -22,11 +22,14 @@ module PhComposer
 
       def install(feature)
         feature.export_contributor(SECTION, :section_version => 1, :requires => [ZONES], :result => RESULT,
-                                            :entity_projections => [CLAIM]) { |reader| records(reader) }
+                                            :entity_projections => [CLAIM],
+                                            :projection => method(:records)) { |reader| records(reader) }
       end
 
-      # One record per exported Building Segment record, in id order. A legacy Zone names no Segment record, so
-      # its BldgSegment keeps honeybee-ph's defaults, which are the same values.
+      # One record per exported Building Segment record, in id order. A legacy Zone names no Segment record, so its
+      # BldgSegment keeps honeybee-ph's defaults, which are the same values. The records are also the section's
+      # projection, so a feature that requires this one reads each Segment's category as exported
+      # (`reader.section(SECTION)`).
       def records(reader)
         stored = reader.entity_projection(Segment::NAMESPACE, Segment::SEGMENT_KIND).to_h do |row|
           [row.fetch("id"), row.fetch("payload")]

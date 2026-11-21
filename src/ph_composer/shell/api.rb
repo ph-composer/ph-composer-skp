@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 82
+    MINOR = 83
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -497,7 +497,18 @@ module PhComposer
                     "step; the programs feature now requires ph_composer.library. programs.zones answers every " \
                     "Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and " \
                     "icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or " \
-                    "ventilation_m3h is unknown), and each Building Segment's sums for its heading row." }
+                    "ventilation_m3h is unknown), and each Building Segment's sums for its heading row." },
+      { "minor" => 83, "date" => "2026-11-20",
+        "change" => "The Program export. Four export sections, programs.export.rooms, schedules, program_types and " \
+                    "set_points, write each exported Zone's ProgramType, People counts, Dwelling and Equipment Set " \
+                    "devices and each Building Segment's set points; the programs.zone_assignment and " \
+                    "programs.segment extensions are now required, claimed by programs.export.rooms. " \
+                    "programs.export_preflight is new, with codes programs.value_missing, " \
+                    "programs.set_points_inverted, programs.rule_without_dwelling, programs.counts_missing, " \
+                    "programs.equipment_set_non_residential and programs.text_left_out, and the view command " \
+                    "programs.locate opens the Zones / Programs view with Zones checked. The Spaces export " \
+                    "projection adds each Zone's floor_area_m2 and weighted_area_m2; the certification export " \
+                    "section registers its records as its projection." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

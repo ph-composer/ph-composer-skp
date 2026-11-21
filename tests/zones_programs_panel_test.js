@@ -490,3 +490,12 @@ test("a Zone shared with another occurrence is read only", function () {
   assert.strictEqual(labelled(rowNamed(p, "Apt 1"), "input", "Bedrooms in Apt 1").disabled, false,
     "another Zone stays editable");
 });
+
+test("an export finding's Locate checks its Zones in this view, and Programs findings send the user here", function () {
+  var p = load();
+  p.panel.navigate("overview", { view: "ph_composer.programs.zones",
+    zones: [{ zone_id: "zon_c", zone_path: [103] }] });
+  assert.strictEqual(checkbox(rowNamed(p, "Corridor")).checked, true);
+  assert.strictEqual(checkbox(rowNamed(p, "Apt 1")).checked, false);
+  assert.strictEqual(p.panel.tabFor("ph_composer.programs.export.rooms").tab, "overview");
+});

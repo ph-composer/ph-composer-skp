@@ -1,0 +1,43 @@
+{
+  "ph_composer.programs.export.program_types": {
+    "program_types": [
+      "id",
+      "people_per_area",
+      "lighting_watts_per_area"
+    ]
+  },
+  "ph_composer.programs.export.rooms": {
+    "rooms": [
+      "zone_id",
+      "program_type_id",
+      "number_bedrooms",
+      "number_people",
+      "dwelling_identifier",
+      "num_dwellings",
+      "device_count"
+    ]
+  },
+  "ph_composer.programs.export.schedules": {
+    "schedules": [
+      "id",
+      "days_per_week",
+      "weeks_per_year",
+      "period_count"
+    ]
+  },
+  "ph_composer.programs.export.set_points": {
+    "dwellings": [
+      "export_identifier",
+      "name",
+      "units",
+      "bedrooms",
+      "occupants"
+    ],
+    "set_points": [
+      "export_identifier",
+      "name",
+      "winter_c",
+      "summer_c"
+    ]
+  }
+}

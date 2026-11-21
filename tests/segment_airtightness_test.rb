@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require_relative "support/box_zone_fixtures"
 require_relative "support/construction_export_fixtures"
 require_relative "support/space_fixtures"
 require_relative "support/zone_options"
@@ -14,6 +15,7 @@ require_relative "support/zone_options"
 # merged Room keeps and the Spaces' net volume. The golden feeds the PHX round trip
 # (tests/python/test_airtightness_phx_round_trip.py).
 class SegmentAirtightnessTest < PhComposerTestCase
+  include BoxZoneFixtures
   include ConstructionExportFixtures
   include FixtureFiles
   include SpaceFixtures
@@ -145,8 +147,8 @@ class SegmentAirtightnessTest < PhComposerTestCase
     write_or_compare(FIXTURE, stable(extract.document))
   end
 
-  # Occupancy payloads are local_only until the Program export claims them: a house's counts on its
-  # Segment and a Zone's assignment leave the export unblocked.
+  # Occupancy payloads are claimed and read by the Program export: a house's counts on its Segment and a Zone's
+  # assignment leave the export unblocked.
   def test_occupancy_payloads_on_exported_zones_and_segments_never_block_export
     reference
     occupancy = P::Occupancy::SEGMENT_NAMESPACE
@@ -195,7 +197,7 @@ class SegmentAirtightnessTest < PhComposerTestCase
 
   def test_a_result_on_a_segment_with_no_outdoors_or_ground_face_refuses
     reference
-    adu = Z::ZONE_STORE.read(zone_group("ADU"))
+    adu = Z::ZONE_STORE.read(box_group("ADU"))
     zone_faces("ADU").each do |face|
       record = Z::Faces::FACE_STORE.read(face)
       next if record.fetch("boundary_condition") == "Surface"
@@ -221,87 +223,6 @@ class SegmentAirtightnessTest < PhComposerTestCase
     adopt_zone_options
     completed(invoke("ph_composer.zones.solve_adjacency", "zones" => zone_rows.map { |row| row.fetch("reference") }))
     assign_pair_assemblies
-  end
-
-  def box(base, letter, name, segment, (x_min, x_max, y_min, y_max), space: true, split_west: false,
-          adiabatic_north: false, net_area_factor: 1.0)
-    children = box_faces(x_min, x_max, y_min, y_max, split_west).each_with_index.map do |(type, normal, loop), index|
-      face = Sketchup::Face.new(base + index + 1, {}, :points => loop.map { |xyz| metres(xyz) },
-                                                      :normal => Geom::Vector3d.new(*normal))
-      boundary = if type == "Floor" then "Ground"
-                 elsif adiabatic_north && normal == [0, 1, 0] then "Adiabatic"
-                 else "Outdoors"
-                 end
-      Z::Faces::FACE_STORE.write(face, "id" => format("fac_%<letter>s%<number>011d", :letter => letter,
-                                                                                     :number => index + 1),
-                                       "schema_version" => 1, "face_type" => type, "boundary_condition" => boundary,
-                                       "assembly_id" => @assembly_id, "user_data" => {}, "extension_data" => {})
-      face
-    end
-    faces = children.dup
-    if space
-      # The Zone's floor Face is its Space's Floor Segment, as Create Space leaves it.
-      floor = children.shift
-      SPACES::FLOOR_SEGMENT_STORE.write(floor, segment_record(letter, :net_area_factor => net_area_factor))
-      children << space_group(base + 50, space_record(letter, :number => "1", :name => name),
-                              [volume_group(base + 60, volume_record(letter), [floor], :locked => false)])
-    end
-    group = Sketchup::Group.new(base, Sketchup::Entities.new(children), :name => name)
-    zone = { "id" => "zon_#{letter * 12}", "schema_version" => 1, "name" => name, "building_segment" => segment,
-             "level" => "L1", "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {} }
-    Z::ZONE_STORE.write(group, zone)
-    stamp = Z::Schema.stamp(zone)
-    faces.each { |face| Z::STAMP_STORE.write(face, stamp) }
-    host_children(children, zone.fetch("id"))
-    group
-  end
-
-  # Floor, roof, then the walls west, east, south and north, outward normals; with `split_west` the west wall
-  # is two Faces, split at y = 4 m.
-  def box_faces(x0, x1, y0, y1, split_west)
-    west = if split_west
-             [[[x0, y0, 0], [x0, y0, 3], [x0, 4, 3], [x0, 4, 0]], [[x0, 4, 0], [x0, 4, 3], [x0, y1, 3], [x0, y1, 0]]]
-           else
-             [[[x0, y0, 0], [x0, y0, 3], [x0, y1, 3], [x0, y1, 0]]]
-           end
-    [["Floor", [0, 0, -1], [[x0, y0, 0], [x0, y1, 0], [x1, y1, 0], [x1, y0, 0]]],
-     ["RoofCeiling", [0, 0, 1], [[x0, y0, 3], [x1, y0, 3], [x1, y1, 3], [x0, y1, 3]]]] +
-      west.map { |loop| ["Wall", [-1, 0, 0], loop] } +
-      [["Wall", [1, 0, 0], [[x1, y0, 0], [x1, y1, 0], [x1, y1, 3], [x1, y0, 3]]],
-       ["Wall", [0, -1, 0], [[x0, y0, 0], [x1, y0, 0], [x1, y0, 3], [x0, y0, 3]]],
-       ["Wall", [0, 1, 0], [[x0, y1, 0], [x0, y1, 3], [x1, y1, 3], [x1, y1, 0]]]]
-  end
-
-  def metres(xyz)
-    Geom::Point3d.new(*xyz.map { |value| value * INCHES })
-  end
-
-  # Each Surface pair's Assembly from its first side by id, so the other side holds it reversed.
-  def assign_pair_assemblies
-    rows = query("ph_composer.zones.faces.all").fetch("faces")
-    pairs = rows.select { |row| row.dig("values", "boundary_condition") == "Surface" }
-    pairs.group_by { |row|
-      [row.dig("reference", "entity_id"), row.dig("values", "adjacency", "counterpart", "entity_id")].sort
-    }.each_value do |sides|
-      side = sides.min_by { |row| row.dig("reference", "entity_id") }
-      completed(invoke("ph_composer.zones.faces.assign_assembly",
-                       "assembly_id" => @assembly_id,
-                       "targets" => [{ "reference" => side.fetch("reference"),
-                                       "expected_values" => side.fetch("values") }]))
-    end
-  end
-
-  def zone_group(name)
-    @model.entities.to_a.find { |entity| entity.is_a?(Sketchup::Group) && entity.name == name }
-  end
-
-  # Every classified Face in the Zone, its Space's floor among them.
-  def zone_faces(name, entities = zone_group(name).entities.to_a)
-    entities.flat_map do |entity|
-      next zone_faces(name, entity.entities.to_a) if entity.is_a?(Sketchup::Group)
-
-      entity.is_a?(Sketchup::Face) && Z::Faces::FACE_STORE.read(entity) ? [entity] : []
-    end
   end
 
   # The document with the Building Segment ids adoption mints, which differ each run, renumbered by Segment name,

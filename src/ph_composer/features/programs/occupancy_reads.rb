@@ -167,7 +167,9 @@ module PhComposer
           row.fetch("single_dwelling") && row.fetch("building_segment_ids") == [segment.id]
         end
         dwellings = zones.filter_map { |row| row.fetch("dwelling_id") }.uniq
-        programs = zones.map { |row| inputs.program(row.fetch("program_id")) }.compact.uniq
+        # In Zone id order, so the pair a disagreement shows first is the one the export writes.
+        programs = zones.sort_by { |row| row.fetch("zone_id") }.map { |row| inputs.program(row.fetch("program_id")) }
+                        .compact.uniq
         set_points = Derive.set_points(programs, inputs.schedules)
         { "id" => segment.id, "name" => segment.name, "category" => segment.category,
           "settings" => segment.settings, "stored" => segment.stored, "single_dwelling" => segment.single?,

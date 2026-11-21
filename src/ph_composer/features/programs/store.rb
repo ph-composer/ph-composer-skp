@@ -34,9 +34,28 @@ module PhComposer
       # Whether the bundle whose head is `bundle` (PROGRAM_KIND or EQUIPMENT_SET_KIND) is still unwritten: neither
       # stored nor staged in `proposal`, and the Model's default.
       def unwritten?(request, bundle, proposal: nil)
-        id = BUNDLES.fetch(bundle).first.last.fetch("id")
-        Settings.stored(request.model).fetch(Settings.kind_field(bundle)).nil? &&
-          !stored?(request.engine, bundle, id) && !proposal&.find(bundle, id)
+        id = head_id(bundle)
+        bundle_unwritten?(Settings.stored(request.model), bundle,
+                          stored?(request.engine, bundle, id) || !proposal&.find(bundle, id).nil?)
+      end
+
+      def head_id(bundle)
+        BUNDLES.fetch(bundle).first.last.fetch("id")
+      end
+
+      # Pure: whether the bundle headed by `bundle` is unwritten, from the stored defaults (Settings.stored) and
+      # whether its head record is stored.
+      def bundle_unwritten?(stored_settings, bundle, head_stored)
+        stored_settings.fetch(Settings.kind_field(bundle)).nil? && !head_stored
+      end
+
+      # Pure: the frozen records of `kind` that reads answer, from the stored defaults and `stored_ids`, the ids of
+      # each kind's stored records. The export reads its snapshot this way.
+      def frozen(stored_settings, kind, stored_ids)
+        rows = BUNDLES.select do |bundle, _records|
+          bundle_unwritten?(stored_settings, bundle, stored_ids.fetch(bundle, []).include?(head_id(bundle)))
+        end.values.flatten(1)
+        rows.select { |row_kind, _record| row_kind == kind }.map { |_kind, record| DeepCopy.call(record) }
       end
 
       # The bundle an unwritten frozen record of `kind` and `id` belongs to, or nil.

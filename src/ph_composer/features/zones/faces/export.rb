@@ -330,6 +330,17 @@ module PhComposer
           end
         end
 
+        # The area of the Floor Faces this section writes for the snapshot Zone occurrence `zone_entry`: honeybee's
+        # Room floor area, which a per-area load multiplies.
+        def floor_area_m2(reader, zone_entry)
+          Zones::ExportProjection.zone_faces(reader, zone_entry).sum(0.0) do |entry|
+            record = entry.record(FACE_DICTIONARY)
+            next 0.0 unless record && record["face_type"] == "Floor" && written?(reader, entry, record)
+
+            entry.geometry.area_m2
+          end
+        end
+
         # Whether the section writes the classified Face `entry` with its stored `record` into the HBJSON: it has
         # a boundary condition and, on a Surface, a current reciprocal other side that is written too.
         def written?(reader, entry, record)

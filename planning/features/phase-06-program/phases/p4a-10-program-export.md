@@ -1,7 +1,7 @@
 # P4a-10: Program export
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch `feature/phase-06-program-p4a-10` (2026-11-20); PG10's host rows owed to the batched sitting. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -88,3 +88,50 @@ PG10: the packaged RBZ exports the five journeys; the round trip reads them back
 ## Done when
 
 PG10 passes.
+
+## Implementation decisions (2026-11-20)
+
+Contract: `context/CONTRACTS.md`, "Program export". Evidence: [PG10 offline](../evidence/pg10-program-export-offline.md).
+
+- **Four sections, one plan.** `ExportPlan` (pure) works out everything once; `programs.export.rooms` claims the two
+  occupancy extensions and registers the plan as its projection, and `schedules`, `program_types` and
+  `set_points` read it. The Python half is four sections in `program_sections.py`, two attached nowhere (Schedules
+  and ProgramTypes, taken as inputs), Rooms at `ROOM` and set points at `SEGMENT`. The stage doc's "one record per
+  Room plus each Segment's set points" holds; Schedules and ProgramTypes are their own records so each honeybee
+  object is built once.
+- **The two occupancy extensions are `required`** and claimed; a payload this version cannot read now blocks.
+- **Areas, as honeybee-ph.** Per-area rule loads divide by the Dwelling's Rooms' Floor Face area (honeybee's
+  `Room.floor_area`, which Set Residential Program uses), the lighting formula takes the Spaces' iCFA. The Spaces
+  export projection now carries each Zone's floor area and iCFA beside its net volume.
+- **Counts on Rooms sum to the Dwelling's.** Each Zone's own count while the Dwelling's is its Zones' sum, else the
+  whole count (its own, the house's or the Phius rule's) on its largest Room by Floor area, which also carries the
+  devices. PHX sums `number_people` and `number_bedrooms` over a Segment's Rooms.
+- **No count is not a block.** A Dwelling on a Phius rule with no bedrooms exports with none, as a warning
+  (`programs.counts_missing`), so a fresh house exports as it did. A Zone in no Dwelling on a rule Program is a
+  group of one unit, as Set Residential Program treats an untagged Room (`programs.rule_without_dwelling`, a
+  warning); a legacy Zone, which names no Segment record, gets no note. "A Program value missing" blocks:
+  `programs.value_missing`, per field, a Schedule left empty being honeybee's Always On except where a rule
+  divides by its mean.
+- **Hot water** follows Set Residential Program's code, shower 1.17 gallons per bedroom, not the 4.67 its
+  docstring and Building America Table 11 give (F4a-20); a follow-up for honeybee-ph.
+- **Process watts** are honeybee-ph's own `annual_avg_wattage` over the Dwelling's counts and iCFA (EnergyPlus
+  only; PHX reads the device). No Process schedule is in the Model, so each uses honeybee's Always On.
+- **A ventilation day off** runs at the minimum period's fraction; a fractional or activity day off at its
+  `fraction_off` or `watts_off`.
+- **Rule means.** A rule's presence and lighting means are the daily mean of the Schedule's day, as the Zones /
+  Programs view derives them, not the annual mean of the exported ruleset; they differ only on a rule Schedule of
+  fewer than 7 days or 52 weeks. A Dwelling with no Floor Face area exports its rule loads at 0 per m² with a
+  warning (`programs.no_floor_area`), where Set Residential Program refuses: blocking would stop exports of Zones
+  drawn without a Floor.
+- **Set points.** Where the Zones' Programs disagree, the Segment exports its first Zone's by id, and the warning
+  names the pair. A temperature Schedule is always constant in the PH form, so "not constant" cannot arise yet.
+- **Identifiers** join record ids with "-" (`pgm_…-dwl_…`, `eqs_…-dev_…`), and every `PhDwellings` gets one, so the
+  HBJSON is the same each run.
+- **Locate.** `programs.locate` opens the Zones tab on the Zones / Programs view with the row's Zones checked
+  (Zones' `onNavigate` takes `zones`), or a single dwelling's settings; Programs records are `workedOn` that tab
+  until P4a-11's Programs tab.
+- **User data** of Programs, Schedules, Equipment Sets and their devices, and Dwellings stays in the Model with a
+  finding; none has an HBJSON object of its own that a map could follow without duplicating it per Dwelling.
+- **Report.** The Programs part lists each Segment's set points and its Dwellings' units and counts, from the
+  Python result.
+

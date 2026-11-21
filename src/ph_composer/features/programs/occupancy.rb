@@ -42,9 +42,9 @@ module PhComposer
                                      :validate => method(:problems))
     end
 
-    # The two structured extensions occupancy is stored in (context/CONTRACTS.md, "Occupancy"). Both are
-    # `local_only` until the Program export claims them: a payload on an exported Zone or Segment never blocks an
-    # export.
+    # The two structured extensions occupancy is stored in (context/CONTRACTS.md, "Occupancy"). Both are `required`:
+    # the Program export claims them (ProgramExport), so a payload on an exported Zone or Segment is read, and one this
+    # version does not understand blocks the export rather than being left out.
     #
     #   zone_assignment   on each Zone: its Program, Dwelling, Equipment Set and counts. Absent, or every field
     #                     null, the Zone is unassigned.
@@ -104,11 +104,11 @@ module PhComposer
 
       ZONE_EXTENSION = Records::Extension.new(:namespace => ZONE_NAMESPACE, :schema_version => 1,
                                               :references => references(ZONE_FIELDS),
-                                              :export_relevance => "local_only",
+                                              :export_relevance => "required",
                                               :validate => ->(payload) { problems(payload, ZONE_FIELDS) })
       SEGMENT_EXTENSION = Records::Extension.new(:namespace => SEGMENT_NAMESPACE, :schema_version => 1,
                                                  :references => references(SEGMENT_FIELDS),
-                                                 :export_relevance => "local_only",
+                                                 :export_relevance => "required",
                                                  :validate => ->(payload) { problems(payload, SEGMENT_FIELDS) })
 
       # The understood payload of `namespace` in a record's `extension_data`, or nil for none, or one this version

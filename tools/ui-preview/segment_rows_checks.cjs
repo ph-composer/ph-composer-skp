@@ -110,7 +110,7 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   const settings = page.getByRole("dialog", { name: "Building Segment settings", exact: true });
   await settings.waitFor();
   assert.deepEqual(await settings.locator("h3").allTextContents(),
-    ["General", "Occupancy", "Phius certification", "Airtightness", "Note"]);
+    ["General", "Occupancy", "Phius certification", "Airtightness", "Comfort", "Note"]);
   assert.equal(await settings.getByRole("checkbox", { name: "New Zones join this Segment", exact: true }).isDisabled(), true);
   const save = settings.getByRole("button", { name: "Save", exact: true });
   assert.equal(await save.isDisabled(), false, "an untouched section holds nothing");

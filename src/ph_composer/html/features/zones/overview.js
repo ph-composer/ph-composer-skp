@@ -1017,7 +1017,8 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
   /* Another tab can open this one on a view (`panel.navigate("overview", { view })`) and, with `check`, with
      rows checked and, with `locate: true`, framed, as the Assemblies tab's "Select faces using" does. The
      named view is shown first, through the view row's guards; `intent.viewShown` says whether it was, and a
-     refused switch applies nothing. `segmentSettings` opens one Building Segment's settings dialog. */
+     refused switch applies nothing. `zones` checks those Zone references in the view, as a Program export
+     finding's Locate does. `segmentSettings` opens one Building Segment's settings dialog. */
   panel.section("ph_composer.overview", render, { order: 10, onNavigate: function (root, intent) {
     if (!screen) return;
     if (intent.view) {
@@ -1026,6 +1027,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       if (!intent.viewShown) return;
     }
     if (intent.check) call(active(screen), "navigate", [intent]);
+    if (intent.zones) call(active(screen), "checkZones", [intent.zones.map(function (zone) {
+      return JSON.stringify(["Zone", zone.zone_path]);
+    })]);
     // `segmentSettings` names a Building Segment whose settings dialog opens, as its heading's Settings does.
     if (intent.segmentSettings) screen.segments.openSettings(intent.segmentSettings);
     panel.repaint();
