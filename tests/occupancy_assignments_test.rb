@@ -327,9 +327,6 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     uses = query("#{P::FEATURE_ID}.programs.all").fetch("records").find { |row| row.fetch("id") == program }
     assert_equal 1, uses.fetch("use_count"), "the Zone assignment counts as a use"
     refused(invoke("#{P::FEATURE_ID}.programs.delete", "id" => program), "reference.in_use")
-    refused(invoke("#{P::FEATURE_ID}.programs.delete", "id" => program,
-                                                       "replacement_id" => P::DefaultProgram::PROGRAM_ID),
-            "reference.in_use")
     dwelling = completed(invoke("#{P::FEATURE_ID}.assign_dwelling", "zones" => [reference("Apt 1 bed")],
                                                                     "choice" => "shared")).fetch("dwelling_ids").first
     refused(invoke("#{P::FEATURE_ID}.dwellings.delete", "id" => dwelling), "reference.in_use")
@@ -380,6 +377,53 @@ class OccupancyAssignmentsTest < PhComposerTestCase
                                                               "dwelling_ids" => [dwelling]))
     completed(invoke("#{P::FEATURE_ID}.equipment_sets.delete", "id" => first, "replacement_id" => second))
     assert_equal second, zone_row("Apt 1").fetch("equipment_set_id")
+  end
+
+  # A Program or Equipment Set deleted with a replacement moves every Zone assignment and Segment setting naming it,
+  # with the delete, in one Undo step; Undo brings both back.
+  def test_a_delete_with_a_replacement_moves_zone_and_segment_payloads_in_one_undo_step
+    switch_off("Apartments", :release => %w[Apt\ 1 Corridor])
+    office = create_program("Office", {})
+    lab = create_program("Lab", {})
+    first = completed(invoke("#{P::FEATURE_ID}.equipment_sets.create", "values" => { "name" => "A" })).fetch("id")
+    second = completed(invoke("#{P::FEATURE_ID}.equipment_sets.create", "values" => { "name" => "B" })).fetch("id")
+    completed(invoke("#{P::FEATURE_ID}.assign_program", "zones" => [reference("Apt 1"), reference("Corridor")],
+                                                        "program_id" => office))
+    completed(invoke("#{P::FEATURE_ID}.assign_equipment_set", "equipment_set_id" => first,
+                                                              "zones" => [reference("Corridor")]))
+    completed(save("House", SEGMENT_NAMESPACE => settings("default_program_id" => office, "equipment_set_id" => first)))
+
+    operations = @model.operations.length
+    completed(invoke("#{P::FEATURE_ID}.programs.delete", "id" => office, "replacement_id" => lab))
+    assert_equal operations + 1, @model.operations.length
+    assert_equal [lab, lab], [zone_row("Apt 1"), zone_row("Corridor")].map { |row| row.dig("assignment", "program_id") }
+    assert_equal lab, segments.fetch("House").dig("settings", "default_program_id")
+
+    completed(invoke("#{P::FEATURE_ID}.equipment_sets.delete", "id" => first, "replacement_id" => second))
+    assert_equal second, zone_row("Corridor").dig("assignment", "equipment_set_id")
+    assert_equal second, segments.fetch("House").dig("settings", "equipment_set_id")
+    set_row = query("#{P::FEATURE_ID}.equipment_sets.all").fetch("records").find { |row| row.fetch("id") == second }
+    assert_equal 2, set_row.fetch("use_count"), "the Corridor and the House"
+
+    @model.undo
+    assert_equal first, zone_row("Corridor").dig("assignment", "equipment_set_id")
+    assert_equal first, segments.fetch("House").dig("settings", "equipment_set_id")
+    @model.undo
+    assert_equal office, zone_row("Apt 1").dig("assignment", "program_id")
+    assert_equal office, segments.fetch("House").dig("settings", "default_program_id")
+    assert(query("#{P::FEATURE_ID}.programs.all").fetch("records").any? { |row| row.fetch("id") == office })
+  end
+
+  def test_a_delete_with_a_replacement_refuses_whole_when_a_zone_is_locked
+    switch_off("Apartments", :release => ["Apt 1"])
+    office = create_program("Office", {})
+    lab = create_program("Lab", {})
+    completed(invoke("#{P::FEATURE_ID}.assign_program", "zones" => [reference("Apt 1")], "program_id" => office))
+    zone_group_named("Apt 1").locked = true
+    revision = @session.revision
+    refused(invoke("#{P::FEATURE_ID}.programs.delete", "id" => office, "replacement_id" => lab), "target.locked")
+    assert_equal revision, @session.revision
+    assert_equal office, zone_row("Apt 1").dig("assignment", "program_id")
   end
 
   # ---------------------------------------------------------------- copy

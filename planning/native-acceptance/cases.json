@@ -5320,6 +5320,27 @@
         "src/ph_composer/html/features/zones/overview.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG11",
+      "label": "The Programs tab on the installed RBZ, in a fresh synthetic Model with a library file of Phius Programs added, Ed at the mouse: the tab after Zones with Programs, Schedules and Equipment Sets subtabs, each with its sidebar; a record opened from its row; a library Program added from the Programs sidebar with its Schedules; the accordion cards opened and closed by pointer and keyboard, their summaries and missing-value flags; a rule load switched to a fixed value and back; a value typed and committed; a Schedule chosen and one made with + New Schedule; New, rename in place, Duplicate, Delete of a used Program with a replacement (its Zones and Segment settings moved) and Reset on the residential default; each edit one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 px with the sidebar beneath the editor; UI polish review recorded",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/assignments.rb",
+        "src/ph_composer/features/programs/operations.rb",
+        "src/ph_composer/features/programs/declarations.rb",
+        "src/ph_composer/features/programs/inventory.rb",
+        "src/ph_composer/html/features/programs/tab.js",
+        "src/ph_composer/html/features/programs/record_page.js",
+        "src/ph_composer/html/features/programs/program_editor.js",
+        "src/ph_composer/html/features/programs/program_loads.js",
+        "src/ph_composer/html/features/programs/record_bodies.js",
+        "src/ph_composer/html/features/programs/programs.css",
+        "src/ph_composer/html/library/sidebar.js",
+        "src/ph_composer/html/library/rows.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

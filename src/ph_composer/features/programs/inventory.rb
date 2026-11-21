@@ -24,8 +24,11 @@ module PhComposer
         return { "programs" => Store.all(request, PROGRAM_KIND).first } if kind == SCHEDULE_KIND
         return { "zones" => OccupancyState.read(request).zones } if kind == DWELLING_KIND
 
-        { "default_id" => Settings.default_id(request.model, kind), "records" => records,
-          "occupancy" => OccupancyState.read(request) }
+        context = { "default_id" => Settings.default_id(request.model, kind), "records" => records,
+                    "occupancy" => OccupancyState.read(request) }
+        return context unless kind == PROGRAM_KIND
+
+        context.merge("schedules" => Store.all(request, SCHEDULE_KIND).first.to_h { |row| [row.fetch("id"), row] })
       end
 
       def row(request, kind, record, stored, context)
@@ -39,7 +42,12 @@ module PhComposer
 
         default = record.fetch("id") == context.fetch("default_id")
         uses = (default ? 1 : 0) + occupancy_uses(context.fetch("occupancy"), kind, record.fetch("id"))
-        base.merge("default" => default, "use_count" => uses)
+        base = base.merge("default" => default, "use_count" => uses)
+        return base unless kind == PROGRAM_KIND
+
+        # What its ProgramType would lack, by load and field, as the export preflight reports it.
+        missing = ExportPlan.missing_fields(record, context.fetch("schedules"))
+        base.merge("missing" => missing.map { |entry| entry.slice("load", "field") })
       end
 
       # How many Zone assignments, Segment settings and Dwellings name a Program or Equipment Set.

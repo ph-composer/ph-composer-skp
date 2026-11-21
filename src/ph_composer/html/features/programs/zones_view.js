@@ -225,7 +225,5 @@ function (panel, ui, units, preferences, fields, tableViews, occupancy, ZoneCell
     }
   };
   tableViews.register("ph_composer.zones", VIEW);
-  // Programs' records are worked on in this view until the Programs tab, so the Export tab sends its findings here.
-  panel.workedOn("ph_composer.programs", "overview");
   return VIEW;
 });

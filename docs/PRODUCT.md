@@ -265,6 +265,36 @@ missing. A Zone's alert flag names its findings, such as a Program with equipmen
 residential Building Segment. Areas and ventilation follow the unit system (ft² and cfm in IP);
 lighting stays in W. Escape closes an open bubble, then clears the checked Zones.
 
+## Edit Programs, Schedules and Equipment Sets
+
+1. Use the **Programs** tab. Its subtabs, **Programs**, **Schedules** and **Equipment Sets**, each show
+   one record at a time with a sidebar of the records in this file. The model's default Program and
+   Equipment Set are listed under **Default**, the rest under **In this file**; Schedules are grouped by
+   type. Choose a record in the sidebar to open it.
+2. **+ New** in the sidebar makes a record under a free name and opens its title for renaming. Rename a
+   record with the pencil beside its title (Enter applies, Escape cancels), copy it with
+   **Duplicate**, and delete it from the **...** menu. Deleting a record that Zones, Building Segments,
+   Dwellings or Programs use asks which record takes its place; everything that used it moves to that
+   record in the same Undo step. PH-Composer's own residential default Program and default Equipment
+   Set carry **Reset to PH-Composer default** in the same menu.
+3. A Program shows its users and its people, lighting and equipment at the top, then one card per load:
+   Occupancy, Lighting, Ventilation, Electric equipment, Setpoint and Infiltration, then Gas equipment
+   and Hot water, which only EnergyPlus reads. A closed card shows its values and Schedule on one line,
+   with an amber alert when a value the export needs is missing. Open a card to edit its values on the
+   left and choose its Schedules on the right; each change is one Undo step. **+ New Schedule** makes a
+   Schedule of the slot's type and names it there.
+4. Occupancy, Lighting and Hot water may follow a rule worked out per Dwelling at export (the Phius
+   occupancy and lighting rules and the Building America hot water rule). **Use a fixed value** switches
+   the load to a value of its own, and **Use the ... rule** switches it back; the lighting rule's
+   high-efficacy fraction stays editable.
+5. To add a Program from a library file, choose the file in the Programs sidebar's source list and click
+   a row. Adding it copies it with its Schedules; a row already in this file shows a check.
+6. Schedules and Equipment Sets show their values read only for now: a Schedule's PH form, full-load hours
+   and the loads that use it; an Equipment Set's devices.
+
+Values follow the unit system: people and watts per ft², cfm per person and per ft², and °F in IP.
+Hot water flow stays in L/h per m².
+
 ## Reuse library definitions
 
 Use **Libraries** to add a file, a folder of files or a connection supplied by a hosted provider.

@@ -363,7 +363,10 @@ with `ph_composer.programs.assign_library_program` (API 1.82), which joins the l
 and `programs.zones` also answers every Dwelling, each Segment's heading sums and why an unknown value is unknown.
 The Program export (API 1.83) writes it all into the HBJSON; `ph_composer.programs.export_preflight` lists what
 blocks or weakens it, and the view command `ph_composer.programs.locate` opens the Zones / Programs view with a
-row's Zones checked ([CONTRACTS.md](CONTRACTS.md), "Program export").
+row's Zones checked ([CONTRACTS.md](CONTRACTS.md), "Program export"). A Program or Equipment Set delete with a
+`replacement_id` (API 1.84) moves the Zone assignments and Segment settings naming it in the same Undo step,
+refusing whole on a locked or shared Zone; the snapshot sections `ph_composer.programs.programs`, `schedules` and
+`equipment_sets` carry the three `all` reads for the Programs tab.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

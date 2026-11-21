@@ -79,6 +79,15 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
         var known = Boolean(row.resolution && row.resolution.candidates.length), locked = self.copyLocked(row);
         if (row.library && !entry.addGlyph) entry.button.appendChild(entry.addGlyph = ui.glyph("add"));
         if (entry.addGlyph) entry.addGlyph.hidden = !row.library || known || locked;
+        if (self.markKnown && row.library && known && !entry.knownGlyph) {
+          entry.button.appendChild(entry.knownGlyph = ui.glyph("check_circle"));
+          entry.knownGlyph.classList.add("library-sidebar-known");
+        }
+        if (entry.knownGlyph) entry.knownGlyph.hidden = !row.library || !known;
+        var current = !row.library && row.id === self.active();
+        entry.button.classList.toggle("is-current", current);
+        if (current) entry.button.setAttribute("aria-current", "true");
+        else entry.button.removeAttribute("aria-current");
         ui.tooltip(entry.button, !row.library ? "" : known ? adapter.name(row) + " is already in this file" :
           locked ? "The library is still loading" : "Add " + adapter.name(row) + " to this file");
         entry.bubble.panel.setAttribute("aria-label", adapter.name(row));
@@ -113,7 +122,9 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
     entry.button = ui.button("", function (event) {
       var suppressed = entry.suppressClick && event.detail !== 0;
       entry.suppressClick = false;
-      if (!suppressed) self.openDetails(entry);
+      if (suppressed) return;
+      if (self.onOpen && !entry.row.library) self.onOpen(entry.row);
+      else self.openDetails(entry);
     });
     entry.button.className = "library-sidebar-row-button";
     entry.button.setAttribute("data-library-row", row.id);

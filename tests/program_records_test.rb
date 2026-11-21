@@ -380,6 +380,26 @@ class ProgramRecordsTest < PhComposerTestCase
     periods.map { |period, hours, fraction| { "period" => period, "hours" => hours, "fraction" => fraction } }
   end
 
+  # ---------------------------------------------------------------- the Programs tab's reads
+
+  # The tab reads each collection from the snapshot, and a Program row names each value its ProgramType would lack,
+  # by load and field, as the export preflight words it.
+  def test_the_snapshot_carries_each_collection_and_a_program_row_names_its_missing_values
+    sections = PhComposer::Snapshot.build(@context).fetch("sections")
+    %w[programs schedules equipment_sets].each do |collection|
+      assert_equal query("#{collection}.all"), sections.dig("#{PREFIX}.#{collection}", "value"), collection
+    end
+    refute sections.key?("#{PREFIX}.dwellings")
+    assert_empty program_row(DEFAULT_PROGRAM).fetch("missing")
+
+    empty = id_of(invoke!("programs.create", "values" => { "name" => "Lab" }))
+    missing = program_row(empty).fetch("missing").map { |gap| gap.values_at("load", "field") }
+    assert_equal [%w[people people_per_area], %w[lighting watts_per_area], %w[electric_equipment watts_per_area],
+                  %w[gas_equipment watts_per_area], %w[service_hot_water flow_per_area],
+                  %w[infiltration flow_per_exterior_area], %w[ventilation flow_per_person], %w[setpoint heating_c],
+                  %w[setpoint cooling_c]], missing
+  end
+
   def lighting(changes)
     P::Program::EMPTY.fetch("lighting").merge(changes)
   end

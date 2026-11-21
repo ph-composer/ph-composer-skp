@@ -423,8 +423,10 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
 5. Choose another default with `ph_composer.programs.settings.update`, naming only the default you change in
    `values` and `expected_values`. Deleting the Model's default refuses `programs.default_in_use` unless you name
    a `replacement_id`, which becomes the default; a used Schedule refuses `reference.in_use` unless you name a
-   replacement of the same type. `ph_composer.programs.reset_default` with `kind` `program` or `equipment_set`
-   restores PH-Composer's definition.
+   replacement of the same type. A Program or Equipment Set that Zones or Building Segments name refuses
+   `reference.in_use` unless you name a `replacement_id`; with one, every Zone assignment and Segment setting
+   naming it takes the replacement in the same Undo step. `ph_composer.programs.reset_default` with `kind`
+   `program` or `equipment_set` restores PH-Composer's definition.
 6. To use a library Program, load both its `programs` and its `schedules` kinds with `ph_composer.library.load`,
    then copy the Program as "Library records" below says. The copy brings every Schedule the Program names in
    the same Undo step, or reuses the local copy of one from the same library, and lists each under

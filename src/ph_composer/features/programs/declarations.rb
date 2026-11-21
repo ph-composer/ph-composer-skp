@@ -70,6 +70,12 @@ module PhComposer
                      target.not_found validation.failed].freeze
       DELETE = %w[copy.rule_missing programs.default_in_use record.unreadable reference.in_use reference.invalid
                   target.ambiguous target.changed target.not_found target.wrong_kind validation.failed].freeze
+      # A Program's or Equipment Set's delete with a replacement stages the Zones and Segments naming it through
+      # Zones, which refuses as any Zone write does.
+      DELETE_STAGED = (DELETE + USES +
+                       %w[extension.invalid extension.migration_required extension.schema_unsupported
+                          extension.unavailable target.locked target.shared_definition target.wrong_hierarchy])
+                      .uniq.sort.freeze
     end
 
     # The Programs, Schedules and Equipment Sets operations and reads (context/CONTRACTS.md, "Programs, Schedules
@@ -167,6 +173,7 @@ module PhComposer
                        "replacement_id" => Shapes.id(kind.id_prefix, "The #{kind.label} every use of the deleted " \
                                                                      "one takes instead. Needed while anything " \
                                                                      "uses it.") }
+        staged = [PROGRAM_KIND, EQUIPMENT_SET_KIND].include?(kind.id)
         handler = lambda do |request, proposal|
           params = request.params
           Operations.delete(request, proposal, kind.id, :id => params.fetch("id"),
@@ -174,13 +181,15 @@ module PhComposer
                                                         :replacement_id => params["replacement_id"])
         end
         feature.action("#{prefix}.delete", :description => "Delete one #{kind.label}; remaining uses refuse.",
-                                           :refuses => Refuses::DELETE,
+                                           :refuses => staged ? Refuses::DELETE_STAGED : Refuses::DELETE,
+                                           :participants => staged ? [Zones::ExtensionStaging::NAME] : [],
                                            :params => Shapes.object(properties,
                                                                     :optional => %w[expected_values replacement_id]),
                                            :result => Shapes.with_removed_user_data(Shapes::RESULT),
                                            :undo_name => "Delete #{kind.label}",
-                                           :side_effects => "A replacement takes every use, then the record goes, " \
-                                                            "in one step.",
+                                           :side_effects => "A replacement takes every use, Zone assignments and " \
+                                                            "Segment settings included, then the record goes, in " \
+                                                            "one step.",
                                            :examples => [{ "id" => example }], &handler)
       end
 
@@ -205,12 +214,21 @@ module PhComposer
                                        :examples => [{}]) do |request|
           Inventory.all(request, kind.id)
         end
+        # The Programs tab reads the three catalogs it edits from the snapshot; Dwellings are read with occupancy.
+        feature.snapshot_section(prefix, :query => "#{prefix}.all") unless collection == "dwellings"
       end
 
       def row(collection, kind)
         view = Shapes.view(kind)
         unless collection == "schedules"
-          return Shapes.with(view, "default" => { "type" => "boolean" }, "use_count" => Shapes::COUNT)
+          row = Shapes.with(view, "default" => { "type" => "boolean" }, "use_count" => Shapes::COUNT)
+          return row unless collection == "programs"
+
+          gap = Shapes.object({ "load" => Shapes::TEXT, "field" => Shapes::TEXT })
+          return Shapes.with(row, "missing" => Shapes.list(gap, :description => "Each value its ProgramType " \
+                                                                                "would lack, by load and field, " \
+                                                                                "as the export preflight reports " \
+                                                                                "it."))
         end
 
         use = Shapes.object({ "program_id" => Shapes::TEXT, "name" => Shapes::TEXT,

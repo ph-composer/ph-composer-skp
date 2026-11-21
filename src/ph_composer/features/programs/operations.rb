@@ -146,8 +146,21 @@ module PhComposer
           return Records::Metadata.removed_user_data(Store::KINDS.fetch(kind), [])
         end
 
-        plan = replacement && request.retarget_references(kind, :from => id, :to => replacement.fetch("id"))
+        plan = replacement && retarget(request, proposal, kind, id, replacement.fetch("id"))
         request.engine.propose_delete(kind, id, proposal, :reference_plan => plan)
+      end
+
+      # The registered retargeters (the Model's defaults, Dwellings), then the Zone and Segment payloads, which Zones
+      # stages; the plan projects the Zones as the proposal leaves them.
+      def retarget(request, proposal, kind, from, to)
+        plan = request.retarget_references(kind, :from => from, :to => to)
+        return plan if kind == DWELLING_KIND
+
+        zones = Assignments.retarget(request, proposal, kind, :from => from, :to => to).map do |entry|
+          Records::ReferenceEntry.new(:kind => entry.fetch("kind"), :key => entry.fetch("key"),
+                                      :record => entry.fetch("record"))
+        end
+        Records::ReferencePlan.new(:entries => plan.entries + zones, :removals => plan.removals)
       end
 
       def delete_schedule(request, proposal, before, replacement)

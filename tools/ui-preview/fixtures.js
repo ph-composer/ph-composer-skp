@@ -1258,8 +1258,108 @@
     return { people: people, lighting_w: name + " is in no Dwelling, so the Phius lighting rule has no units.",
       ventilation_m3h: "Ventilation per person waits for the people. " + people };
   }
+  /* The Programs tab's three catalogs (P4a-11), as `programs.all`, `schedules.all` and `equipment_sets.all` answer
+     them (features/programs/inventory.rb): the residential default and its Schedules, the Phius office copied from
+     a library, an empty lab Program missing every value, and the two Equipment Sets the occupancy read names. */
+  function programLoads(changes) {
+    var loads = {
+      people: { rule: null, people_per_area: null, occupancy_schedule_id: null, activity_schedule_id: null,
+        radiant_fraction: 0.3, latent_fraction: null },
+      lighting: { rule: null, watts_per_area: null, high_efficacy_fraction: 1, schedule_id: null,
+        return_air_fraction: 0, radiant_fraction: 0.32, visible_fraction: 0.25 },
+      electric_equipment: { watts_per_area: null, schedule_id: null, radiant_fraction: 0, latent_fraction: 0,
+        lost_fraction: 0 },
+      gas_equipment: { watts_per_area: null, schedule_id: null, radiant_fraction: 0, latent_fraction: 0,
+        lost_fraction: 0 },
+      service_hot_water: { rule: null, flow_per_area: null, target_temperature_c: 60, schedule_id: null,
+        sensible_fraction: 0.2, latent_fraction: 0.05 },
+      infiltration: { flow_per_exterior_area: null, schedule_id: null },
+      ventilation: { flow_per_person: null, flow_per_area: null, flow_per_zone: null, air_changes_per_hour: null,
+        schedule_id: null },
+      setpoint: { heating_c: null, cooling_c: null, heating_schedule_id: null, cooling_schedule_id: null,
+        dehumidify_rh: null, humidify_rh: null }
+    };
+    Object.keys(changes || {}).forEach(function (key) { Object.assign(loads[key], changes[key]); });
+    return loads;
+  }
+  function catalogRow(kind, id, name, values, extra) {
+    return Object.assign({ kind: "ph_composer.programs." + kind, id: id, schema_version: 1, user_data: {},
+      extension_status: {}, stored: true, values: Object.assign({ name: name, notes: "", datasheet_links: [],
+        source: { kind: "manual" } }, values) }, extra);
+  }
+  function scheduleRow(id, name, values, uses) {
+    return catalogRow("schedule", id, name, Object.assign({ days_per_week: 7, weeks_per_year: 52 }, values),
+      { uses: uses || [], use_count: (uses || []).length, profile: { hours: [], daily_full_load_hours: 24,
+        annual_full_load_hours: 8760 } });
+  }
+  var DEFAULT_SOURCE = { kind: "ph_composer_default" };
+  var PROGRAM_CATALOG = {
+    programs: [
+      catalogRow("program", "pgm_PHCDEFAULT01", "Residential default", Object.assign({ source: DEFAULT_SOURCE },
+        programLoads({ people: { rule: "phius_residential", occupancy_schedule_id: "sch_PHCDEFAULT01",
+          activity_schedule_id: "sch_PHCDEFAULT02" }, lighting: { rule: "phius_interior",
+          schedule_id: "sch_PHCDEFAULT03" }, electric_equipment: { watts_per_area: 0, schedule_id: "sch_PHCDEFAULT05" },
+        gas_equipment: { watts_per_area: 0, schedule_id: "sch_PHCDEFAULT05" }, service_hot_water: {
+          rule: "building_america", target_temperature_c: 43.3, schedule_id: "sch_PHCDEFAULT04" },
+        infiltration: { flow_per_exterior_area: 0.0003, schedule_id: "sch_PHCDEFAULT05" }, ventilation: {
+          flow_per_person: 0, flow_per_area: 0, flow_per_zone: 0, air_changes_per_hour: 0.4,
+          schedule_id: "sch_PHCDEFAULT06" }, setpoint: { heating_c: 20, cooling_c: 25, dehumidify_rh: 60 } })),
+      { stored: false, default: true, use_count: 6, missing: [] }),
+      catalogRow("program", "pgm_office", "Phius NR Office", Object.assign({ source: { kind: "library",
+        library_id: "phius.nonresidential", record_id: "office", library_name: "Phius Non-Residential" } },
+        programLoads({ people: { people_per_area: 0.0538, occupancy_schedule_id: "sch_office" },
+          lighting: { watts_per_area: 7.64, schedule_id: "sch_office" }, electric_equipment: { watts_per_area: 15,
+            schedule_id: "sch_office" }, gas_equipment: { watts_per_area: 0 },
+          service_hot_water: { flow_per_area: 0.03 },
+          infiltration: { flow_per_exterior_area: 0.0003 }, ventilation: { flow_per_person: 0.0025,
+            flow_per_area: 0.0003, schedule_id: "sch_PHCDEFAULT06", source: "2019::MediumOffice::OpenOffice" },
+          setpoint: { heating_c: 21.1, cooling_c: 23.9 } })),
+      { default: false, use_count: 1, missing: [] }),
+      catalogRow("program", "pgm_lab", "Wet lab", programLoads({}), { default: false, use_count: 0, missing: [
+        { load: "people", field: "people_per_area" }, { load: "lighting", field: "watts_per_area" },
+        { load: "electric_equipment", field: "watts_per_area" }, { load: "gas_equipment", field: "watts_per_area" },
+        { load: "service_hot_water", field: "flow_per_area" },
+        { load: "infiltration", field: "flow_per_exterior_area" },
+        { load: "ventilation", field: "flow_per_person" }, { load: "setpoint", field: "heating_c" },
+        { load: "setpoint", field: "cooling_c" }] })
+    ],
+    schedules: [
+      scheduleRow("sch_PHCDEFAULT01", "Residential occupancy", { source: DEFAULT_SOURCE, type: "fractional",
+        start_h: 0, end_h: 24, fraction_on: 0.72, fraction_off: 0 }, [{ program_id: "pgm_PHCDEFAULT01",
+        name: "Residential default", slot: "people.occupancy_schedule_id" }]),
+      scheduleRow("sch_PHCDEFAULT02", "Residential activity", { source: DEFAULT_SOURCE, type: "activity",
+        start_h: 0, end_h: 24, watts_on: 112.5, watts_off: 112.5 }, [{ program_id: "pgm_PHCDEFAULT01",
+        name: "Residential default", slot: "people.activity_schedule_id" }]),
+      scheduleRow("sch_PHCDEFAULT03", "Residential lighting", { source: DEFAULT_SOURCE, type: "fractional",
+        start_h: 0, end_h: 24, fraction_on: 0.04, fraction_off: 0 }),
+      scheduleRow("sch_PHCDEFAULT04", "Residential hot water", { source: DEFAULT_SOURCE, type: "fractional",
+        start_h: 0, end_h: 24, fraction_on: 0.04, fraction_off: 0 }),
+      scheduleRow("sch_PHCDEFAULT05", "Always on", { source: DEFAULT_SOURCE, type: "fractional", start_h: 0,
+        end_h: 24, fraction_on: 1, fraction_off: 0 }),
+      scheduleRow("sch_PHCDEFAULT06", "Constant ventilation", { source: DEFAULT_SOURCE, type: "ventilation",
+        periods: [{ period: "high", hours: 0, fraction: 1 }, { period: "standard", hours: 24, fraction: 1 },
+          { period: "basic", hours: 0, fraction: 0.5 }, { period: "minimum", hours: 0, fraction: 0.3 }] }),
+      scheduleRow("sch_office", "Office hours", { type: "fractional", start_h: 7, end_h: 19, fraction_on: 0.8,
+        fraction_off: 0, days_per_week: 5 }, [{ program_id: "pgm_office", name: "Phius NR Office",
+        slot: "people.occupancy_schedule_id" }])
+    ],
+    equipment_sets: [
+      catalogRow("equipment_set", "eqs_PHCDEFAULT01", "Phius single-family", { source: DEFAULT_SOURCE, devices: [
+        { id: "dev_PHCDEFAULT01", type: "fridge_freezer", display_name: "Fridge-freezer", quantity: 1,
+          in_conditioned_space: true, reference_quantity: 1, reference_energy_norm: 1, energy_demand: 1 },
+        { id: "dev_PHCDEFAULT02", type: "dishwasher", display_name: "Dishwasher", quantity: 1,
+          in_conditioned_space: true, reference_quantity: 1, reference_energy_norm: 2, energy_demand: 269 },
+        { id: "dev_PHCDEFAULT08", type: "phius_mel", display_name: "Phius MEL", quantity: 1,
+          in_conditioned_space: true, reference_quantity: 3 }] },
+      { stored: false, default: true, use_count: 3 }),
+      catalogRow("equipment_set", "eqs_apartment", "Apartment kitchen", { devices: [] },
+        { default: false, use_count: 1 })
+    ]
+  };
+
   FIXTURES.programs = {
     parts: [],
+    programCatalog: PROGRAM_CATALOG,
     zones: [programZone("zon_living", "Living", "bsg_house", 101),
       programZone("zon_bedroom", "Bedroom", "bsg_house", 102),
       programZone("zon_apt1", "Apt 1", "bsg_apartments", 201),

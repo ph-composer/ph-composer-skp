@@ -21,6 +21,12 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var self = this;
       this.adapter = adapters.adapter(options.adapter);
       this.onUse = options.onUse;
+      // A placement whose work surface edits one record of this file at a time: a local row opens that record
+      // (`onOpen(row)`) instead of its details, and `active()` names the record shown, whose row is marked current.
+      this.onOpen = options.onOpen || null;
+      this.active = options.active || function () { return null; };
+      // A library row already in this file ends in a check, where its add glyph would be.
+      this.markKnown = Boolean(options.markKnown);
       // Beside the table of the same records, the local list would only repeat it.
       this.besideTable = Boolean(options.besideTable);
       this.ownerBusy = options.busy || function () { return false; };
@@ -100,9 +106,11 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
           }
           self.changed();
         });
-        // A review is held for its own source catalog, which need not be the one the sidebar shows.
+        // A review is held for its own source catalog, which need not be the one the sidebar shows, and for any
+        // catalog its copies depend on (`dependencyLoading(library)`, a placement's, such as a Program's Schedules).
         this.copy.loading = function (library) {
-          return Boolean(library) && self.store.catalogLoading(library.provider_id);
+          return Boolean(library) && (self.store.catalogLoading(library.provider_id) ||
+            Boolean(options.dependencyLoading && options.dependencyLoading(library)));
         };
         this.setup = new Setup(options.session, options.send, this.changed);
         this.root.appendChild(this.copy.root); this.root.appendChild(this.setup.root);
@@ -217,8 +225,9 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var cancelling = !this.cancelButton.hidden && this.store.cancelling();
       this.cancelButton.textContent = cancelling ? "Cancelling…" : "Cancel loading";
       this.cancelButton.disabled = cancelling;
-      this.controls.hidden = this.localOnly || (this.refreshButton.hidden && this.cancelButton.hidden &&
-        !this.createButton);
+      // A local-only placement keeps its own New, the one control it has here.
+      this.controls.hidden = this.createButton ? false : this.localOnly || (this.refreshButton.hidden &&
+        this.cancelButton.hidden);
       this.refreshButton.disabled = this.busy() || Boolean(this.store && this.store.busy());
       this.setupButton.disabled = !this.setup || !this.setup.enabled || this.busy();
       if (this.createButton) this.createButton.disabled = !this.enabled || this.busy();
