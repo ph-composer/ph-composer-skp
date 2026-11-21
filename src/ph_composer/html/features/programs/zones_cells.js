@@ -86,7 +86,9 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
   };
 
   ZoneCells.prototype.disabled = function (row) {
-    return this.writes.busy() || Boolean(this.host.draftReason()) || Boolean(this.host.gated[row.key]);
+    // A Zone shared with another occurrence is read only; the host keys those by the occurrence's path.
+    var path = row.record.zone && JSON.stringify(row.record.zone.reference.zone_path || []);
+    return this.writes.busy() || Boolean(this.host.draftReason()) || Boolean(path && this.host.gated[path]);
   };
 
   /* A locked value: the kit's locked pill, which explains the lock. */
@@ -258,7 +260,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       cell.input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") { event.preventDefault(); self.commitCount(cell); }
         if (event.key === "Escape" && cell.input.value !== cell.seed) {
-          event.preventDefault(); cell.input.value = cell.seed;
+          event.preventDefault(); cell.input.value = cell.seed; cell.typed = false;
         }
       });
     }
@@ -451,9 +453,11 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
     detail.replaceChildren.apply(detail, parts);
   };
 
-  /* A Dwelling's own number in the bubble: Enter or leaving writes it; Escape restores it. */
+  /* A Dwelling's own number in the bubble: Enter or leaving writes it, at the revision the field was drawn from,
+     which it keeps while focused; Escape restores it. */
   ZoneCells.prototype.dwellingField = function (dwelling, key, label, seed) {
     var self = this, dd = ui.element("dd"), input = ui.element("input", "phc-dwelling-input");
+    var revision = this.writes.revision;
     input.type = "text"; input.setAttribute("inputmode", "decimal"); input.setAttribute("aria-label", label);
     input.value = seed;
     function commit() {
@@ -471,7 +475,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       seed = input.value.trim();
       self.writes.run(PREFIX + ".dwellings.update", { id: dwelling.id, values: values, expected_values: expected },
         function () { return dwelling.name + " now has " + value + " " + (key === "units" ? "unit" : "bedroom") +
-          (value === 1 ? "" : "s") + "."; });
+          (value === 1 ? "" : "s") + "."; }, revision);
     }
     input.addEventListener("change", commit);
     input.addEventListener("keydown", function (event) {
@@ -513,7 +517,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       entry.input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") { event.preventDefault(); self.commitHouse(entry); }
         if (event.key === "Escape" && entry.input.value !== entry.seed) {
-          event.preventDefault(); entry.input.value = entry.seed;
+          event.preventDefault(); entry.input.value = entry.seed; entry.typed = false;
         }
       });
       entry.input.addEventListener("input", function () {

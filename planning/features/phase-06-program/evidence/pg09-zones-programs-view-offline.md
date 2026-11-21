@@ -11,7 +11,7 @@ reached no bridge).
 
 Commands:
 `ruby -Itests tests/zones_programs_view_test.rb` (4 runs, 84 assertions, 0 failures on each Ruby);
-`node --test tests/zones_programs_panel_test.js` (20 pass);
+`node --test tests/zones_programs_panel_test.js` (23 pass);
 `make ui-checks UI_CHECKS="tools/ui-preview/programs_view_checks.cjs tools/ui-preview/segment_rows_checks.cjs"`
 (pass, through `browser_evidence.cjs`).
 

@@ -95,6 +95,8 @@ function occupancy() {
 function snapshot(options) {
   var zones = [zone("zon_a", "Living", "bsg_house", [101]), zone("zon_b", "Apt 1", "bsg_annex", [102]),
     zone("zon_c", "Corridor", "bsg_annex", [103])];
+  // A Zone that shares its Faces with another occurrence: the Zones screen keeps it read only.
+  if (options.shared) zones[2].state = "shared_definition";
   var sections = {
     "ph_composer.zones.faces.palette": { status: "completed", value: { active: false, palette: {},
       face_types: ["Wall"], boundary_conditions: ["Outdoors"] } },
@@ -456,4 +458,35 @@ test("a Dwelling of Zones in no Building Segment is not offered to a Zone in one
   var names = labelled(bubble(p, "Dwelling of Corridor"), "select", "Dwelling of Corridor").querySelectorAll("option")
     .map(function (node) { return node.textContent; });
   assert.deepStrictEqual(plain(names), ["Apt 1", "Spare", "New dwelling", "Not a dwelling"]);
+});
+
+test("Escape drops a typed count's revision, so a new entry after a snapshot is sent at the new one", function () {
+  var p = load();
+  var input = labelled(rowNamed(p, "Apt 1"), "input", "Bedrooms in Apt 1");
+  typeInto(p, input, "3");
+  input.listeners.keydown({ key: "Escape", preventDefault: function () {} });
+  republish(p, REVISION + 1, function () {});
+  typeInto(p, input, "4");
+  input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+  assert.deepStrictEqual(plain([last(p).expected_revision, last(p).params.bedrooms]), [REVISION + 1, 4]);
+});
+
+test("a Dwelling field keeps the revision it was drawn from while focused", function () {
+  var p = load();
+  click(cell(rowNamed(p, "Apt 1"), "dwelling").querySelector("button"));
+  var units = labelled(bubble(p, "Dwelling of Apt 1"), "input", "Units of Apt 1");
+  units.focus();
+  republish(p, REVISION + 1, function (value) { value.zones[2].lighting_w = 41; });
+  assert.strictEqual(labelled(bubble(p, "Dwelling of Apt 1"), "input", "Units of Apt 1"), units, "kept while focused");
+  change(units, "2");
+  assert.deepStrictEqual(plain([last(p).name, last(p).expected_revision]),
+    ["ph_composer.programs.dwellings.update", REVISION]);
+});
+
+test("a Zone shared with another occurrence is read only", function () {
+  var p = load({ shared: true });
+  var select = labelled(rowNamed(p, "Corridor"), "select", "Program for Corridor");
+  assert.strictEqual(select.disabled, true);
+  assert.strictEqual(labelled(rowNamed(p, "Apt 1"), "input", "Bedrooms in Apt 1").disabled, false,
+    "another Zone stays editable");
 });
