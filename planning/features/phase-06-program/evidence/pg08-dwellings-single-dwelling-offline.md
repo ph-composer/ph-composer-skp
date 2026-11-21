@@ -10,8 +10,8 @@ the preview's Chrome for the browser check. SketchUp was not launched (conductor
 reached no bridge).
 
 Commands:
-`ruby -Itests tests/occupancy_assignments_test.rb` (22 runs, 428 assertions, 0 failures on each Ruby);
-`node --test tests/occupancy_section_panel_test.js` (6 pass);
+`ruby -Itests tests/occupancy_assignments_test.rb` (26 runs, 510 assertions, 0 failures on each Ruby, on `c4a8280e`);
+`node --test tests/occupancy_section_panel_test.js` (7 pass);
 `make ui-checks UI_CHECKS=tools/ui-preview/segment_rows_checks.cjs` (pass, through `browser_evidence.cjs`).
 
 ## Rows
@@ -22,6 +22,7 @@ Commands:
 | An emptied Dwelling goes | Pass | `test_each_and_none_create_and_delete_dwellings`: `each` makes one Dwelling per Zone; moving a Zone to the other's leaves one, deleted in the same step (`deleted_dwelling_ids`); `none` deletes the last |
 | A Dwelling across Segments refuses | Pass | `test_a_dwelling_across_segments_refuses_and_a_single_dwelling_zone_refuses`: `existing` and `shared` across House and Apartments refuse `programs.dwelling_across_segments`, the revision unchanged; a Zone of a single dwelling refuses `programs.single_dwelling` |
 | Single dwelling on: Zones cleared, emptied Dwellings deleted, summed bedrooms, one Undo step | Pass | `test_switching_on_clears_the_zones_and_deletes_their_dwellings_in_one_undo_step`: the preview sums the Zones' bedrooms to 2; one Save clears every Zone and deletes both Dwellings; the house reads 2 bedrooms and 3 occupants by the Phius rule; Undo restores both Dwellings and the counts |
+| Off and on keep the house's counts; a count cleared in the switching Save stays cleared; overridden Zone counts never reach the house | Pass | `test_house_counts_survive_off_and_on_and_an_explicit_null_is_kept`, `test_overridden_assignments_neither_count_in_the_house_nor_outlive_switching_off` |
 | Single dwelling off: Zones keep the Dwelling and the default Program, one Undo step | Pass | `test_switching_off_makes_the_house_a_dwelling_its_zones_keep_in_one_undo_step` (a Dwelling named House with the 3 bedrooms, every Zone in it, no Program of its own); `test_switching_off_where_the_segment_names_a_default_keeps_the_models`; `test_a_rename_and_the_switch_land_together_in_one_save` (a rename's evidence rewrite and the Zone writes chain in one step) |
 | An absent payload reads as on; a non-residential Segment is never one | Pass | `test_an_absent_payload_reads_as_single_dwelling_and_a_non_residential_segment_is_never_one`; `test_a_category_change_alone_writes_no_assignment` |
 | Copying a Zone copies its assignment and keeps its Dwelling (C4a-2) | Pass | `test_a_copied_zone_keeps_its_assignment_and_dwelling`: after `make_independent`, both Zones name the same Dwelling |
