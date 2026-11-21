@@ -229,6 +229,19 @@ test("a fraction typed while hours are held joins the draft and goes with them",
   assert.deepStrictEqual(plain(last(p).params.values.periods), periods);
 });
 
+test("a period edit is guarded by the periods as they were when typing began", function () {
+  var p = load("Schedules");
+  open(p, "Ventilation");
+  var fraction = labelled(shown(p), "input", "High fraction of design flow");
+  type(fraction, "0.9");
+  var changed = plain(VENTILATION);
+  changed[0].fraction = 0.8;
+  p.snapshot(schedules({ vent: { type: "ventilation", periods: changed } }));
+  key(fraction, "Enter");
+  assert.deepStrictEqual(plain(last(p).params.expected_values), { periods: VENTILATION }, "so Ruby refuses it");
+  assert.strictEqual(last(p).params.values.periods[0].fraction, 0.9);
+});
+
 test("a Schedule whose type changes underneath draws its new form", function () {
   var p = load("Schedules");
   open(p, "Ventilation");
@@ -394,6 +407,25 @@ test("a choice lays the form out again and keeps a number not yet read", functio
   root.querySelector("form").listeners.submit({ preventDefault: function () {} });
   assert.strictEqual(p.actions().length, 0, "the submit names what does not read");
   assert.notStrictEqual(root.querySelector(".cell-error").textContent, "");
+});
+
+test("the fields hold still while a device write is out; a refusal gives them and the commit back", function () {
+  var p = load("Equipment Sets");
+  types(p);
+  click(labelled(shown(p), "button", "Edit Kitchen dishwasher"));
+  var root = dialog(p);
+  type(field(root, "quantity"), "2");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  var save = root.querySelectorAll("button").filter(function (node) { return node.textContent === "Save"; })[0];
+  assert.deepStrictEqual([field(root, "quantity").disabled, field(root, "display_name").disabled, save.disabled],
+    [true, true, true]);
+  answer(p, { status: "refused", code: "validation.failed", message: "Quantity is too large." });
+  p.snapshot();
+  assert.deepStrictEqual([field(root, "quantity").disabled, save.disabled], [false, false]);
+  type(field(root, "quantity"), "3");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.deepStrictEqual(plain(last(p).params.values), { quantity: 3 }, "the corrected value goes");
+  assert.strictEqual(p.actions().length, 2);
 });
 
 test("a quantity must be a whole number of at least 1", function () {

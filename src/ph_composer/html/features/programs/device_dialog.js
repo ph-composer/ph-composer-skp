@@ -299,7 +299,7 @@ function (RecordForm, ui, fields, loads) {
     var draft = this.draft, values = {}, expected = {};
     if (this.adding) {
       Object.keys(draft).forEach(function (key) { if (key !== "type") values[key] = draft[key]; });
-      this.run({ id: this.set.id, type: draft.type, values: values });
+      this.sent(this.run({ id: this.set.id, type: draft.type, values: values }));
       return;
     }
     var opened = this.opened;
@@ -310,7 +310,14 @@ function (RecordForm, ui, fields, loads) {
       expected[key] = opened[key] === undefined ? null : opened[key];
     });
     if (!Object.keys(values).length) { this.hide(null); return; }
-    this.run({ id: this.set.id, device_id: opened.id, values: values, expected_values: expected });
+    this.sent(this.run({ id: this.set.id, device_id: opened.id, values: values, expected_values: expected }));
+  };
+
+  /* While the request is out the fields hold still, so what the dialog shows is what was sent; a refusal or failure
+     gives them back, with the commit. */
+  DeviceDialog.prototype.sent = function (running) {
+    var inputs = this.inputs;
+    Object.keys(inputs).forEach(function (key) { inputs[key].disabled = Boolean(running); });
   };
 
   /* Settles the request from the owner's render: a completed one closes the dialog; a refusal keeps the draft
@@ -318,6 +325,7 @@ function (RecordForm, ui, fields, loads) {
   DeviceDialog.prototype.refresh = function (state) {
     var outcome = this.settle(state);
     if (outcome && outcome.status === "completed") this.hide(outcome);
+    else if (outcome) { this.sent(false); this.submitButton.disabled = false; }
   };
 
   DeviceDialog.prototype.open = function () {

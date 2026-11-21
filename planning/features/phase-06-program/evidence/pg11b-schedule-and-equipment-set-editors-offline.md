@@ -16,7 +16,7 @@ Commands:
 `ruby -Itests tests/program_records_test.rb` (24 runs, 322 assertions, 0 failures on Ruby 3.2.2 and 2.7.2);
 `program_export_test.rb` (19 runs, 0 failures on each Ruby) for the export's weekdays, now `ScheduleProfile`'s;
 `api_test.rb` (47 runs, 0 failures);
-`node --test tests/programs_editors_panel_test.js tests/programs_tab_panel_test.js` (28 pass, 19 of them this stage's);
+`node --test tests/programs_editors_panel_test.js tests/programs_tab_panel_test.js` (30 pass, 21 of them this stage's);
 `make ui-checks UI_CHECKS="tools/ui-preview/programs_editors_checks.cjs tools/ui-preview/programs_tab_checks.cjs"`
 (both pass, through `browser_evidence.cjs`), with `programs_view_checks` and `library_checks` for the shared
 sidebar and fixture (each passes).

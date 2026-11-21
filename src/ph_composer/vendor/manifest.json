@@ -181,9 +181,9 @@
       "sha256": "1ba6547b5fb6af959b789532336b3179d65ead7cbaddb544ecf90568933d7e7a"
     },
     "html/features/programs/device_dialog.js": {
-      "bytes": 17248,
+      "bytes": 17692,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d0e02918fa7de390e56187308f3b9aa9f7e8bb7427fd4a25592fd9831658129e"
+      "sha256": "324675fc19ffe6615bbfd3e2b1fc2bb2ec1ae346a9e76490c7741bcddb9cc427"
     },
     "html/features/programs/equipment_set_editor.js": {
       "bytes": 9698,
@@ -221,9 +221,9 @@
       "sha256": "517a0c9f5daf2a335a99ce6bba5197594f2153b42737e18dd7dee136c13f6739"
     },
     "html/features/programs/schedule_editor.js": {
-      "bytes": 18644,
+      "bytes": 18833,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b31ebb39c26111907a28d014899f9d4c2a342742cce90f4611214edb1d5ab21a"
+      "sha256": "d93f2e8c549d7170b30fef081e5d80824377ebbdbc16c261c8c30d328354854d"
     },
     "html/features/programs/tab.js": {
       "bytes": 11980,

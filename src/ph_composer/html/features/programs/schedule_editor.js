@@ -209,6 +209,8 @@ function (ui, fields, loads) {
       // The entry is guarded by the value as it was when typing began, and read in the units it began in.
       if (!input.typed) {
         input.baseline = self.stored(path); input.profile = loads.profile(entry); input.record = self.row.id;
+        // A period's edit is guarded by all four periods as they were when typing began.
+        if (/^periods\./.test(path)) input.periods = clone(self.draft ? self.draft.baseline : self.row.values.periods);
       }
       input.typed = true;
     });
@@ -243,16 +245,16 @@ function (ui, fields, loads) {
     if (parsed.error) { this.host.refuse(parsed.error); this.fill(); return; }
     if (parsed.value === input.baseline || input.value.trim() === input.seed) { this.fill(); return; }
     var parts = input.path.split(".");
-    if (parts[0] === "periods") { this.commitPeriod(Number(parts[1]), parts[2], parsed.value); return; }
+    if (parts[0] === "periods") { this.commitPeriod(Number(parts[1]), parts[2], parsed.value, input.periods); return; }
     var values = {}, expected = {};
     values[input.path] = parsed.value; expected[input.path] = input.baseline;
     this.host.update(this.row, values, expected);
   };
 
   /* A period's hours or fraction: one update of `periods` once the hours total 24, held as a draft until then. */
-  ScheduleEditor.prototype.commitPeriod = function (index, key, value) {
-    var baseline = this.draft ? this.draft.baseline : clone(this.row.values.periods);
-    var periods = this.draft ? this.draft.periods : clone(this.row.values.periods);
+  ScheduleEditor.prototype.commitPeriod = function (index, key, value, began) {
+    var baseline = this.draft ? this.draft.baseline : began;
+    var periods = this.draft ? this.draft.periods : clone(began);
     periods[index][key] = value;
     if (JSON.stringify(periods) === JSON.stringify(baseline)) { this.draft = null; this.fill(); return; }
     if (total(periods) !== HOURS) { this.draft = { baseline: baseline, periods: periods }; this.fill(); return; }
