@@ -10,8 +10,8 @@ Run by the P4a-10 stage, offline, against the SketchUp stub on Ruby 3.2.2 and 2.
 the preview's Chrome for the browser check. SketchUp was not launched (conductor decision).
 
 Commands:
-`ruby -Itests tests/program_export_test.rb` (18 runs, 356 assertions, 0 failures on each Ruby);
-`uv run pytest tests/python/test_program_sections.py` (6 pass); `uv run --group phx pytest tests/python` (every Python test, the round trips among them, pass); `make runtime-browser-check` (PASS: the shipped runtime page in Chromium 88 translates the two-Zone fixture, Program sections included);
+`ruby -Itests tests/program_export_test.rb` (19 runs, 373 assertions, 0 failures on each Ruby);
+`uv run pytest tests/python/test_program_sections.py` (7 pass); `uv run --group phx pytest tests/python` (every Python test, the round trips among them, pass); `make runtime-browser-check` (PASS: the shipped runtime page in Chromium 88 translates the two-Zone fixture, Program sections included);
 `uv run --group phx pytest tests/python/test_program_phx_round_trip.py` (2 pass);
 `node --test tests/occupancy_section_panel_test.js tests/zones_programs_panel_test.js` (32 pass);
 `make ui-checks UI_CHECKS="tools/ui-preview/segment_rows_checks.cjs"` (pass, through `browser_evidence.cjs`).

@@ -811,9 +811,9 @@
       "sha256": "9910a7df68b6a17c3af52a24e56b6519465ed5734231b4305d4a7b601c1c3538"
     },
     "python/ph_composer_translation/program_sections.py": {
-      "bytes": 31458,
+      "bytes": 31552,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "4fac3645695f724b6a61114e2b610c563c57fe5da3b2b55bc3a4ae30d984c775"
+      "sha256": "48589fd4e86921feea5510e1970c8947c9ac8c033140da25b5fbef43810ca2f4"
     },
     "python/ph_composer_translation/result.py": {
       "bytes": 3570,

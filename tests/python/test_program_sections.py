@@ -135,3 +135,15 @@ def test_every_result_row_holds_exactly_the_fields_ruby_declares() -> None:
             rows = result[section][field]
             assert rows, f"{section} {field} has rows"
             assert all(sorted(row) == sorted(keys) for row in rows), f"{section} {field}"
+
+
+def test_a_fractional_bedroom_count_reaches_the_people_extension_as_entered() -> None:
+    value = extraction()
+    room = next(row for row in records(value, "rooms") if row["number_bedrooms"] > 0)
+    room["number_bedrooms"] = 1.5
+    result = run(value)
+    assert result["summary"]["publishable"] is True, result["findings"]
+    reloaded = {room.identifier: room for room in model(result).rooms}[room["id"]]
+    assert reloaded.properties.energy.people.properties.ph.number_bedrooms == 1.5
+    rows = {row["zone_id"]: row for row in result["ph_composer.programs.export.rooms"]["rooms"]}
+    assert rows[room["id"]]["number_bedrooms"] == 1.5

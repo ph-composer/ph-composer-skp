@@ -167,7 +167,11 @@ module PhComposer
       # What a Program lacks that its ProgramType needs. A Schedule left empty is honeybee's Always On, except where
       # a Phius rule divides by its mean.
       def missing(program, schedules)
-        found = []
+        found = Program::SLOTS.keys.filter_map do |slot|
+          id = program.dig(*slot.split("."))
+          "#{slot.tr('._', '  ').sub(/ id\z/,
+                                     '')} names a Schedule that is not in the Model" if id && !schedules.key?(id)
+        end
         people = program.fetch("people")
         if people["rule"]
           found << "its occupancy Schedule is missing or never occupied" unless mean(schedules,

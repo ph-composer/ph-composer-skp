@@ -185,6 +185,22 @@ class ProgramExportTest < PhComposerTestCase
     assert_equal "programs.value_missing", error.code
   end
 
+  def test_a_program_naming_a_schedule_no_longer_in_the_model_blocks
+    house_only
+    switch_off("House")
+    day = create_schedule("Day", "start_h" => 8, "end_h" => 18)
+    program = create_program("Office", "lighting" => { "watts_per_area" => 5.0, "schedule_id" => day })
+    completed(invoke("#{P::FEATURE_ID}.assign_program", "zones" => [reference("Kitchen")], "program_id" => program))
+    # A generic route could leave the reference behind; the Schedule's own delete refuses while it is named.
+    @model.attribute_dictionary("ph_composer.records.#{P::SCHEDULE_KIND}").delete_key(day)
+    refute(query("#{P::FEATURE_ID}.schedules.all").fetch("records").any? { |row| row.fetch("id") == day })
+
+    row = preflight.find { |finding| finding.fetch("code") == "programs.value_missing" }
+    assert row.fetch("blocks_export")
+    assert_match(/lighting schedule names a Schedule that is not in the Model/, row.fetch("message"))
+    assert_equal "programs.value_missing", assert_raises(PhComposer::Export::Blocked) { extract }.code
+  end
+
   def test_a_heating_schedule_above_the_cooling_set_point_blocks
     house_only
     switch_off("House")

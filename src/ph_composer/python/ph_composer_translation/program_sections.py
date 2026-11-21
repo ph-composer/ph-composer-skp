@@ -517,7 +517,8 @@ class RoomProgramSection(Section[RoomRecord, TranslatedRoom]):
             people = program.people.duplicate()
             people.identifier = f"{record.zone_id}_people"
             ph = people.properties.ph
-            ph.number_bedrooms = int(record.number_bedrooms)
+            # As entered: a count may be fractional, and PHX makes its own whole number of each Room's.
+            ph.number_bedrooms = record.number_bedrooms
             ph.number_people = record.number_people
             if record.dwelling is None:
                 ph.dwellings = _no_dwelling(f"{record.zone_id}_people")
@@ -557,7 +558,7 @@ class RoomProgramSection(Section[RoomRecord, TranslatedRoom]):
             {
                 "zone_id": item.source.zone_id,
                 "program_type_id": item.source.program_type_id,
-                "number_bedrooms": int(item.source.number_bedrooms),
+                "number_bedrooms": item.source.number_bedrooms,
                 "number_people": item.source.number_people,
                 "dwelling_identifier": None if item.source.dwelling is None else item.source.dwelling[0],
                 "num_dwellings": 0 if item.source.dwelling is None else item.source.dwelling[1],
