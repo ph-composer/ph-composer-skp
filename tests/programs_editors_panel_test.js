@@ -242,6 +242,20 @@ test("a period edit is guarded by the periods as they were when typing began", f
   assert.strictEqual(last(p).params.values.periods[0].fraction, 0.9);
 });
 
+test("New and Duplicate wait while ventilation periods are held", function () {
+  var p = load("Schedules");
+  open(p, "Ventilation");
+  var high = labelled(shown(p), "input", "High hours per day");
+  type(high, "3"); key(high, "Enter");
+  high.blur();
+  click(labelled(shown(p), "button", "Duplicate Schedule"));
+  click(shown(p).querySelectorAll("button").filter(function (node) {
+    return node.textContent === "+ New Schedule"; })[0]);
+  assert.strictEqual(p.actions().length, 0);
+  assert.match(p.panel.state.ui.notice.message, /total 24 h/);
+  assert.strictEqual(high.value, "3", "the draft stays");
+});
+
 test("a Schedule whose type changes underneath draws its new form", function () {
   var p = load("Schedules");
   open(p, "Ventilation");
@@ -426,6 +440,21 @@ test("the fields hold still while a device write is out; a refusal gives them an
   root.querySelector("form").listeners.submit({ preventDefault: function () {} });
   assert.deepStrictEqual(plain(last(p).params.values), { quantity: 3 }, "the corrected value goes");
   assert.strictEqual(p.actions().length, 2);
+});
+
+test("a number typed back to what it was sends what it was, after a refused submit", function () {
+  var p = load("Equipment Sets");
+  types(p);
+  click(labelled(shown(p), "button", "Edit Kitchen dishwasher"));
+  var root = dialog(p);
+  type(field(root, "quantity"), "2");
+  type(field(root, "display_name"), "");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(p.actions().length, 0, "no name");
+  type(field(root, "quantity"), "1");
+  type(field(root, "display_name"), "Dishwasher");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.deepStrictEqual(plain(last(p).params.values), { display_name: "Dishwasher" });
 });
 
 test("a quantity must be a whole number of at least 1", function () {

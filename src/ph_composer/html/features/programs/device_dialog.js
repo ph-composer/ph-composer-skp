@@ -220,7 +220,7 @@ function (RecordForm, ui, fields, loads) {
     var self = this, input = el("input", "pgm-device-number"), typed = this.typed;
     input.type = "text"; input.setAttribute("inputmode", "decimal"); input.setAttribute("autocomplete", "off");
     input.setAttribute("data-key", key);
-    input.seed = loads.editText(words, this.draft[key]);
+    input.seed = loads.editText(words, this.draft[key]); input.seedValue = this.draft[key];
     input.value = typed[key] !== undefined ? typed[key] : input.seed;
     input.entry = words; input.profile = loads.profile(words);
     if (words.help) ui.tooltip(input, words.help);
@@ -278,7 +278,8 @@ function (RecordForm, ui, fields, loads) {
         return;
       }
       if (!input.entry) { draft[key] = input.value.trim(); return; }
-      if (input.value === input.seed) return;
+      // Text back at its seed is the value the field was drawn from, whatever an earlier read made of it.
+      if (input.value === input.seed) { draft[key] = input.seedValue; return; }
       var parsed = loads.parse(input.entry, input.value, input.profile), problem = null;
       if (parsed.error) problem = parsed.error;
       else if (parsed.value === null) problem = input.entry.label + " needs a value.";

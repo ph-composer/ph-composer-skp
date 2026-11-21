@@ -159,15 +159,23 @@ function (ui, Sidebar, Store) {
     this.sidebar.revealLocal(id);
   };
 
+  /* Whether the shown record may give way (to New, Duplicate or Delete); says why not when it may not. */
+  RecordPage.prototype.mayLeave = function () {
+    var held = this.guard();
+    if (held) this.host.refuse(held);
+    return !held;
+  };
+
   RecordPage.prototype.create = function () {
     var self = this;
+    if (!this.mayLeave()) return;
     this.host.run(this.host.prefix(this.kind) + ".create", { values: this.kind.createValues || {} },
       function (outcome) { self.opened(outcome); return null; });
   };
 
   RecordPage.prototype.duplicate = function () {
     var self = this, row = this.record();
-    if (!row) return;
+    if (!row || !this.mayLeave()) return;
     this.host.run(this.host.prefix(this.kind) + ".duplicate", { id: row.id },
       function (outcome) { self.opened(outcome); return null; });
   };
@@ -258,7 +266,7 @@ function (ui, Sidebar, Store) {
      which must be of the same type for a Schedule. */
   RecordPage.prototype.confirmDelete = function () {
     var self = this, row = this.record(), kind = this.kind;
-    if (!row) return;
+    if (!row || !this.mayLeave()) return;
     // Anything naming it counts, Segment settings and Dwellings too (`use_count`); the words name its Zones.
     var uses = this.useCount(row), used = row.use_count > 0 || row.default;
     var others = this.records.filter(function (other) {
