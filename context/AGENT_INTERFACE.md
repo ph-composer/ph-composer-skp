@@ -366,7 +366,8 @@ blocks or weakens it, and the view command `ph_composer.programs.locate` opens t
 row's Zones checked ([CONTRACTS.md](CONTRACTS.md), "Program export"). A Program or Equipment Set delete with a
 `replacement_id` (API 1.84) moves the Zone assignments and Segment settings naming it in the same Undo step,
 refusing whole on a locked or shared Zone; the snapshot sections `ph_composer.programs.programs`, `schedules` and
-`equipment_sets` carry the three `all` reads for the Programs tab.
+`equipment_sets` carry the three `all` reads for the Programs tab, and a Program row's `missing` names each
+value its ProgramType would lack, by load and field, as the export preflight reports it.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

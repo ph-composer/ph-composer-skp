@@ -216,9 +216,9 @@
       "sha256": "e62b51752eb60e6088ce064df86a8667163b8a39c4b3b2448807257af0f622e4"
     },
     "html/features/programs/tab.js": {
-      "bytes": 9733,
+      "bytes": 10355,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "849708d5d99206e3bae2aae2fa7559e6a09c6ea363a70ea4e38196f042388f65"
+      "sha256": "3c3982ca844c7bbd1ab1903f78a774165906f86f6d4b0c5b568e606e1a6624cd"
     },
     "html/features/programs/zones_cells.js": {
       "bytes": 30991,

@@ -640,7 +640,11 @@ naming a Program or Equipment Set refuses a plain delete as `reference.in_use`; 
 naming it (a Zone's `program_id` and `equipment_set_id`, a Segment's `default_program_id` and
 `equipment_set_id`) takes the replacement through `ph_composer.zones.stage_extension` in the same step, and a
 locked or shared Zone refuses the whole delete as any Zone write does. A Dwelling naming an Equipment Set moves
-to the replacement; a Dwelling a Zone names refuses its delete as `reference.in_use`. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
+to the replacement; a Dwelling a Zone names refuses its delete as `reference.in_use`.
+
+**Missing values.** A `programs.list` or `programs.all` row carries `missing`, a list of `{load, field}`: each
+value its ProgramType would lack, worked out by the export preflight's own rule (`ExportPlan.missing_fields`), so
+the Programs tab's flags and the preflight's `programs.value_missing` rows never disagree. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
 keeping its map.
 
 **Library kinds.** `programs`, `schedules` and `equipment_sets` (`features/programs/library_kinds.rb`; wire rows

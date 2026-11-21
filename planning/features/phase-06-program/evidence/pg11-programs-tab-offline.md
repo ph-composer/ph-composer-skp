@@ -5,18 +5,23 @@ STATUS: Offline rows, the panel tests and the browser check pass on the stage br
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
-Run by the P4a-11 stage, offline, against the SketchUp stub on Ruby 3.2.2, in Node for the panel and in the
+Run by the P4a-11 stage, offline, against the SketchUp stub on Ruby 3.2.2 and 2.7.2, in Node for the panel and in the
 preview's Chrome for the browser check, on the preview fixture `programs` (the residential default and its
 Schedules, a Phius office copied from a library, an empty Wet lab Program, two Equipment Sets, and a library
 file of Phius multifamily Programs and Schedules). SketchUp was not launched (conductor decision).
 
 Commands:
-`ruby -Itests tests/occupancy_assignments_test.rb` (28 runs, 0 failures);
-`ruby -Itests tests/program_records_test.rb` (23 runs, 0 failures);
-`node --test tests/programs_tab_panel_test.js` (6 pass);
+`ruby -Itests tests/occupancy_assignments_test.rb` (28 runs, 567 assertions, 0 failures on each Ruby);
+`ruby -Itests tests/program_records_test.rb` (23 runs, 313 assertions, 0 failures on each Ruby);
+`program_export_test.rb`, `api_test.rb` and `zones_programs_view_test.rb` (19, 47 and 4 runs, 0 failures on each
+Ruby);
+`node --test tests/programs_tab_panel_test.js tests/zones_programs_panel_test.js` (33 pass, 9 of them the Programs
+tab's);
 `make ui-checks UI_CHECKS="tools/ui-preview/programs_tab_checks.cjs"` (pass, through `browser_evidence.cjs`), with
 `library_checks`, `builder_checks`, `windows_checks`, `programs_view_checks`, `panel_policy_checks` and
-`preview_checks` for the shared sidebar and the panel shell (each passes).
+`preview_checks` for the shared sidebar and the panel shell (each passes). The full `make ui-checks` passes but for
+`assembly_hover_checks.cjs`, which fails the same way on `main` at `9105737e` (a pre-existing failure, not this
+stage's).
 
 ## Rows
 
@@ -25,6 +30,8 @@ Commands:
 | Three subtabs, each with the right sidebar: sources, grouping, open from a row | Pass, offline | Browser check steps "the tab opens on the Model's default Program", "a Program missing values flags each card; a row opens it", "Schedules group by type; Equipment Sets list this file's Sets"; panel test "the tab opens on the Model's default Program" |
 | Copy from a library with its Schedules | Pass, offline | Browser check "a library Program is copied from the sidebar": the library's `schedules` catalog is read beside its `programs`, the copy sends no assignment and the row ends in a check. The copy of the Schedules themselves is the coordinator's (PG07b) |
 | Accordion cards open and close by pointer and keyboard; summaries; missing-value flags | Pass, offline | Browser check "cards open and close by pointer and by keyboard", "closed cards read on one line", the Wet lab's eight flags; Ruby `test_the_snapshot_carries_each_collection_and_a_program_row_names_its_missing_values` |
+| + New Schedule makes a Schedule of the slot's type and the slot names it | Pass, offline | Browser check "+ New Schedule makes a Schedule of the slot's type"; two Undo steps by design (the stage doc's decisions) |
+| An Equipment Set counts the Zones its Set reaches, a single dwelling's Segment Set included, no non-residential Zone | Pass, offline | Panel test "an Equipment Set counts the Zones whose Set it works out to" |
 | Rule switch | Pass, offline | Browser check "the rule switches to a fixed value and back"; panel test "the rule switch is one update" |
 | Every edit one registered action; a stale value refuses and the field shows the Model's value | Pass, offline | Panel tests "a value commits as one update of its load", "a refused value lets the Model's value back into the field"; browser check "a value changed meanwhile refuses". One Undo step per action is the host's (PG11) |
 | New, rename in place, Duplicate, Delete with replacement, Reset on the default | Pass, offline | Browser check steps of the same names; panel tests "a used record's Delete names its replacement" and "Reset is offered on PH-Composer's own default only" |

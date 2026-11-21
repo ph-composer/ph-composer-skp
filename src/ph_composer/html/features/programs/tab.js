@@ -95,8 +95,8 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
       newSchedule: function (type, done) {
         self.run(PREFIX + ".schedules.create", { values: { type: type } }, function (outcome) {
           var id = outcome.value && outcome.value.id;
-          // The Program names it in a second step, once the snapshot carries it.
-          if (id) self.after = function () { done(id); };
+          // The Program names it in a second step, once a snapshot carries it, so that step is read at its revision.
+          if (id) self.after = { id: id, run: function () { done(id); } };
           return null;
         });
       }
@@ -145,14 +145,21 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
     var enabled = !missing && !this.channel.busy();
     return {
       enabled: enabled, available: !missing, unavailable: missing,
+      hasSchedule: function (id) { return Boolean(schedules[id]); },
       records: function (kind) {
         return sections[kind.id].slice().sort(function (a, b) { return ui.compareText(a.values.name, b.values.name); });
       },
-      // Zones using a Program, by the Program each works out to; or an Equipment Set, the default where none.
+      // Zones using a Program, by the Program each works out to; or an Equipment Set, by the Set each works out to
+      // (its Dwelling's, a single dwelling's house's, its own, else the Model's default), in residential Segments
+      // only, since PHX reads no devices elsewhere.
       zoneCount: function (kind, id) {
-        var fallback = (occupancy.choices || {}).default_equipment_set_id;
+        var fallback = (occupancy.choices || {}).default_equipment_set_id, nonResidential = {};
+        (occupancy.building_segments || []).forEach(function (segment) {
+          if (segment.category && segment.category !== "residential") nonResidential[segment.id] = true;
+        });
         return (occupancy.zones || []).filter(function (zone) {
-          return kind.id === "programs" ? zone.program_id === id : (zone.equipment_set_id || fallback) === id;
+          if (kind.id === "programs") return zone.program_id === id;
+          return !nonResidential[zone.building_segment_id] && (zone.equipment_set_id || fallback) === id;
         }).length;
       },
       bodyContext: function (kind, row) {
@@ -167,7 +174,9 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
     Object.keys(this.pages).forEach(function (id) {
       self.pages[id].render(state, context);
     });
-    if (this.after && !this.channel.busy()) { var next = this.after; this.after = null; next(); }
+    if (this.after && !this.channel.busy() && context.hasSchedule(this.after.id)) {
+      var next = this.after; this.after = null; next.run();
+    }
   };
 
   View.prototype.dispose = function () {

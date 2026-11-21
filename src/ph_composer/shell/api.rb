@@ -515,7 +515,9 @@ module PhComposer
                     "setting naming the record to the replacement, through ph_composer.zones.stage_extension, in " \
                     "the same Undo step, and refuse as a Zone write does (target.locked, " \
                     "target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and " \
-                    "equipment_sets carry each collection's all read." }
+                    "equipment_sets carry each collection's all read. A programs.list and programs.all row adds " \
+                    "missing: each value its ProgramType would lack, by load and field, as the export preflight " \
+                    "reports it." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -120,6 +120,19 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => window.previewHost.programCatalog.programs.filter(row => row.id === "pgm_lab")[0]
     .values.lighting.schedule_id === "sch_office");
 
+  step("+ New Schedule makes a Schedule of the slot's type, then the slot names it once the snapshot has it");
+  await card("lighting").getByRole("button", { name: "New fractional Schedule for lighting schedule" }).click();
+  await page.waitForFunction(() => {
+    const lab = window.previewHost.programCatalog.programs.filter(row => row.id === "pgm_lab")[0];
+    return /^sch_preview/.test(lab.values.lighting.schedule_id);
+  });
+  const created = (await sent(page, "ph_composer.programs.schedules.create")).pop();
+  assert.deepEqual(created, { values: { type: "fractional" } });
+  await page.waitForFunction(() => {
+    const select = document.querySelector("[aria-label='Lighting lighting schedule']");
+    return select && select.selectedOptions[0] && select.selectedOptions[0].textContent === "Schedule 1";
+  });
+
   step("New acts at once under a free name and opens the title for renaming");
   await page.locator(`${shown}`).getByRole("button", { name: "+ New Program" }).click();
   const rename = page.locator(`${shown} .pgm-title-input`);

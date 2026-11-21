@@ -75,11 +75,19 @@ function snapshot(programRows, extra, preferences) {
       "ph_composer.programs.programs": { status: "completed", value: { records: programRows, unreadable: [] } },
       "ph_composer.programs.schedules": { status: "completed", value: { records: [schedule].concat(extra || []),
         unreadable: [] } },
-      "ph_composer.programs.equipment_sets": { status: "completed", value: { records: [], unreadable: [] } },
+      "ph_composer.programs.equipment_sets": { status: "completed", value: { records: [
+        row("equipment_set", "eqs_PHCDEFAULT01", "Default devices", { devices: [] }, { default: true, use_count: 1 }),
+        row("equipment_set", "eqs_house", "House devices", { devices: [] }, { default: false, use_count: 1 })],
+      unreadable: [] } },
+      // A house whose Segment names its own Set, a Zone on the default, and a school, where no Set applies.
       "ph_composer.programs.occupancy": { status: "completed", value: { zones: [
-        { zone_id: "zon_a", program_id: "pgm_PHCDEFAULT01", equipment_set_id: null },
-        { zone_id: "zon_b", program_id: "pgm_PHCDEFAULT01", equipment_set_id: null }],
-      choices: { default_equipment_set_id: null } } } } };
+        { zone_id: "zon_a", building_segment_id: "bsg_house", program_id: "pgm_PHCDEFAULT01",
+          equipment_set_id: "eqs_house" },
+        { zone_id: "zon_b", building_segment_id: "bsg_flats", program_id: "pgm_PHCDEFAULT01", equipment_set_id: null },
+        { zone_id: "zon_c", building_segment_id: "bsg_school", program_id: "pgm_office", equipment_set_id: null }],
+      building_segments: [{ id: "bsg_house", category: "residential" }, { id: "bsg_flats", category: "residential" },
+        { id: "bsg_school", category: "non_residential" }],
+      choices: { default_equipment_set_id: "eqs_PHCDEFAULT01" } } } } };
 }
 
 function pane(p) { return p.context.document.querySelector("[data-pane='programs']"); }
@@ -213,4 +221,17 @@ test("a draft keeps the units it began in, and a plain number reads the user's d
   type(air, "0,5");
   enter(air);
   assert.strictEqual(last(p).params.values.ventilation.air_changes_per_hour, 0.5);
+});
+
+test("an Equipment Set counts the Zones whose Set it works out to, a house's Segment Set included", function () {
+  var p = load();
+  click(p.context.document.querySelectorAll("[role='tab']").filter(function (node) {
+    return node.textContent === "Equipment Sets"; })[0]);
+  var names = shown(p).querySelectorAll(".library-sidebar-row-button");
+  var counts = names.map(function (node) {
+    return [node.querySelector(".library-sidebar-name").textContent,
+      node.querySelector(".pgm-sidebar-count").textContent];
+  });
+  assert.deepStrictEqual(counts, [["Default devices", "1"], ["House devices", "1"]],
+    "the school's Zone counts toward neither");
 });
