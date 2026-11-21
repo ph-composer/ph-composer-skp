@@ -60,6 +60,8 @@ module PhComposer
     # codes"). Every write goes through the record engine or Store.
     module Refuses
       PAGE = %w[query.cursor_expired query.limit_invalid].freeze
+      # The collections' reads count occupancy uses, which reads the Zones (OccupancyState).
+      USES = %w[geometry.invalid record.unreadable target.wrong_kind validation.failed].freeze
       READ = %w[record.unreadable].freeze
       CREATE = %w[record.unreadable reference.invalid target.ambiguous target.not_found validation.failed].freeze
       EDIT = %w[record.unreadable reference.invalid target.ambiguous target.changed target.not_found
@@ -192,14 +194,14 @@ module PhComposer
                                :optional => %w[ids limit cursor])
         feature.query("#{prefix}.list", :description => "One bounded page of #{collection} in id order, with what " \
                                                         "uses each.",
-                                        :refuses => Refuses::PAGE, :params => params, :result => list,
+                                        :refuses => Refuses::PAGE + Refuses::USES, :params => params, :result => list,
                                         :examples => [{}, { "limit" => 20 }]) do |request|
           Inventory.list(request, "#{prefix}.list", kind.id)
         end
         all = Shapes.object({ "records" => Shapes.list(row), "unreadable" => DefinitionLists::UNREADABLE })
         feature.query("#{prefix}.all", :response => { "bounded" => false, "prefer" => "#{prefix}.list" },
                                        :description => "Every #{kind.label}, PH-Composer's defaults included.",
-                                       :refuses => [], :params => Shapes::NONE, :result => all,
+                                       :refuses => Refuses::USES, :params => Shapes::NONE, :result => all,
                                        :examples => [{}]) do |request|
           Inventory.all(request, kind.id)
         end

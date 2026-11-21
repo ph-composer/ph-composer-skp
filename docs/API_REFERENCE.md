@@ -16326,7 +16326,7 @@ Every Dwelling with its Zones and counts, the single-dwelling houses among them.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.dwellings.list` instead.
 
-Refuses: `geometry.invalid`, `record.unreadable`, and the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -16477,7 +16477,7 @@ Every Dwelling, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.dwellings.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -16749,7 +16749,7 @@ Example params:
 
 One bounded page of dwellings in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -17062,7 +17062,7 @@ Every Equipment Set, PH-Composer's defaults included. Owner: `ph_composer.progra
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.equipment_sets.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -17628,7 +17628,7 @@ Example params:
 
 One bounded page of equipment_sets in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -18192,7 +18192,7 @@ Every Program, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.programs.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -19301,7 +19301,7 @@ Example params:
 
 One bounded page of programs in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -20451,7 +20451,7 @@ Every Schedule, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.schedules.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -20915,7 +20915,7 @@ Example params:
 
 One bounded page of schedules in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -21824,7 +21824,7 @@ Example params:
 
 What switching Single dwelling on in one Building Segment replaces: Programs chosen per Zone, Dwellings and Equipment Sets, and the Zones' summed bedrooms and occupants, which the Save then carries. Owner: `ph_composer.programs`.
 
-Refuses: `geometry.invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -21931,7 +21931,7 @@ Every Zone's assignment and what it works out to: its Program, Dwelling, peak pe
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.zones.list` instead.
 
-Refuses: `geometry.invalid`, `record.unreadable`, and the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -57589,7 +57589,7 @@ Undo step: Assign Dwelling. Writes each Zone's assignment; creates and deletes D
 
 Calls: `ph_composer.zones.stage_extension`.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -57768,7 +57768,7 @@ Undo step: Assign Equipment Set. Updates each Dwelling and writes each Zone's as
 
 Calls: `ph_composer.zones.stage_extension`.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -57877,7 +57877,7 @@ Undo step: Assign Program. Writes each Zone's assignment; stores the residential
 
 Calls: `ph_composer.zones.stage_extension`.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -63834,7 +63834,7 @@ Undo step: Set Bedrooms and Occupants. Writes the Zone's assignment.
 
 Calls: `ph_composer.zones.stage_extension`.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -85739,7 +85739,7 @@ Undo step: Change Building Segment Settings. Writes the Segment's values and set
 
 Calls: `ph_composer.zones.stage_extension`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 

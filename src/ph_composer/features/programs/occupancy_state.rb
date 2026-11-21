@@ -7,6 +7,8 @@ module PhComposer
     # stage anything; the Single dwelling transition reads its Segment as the proposal leaves it.
     module OccupancyState
       ZONES = "ph_composer.zones.all"
+      # What that read can answer, and so what every operation that reads occupancy can.
+      REFUSES = %w[geometry.invalid record.unreadable target.wrong_kind validation.failed].freeze
 
       Zone = Struct.new(:id, :reference, :name, :segment_id, :assignment, keyword_init: true)
       Segment = Struct.new(:id, :name, :category, :settings, :stored, keyword_init: true) do

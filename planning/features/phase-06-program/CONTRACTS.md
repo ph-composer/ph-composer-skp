@@ -86,8 +86,8 @@ panel.segmentSettingsSection(namespace, {
 Zones also exposes the staging route as a proposal participant, `ph_composer.zones.stage_extension`
 (a namespace and payload for named Zone or Segment records), so Programs' own actions, which may
 call Zones because Programs requires it, write the per-Zone assignment the same way (P4a-08).
-Side effects of a section's change that belong to its owner (switching Single dwelling on creates
-a Dwelling and clears Zone assignments) run as that owner's transition contributor on Zones'
+Side effects of a section's change that belong to its owner (switching Single dwelling on clears Zone
+assignments and deletes emptied Dwellings; switching it off creates the Segment's Dwelling, P4a-08) run as that owner's transition contributor on Zones'
 save, in the same Undo step.
 
 Zones owns the dialog frame, the General section and Save. P4a-02 adds the seam to
@@ -142,7 +142,7 @@ interview; P4a-07 fixes them.
 | `ph_composer.programs.program` | `pgm_` | Name, notes, source; eight load sections (People, Lighting, Electric equipment, Gas equipment, Service hot water, Infiltration, Ventilation with four terms and method fixed to Sum, Setpoint), each with its values and Schedule references (Q4a-02, Q4a-15) |
 | `ph_composer.programs.schedule` | `sch_` | Name, type (fractional, activity level, temperature, ventilation) and its PH form: for fractional and activity, start, end, fraction while operating and otherwise; for ventilation, the four periods high, standard, basic and minimum, each hours per day and a fraction (totalling 24 h, Q4a-33); for both, days per week and weeks per year. Writes its honeybee ruleset (Q4a-07, Q4a-09) |
 | `ph_composer.programs.equipment_set` | `eqs_` | Name; devices as `Records::Part`s (Q4a-03, Q4a-36), each `type` (one of 14 honeybee-ph `PhEquipment` types), `display_name`, `quantity` (integer ≥ 1), `in_conditioned_space`, `comment`, `reference_quantity` (a WUFI/METr code the type allows), `reference_energy_norm`, `energy_demand` (absent on Phius-rule types), `energy_demand_per_use` (PHPP only) and the type's own fields (dishwasher capacity and water connection; washer capacity, MEF, utilization factor, water connection; dryer type, CEF, field utilization factor and gas fields; cooktop fuel; the Phius lighting high-efficacy fraction) |
-| `ph_composer.programs.dwelling` | `dwl_` | Name, `units` (integer ≥ 1), `bedrooms` and `occupants` (number or null; set only under Single dwelling, Q4a-24), `equipment_set_id` (reference or null, Q4a-21) |
+| `ph_composer.programs.dwelling` | `dwl_` | Name, `units` (integer ≥ 1), optional `bedrooms` and `occupants` (its own counts, given when Single dwelling is switched off, Q4a-24), optional `equipment_set_id` (reference, Q4a-21). No Dwelling record exists while a Segment is single: the house's counts and Set are the Segment payload's (P4a-08) |
 
 **The residential default becomes an ordinary Program record in each Model** (Q4a-13, Q4a-23).
 Reads never write: until a write touches it, reads answer a frozen definition in code (built from
@@ -197,8 +197,8 @@ rule (P4a-10).
 | Value | Rule |
 | --- | --- |
 | Effective Program of a Zone | Under effective Single dwelling, the Model's default Program; else the Zone's `program_id`; else its Segment's `default_program_id`; else the Model's default Program |
-| Dwelling of a Zone | Under effective Single dwelling, the Segment's `dwelling_id` (created when first needed); else the Zone's `dwelling_id` |
-| Dwelling bedrooms and occupants | The Dwelling's own value when set; else the sum over its Zones; occupants with neither use the Phius rule, bedrooms + units (F4a-20) |
+| Dwelling of a Zone | Under effective Single dwelling, the Segment's house: no record, named for the Segment, one unit, its counts and Set the Segment payload's (P4a-08); else the Zone's `dwelling_id` |
+| Dwelling bedrooms and occupants | The Dwelling's own value when set; else the sum over its Zones; occupants with neither use the Phius rule, bedrooms + units (F4a-20). A single dwelling's house takes its Segment's values only |
 | Zone people | Residential default: the Dwelling's occupants over its presence schedule mean, shared by gross floor area. Other Programs: people per area × floor area |
 | Zone ventilation (Programs view) | By Program: the Program's four terms summed, PHX's split (F4a-10). Detailed: the larger of the Zone's Spaces' supply and extract sums |
 | Segment set points | From its Zones' effective Programs; a finding when they disagree or a set point schedule is not constant (Q4a-04) |

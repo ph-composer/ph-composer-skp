@@ -13,7 +13,7 @@ module PhComposer
       NULLABLE_ID = ->(prefix, description) { SchemaShapes.id(prefix, description, :nullable => true) }
       COUNT = { "type" => %w[number null], "minimum" => 0 }.freeze
       ZONE_EXAMPLE = { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [101] }.freeze
-      ASSIGN = %w[programs.dwelling_across_segments programs.single_dwelling extension.invalid
+      ASSIGN = %w[geometry.invalid programs.dwelling_across_segments programs.single_dwelling extension.invalid
                   extension.migration_required extension.schema_unsupported extension.unavailable record.unreadable
                   reference.in_use reference.invalid target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
@@ -207,7 +207,7 @@ module PhComposer
                                                          "Program, Dwelling, peak people, lighting and " \
                                                          "ventilation, with findings; and each Building Segment's " \
                                                          "occupancy, set points and Single dwelling preview.",
-                                         :refuses => %w[geometry.invalid record.unreadable], :params => Shapes::NONE,
+                                         :refuses => OccupancyState::REFUSES, :params => Shapes::NONE,
                                          :result => zones, :examples => [{}]) do |request|
           OccupancyReads.zones(request)
         end
@@ -215,7 +215,7 @@ module PhComposer
                                                             "prefer" => "#{PREFIX}.dwellings.list" },
                                              :description => "Every Dwelling with its Zones and counts, the " \
                                                              "single-dwelling houses among them.",
-                                             :refuses => %w[geometry.invalid record.unreadable],
+                                             :refuses => OccupancyState::REFUSES,
                                              :params => Shapes::NONE,
                                              :result => Shapes.object({ "dwellings" => Shapes.list(DWELLING_ROW) }),
                                              :examples => [{}]) do |request|
@@ -226,7 +226,7 @@ module PhComposer
                       :description => "What switching Single dwelling on in one Building Segment replaces: Programs " \
                                       "chosen per Zone, Dwellings and Equipment Sets, and the Zones' summed bedrooms " \
                                       "and occupants, which the Save then carries.",
-                      :refuses => %w[geometry.invalid record.unreadable target.not_found],
+                      :refuses => OccupancyState::REFUSES + %w[target.not_found],
                       :params => Shapes.object({ "id" => SchemaShapes.id("bsg", "The Building Segment.") }),
                       :result => PREVIEW, :examples => [{ "id" => "bsg_Ab12Cd34Ef56" }]) do |request|
           id = request.params.fetch("id")

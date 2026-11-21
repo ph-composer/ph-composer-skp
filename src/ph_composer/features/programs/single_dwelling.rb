@@ -24,7 +24,7 @@ module PhComposer
       NAME = "#{FEATURE_ID}.single_dwelling"
       TRANSITION = Zones::Options::SegmentSettings::TRANSITION
       SEGMENT_KIND = Occupancy::SEGMENT_KIND
-      REFUSES = (Zones::ExtensionStaging::REFUSES + %w[reference.in_use]).uniq.freeze
+      REFUSES = (Zones::ExtensionStaging::REFUSES + OccupancyState::REFUSES + %w[reference.in_use]).uniq.freeze
 
       module_function
 

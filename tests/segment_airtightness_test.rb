@@ -143,6 +143,33 @@ class SegmentAirtightnessTest < PhComposerTestCase
     write_or_compare(FIXTURE, stable(extract.document))
   end
 
+  # Occupancy payloads are local_only until the Program export claims them: a house's counts on its
+  # Segment and a Zone's assignment leave the export unblocked.
+  def test_occupancy_payloads_on_exported_zones_and_segments_never_block_export
+    reference
+    occupancy = P::Occupancy::SEGMENT_NAMESPACE
+    switched_off = P::Occupancy::SEGMENT_DEFAULTS.merge("single_dwelling" => false)
+    all = query("#{O::PREFIX}.all")
+    row = all.fetch("building_segments").find { |candidate| candidate.dig("values", "name") == "ADU" }
+    values = row.fetch("values").slice("name", "colour")
+    completed(invoke(O::SegmentSettings::SAVE,
+                     "id" => row.fetch("id"), "values" => values, "expected_values" => values,
+                     "default" => all.fetch("default_segment_id") == row.fetch("id"),
+                     "expected_default_segment_id" => all.fetch("default_segment_id"),
+                     "extension_payloads" => { occupancy => switched_off },
+                     "expected_extension_data" => row.fetch("extension_data", {})))
+    completed(save(segment_id("House"), HOUSE))
+    adu = zone_rows.find { |zone| zone.dig("values", "name") == "ADU" }
+    assert_equal P::Occupancy::ZONE_NAMESPACE,
+                 adu.fetch("extension_data").keys.find { |key| key == P::Occupancy::ZONE_NAMESPACE },
+                 "switching the ADU off wrote its Zone's assignment"
+
+    assert_empty preflight.select { |finding| finding.fetch("blocks_export") }
+    records = extract.document.dig("sections", SECTION, "records")
+    assert_equal %w[Kitchen Living], records.map { |record| zone_name(record.fetch("id")) }.sort,
+                 "the export runs; the ADU has no airtightness settings"
+  end
+
   def test_no_result_writes_the_wind_exposure_alone_and_no_settings_write_no_record
     reference
     completed(save(segment_id("House"), HOUSE.merge("value" => nil)))
