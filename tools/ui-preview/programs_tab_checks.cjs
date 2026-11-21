@@ -197,7 +197,7 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
   await page.getByRole("tab", { name: "Schedules" }).click();
   const scheduleGroups = await page.locator(`${shown} .library-sidebar-group-heading`).allTextContents();
   assert.deepEqual(scheduleGroups.map(text => text.replace(/\d+$/, "")),
-    ["Fractional", "Activity level", "Ventilation"]);
+    ["Fractional", "Activity level", "Temperature", "Ventilation"]);
   assert.equal(await page.locator(`${shown} .library-sidebar-source`).isVisible(), false, "this file only");
   await page.locator(`${shown} .library-sidebar-row-button`, { hasText: "Office hours" }).click();
   await title.filter({ hasText: "Office hours" }).waitFor();
@@ -205,7 +205,7 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
   await page.screenshot({ path: path.join(output, "schedules.png") });
   await page.getByRole("tab", { name: "Equipment Sets" }).click();
   await title.filter({ hasText: "Phius single-family" }).waitFor();
-  assert.equal(await page.locator(`${shown} .pgm-devices tbody tr`).count(), 3);
+  assert.equal(await page.locator(`${shown} .pgm-devices tbody tr`).count(), 4);
   assert.deepEqual(await rows(page), ["Phius single-family", "Apartment kitchen"]);
   await page.screenshot({ path: path.join(output, "equipment-sets.png") });
 

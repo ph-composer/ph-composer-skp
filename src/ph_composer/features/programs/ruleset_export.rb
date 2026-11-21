@@ -17,7 +17,6 @@ module PhComposer
     # ventilation utilization pattern (C4a-10); occupancy and lighting Schedules carry none until the honeybee-ph
     # and PHX fix for F4a-13 (Q4a-08), so PHX reads their hourly values.
     module RulesetExport
-      WEEKDAYS = %w[monday tuesday wednesday thursday friday saturday sunday].freeze
       TYPE_LIMITS = { "fractional" => "Fractional", "activity" => "Activity Level", "temperature" => "Temperature",
                       "ventilation" => "Fractional" }.freeze
       # 1 August in a 365-day year, which honeybee's rules use.
@@ -34,7 +33,7 @@ module PhComposer
         { "id" => values.fetch("id"), "name" => name, "type_limit" => TYPE_LIMITS.fetch(type),
           "operating_day" => ScheduleProfile.profile(values),
           "off_day" => every_day ? nil : Array.new(Schedule::HOURS, off_value(values)),
-          "operating_weekdays" => WEEKDAYS.first(days), "operating_dates" => operating_dates(weeks),
+          "operating_weekdays" => ScheduleProfile.weekdays(values), "operating_dates" => operating_dates(weeks),
           "days_per_week" => days, "weeks_per_year" => weeks, "operating_periods" => periods(values) }
       end
 

@@ -21021,7 +21021,8 @@ Result:
             "required": [
               "hours",
               "daily_full_load_hours",
-              "annual_full_load_hours"
+              "annual_full_load_hours",
+              "weekdays"
             ],
             "properties": {
               "hours": {
@@ -21046,6 +21047,22 @@ Result:
                 ],
                 "x-unit": "h",
                 "description": "The daily hours on days_per_week × weeks_per_year days."
+              },
+              "weekdays": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday"
+                  ]
+                },
+                "description": "The days the profile applies on, Monday first: the first days_per_week, or every day for a temperature Schedule."
               }
             }
           }
@@ -21504,7 +21521,8 @@ Result:
             "required": [
               "hours",
               "daily_full_load_hours",
-              "annual_full_load_hours"
+              "annual_full_load_hours",
+              "weekdays"
             ],
             "properties": {
               "hours": {
@@ -21529,6 +21547,22 @@ Result:
                 ],
                 "x-unit": "h",
                 "description": "The daily hours on days_per_week × weeks_per_year days."
+              },
+              "weekdays": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday"
+                  ]
+                },
+                "description": "The days the profile applies on, Monday first: the first days_per_week, or every day for a temperature Schedule."
               }
             }
           }
@@ -21908,7 +21942,8 @@ Result:
   "required": [
     "hours",
     "daily_full_load_hours",
-    "annual_full_load_hours"
+    "annual_full_load_hours",
+    "weekdays"
   ],
   "properties": {
     "hours": {
@@ -21933,6 +21968,22 @@ Result:
       ],
       "x-unit": "h",
       "description": "The daily hours on days_per_week × weeks_per_year days."
+    },
+    "weekdays": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ]
+      },
+      "description": "The days the profile applies on, Monday first: the first days_per_week, or every day for a temperature Schedule."
     }
   }
 }
@@ -95404,3 +95455,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.82 | 2026-11-20 | The Zones / Programs view's reads and the library Program on Zones. programs.assign_library_program copies a library Program with its Schedules, or reuses its local copy, through ph_composer.library.copy_into_proposal and assigns it to Zones in one Undo step; the programs feature now requires ph_composer.library. programs.zones answers every Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or ventilation_m3h is unknown), and each Building Segment's sums for its heading row. |
 | 1.83 | 2026-11-20 | The Program export. Four export sections, programs.export.rooms, schedules, program_types and set_points, write each exported Zone's ProgramType, People counts, Dwelling and Equipment Set devices and each Building Segment's set points; the programs.zone_assignment and programs.segment extensions are now required, claimed by programs.export.rooms. programs.export_preflight is new, with codes programs.value_missing, programs.set_points_inverted, programs.rule_without_dwelling, programs.counts_missing, programs.equipment_set_non_residential and programs.text_left_out, and the view command programs.locate opens the Zones / Programs view with Zones checked. The Spaces export projection adds each Zone's floor_area_m2 and weighted_area_m2; the certification export section registers its records as its projection. |
 | 1.84 | 2026-11-20 | The Programs tab's reads and a delete with a replacement. programs.delete and equipment_sets.delete with a replacement_id move every Zone assignment and Building Segment setting naming the record to the replacement, through ph_composer.zones.stage_extension, in the same Undo step, and refuse as a Zone write does (target.locked, target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and equipment_sets carry each collection's all read. A programs.list and programs.all row adds missing: each value its ProgramType would lack, by load and field, as the export preflight reports it. |
+| 1.85 | 2026-11-21 | A Schedule's profile (programs.schedules.profile and each schedules row's profile) adds weekdays, the days its operating day applies on, Monday first. An equipment_sets.device_types field adds applies_when where it means something only under another field's values: a clothes dryer's gas_consumption and gas_efficiency_factor, under dryer_type gas_exhaust_air. |

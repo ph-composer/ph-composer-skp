@@ -604,12 +604,17 @@ datasheet links and source fields, whose source kind may also be `ph_composer_de
   for activity; `value_c`; or `periods`, high, standard, basic and minimum in that order, whole hours totalling 24
   and a fraction each. An end before the start runs past midnight. A type change on update drops the old form's
   fields and fills the new form's defaults. `ScheduleProfile` draws the 24-hour profile and, for fractional and
-  ventilation, the daily full-load hours and the annual ones over days_per_week × weeks_per_year operating days.
+  ventilation, the daily full-load hours and the annual ones over days_per_week × weeks_per_year operating days,
+  and names the `weekdays` the operating day applies on: the first days_per_week from Monday, or every day for a
+  temperature Schedule, as the export writes them (API 1.85).
 - **Equipment Set** (`ph_composer.programs.equipment_set`, `eqs_`): `devices`, each a part (`devices[]`,
   `dev_` ids, its own `user_data`) of one of the fourteen honeybee-ph `PhEquipment` types. `EquipmentTypes`
   names each type's fields, the reference quantity codes and energy norms it allows and a new device's values
-  (honeybee-ph's PHIUS defaults); a field the type does not carry, or a missing one, refuses. A device's type is
-  fixed; add, update and delete are each one Undo step, and delete reports the device's removed map. The Set's
+  (honeybee-ph's PHIUS defaults); a field the type does not carry, or a missing one, refuses. A field that means
+  something only under another field's values declares `applies_when` (a clothes dryer's `gas_consumption` and
+  `gas_efficiency_factor`, under `dryer_type` `gas_exhaust_air`); the device still stores it, and
+  `equipment_sets.device_types` names the condition so a form can show the field only then (API 1.85). A
+  device's type is fixed; add, update and delete are each one Undo step, and delete reports the device's removed map. The Set's
   own update takes no `devices`: devices change only through the device actions (`params.invalid`).
 
 **PH-Composer's defaults.** The residential default Program (`pgm_PHCDEFAULT01`) with its six Schedules

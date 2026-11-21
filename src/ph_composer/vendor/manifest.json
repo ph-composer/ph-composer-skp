@@ -180,6 +180,16 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "1ba6547b5fb6af959b789532336b3179d65ead7cbaddb544ecf90568933d7e7a"
     },
+    "html/features/programs/device_dialog.js": {
+      "bytes": 17248,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "d0e02918fa7de390e56187308f3b9aa9f7e8bb7427fd4a25592fd9831658129e"
+    },
+    "html/features/programs/equipment_set_editor.js": {
+      "bytes": 9698,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "0984749e26b6fa2513dfc69cdf4ef23824f19e0c9ac3a479b93d79fbde4987f0"
+    },
     "html/features/programs/library_programs.js": {
       "bytes": 5264,
       "mime": "text/javascript; charset=utf-8",
@@ -201,24 +211,24 @@
       "sha256": "a580ce593dd394c422a917b3911e27d73d447b5f322034ab859dcc78f7b02e49"
     },
     "html/features/programs/programs.css": {
-      "bytes": 10863,
+      "bytes": 14653,
       "mime": "text/css; charset=utf-8",
-      "sha256": "019587e451dc318600df954900d8050ca94b0b178acb697f4991a03f92e595c4"
-    },
-    "html/features/programs/record_bodies.js": {
-      "bytes": 6284,
-      "mime": "text/javascript; charset=utf-8",
-      "sha256": "0c13670307472bbe4e91f3f180723fa758125ac3ba78d73197846e3f824af762"
+      "sha256": "2c6ee8655f9ee58d148949a1bad675789a400cd31582a837ae550be1b79624c1"
     },
     "html/features/programs/record_page.js": {
-      "bytes": 15569,
+      "bytes": 15973,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e62b51752eb60e6088ce064df86a8667163b8a39c4b3b2448807257af0f622e4"
+      "sha256": "517a0c9f5daf2a335a99ce6bba5197594f2153b42737e18dd7dee136c13f6739"
+    },
+    "html/features/programs/schedule_editor.js": {
+      "bytes": 18644,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "b31ebb39c26111907a28d014899f9d4c2a342742cce90f4611214edb1d5ab21a"
     },
     "html/features/programs/tab.js": {
-      "bytes": 10355,
+      "bytes": 11980,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3c3982ca844c7bbd1ab1903f78a774165906f86f6d4b0c5b568e606e1a6624cd"
+      "sha256": "da2719c13913073e56612411dc5d038bd2caee12bd8b7b789f27b38f379f300d"
     },
     "html/features/programs/zones_cells.js": {
       "bytes": 30991,
@@ -471,9 +481,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 10338,
+      "bytes": 10473,
       "mime": "text/html; charset=utf-8",
-      "sha256": "cfbe6bc5fc33a66b0603405d6406ea124300f928529060a083d76877d7cc5c94"
+      "sha256": "1eae5b6ba965d973e86612c4f9c81aebbce34786a4888ec2c4fa93328937f110"
     },
     "html/inventory.js": {
       "bytes": 12812,

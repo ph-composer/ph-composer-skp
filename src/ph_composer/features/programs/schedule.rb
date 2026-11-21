@@ -142,8 +142,11 @@ module PhComposer
     # and over the year that sum on every operating day, days_per_week × weeks_per_year (the operating-day count
     # honeybee-ph's ScheduleRulesetPhProperties uses), days off counting nothing. An activity profile is W per
     # person and a temperature profile °C, levels rather than fractions, so their full-load hours are null.
-    # Ventilation periods lie end to end from midnight, high first.
+    # Ventilation periods lie end to end from midnight, high first. The operating day applies on the first
+    # days_per_week days from Monday (5: Monday to Friday); a temperature Schedule applies every day.
     module ScheduleProfile
+      WEEKDAYS = %w[monday tuesday wednesday thursday friday saturday sunday].freeze
+
       module_function
 
       def call(values)
@@ -151,7 +154,13 @@ module PhComposer
         fraction = %w[fractional ventilation].include?(values.fetch("type"))
         daily = fraction ? hours.sum : nil
         annual = daily && daily * values.fetch("days_per_week") * values.fetch("weeks_per_year")
-        { "hours" => hours, "daily_full_load_hours" => daily, "annual_full_load_hours" => annual }
+        { "hours" => hours, "daily_full_load_hours" => daily, "annual_full_load_hours" => annual,
+          "weekdays" => weekdays(values) }
+      end
+
+      # The weekdays the operating day applies on, Monday first.
+      def weekdays(values)
+        WEEKDAYS.first(values.fetch("type") == "temperature" ? WEEKDAYS.size : values.fetch("days_per_week"))
       end
 
       def profile(values)

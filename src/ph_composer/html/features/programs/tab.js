@@ -2,16 +2,17 @@
    a record editor with one right sidebar (features/programs/record_page.js). Records come from the snapshot
    sections `ph_composer.programs.programs`, `schedules` and `equipment_sets`, each its collection's `all` read
    (features/programs/declarations.rb); how many Zones use a Program or Equipment Set comes from the occupancy read
-   the Zones / Programs view shows. Every write is one registered Programs action and one Undo step, one at a time;
-   a refusal is the panel's notice. */
+   the Zones / Programs view shows, and which Dwellings use an Equipment Set from its Dwellings. Every write is one
+   registered Programs action and one Undo step, one at a time; a refusal is the panel's notice. */
 PhComposerUI.define("features/programs/tab", ["panel", "subtabs", "workspace", "request", "snapshot",
-  "features/programs/record_page", "features/programs/program_editor", "features/programs/record_bodies"],
-function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bodies) {
+  "features/programs/record_page", "features/programs/program_editor", "features/programs/schedule_editor",
+  "features/programs/equipment_set_editor"],
+function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, ScheduleEditor, SetEditor) {
   "use strict";
   var TAB = "programs", PREFIX = "ph_composer.programs";
   var OCCUPANCY = PREFIX + ".occupancy";
   var SCHEDULE_GROUPS = ["fractional", "activity", "temperature", "ventilation"].map(function (type, index) {
-    return { id: String.fromCharCode(97 + index) + "-" + type, label: bodies.TYPES[type], type: type };
+    return { id: String.fromCharCode(97 + index) + "-" + type, label: ScheduleEditor.TYPES[type], type: type };
   });
   var views = Object.create(null), current;
 
@@ -61,13 +62,26 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
     this.header = ui.pageHeader({ title: "Programs" });
     root.appendChild(this.header.root);
     var host = { session: state.session, send: send, changed: function () { panel.repaint(); },
-      busy: function () { return self.channel.busy(); }, run: function (name, params, done) {
+      busy: function () { return self.busy(); }, run: function (name, params, done) {
         return self.run(name, params, done);
       }, refuse: function (text) { panel.notify(text, "warning"); }, repaint: function () { panel.repaint(); },
       prefix: function (kind) { return PREFIX + "." + kind.id; } };
     var made = { programs: function (owner) { return self.programBody(owner); },
-      schedules: function () { return new bodies.ScheduleBody(); },
-      equipment_sets: function () { return new bodies.SetBody(); } };
+      schedules: function (owner) {
+        return new ScheduleEditor({ update: function (row, values, expected) {
+          return owner.update(row, values, expected);
+        }, refuse: function (text) { panel.notify(text, "warning"); } });
+      },
+      equipment_sets: function (owner) {
+        return new SetEditor({ session: state.session, send: send, run: function (name, params, done) {
+          return self.run(name, params, done);
+        }, busy: function () { return self.busy(); }, askFirst: function (heading, text, label, apply) {
+          owner.askFirst(heading, text, label, null, apply);
+        },
+        notify: function (text) { panel.notify(text, "success"); },
+        refuse: function (text) { panel.notify(text, "warning"); },
+        repaint: function () { panel.repaint(); } });
+      } };
     this.pages = {};
     Object.keys(KINDS).forEach(function (id) { self.pages[id] = new RecordPage(KINDS[id], host, made[id]); });
     this.tabs = new Subtabs({ label: "Programs", state: page, stateKey: "tab", tabs: [
@@ -111,6 +125,14 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
     panel.repaint();
   };
 
+  /* A write is out: the page's own, or a device dialog's. */
+  View.prototype.busy = function () {
+    var pages = this.pages || {};
+    return this.channel.busy() || Object.keys(pages).some(function (id) {
+      return Boolean(pages[id].body.busy && pages[id].body.busy());
+    });
+  };
+
   View.prototype.guard = function () {
     var pages = this.pages, found = null;
     Object.keys(pages).some(function (id) { return Boolean(found = pages[id].guard()); });
@@ -119,7 +141,7 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
 
   /* One write at a time; `done(outcome)` may answer words for a success notice. */
   View.prototype.run = function (name, params, done) {
-    if (this.channel.busy()) { panel.notify("Wait for the last change to finish.", "warning"); return false; }
+    if (this.busy()) { panel.notify("Wait for the last change to finish.", "warning"); return false; }
     this.channel.run(name, params, { onDone: function (outcome) {
       var words = done ? done(outcome) : null;
       if (words) panel.notify(words, "success");
@@ -142,7 +164,7 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
     var occupancy = snapshot.value(state, OCCUPANCY) || { zones: [], choices: {} };
     var schedules = {};
     sections.schedules.forEach(function (row) { schedules[row.id] = row; });
-    var enabled = !missing && !this.channel.busy();
+    var enabled = !missing && !this.busy();
     return {
       enabled: enabled, available: !missing, unavailable: missing,
       hasSchedule: function (id) { return Boolean(schedules[id]); },
@@ -162,8 +184,17 @@ function (panel, Subtabs, ui, requests, snapshot, RecordPage, ProgramEditor, bod
           return !nonResidential[zone.building_segment_id] && (zone.equipment_set_id || fallback) === id;
         }).length;
       },
+      // The Dwellings an Equipment Set serves: its own, and for the Model's default every Dwelling without one.
+      dwellings: function (id) {
+        var fallback = (occupancy.choices || {}).default_equipment_set_id;
+        return (occupancy.dwellings || []).filter(function (dwelling) {
+          return (dwelling.equipment_set_id || fallback) === id;
+        }).map(function (dwelling) { return dwelling.name; });
+      },
       bodyContext: function (kind, row) {
-        return { zones: kind.useCount ? kind.useCount(row, this) : row.use_count, schedules: schedules };
+        var shown = { zones: kind.useCount ? kind.useCount(row, this) : row.use_count, schedules: schedules };
+        if (kind.id === "equipment_sets") shown.dwellings = this.dwellings(row.id);
+        return shown;
       }
     };
   };

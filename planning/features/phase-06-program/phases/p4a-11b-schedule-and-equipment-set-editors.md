@@ -1,7 +1,7 @@
 # P4a-11b: The Schedule and Equipment Set editors
 
 DATE: 2026-11-20
-STATUS: Scoped. Split from P4a-11 on 2026-11-20 and authorized with it ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch `feature/phase-06-program-p4a-11b` (2026-11-21); PG11b host rows owed. Split from P4a-11 on 2026-11-20 and authorized with it ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -48,3 +48,37 @@ PG11b: panel gestures with Ed at the mouse; UI polish review recorded.
 ## Done when
 
 PG11b passes.
+
+## Decided while implementing (2026-11-21)
+
+- **Ventilation hours.** The record refuses periods that do not total 24 h, so the four periods are held as one
+  draft while they do not: the inputs and the total turn amber, the page refuses to move on, and one
+  `schedules.update` of `periods`, guarded by the periods as the draft began, goes once the hours total 24. A
+  fraction typed meanwhile joins the draft. Escape in a period restores the Model's periods. Every other field is
+  one update of that field.
+- **Strip and week row.** Both draw the row's `profile`, the same `ScheduleProfile` the `schedules.profile` query
+  answers, so a paint sends no request and the strip always shows the Model's values, never a draft. The week row
+  reads the profile's new `weekdays`, the export's own rule (first days_per_week from Monday, every day for a
+  temperature Schedule), moved into `ScheduleProfile` so the two never disagree. API 1.85.
+- **Temperature.** One value, every day: no days per week or weeks per year, which the export ignores for it.
+- **Whole numbers.** Hours, days per week and weeks per year refuse a fraction or a value out of range at the field,
+  with the range in the notice, before any request.
+- **Gas dryer fields.** `EquipmentTypes` declares `applies_when` on a clothes dryer's `gas_consumption` and
+  `gas_efficiency_factor` (`dryer_type` `gas_exhaust_air`), and `device_types` carries it, so the dialog shows a field
+  by the catalog's condition rather than a branch of its own. The device still stores both. API 1.85.
+- **Device dialog.** Built on `record_form.js` with its own request, settled from the page's render and counted in
+  the page's busy state. Add sends the whole device; Edit sends only the values changed, guarded by them as the
+  dialog opened. Field words (labels, units, choice labels, the Phius rule each rule device follows) are the
+  view's; which fields a type carries and what they allow are the catalog's. Energy demand, the dryer's CEF and the
+  gas fields stay in kWh and lb/kWh in both systems (the units core has no energy quantity); a clothes washer's
+  capacity follows the volume unit.
+- **Delete names Dwellings.** The confirmation names the Dwellings whose Set this is (their own, or the Model's
+  default for one without), from the occupancy read.
+- **Header action.** A record page body may give `headerAction`, set between the icon tools and the overflow menu, as
+  the page-header rule orders them; the Equipment Set editor gives **Add device**.
+- **Kit.** No shared kit part or kit stylesheet changed: the device grid is the kit table, the dialog the kit form
+  dialog. Styles are in `features/programs/programs.css`.
+
+Follow-ups: the Schedules subtab's **+ New Schedule** makes a fractional Schedule only, and the editor has no type
+choice (Ruby's update already swaps the form on a type change); a focused field holds a subtab switch until it
+loses focus, as `subtabs.js` rules for every tab.

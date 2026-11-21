@@ -6,6 +6,8 @@ require_relative "test_helper"
 # profile, rule loads, device editing, the residential default Program and default Equipment Set that reads answer
 # until a write stores them, the Model's defaults and guarded deletes, each write one Undo step.
 class ProgramRecordsTest < PhComposerTestCase
+  include FixtureFiles
+
   API = PhComposer::API
   P = PhComposer::Programs
   PREFIX = P::FEATURE_ID
@@ -74,6 +76,7 @@ class ProgramRecordsTest < PhComposerTestCase
     assert_equal ([0.1] * 7) + ([0.5] * 11) + ([0.1] * 6), office.fetch("hours")
     assert_in_delta (11 * 0.5) + (13 * 0.1), office.fetch("daily_full_load_hours"), 1e-9
     assert_in_delta 6.8 * 5 * 50, office.fetch("annual_full_load_hours"), 1e-9
+    assert_equal %w[monday tuesday wednesday thursday friday], office.fetch("weekdays"), "Monday first, as exported"
     night = profile("type" => "fractional", "start_h" => 22, "end_h" => 6, "fraction_on" => 1.0,
                     "fraction_off" => 0.0)
     assert_equal ([1.0] * 6) + ([0.0] * 16) + ([1.0] * 2), night.fetch("hours"), "an end before the start wraps"
@@ -81,7 +84,9 @@ class ProgramRecordsTest < PhComposerTestCase
     activity = profile("type" => "activity", "start_h" => 0, "end_h" => 24, "watts_on" => 120.0, "watts_off" => 80.0)
     assert_equal [120.0] * 24, activity.fetch("hours")
     assert_nil activity.fetch("daily_full_load_hours"), "a level has no full-load hours"
-    assert_equal [21.0] * 24, profile("type" => "temperature", "value_c" => 21.0).fetch("hours")
+    temperature = profile("type" => "temperature", "value_c" => 21.0, "days_per_week" => 5)
+    assert_equal [[21.0] * 24, 7], [temperature.fetch("hours"), temperature.fetch("weekdays").size],
+                 "a temperature Schedule applies every day"
     assert_equal "validation.failed", query_outcome("schedules.profile",
                                                     "values" => { "type" => "temperature", "start_h" => 1 })["code"]
   end
@@ -260,6 +265,20 @@ class ProgramRecordsTest < PhComposerTestCase
   end
 
   # ---------------------------------------------------------------- devices
+
+  def test_device_types_say_which_fields_apply_only_under_another_fields_values
+    types = query("equipment_sets.device_types", {}).fetch("types")
+    assert_equal 14, types.size
+    conditional = types.flat_map do |type|
+      type.fetch("fields").filter_map { |field| [type.fetch("type"), field.fetch("key")] if field["applies_when"] }
+    end
+    assert_equal [%w[clothes_dryer gas_consumption], %w[clothes_dryer gas_efficiency_factor]], conditional
+    dryer = types.find { |type| type.fetch("type") == "clothes_dryer" }
+    gas = dryer.fetch("fields").find { |field| field.fetch("key") == "gas_consumption" }
+    assert_equal({ "dryer_type" => ["gas_exhaust_air"] }, gas.fetch("applies_when"))
+    # The panel preview answers this read from the golden, so its device dialog lays out what Ruby declares.
+    write_or_compare(File.expand_path("fixtures/programs/device_types.json", __dir__), types)
+  end
 
   def test_device_add_edit_and_delete_are_each_one_undo_step_with_each_types_fields
     set = id_of(invoke!("equipment_sets.create", "values" => { "name" => "Laundry" }))

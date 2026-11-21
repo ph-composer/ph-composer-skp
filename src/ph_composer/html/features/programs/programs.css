@@ -130,13 +130,66 @@
   border-color: transparent; background: transparent; color: var(--interaction-highlight); font-size: var(--text-sm); }
 .phc-workspace .pgm-slot-new:hover:enabled { background: transparent; text-decoration: underline; }
 
-/* The read-only Schedule and Equipment Set bodies. */
-.pgm-readonly, .pgm-used-by { margin-top: 14px; }
-.pgm-readonly h3, .pgm-used-by h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
-.pgm-readonly .phc-property-row { max-width: 420px; }
+/* The Schedule editor (schedule_editor.js): the PH form as labelled fields, the ventilation periods as a small grid
+   with their running total, then the 24-hour strip, the week row, its users and the planned hourly editor. */
+.sch-form-area { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; }
+.sch-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 190px)); gap: 10px 16px; }
+.sch-field { display: flex; flex-direction: column; gap: 4px; color: var(--muted-strong); font-size: var(--text-sm);
+  font-weight: 400; }
+.sch-field .unit { color: var(--muted); font-size: var(--text-xs); }
+.phc-workspace .sch-input { border-color: var(--line-strong); background: #fff; }
+.sch-period-table { border-collapse: collapse; font-size: var(--text-sm); }
+.sch-period-table th { padding: 4px 12px 4px 0; color: var(--muted); font-size: var(--text-xs); font-weight: 600;
+  text-align: left; }
+.sch-period-table tbody th { color: var(--ink); font-size: var(--text-sm); font-weight: 400; }
+.sch-period-table td { width: 140px; padding: 2px 8px 2px 0; }
+/* A period held while the hours do not total 24: the draft reads in amber until it is saved or restored. */
+.phc-workspace .sch-input.is-held { border-color: var(--warning-ink); background: var(--warning-surface); }
+.sch-total { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; color: var(--muted-strong);
+  font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.sch-total.is-missing { color: var(--warning-ink); font-weight: 600; }
+.sch-total .pgm-flag { margin-left: 0; }
+.sch-caption { margin: 16px 0 4px; color: var(--muted); font-size: var(--text-xs); }
+.sch-strip-svg { display: block; width: 100%; max-width: 560px; height: auto; }
+.sch-strip-svg .sch-axis { stroke: var(--line-strong); }
+.sch-strip-svg .sch-bar { fill: var(--interaction-highlight-soft); stroke: var(--interaction-highlight);
+  stroke-width: .5; }
+.sch-strip-svg text { fill: var(--muted); font-size: 10px; }
+.sch-week { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; margin-top: 8px; font-size: var(--text-xs); }
+.sch-week-label { margin-right: 6px; color: var(--muted); }
+.sch-day { padding: 2px 7px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--muted); }
+.sch-day.is-on { border-color: var(--interaction-highlight); background: var(--interaction-highlight-soft);
+  color: var(--interaction-highlight); }
+.pgm-used-by { margin-top: 14px; }
+.pgm-used-by h3 { margin: 0 0 6px; font-size: 13px; }
 .pgm-use { font-size: var(--text-sm); line-height: 1.6; }
-.pgm-devices { width: 100%; }
+.sch-hourly { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--line); font-size: var(--text-sm); }
+
+/* The Equipment Set editor (equipment_set_editor.js): the device grid, a row click edits, its icons on hover. */
+.pgm-devices { margin-top: 14px; }
+.pgm-devices tbody tr[data-row-key] { cursor: pointer; }
+.pgm-sigma { color: var(--interaction-highlight); }
+.phc-workspace .pgm-add-device { display: inline-flex; align-items: center; gap: 4px; }
 .pgm-replacement { margin: 10px 0 0; }
+
+/* The device dialog (device_dialog.js): sections of label-beside-control rows, stacked below 500 px. */
+.pgm-device-dialog { display: flex; flex-direction: column; overflow: hidden; }
+.pgm-device-dialog[hidden] { display: none; }
+.pgm-device-dialog form { min-height: 0; overflow: auto; }
+.pgm-device-body { min-width: 0; }
+.pgm-device-section { padding: 10px 0 12px; border-top: 1px solid var(--line); }
+.pgm-device-section h3 { margin: 0 0 8px; font-size: var(--text-md); }
+.phc-form-dialog .pgm-device-row { display: grid; grid-template-columns: minmax(120px, 2fr) minmax(0, 3fr);
+  align-items: center; gap: 4px 12px; min-height: 32px; }
+.pgm-device-label { color: var(--muted-strong); }
+.pgm-device-check { display: flex; align-items: flex-start; gap: 6px; font-size: var(--text-sm); }
+.pgm-device-check input { margin-top: 2px; }
+.pgm-device-rule, .pgm-device-type { font-size: var(--text-sm); }
+.phc-form-dialog input.pgm-device-number { max-width: 140px; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 500px) {
+  .phc-form-dialog .pgm-device-row { grid-template-columns: minmax(0, 1fr); }
+}
 
 @media (max-width: 700px) {
   .pgm-layout { flex-direction: column; align-items: stretch; min-height: 0; }
@@ -148,5 +201,3 @@
   .pgm-sum, .pgm-flag[hidden] + .pgm-sum { flex-basis: 100%; max-width: none; margin-left: 24px; }
   .pgm-tags { flex-wrap: wrap; }
 }
-.pgm-devices :is(th, td) { text-align: left; }
-.pgm-devices td.is-numeric { text-align: right; }
