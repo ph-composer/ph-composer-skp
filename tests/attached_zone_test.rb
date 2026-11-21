@@ -292,6 +292,24 @@ class AttachedZoneTest < PhComposerTestCase
     refute_includes JSON.generate(extraction.document), "firm"
   end
 
+  # Extraction reads every Attached zone whole, named by a Face or not, so data on one that nothing exports
+  # blocks it; the preflight lists the same blocking row first.
+  def test_an_attached_zone_holding_data_nothing_exports_blocks_the_preflight_as_it_blocks_extraction
+    garage = create_zone_record("Garage")
+    stored = KIND_STORE.read(@model, garage)
+    envelope = { "schema_version" => 1, "payload" => {}, "references" => [], "export_relevance" => "required" }
+    KIND_STORE.write(@model, stored.merge("extension_data" => { "example.review" => envelope }))
+    preflight = API.export_preflight(:context => @context).dig("value", "findings")
+                   .select { |row| row["object_id"] == garage }
+    section = PhComposer::Zones::Faces::ExportProjection::SECTION
+    error = assert_raises(PhComposer::Export::Blocked) do
+      PhComposer::Export::Collection.build(@model, :run_id => "atz", :contributors => [section])
+    end
+
+    assert_equal [["extension.unavailable", true]], preflight.map { |row| row.values_at("code", "blocks_export") }
+    assert_equal "extension.unavailable", error.code
+  end
+
   private
 
   KIND_STORE = PhComposer::Zones::Faces::AttachedZone::RECORD_KIND.store

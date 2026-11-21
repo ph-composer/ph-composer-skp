@@ -408,6 +408,19 @@ test("a washer's capacity reads in the display volume and is stored in m³", fun
   assert.strictEqual(Math.round(last(p).params.values.capacity_m3 * 10000) / 10000, 0.1416);
 });
 
+test("a number typed before the unit system changes keeps its units through a layout", function () {
+  var p = load("Equipment Sets");
+  p.snapshot(null, [WASHER], { unit_system: "SI" });
+  types(p);
+  click(labelled(shown(p), "button", "Edit Laundry - washer"));
+  var root = dialog(p);
+  type(field(root, "capacity_m3"), "0.1");
+  p.snapshot(null, [WASHER], { unit_system: "IP" });
+  change(field(root, "water_connection"), "dhw");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(last(p).params.values.capacity_m3, 0.1, "0.1 m³, as typed in SI");
+});
+
 test("a choice lays the form out again and keeps a number not yet read", function () {
   var p = load("Equipment Sets");
   types(p);

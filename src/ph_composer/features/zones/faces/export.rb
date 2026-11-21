@@ -82,7 +82,20 @@ module PhComposer
               face_findings(request, zone, occurrence, index)
             end
           end
-          { "findings" => findings, "repairs" => [] }
+          { "findings" => findings + attached_zone_metadata_findings(request), "repairs" => [] }
+        end
+
+        # The metadata extraction refuses on an Attached zone record, read as `attached_zones` reads them: every
+        # readable record, whether or not a Face names it, with no extension claimed and no user_data passed.
+        def attached_zone_metadata_findings(request)
+          kind = AttachedZone::RECORD_KIND
+          records = kind.store.ids(request.model).sort.filter_map do |id|
+            stored = kind.store.read(request.model, id)
+            stored if stored.is_a?(Hash) && kind.problems(stored).empty?
+          rescue JSON::ParserError
+            nil
+          end
+          Export::MetadataCheck.findings(request, records, :section => SECTION)
         end
 
         def face_findings(request, zone, occurrence, index)

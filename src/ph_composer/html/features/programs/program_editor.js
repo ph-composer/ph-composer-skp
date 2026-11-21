@@ -286,8 +286,10 @@ function (ui, loads) {
       definition.values.some(function (entry) { return entry.key === key; })); }
     Array.prototype.forEach.call(card.body.querySelectorAll(".pgm-input"), function (input) {
       var text = loads.editText(input.entry, values[input.entry.key]);
-      if (!input.typed || document.activeElement !== input) { input.value = text; input.typed = false; }
-      input.seed = text;
+      // A field being typed into keeps the seed it began with, in the units its draft is read in.
+      if (!input.typed || document.activeElement !== input) {
+        input.value = text; input.typed = false; input.seed = text;
+      }
       input.disabled = !enabled;
       input.row.classList.toggle("is-missing", Boolean(flagged(input.entry.key)));
     });

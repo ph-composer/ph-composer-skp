@@ -471,6 +471,19 @@ test("Escape drops a typed count's revision, so a new entry after a snapshot is 
   assert.deepStrictEqual(plain([last(p).expected_revision, last(p).params.bedrooms]), [REVISION + 1, 4]);
 });
 
+test("Escape drops the revision even when the typed count is back at its seed", function () {
+  var p = load();
+  var input = labelled(rowNamed(p, "Apt 1"), "input", "Bedrooms in Apt 1");
+  var seed = input.value;
+  typeInto(p, input, "3");
+  typeInto(p, input, seed);
+  input.listeners.keydown({ key: "Escape", preventDefault: function () {} });
+  republish(p, REVISION + 1, function () {});
+  typeInto(p, input, "4");
+  input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+  assert.deepStrictEqual(plain([last(p).expected_revision, last(p).params.bedrooms]), [REVISION + 1, 4]);
+});
+
 test("a Dwelling field keeps the revision it was drawn from while focused", function () {
   var p = load();
   click(cell(rowNamed(p, "Apt 1"), "dwelling").querySelector("button"));

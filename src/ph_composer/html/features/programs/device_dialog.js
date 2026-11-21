@@ -215,17 +215,19 @@ function (RecordForm, ui, fields, loads) {
   };
 
   /* A number shows the draft's value as its seed; only text that differs from the seed is read back, so a value the
-     user left alone is never rounded by its display. Typed text survives a layout. */
+     user left alone is never rounded by its display. Typed text that does not read yet survives a layout with the
+     units and number format it was typed in. */
   DeviceDialog.prototype.number = function (key, words) {
-    var self = this, input = el("input", "pgm-device-number"), typed = this.typed;
+    var self = this, input = el("input", "pgm-device-number"), typed = this.typed, kept = typed[key];
     input.type = "text"; input.setAttribute("inputmode", "decimal"); input.setAttribute("autocomplete", "off");
     input.setAttribute("data-key", key);
     input.seed = loads.editText(words, this.draft[key]); input.seedValue = this.draft[key];
-    input.value = typed[key] !== undefined ? typed[key] : input.seed;
-    input.entry = words; input.profile = loads.profile(words);
+    input.value = kept ? kept.text : input.seed;
+    input.entry = words; input.profile = kept ? kept.profile : loads.profile(words);
     if (words.help) ui.tooltip(input, words.help);
     input.addEventListener("input", function () {
-      if (input.value === input.seed) delete typed[key]; else typed[key] = input.value;
+      if (input.value === input.seed) delete typed[key];
+      else typed[key] = { text: input.value, profile: input.profile };
       self.clearStatus();
     });
     this.inputs[key] = input;
@@ -267,7 +269,7 @@ function (RecordForm, ui, fields, loads) {
   /* The form's values into the draft, or `{ error }` naming the first that does not read; with `strict` false, a
      number that does not read is left out of the draft. */
   DeviceDialog.prototype.read = function (strict) {
-    var draft = this.draft, inputs = this.inputs, error = null;
+    var self = this, draft = this.draft, inputs = this.inputs, error = null;
     strict = strict !== false;
     Object.keys(inputs).forEach(function (key) {
       var input = inputs[key];
@@ -286,7 +288,8 @@ function (RecordForm, ui, fields, loads) {
       else if (input.entry.whole && (Math.round(parsed.value) !== parsed.value || parsed.value < 1)) {
         problem = input.entry.label + " is a whole number of at least 1.";
       }
-      if (!problem) draft[key] = parsed.value;
+      // A value that reads goes into the draft, so a layout redraws it from there in the units shown then.
+      if (!problem) { draft[key] = parsed.value; delete self.typed[key]; }
       else if (strict) error = problem;
     });
     if (!error && strict && !String(draft.display_name || "").trim()) error = "Enter a name.";
