@@ -13,9 +13,10 @@ module PhComposer
     #   on    every Zone's assignment cleared (its Program, Dwelling, counts and Equipment Set), and each Dwelling
     #         no Zone then names deleted. The Save carries the house's counts: the section enters the Zones' summed
     #         bedrooms, from `preview`, for the user to see before saving.
-    #   off   a Dwelling named for the Segment, holding the house's counts and Equipment Set, and every Zone in it
-    #         with the default Program it had: no Program of its own, or the Model's default where the Segment
-    #         names another.
+    #   off   a Dwelling named for the Segment, holding the counts and Equipment Set the Save carries (null as
+    #         null), and every Zone in it with the default Program it had: no Program of its own, or the Model's
+    #         default where the Segment names another. A Dwelling a Zone kept while overridden, and no Zone names
+    #         afterwards, is deleted.
     #
     # Only the switch itself has side effects, and only where it applies: on a residential Segment. A change of
     # category alone writes nothing; it changes whether the setting applies, and Zones keep their assignments.
@@ -69,9 +70,7 @@ module PhComposer
         zones = state.zones_in(after.id)
         return [] if zones.empty?
 
-        house = %w[bedrooms occupants equipment_set_id].to_h do |key|
-          [key, after.settings[key].nil? ? before.settings[key] : after.settings[key]]
-        end
+        house = after.settings.slice("bedrooms", "occupants", "equipment_set_id")
         dwelling_id = Operations.create(request, proposal, DWELLING_KIND,
                                         :values => house.merge("name" => Assignments.free_name(request,
                                                                                                after.name,
@@ -80,14 +79,18 @@ module PhComposer
         program_id = after.settings["default_program_id"] && Assignments.stored_id!(
           request, proposal, PROGRAM_KIND, Settings.default_id(request.model, PROGRAM_KIND)
         )
-        Assignments.stage(request, proposal, zones.to_h do |zone|
+        entries = Assignments.stage(request, proposal, zones.to_h do |zone|
           [zone, Occupancy::UNASSIGNED.merge("program_id" => program_id, "dwelling_id" => dwelling_id)]
         end)
-        [{ "kind" => DWELLING_KIND, "id" => dwelling_id }]
+        # Assignments a Zone kept while the setting overrode them (after a category change) give way too.
+        named = state.zones.reject { |zone| zones.include?(zone) }.map { |zone| zone.assignment["dwelling_id"] }
+        emptied = zones.map { |zone| zone.assignment["dwelling_id"] }.compact.uniq - named
+        deleted = Assignments.delete_dwellings(request, proposal, emptied, entries).first
+        ([dwelling_id] + deleted).map { |id| { "kind" => DWELLING_KIND, "id" => id } }
       end
 
       # What switching Single dwelling on in a Segment replaces, for the confirmation, and the bedrooms and occupants
-      # it would hold: the Zones' summed counts, null where none holds one.
+      # it would hold: its Dwellings' and Zones' counts summed, null where none holds one.
       def preview(state, segment_id)
         zones = state.zones_in(segment_id)
         assigned = zones.reject { |zone| Occupancy.unassigned?(zone.assignment) }
@@ -100,12 +103,17 @@ module PhComposer
           "dwelling_ids" => dwellings,
           "equipment_set_ids" => (assigned.map { |zone| zone.assignment["equipment_set_id"] } +
                                   dwellings.map { |id| state.dwelling(id)&.[]("equipment_set_id") }).compact.uniq,
-          "bedrooms" => sum(zones, "bedrooms"), "occupants" => sum(zones, "occupants")
+          "bedrooms" => total(state, zones, "bedrooms"), "occupants" => total(state, zones, "occupants")
         }
       end
 
-      def sum(zones, key)
-        values = zones.map { |zone| zone.assignment[key] }.compact
+      # The Segment's count of `key`: each Dwelling's own count where it holds one, else its Zones' counts, plus the
+      # counts of Zones in no Dwelling; null when none holds one.
+      def total(state, zones, key)
+        values = zones.group_by { |zone| zone.assignment["dwelling_id"] }.flat_map do |dwelling_id, members|
+          own = dwelling_id && state.dwelling(dwelling_id)&.[](key)
+          own.nil? ? members.map { |zone| zone.assignment[key] } : [own]
+        end.compact
         values.empty? ? nil : values.sum
       end
     end

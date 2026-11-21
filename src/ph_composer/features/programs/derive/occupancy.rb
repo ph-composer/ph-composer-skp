@@ -44,7 +44,9 @@ module PhComposer
 
       # A Dwelling's bedrooms and occupants: its own when it holds them, else its Zones' summed; occupants with
       # neither by the Phius rule, bedrooms + units. `occupants_rule` says the rule gave them.
+      # A single dwelling's house takes its counts from its Segment alone: its Zones' assignments are overridden.
       def counts(dwelling, zones)
+        zones = [] if dwelling["single"]
         bedrooms = dwelling["bedrooms"] || sum(zones.map { |zone| zone.assignment["bedrooms"] })
         occupants = dwelling["occupants"] || sum(zones.map { |zone| zone.assignment["occupants"] })
         rule = occupants.nil? && !bedrooms.nil?

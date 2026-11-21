@@ -159,6 +159,34 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     assert_equal 1, zone_row("Apt 1").dig("assignment", "bedrooms")
   end
 
+  def test_house_counts_survive_off_and_on_and_an_explicit_null_is_kept
+    completed(save("House", SEGMENT_NAMESPACE => settings("bedrooms" => 3, "occupants" => 5)))
+    completed(save("House", SEGMENT_NAMESPACE => settings("single_dwelling" => false, "bedrooms" => 3,
+                                                          "occupants" => 5)))
+    preview = segments.fetch("House").fetch("single_dwelling_preview")
+    assert_equal [3, 5], preview.values_at("bedrooms", "occupants"), "the Dwelling's own counts"
+    completed(save("House", SEGMENT_NAMESPACE => settings("bedrooms" => 3, "occupants" => 5)))
+    assert_equal [3, 5], segments.fetch("House").fetch("dwelling").values_at("bedrooms", "occupants")
+    completed(save("House", SEGMENT_NAMESPACE => settings("single_dwelling" => false, "bedrooms" => 3)))
+    assert_equal [3, 4, true], records.first.values_at("bedrooms", "occupants", "occupants_rule"),
+                 "occupants cleared in the same Save stay cleared"
+  end
+
+  def test_overridden_assignments_neither_count_in_the_house_nor_outlive_switching_off
+    completed(save("House", CERTIFICATION => certification("non_residential")))
+    completed(invoke("#{P::FEATURE_ID}.assign_dwelling", "zones" => [reference("Living"), reference("Bedroom")],
+                                                         "choice" => "shared"))
+    completed(invoke("#{P::FEATURE_ID}.set_counts", "zone" => reference("Bedroom"), "bedrooms" => 2,
+                                                    "occupants" => 9))
+    completed(save("House", CERTIFICATION => certification("residential")))
+    house = segments.fetch("House")
+    assert house.fetch("single_dwelling")
+    assert_equal [nil, nil], house.fetch("dwelling").values_at("bedrooms", "occupants"),
+                 "the overridden Zone counts are not the house's"
+    completed(save("House", SEGMENT_NAMESPACE => settings("single_dwelling" => false, "bedrooms" => 1)))
+    assert_equal ["House"], records.map { |row| row.fetch("name") }, "the kept Dwelling gave way"
+  end
+
   def test_a_category_change_alone_writes_no_assignment
     completed(save("House", CERTIFICATION => certification("non_residential")))
     assert_equal false, segments.fetch("House").fetch("single_dwelling")
@@ -296,6 +324,8 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     assert_includes stored, P::DefaultProgram::PROGRAM_ID
     program = completed(invoke("#{P::FEATURE_ID}.programs.create", "values" => { "name" => "Office" })).fetch("id")
     completed(invoke("#{P::FEATURE_ID}.assign_program", "zones" => [reference("Apt 1")], "program_id" => program))
+    uses = query("#{P::FEATURE_ID}.programs.all").fetch("records").find { |row| row.fetch("id") == program }
+    assert_equal 1, uses.fetch("use_count"), "the Zone assignment counts as a use"
     refused(invoke("#{P::FEATURE_ID}.programs.delete", "id" => program), "reference.in_use")
     refused(invoke("#{P::FEATURE_ID}.programs.delete", "id" => program,
                                                        "replacement_id" => P::DefaultProgram::PROGRAM_ID),

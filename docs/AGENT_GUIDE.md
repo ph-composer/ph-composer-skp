@@ -448,8 +448,9 @@ residential default Program, and only its bedrooms, occupants and Equipment Set 
    `ph_composer.zones.save_segment_settings`: all five fields, `single_dwelling` true and `bedrooms`. Leave
    `occupants` null for the Phius rule (bedrooms + 1) and `default_program_id` and `equipment_set_id` null for
    the Model's defaults.
-3. For apartments or other buildings, save the payload with `single_dwelling` false. That makes one Dwelling named
-   for the Segment and puts every Zone in it, in the same Undo step. Then assign per Zone, each one Undo step,
+3. For apartments or other buildings, save the payload with `single_dwelling` false, keeping the house's
+   `bedrooms`, `occupants` and `equipment_set_id` as read if you want them kept. That makes one Dwelling named for
+   the Segment, holding those values, and puts every Zone in it, in the same Undo step. Then assign per Zone, each one Undo step,
    naming Zones by the `reference` the read gives: `ph_composer.programs.assign_dwelling` with `choice` `shared`,
    `each`, `none` or `existing` (with `dwelling_id`), `set_counts` for a Zone's bedrooms and occupants,
    `assign_program` (null returns a Zone to its Segment's default) and `assign_equipment_set` for Dwellings or for

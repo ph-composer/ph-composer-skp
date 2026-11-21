@@ -684,8 +684,10 @@ one). The generic metadata routes may store either; the reads report it as a fin
 `ph_composer.zones.segment_settings_saved` adds the side effects when `single_dwelling` itself changes on a
 residential Segment. On: every Zone's assignment is cleared and each Dwelling no Zone then names is deleted;
 the Save carries the house's counts, which the Occupancy section fills from the preview's summed bedrooms. Off: a
-Dwelling named for the Segment takes the house's counts and Set, and every Zone joins it with no Program of its
-own (the Model's default where the Segment names another). A category change alone writes nothing. A contributor
+Dwelling named for the Segment takes the counts and Set the Save carries (a null stays null), every Zone joins it
+with no Program of its own (the Model's default where the Segment names another), and a Dwelling only an
+overridden Zone named is deleted. A house's counts come from its Segment alone; the preview sums each Dwelling's
+own count, else its Zones'. A category change alone writes nothing. A contributor
 may not change what Save staged (`proposal.contribution_replaced`), so the house's values live on the Segment
 payload, not on a Dwelling the switch would have to link.
 
