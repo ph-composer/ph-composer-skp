@@ -154,7 +154,7 @@ function (RecordForm, ui, fields, loads) {
         return;
       }
       var words = key === "energy_demand" ? number("Energy demand", demandUnit(type, draft)) : WORDS[key];
-      energy.add(self.label(words), self.number(key, words));
+      energy.add(self.label(words, key), self.number(key, words));
     });
     sections.push(energy.root);
 
@@ -163,13 +163,13 @@ function (RecordForm, ui, fields, loads) {
     });
     if (own.length) {
       var section = this.section(type.label);
-      own.forEach(function (field) { section.add(self.label(WORDS[field.key]), self.control(field)); });
+      own.forEach(function (field) { section.add(self.label(WORDS[field.key], field.key), self.control(field)); });
       sections.push(section.root);
     }
     var phpp = type.fields.filter(function (field) { return PHPP.indexOf(field.key) >= 0; });
     if (phpp.length) {
       var only = this.section("PHPP only");
-      phpp.forEach(function (field) { only.add(self.label(WORDS[field.key]), self.control(field)); });
+      phpp.forEach(function (field) { only.add(self.label(WORDS[field.key], field.key), self.control(field)); });
       sections.push(only.root);
     }
     this.body.replaceChildren.apply(this.body, sections);
@@ -177,8 +177,10 @@ function (RecordForm, ui, fields, loads) {
     if (again) again.focus({ preventScroll: true });
   };
 
-  DeviceDialog.prototype.label = function (words) {
-    var unit = words.field ? loads.unit(words) : "";
+  /* A label with its unit: for kept text that does not read yet, the unit it was typed in. */
+  DeviceDialog.prototype.label = function (words, key) {
+    var kept = key && this.typed[key];
+    var unit = words.field ? loads.unit(words, kept && kept.profile) : "";
     return words.label + (unit && unit !== "1" ? " [" + unit + "]" : "");
   };
 

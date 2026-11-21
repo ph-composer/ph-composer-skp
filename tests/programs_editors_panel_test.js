@@ -430,6 +430,7 @@ test("text that does not read yet, corrected after a unit switch, is read in the
   type(field(root, "capacity_m3"), "abc");
   p.snapshot(null, [WASHER], { unit_system: "IP" });
   change(field(root, "water_connection"), "dhw");
+  assert.match(text(root), /Capacity \[m³\]/, "the row names the units the text was typed in");
   // 4.5 is how the stored 0.1274 m³ reads in ft³, so only the units it was typed in tell the two apart.
   type(field(root, "capacity_m3"), "4.5");
   root.querySelector("form").listeners.submit({ preventDefault: function () {} });
