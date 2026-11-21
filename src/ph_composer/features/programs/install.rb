@@ -24,7 +24,17 @@
 #   declarations.rb     the actions, queries and codes
 #   library_kinds.rb    the programs, schedules and equipment_sets library kinds; a Program copies with its Schedules
 #
-# The panel half is html/features/programs/airtightness.js.
+# Occupancy: Dwellings, each Zone's assignment and Single dwelling per Building Segment:
+#
+#   occupancy.rb               the Dwelling kind and the two extensions, on Zones and on Segments
+#   occupancy_state.rb         the Zones, Segments and Dwellings an occupancy action or read starts from
+#   assignments.rb             assign a Program, a Dwelling, counts and an Equipment Set, through Zones' participant
+#   single_dwelling.rb         the contributor to Zones' settings Save that switches Single dwelling, and its preview
+#   derive/occupancy.rb        pure: effective Program and Dwelling, counts, people, lighting, ventilation, set points
+#   occupancy_reads.rb         the programs.zones and programs.dwellings reads, with their findings
+#   occupancy_declarations.rb  what occupancy registers
+#
+# The panel half is html/features/programs/airtightness.js and occupancy.js.
 module PhComposer
   module Programs
     FEATURE_ID = "ph_composer.programs"
@@ -37,6 +47,7 @@ require_relative "export"
 require_relative "schedule"
 require_relative "equipment_types"
 require_relative "program"
+require_relative "occupancy"
 require_relative "default_program"
 require_relative "settings"
 require_relative "store"
@@ -44,6 +55,12 @@ require_relative "operations"
 require_relative "inventory"
 require_relative "declarations"
 require_relative "library_kinds"
+require_relative "occupancy_state"
+require_relative "derive/occupancy"
+require_relative "assignments"
+require_relative "single_dwelling"
+require_relative "occupancy_reads"
+require_relative "occupancy_declarations"
 
 module PhComposer
   module Programs
@@ -89,10 +106,11 @@ module PhComposer
         Airtightness.read(request, request.params.fetch("id"))
       end
       AirtightnessExport.install(feature)
-      [Schedule::KIND, Program::KIND, EquipmentSet::KIND].each { |kind| feature.record_kind(kind) }
+      [Schedule::KIND, Program::KIND, EquipmentSet::KIND, Dwelling::KIND].each { |kind| feature.record_kind(kind) }
       Settings.install(feature)
       Declarations.install(feature)
       LibraryKinds.install(feature)
+      OccupancyDeclarations.install(feature)
     end
   end
 end

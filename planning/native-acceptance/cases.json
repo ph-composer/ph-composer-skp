@@ -5266,6 +5266,23 @@
         "tools/examples/library/programs.json"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG08",
+      "label": "Dwellings and Single dwelling on the installed RBZ, in a fresh synthetic Model of the house and apartment references: the House Segment reads as a single dwelling, its bedrooms saved in its settings; switching Single dwelling off in the Occupancy section makes the House Dwelling its Zones join, and back on clears them and deletes it, each one Save; per-Zone assign_dwelling, set_counts and assign_program each one step; a Dwelling across two Segments refused; copying a Zone keeps its Dwelling; native Undo and Redo of each from the Edit menu; the Single dwelling tag and occupancy findings on the Segment headings in Geometry and Spaces, Ed at the mouse",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/extension_staging.rb",
+        "src/ph_composer/features/zones/zone/steps.rb",
+        "src/ph_composer/features/programs/occupancy.rb",
+        "src/ph_composer/features/programs/assignments.rb",
+        "src/ph_composer/features/programs/single_dwelling.rb",
+        "src/ph_composer/features/programs/occupancy_reads.rb",
+        "src/ph_composer/html/features/programs/occupancy.js",
+        "src/ph_composer/html/features/zones/segment_settings.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

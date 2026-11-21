@@ -1605,6 +1605,176 @@ Values:
 }
 ```
 
+### `ph_composer.programs.dwelling`
+
+Dwelling, a catalog kind owned by `ph_composer.programs`, schema version 1.
+
+References: `equipment_set_id` names one `ph_composer.programs.equipment_set`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "units"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library",
+            "ph_composer_default"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "units": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical dwelling units it counts as."
+            },
+            "bedrooms": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "description": "Its own bedroom count; absent or null sums its Zones'."
+            },
+            "occupants": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+            },
+            "equipment_set_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^eqs_[A-Za-z0-9]{12}$",
+              "description": "Its Equipment Set; absent or null for the Model's default."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "units": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical dwelling units it counts as."
+    },
+    "bedrooms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Its own bedroom count; absent or null sums its Zones'."
+    },
+    "occupants": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+    },
+    "equipment_set_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "Its Equipment Set; absent or null for the Model's default."
+    }
+  }
+}
+```
+
 ### `ph_composer.programs.equipment_set`
 
 Equipment Set, a catalog kind owned by `ph_composer.programs`, schema version 1.
@@ -16150,13 +16320,749 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.dwellings`
+
+Every Dwelling with its Zones and counts, the single-dwelling houses among them. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.dwellings.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dwellings"
+  ],
+  "properties": {
+    "dwellings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "units",
+          "single_dwelling",
+          "own_bedrooms",
+          "own_occupants",
+          "bedrooms",
+          "occupants",
+          "occupants_rule",
+          "equipment_set_id",
+          "zone_ids",
+          "building_segment_ids",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "units": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "single_dwelling": {
+            "type": "boolean"
+          },
+          "own_bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "own_occupants": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "occupants": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "occupants_rule": {
+            "type": "boolean"
+          },
+          "equipment_set_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "zone_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "building_segment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.dwellings.all`
+
+Every Dwelling, PH-Composer's defaults included. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.dwellings.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "units"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "units": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical dwelling units it counts as."
+                      },
+                      "bedrooms": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "description": "Its own bedroom count; absent or null sums its Zones'."
+                      },
+                      "occupants": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+                      },
+                      "equipment_set_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                        "description": "Its Equipment Set; absent or null for the Model's default."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "units": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical dwelling units it counts as."
+              },
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Its own bedroom count; absent or null sums its Zones'."
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+              },
+              "equipment_set_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                "description": "Its Equipment Set; absent or null for the Model's default."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.dwellings.list`
+
+One bounded page of dwellings in id order, with what uses each. Owner: `ph_composer.programs`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "units"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "units": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical dwelling units it counts as."
+                      },
+                      "bedrooms": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "description": "Its own bedroom count; absent or null sums its Zones'."
+                      },
+                      "occupants": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+                      },
+                      "equipment_set_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                        "description": "Its Equipment Set; absent or null for the Model's default."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "units": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical dwelling units it counts as."
+              },
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Its own bedroom count; absent or null sums its Zones'."
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+              },
+              "equipment_set_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                "description": "Its Equipment Set; absent or null for the Model's default."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
 ### `ph_composer.programs.equipment_sets.all`
 
 Every Equipment Set, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.equipment_sets.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -16722,7 +17628,7 @@ Example params:
 
 One bounded page of equipment_sets in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -17286,7 +18192,7 @@ Every Program, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.programs.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -18395,7 +19301,7 @@ Example params:
 
 One bounded page of programs in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -19545,7 +20451,7 @@ Every Schedule, PH-Composer's defaults included. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.schedules.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -20009,7 +20915,7 @@ Example params:
 
 One bounded page of schedules in id order, with what uses each. Owner: `ph_composer.programs`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -20903,6 +21809,626 @@ Result:
     },
     "default_equipment_set_id": {
       "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.single_dwelling_preview`
+
+What switching Single dwelling on in one Building Segment replaces: Programs chosen per Zone, Dwellings and Equipment Sets, and the Zones' summed bedrooms and occupants, which the Save then carries. Owner: `ph_composer.programs`.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "building_segment_id",
+    "programs",
+    "dwelling_ids",
+    "equipment_set_ids",
+    "bedrooms",
+    "occupants"
+  ],
+  "properties": {
+    "building_segment_id": {
+      "type": "string"
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "program_id"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "program_id": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Each Zone's own Program, which gives way to the default."
+    },
+    "dwelling_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dwellings its Zones are in."
+    },
+    "equipment_set_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Sets its Zones and Dwellings name."
+    },
+    "bedrooms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "The Zones' bedrooms summed; null when none holds a count."
+    },
+    "occupants": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "The Zones' occupants summed; null when none holds a count."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "bsg_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.zones`
+
+Every Zone's assignment and what it works out to: its Program, Dwelling, peak people, lighting and ventilation, with findings; and each Building Segment's occupancy, set points and Single dwelling preview. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.zones.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "building_segments",
+    "choices"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "reference",
+          "name",
+          "building_segment_id",
+          "assignment",
+          "program_id",
+          "program_name",
+          "dwelling_id",
+          "dwelling_name",
+          "single_dwelling",
+          "equipment_set_id",
+          "floor_area_m2",
+          "icfa_m2",
+          "people",
+          "lighting_w",
+          "ventilation_m3h",
+          "ventilation_source",
+          "findings"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "building_segment_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "assignment": {
+            "type": "object",
+            "description": "The stored assignment, every field null when it has none."
+          },
+          "program_id": {
+            "type": "string",
+            "description": "The Program it uses: under Single dwelling the Model's default, else its own, its Segment's default or the Model's."
+          },
+          "program_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dwelling_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Its Dwelling; null in none, and under Single dwelling, whose house is no record."
+          },
+          "dwelling_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "single_dwelling": {
+            "type": "boolean",
+            "description": "Whether its Segment's setting decides it."
+          },
+          "equipment_set_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Its Dwelling's Set, or its own when in none; null for the Model's default."
+          },
+          "floor_area_m2": {
+            "type": "number",
+            "x-unit": "m2",
+            "description": "Its Spaces' floor area."
+          },
+          "icfa_m2": {
+            "type": "number",
+            "x-unit": "m2",
+            "description": "Its Spaces' weighted area."
+          },
+          "people": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Peak people; null while a value is missing."
+          },
+          "lighting_w": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "W",
+            "description": "Peak interior lighting."
+          },
+          "ventilation_m3h": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "m3/h"
+          },
+          "ventilation_source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "by_program",
+              "detailed",
+              null
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "building_segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "category",
+          "settings",
+          "stored",
+          "single_dwelling",
+          "dwelling",
+          "dwelling_count",
+          "set_points",
+          "single_dwelling_preview",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "single_dwelling",
+              "default_program_id",
+              "bedrooms",
+              "occupants",
+              "equipment_set_id"
+            ],
+            "properties": {
+              "single_dwelling": {
+                "type": "boolean"
+              },
+              "default_program_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "equipment_set_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "Its occupancy settings, the defaults where it stores none."
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "single_dwelling": {
+            "type": "boolean",
+            "description": "On and residential: the setting applies."
+          },
+          "dwelling": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "units",
+              "bedrooms",
+              "occupants",
+              "occupants_rule",
+              "equipment_set_id"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "units": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "occupants_rule": {
+                "type": "boolean"
+              },
+              "equipment_set_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The house under Single dwelling, while it has Zones."
+          },
+          "dwelling_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "set_points": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "heating_c",
+              "cooling_c",
+              "agree"
+            ],
+            "properties": {
+              "heating_c": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cooling_c": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "agree": {
+                "type": "boolean"
+              }
+            }
+          },
+          "single_dwelling_preview": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "building_segment_id",
+              "programs",
+              "dwelling_ids",
+              "equipment_set_ids",
+              "bedrooms",
+              "occupants"
+            ],
+            "properties": {
+              "building_segment_id": {
+                "type": "string"
+              },
+              "programs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "program_id"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "program_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "description": "Each Zone's own Program, which gives way to the default."
+              },
+              "dwelling_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Dwellings its Zones are in."
+              },
+              "equipment_set_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sets its Zones and Dwellings name."
+              },
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "The Zones' bedrooms summed; null when none holds a count."
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "The Zones' occupants summed; null when none holds a count."
+              }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "choices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "programs",
+        "equipment_sets",
+        "default_program_id",
+        "default_equipment_set_id"
+      ],
+      "properties": {
+        "programs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Every Program, by name."
+        },
+        "equipment_sets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Every Equipment Set, by name."
+        },
+        "default_program_id": {
+          "type": "string"
+        },
+        "default_equipment_set_id": {
+          "type": "string"
+        }
+      }
     }
   }
 }
@@ -56055,6 +57581,1009 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.assign_dwelling`
+
+Put Zones in a Dwelling: one shared, one each, none, or an existing one. A Dwelling left with no Zones is deleted in the same step. Owner: `ph_composer.programs`.
+
+Undo step: Assign Dwelling. Writes each Zone's assignment; creates and deletes Dwellings.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "choice"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Each Zone occurrence, as zones.all or programs.zones returns its reference.",
+      "minItems": 1
+    },
+    "choice": {
+      "type": "string",
+      "enum": [
+        "shared",
+        "each",
+        "none",
+        "existing"
+      ],
+      "description": "shared: one new Dwelling for them all; each: one new Dwelling per Zone; none: no Dwelling; existing: the Dwelling dwelling_id names."
+    },
+    "dwelling_id": {
+      "type": "string",
+      "pattern": "^dwl_[A-Za-z0-9]{12}$",
+      "description": "The Dwelling, for existing."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "dwelling_ids",
+    "deleted_dwelling_ids",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dwelling_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deleted_dwelling_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        101
+      ]
+    }
+  ],
+  "choice": "shared"
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        101
+      ]
+    }
+  ],
+  "choice": "existing",
+  "dwelling_id": "dwl_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.assign_equipment_set`
+
+Set the Equipment Set of Dwellings, or of Zones in no Dwelling. Owner: `ph_composer.programs`.
+
+Undo step: Assign Equipment Set. Updates each Dwelling and writes each Zone's assignment; stores the default Set when it is named.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "equipment_set_id"
+  ],
+  "properties": {
+    "equipment_set_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set; null for the Model's default."
+    },
+    "dwelling_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^dwl_[A-Za-z0-9]{12}$",
+        "description": "A Dwelling."
+      },
+      "description": "Dwellings to set."
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Zones in no Dwelling to set."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dwelling_ids",
+    "zone_ids",
+    "equipment_set_id"
+  ],
+  "properties": {
+    "dwelling_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "equipment_set_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "equipment_set_id": "eqs_Ab12Cd34Ef56",
+  "dwelling_ids": [
+    "dwl_Ab12Cd34Ef56"
+  ]
+}
+```
+
+### `ph_composer.programs.assign_program`
+
+Set the Program of Zones. Owner: `ph_composer.programs`.
+
+Undo step: Assign Program. Writes each Zone's assignment; stores the residential default when it is named.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "program_id"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Each Zone occurrence, as zones.all or programs.zones returns its reference.",
+      "minItems": 1
+    },
+    "program_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^pgm_[A-Za-z0-9]{12}$",
+      "description": "The Program; null returns each Zone to its Segment's default."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "program_id"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "program_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        101
+      ]
+    }
+  ],
+  "program_id": "pgm_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.dwellings.create`
+
+Create one Dwelling with default values. Owner: `ph_composer.programs`.
+
+Undo step: Create Dwelling. Creates one catalog record.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "units": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical dwelling units it counts as."
+                },
+                "bedrooms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "description": "Its own bedroom count; absent or null sums its Zones'."
+                },
+                "occupants": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+                },
+                "equipment_set_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                  "description": "Its Equipment Set; absent or null for the Model's default."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "units": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical dwelling units it counts as."
+        },
+        "bedrooms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Its own bedroom count; absent or null sums its Zones'."
+        },
+        "occupants": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+        },
+        "equipment_set_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^eqs_[A-Za-z0-9]{12}$",
+          "description": "Its Equipment Set; absent or null for the Model's default."
+        }
+      },
+      "description": "The new Dwelling's values; any not given take their defaults, and a missing name the first free \"Dwelling N\"."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Example Dwelling"
+  }
+}
+```
+
+### `ph_composer.programs.dwellings.delete`
+
+Delete one Dwelling; remaining uses refuse. Owner: `ph_composer.programs`.
+
+Undo step: Delete Dwelling. A replacement takes every use, then the record goes, in one step.
+
+Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dwl_[A-Za-z0-9]{12}$",
+      "description": "The Dwelling to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": "string",
+      "pattern": "^dwl_[A-Za-z0-9]{12}$",
+      "description": "The Dwelling every use of the deleted one takes instead. Needed while anything uses it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dwl_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.dwellings.duplicate`
+
+Duplicate one Dwelling with a new identity. Owner: `ph_composer.programs`.
+
+Undo step: Duplicate Dwelling. Creates one catalog record; Schedules stay shared.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dwl_[A-Za-z0-9]{12}$",
+      "description": "The Dwelling to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dwl_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.dwellings.update`
+
+Edit one Dwelling; changed expected values refuse. Owner: `ph_composer.programs`.
+
+Undo step: Edit Dwelling. Updates values; metadata stays as stored.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dwl_[A-Za-z0-9]{12}$",
+      "description": "The Dwelling to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "units": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical dwelling units it counts as."
+                },
+                "bedrooms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "description": "Its own bedroom count; absent or null sums its Zones'."
+                },
+                "occupants": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+                },
+                "equipment_set_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^eqs_[A-Za-z0-9]{12}$",
+                  "description": "Its Equipment Set; absent or null for the Model's default."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "units": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical dwelling units it counts as."
+        },
+        "bedrooms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Its own bedroom count; absent or null sums its Zones'."
+        },
+        "occupants": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
+        },
+        "equipment_set_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^eqs_[A-Za-z0-9]{12}$",
+          "description": "Its Equipment Set; absent or null for the Model's default."
+        }
+      },
+      "description": "The values to change; any not given stay."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dwl_Ab12Cd34Ef56",
+  "values": {
+    "name": "Edited"
+  },
+  "expected_values": {
+    "name": "Original"
+  }
+}
+```
+
 ### `ph_composer.programs.equipment_sets.add_device`
 
 Add one device of a honeybee-ph type, with that type's defaults under the values given. Owner: `ph_composer.programs`.
@@ -61294,6 +63823,100 @@ Example params:
   "expected_values": {
     "name": "Original"
   }
+}
+```
+
+### `ph_composer.programs.set_counts`
+
+Set one Zone's bedrooms and occupants, which its Dwelling sums. Owner: `ph_composer.programs`.
+
+Undo step: Set Bedrooms and Occupants. Writes the Zone's assignment.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone",
+    "bedrooms",
+    "occupants"
+  ],
+  "properties": {
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "zone_id",
+        "zone_path"
+      ],
+      "properties": {
+        "zone_id": {
+          "type": "string"
+        },
+        "zone_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "The Zone occurrence, in a Dwelling."
+    },
+    "bedrooms": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Its bedrooms; null for none."
+    },
+    "occupants": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Its occupants; null lets the Dwelling's sum or the Phius rule decide."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_id"
+  ],
+  "properties": {
+    "zone_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zone": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      101
+    ]
+  },
+  "bedrooms": 2,
+  "occupants": null
 }
 ```
 
@@ -83114,7 +85737,9 @@ Save one Building Segment's settings dialog: its name, colour and default, and a
 
 Undo step: Change Building Segment Settings. Writes the Segment's values and settings; a rename or a new default also rewrites each member Zone's evidence. Every contributor to ph_composer.zones.segment_settings_saved adds its own changes in the same step.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -90183,6 +92808,159 @@ Example params:
 }
 ```
 
+### `ph_composer.zones.stage_extension`
+
+Stage the calling feature's extension payload on named Zone and Building Segment records in its own proposal, checked by the namespace's installed validator. Owner: `ph_composer.zones`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `participant` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "namespace"
+  ],
+  "properties": {
+    "namespace": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The calling feature's own extension namespace."
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "payload"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Each Zone occurrence and its whole new payload."
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "payload"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^bsg_[A-Za-z0-9]{12}$",
+            "description": "The Building Segment."
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Each Building Segment and its whole new payload."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "segment_ids",
+    "zone_entries"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The Zones whose payload changed."
+    },
+    "segment_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The Segments whose payload changed."
+    },
+    "zone_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "key",
+          "record"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "key": {
+            "type": "array"
+          },
+          "record": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Each changed Zone as the proposal leaves it, as a reference entry: what a caller's reference plan projects when it deletes a record the Zones no longer name."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "namespace": "example.segment.note",
+  "segments": [
+    {
+      "id": "bsg_Ab12Cd34Ef56",
+      "payload": {
+        "text": "Note"
+      }
+    }
+  ]
+}
+```
+
 ## Export tasks
 
 HBJSON runtime exports use retained task methods. Each params key is the method's keyword argument.
@@ -91712,6 +94490,15 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `airtightness.no_exposed_face` | A Building Segment with an airtightness test result has no Outdoors or Ground Face, so PHX would read no infiltration. |
 | `airtightness.no_net_volume` | A Building Segment with an n50 test result has no Space net volume to convert it over. |
 | `programs.default_in_use` | A Program or Equipment Set is the Model's default; a delete must name a replacement, which becomes the default. |
+| `programs.dwelling_across_segments` | A Dwelling holds Zones in more than one Building Segment. |
+| `programs.equipment_watts_residential` | A Zone's Program has electric equipment watts in a residential Building Segment; PHX reads only Equipment Set devices there. |
+| `programs.non_residential_dwellings` | A non-residential Building Segment holds Dwellings. |
+| `programs.residential_without_dwelling` | A residential Building Segment has no Dwelling. |
+| `programs.set_points_disagree` | The Programs of a Building Segment's Zones give different heating or cooling set points; the Segment carries one pair. |
+| `programs.single_dwelling` | The Zone is in a Building Segment that is a single dwelling, where the setting decides its Program, Dwelling and counts. |
+| `programs.single_dwelling_no_effect` | Single dwelling is on in a non-residential Building Segment, where it has no effect. |
+| `programs.single_dwelling_overrides` | A Zone in a single dwelling keeps an assignment of its own, which the setting overrides. |
+| `programs.unassigned_zone` | A Zone in a non-residential Building Segment has no Program of its own or from its Segment. |
 
 ### `ph_composer.shading`
 
@@ -91979,3 +94766,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
 | 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |
 | 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |
+| 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |

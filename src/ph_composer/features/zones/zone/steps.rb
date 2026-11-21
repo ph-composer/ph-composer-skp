@@ -80,13 +80,29 @@ module PhComposer
         current = occurrence.record
         raise CodedError.new("target.changed", "The Zone changed after it was previewed.") unless current == @before
 
-        ZONE_STORE.write(occurrence.entity, @after)
-        occurrence.entity.name = @after.fetch("name") if occurrence.entity.respond_to?(:name=)
+        @applied = [model, occurrence]
+        write(model, occurrence, @after)
+      end
+
+      # Writes the record as it stood before apply back, for a transition inside a host follow-up that cannot
+      # abort (context/CONTRACTS.md, "Transition contributors"); nothing before apply.
+      def restore
+        return unless @applied
+
+        write(*@applied, @before)
+        @applied = nil
+      end
+
+      private
+
+      def write(model, occurrence, record)
+        ZONE_STORE.write(occurrence.entity, record)
+        occurrence.entity.name = record.fetch("name") if occurrence.entity.respond_to?(:name=)
         Names.track(model, occurrence.entity)
-        stamp = Schema.stamp(@after)
+        stamp = Schema.stamp(record)
         Occurrences.member_faces(occurrence).map(&:entity).each do |entity|
           existing = STAMP_STORE.read(entity)
-          STAMP_STORE.write(entity, stamp) if existing && existing["zone_id"] == @after.fetch("id")
+          STAMP_STORE.write(entity, stamp) if existing && existing["zone_id"] == record.fetch("id")
         end
       end
     end

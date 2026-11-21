@@ -635,8 +635,9 @@ the bundle is no longer read. The stored fields are the reference target `ph_com
 with a retargeter per kind.
 
 **Deletes.** A Schedule a Program names refuses a plain delete as `reference.in_use`; with a replacement of the
-same type every Program slot naming it takes the replacement first. Zone assignments and Dwellings join these
-uses in P4a-08. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
+same type every Program slot naming it takes the replacement first. A Zone assignment or a Segment's occupancy
+naming a Program, Dwelling or Equipment Set refuses its delete as `reference.in_use`, with or without a
+replacement (their payloads are not retargeted); a Dwelling naming an Equipment Set moves to the replacement. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
 keeping its map.
 
 **Library kinds.** `programs`, `schedules` and `equipment_sets` (`features/programs/library_kinds.rb`; wire rows
@@ -648,7 +649,67 @@ form values its type's, and a device's missing fields its type's. An Equipment S
 `use_library` replacement keeps the id and `user_data` of each local device whose place the incoming device of the
 same type takes, and refuses `validation.failed` rather than drop a device holding `user_data`. A Program or
 Equipment Set copy may assign itself as the Model's default (`{"mode": "model_default", "expected_settings"}`,
-through `update_settings`); a Schedule copies without assignment. Zone assignment joins in P4a-08.
+through `update_settings`); a Schedule copies without assignment. Copying a library Program onto a Zone waits
+for the Zones / Programs view (P4a-09); `Assignments.assign_program` takes its inputs as arguments for it.
+
+## Occupancy
+
+`ph_composer.programs` owns Dwellings, each Zone's assignment and Single dwelling per Building Segment
+(`features/programs/occupancy.rb`, `assignments.rb`, `single_dwelling.rb`, `derive/occupancy.rb`).
+
+- **Dwelling** (`ph_composer.programs.dwelling`, `dwl_`): the shared fields, `units` (integer, at least 1), and
+  optional `bedrooms` and `occupants` (its own counts) and `equipment_set_id` (a core reference; absent for the
+  Model's default Set). An edit to null removes one. Its own counts are set when Single dwelling is switched off; otherwise its Zones' counts sum.
+- **Zone assignment**, the structured extension `ph_composer.programs.zone_assignment` on each Zone: `program_id`,
+  `dwelling_id`, `equipment_set_id` (declared references, each null for none) and `bedrooms`, `occupants`. Absent,
+  or every field null, the Zone is unassigned. It travels with a copied Zone, which keeps its Dwelling.
+- **Segment occupancy**, `ph_composer.programs.segment` on each Building Segment: `single_dwelling` (absent reads
+  true), `default_program_id`, and the house's `bedrooms`, `occupants` and `equipment_set_id` while single. Single
+  dwelling applies on a residential Segment only (the certification category); then every Zone uses the Model's
+  default Program and is in the house, which is no record, and its Zone assignments are ignored.
+
+Both extensions are `local_only` until the Program export claims them, so a payload never blocks an export.
+Zones never reads them. Programs writes them through Zones' proposal participant
+`ph_composer.zones.stage_extension` (a namespace and whole payloads for named Zone occurrences and Segments, each
+checked by the installed validator, a Zone as one Zone update step chained after any earlier write of it in the
+proposal); its result gives each changed Zone as a reference entry, so an action that deletes a Dwelling its Zones
+stop naming plans the delete over them. `assign_program`, `assign_dwelling` (`shared`, `each`, `none`,
+`existing`; a Dwelling no Zone names afterwards is deleted, and its map reported as `removed_user_data`), `set_counts` (a Zone in a Dwelling) and
+`assign_equipment_set` (Dwellings, or Zones in none) are each one Undo step, store an unwritten default they name
+first, and refuse `programs.single_dwelling` for a Zone a single dwelling decides and
+`programs.dwelling_across_segments` for a Dwelling whose Zones would lie in two Segments (no Segment counts as
+one). The generic metadata routes may store either; the reads report it as a finding.
+
+**Switching Single dwelling.** Zones' settings Save stages the payload; Programs' contributor to
+`ph_composer.zones.segment_settings_saved` adds the side effects when `single_dwelling` itself changes on a
+residential Segment. On: every Zone's assignment is cleared and each Dwelling no Zone then names is deleted;
+the Save carries the house's counts, which the Occupancy section fills from the preview's summed bedrooms. Off: a
+Dwelling named for the Segment takes the counts and Set the Save carries (a null stays null), every Zone joins it
+with no Program of its own (the Model's default where the Segment names another), and a Dwelling only an
+overridden Zone named is deleted. A house's counts come from its Segment alone; the preview sums each Dwelling's
+own count, else its Zones'. A category change alone writes nothing. A contributor
+may not change what Save staged (`proposal.contribution_replaced`), so the house's values live on the Segment
+payload, not on a Dwelling the switch would have to link.
+
+**Reads.** `ph_composer.programs.zones` answers one row per Zone (its assignment; effective Program, Dwelling and
+Equipment Set; floor area and iCFA from Spaces; peak people, interior lighting W and ventilation m³/h with its
+source; findings), one row per Segment (category, settings, whether Single dwelling applies, the house, set
+points and whether its Zones' Programs agree, the switch-on preview, findings) and the Program and Equipment Set
+choices; the panel reads it as the snapshot section `ph_composer.programs.occupancy`.
+`ph_composer.programs.dwellings` lists every Dwelling, the houses among them with a null id. The derivations are
+CONTRACTS section 6 of the Phase 4a packet: people from the Dwelling's occupants over the presence Schedule's
+mean (its daily full-load hours over 24, as honeybee-ph's `annual_average_operating_fraction`), shared by floor
+area; lighting from honeybee-ph `phius_residential.lighting_interior` over the Dwelling's iCFA and units, as peak
+watts over the lighting Schedule's mean × 8,760 h, shared by iCFA; other loads per
+m² of floor; ventilation from the Program's four terms, or the larger of a detailed Zone's Spaces' supply and
+extract. Findings: `programs.dwelling_across_segments`, `programs.single_dwelling_no_effect` (a stored true on a
+non-residential Segment), `programs.residential_without_dwelling`, `programs.non_residential_dwellings`,
+`programs.unassigned_zone`, `programs.equipment_watts_residential`, `programs.single_dwelling_overrides` (a
+Zone of a single dwelling that keeps an assignment, which the setting overrides) and `programs.set_points_disagree`,
+each a warning. A Segment row also carries its Zones' findings, one per code, for its heading. A per-person
+ventilation term over people still unknown leaves the Zone's ventilation unknown. Programs' own
+actions refuse a Dwelling across Segments only for the Dwelling they join, so one already across never blocks the
+repair.
 
 ## This computer's settings file
 

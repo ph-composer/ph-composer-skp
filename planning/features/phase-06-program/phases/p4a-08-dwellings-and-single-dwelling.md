@@ -85,3 +85,29 @@ PG08: Single dwelling on and off, Undo/Redo, copying a Zone, a Dwelling across S
 ## Done when
 
 PG08 passes.
+
+## Implementation decisions (2026-11-20)
+
+Recorded by the stage; [STATUS](../STATUS.md) holds the ledger row.
+
+- **The house's values live on the Segment payload.** `ph_composer.programs.segment` holds `single_dwelling`,
+  `default_program_id` and, while single, the house's `bedrooms`, `occupants` and `equipment_set_id`, in place of
+  CONTRACTS section 2's `dwelling_id`. A transition contributor may not change what Zones' Save staged
+  (`proposal.contribution_replaced`), so it could not link a Dwelling it creates to the Segment, and the dialog's
+  bedrooms have no other route into the one Save. No Dwelling record exists while single; switching off creates one
+  named for the Segment with the house's values (step 5's "Dwelling of a Zone ... created when first needed").
+- **Switching on sums in the dialog.** The Occupancy section enters the preview's summed bedrooms when the box is
+  checked, and an inline note names what gives way; Save is the confirmation (no `confirm(` in the panel). An agent
+  reads `programs.single_dwelling_preview` and sends the sum.
+- **Only the switch has side effects**, and only on a residential Segment. A category change alone writes nothing;
+  a Zone a single dwelling overrides that keeps an assignment is the `programs.single_dwelling_overrides` finding.
+- **Both extensions are `local_only`** until the Program export (P4a-10) claims them, so no payload blocks an export.
+- **Delete guards.** A Program, Dwelling or Equipment Set a Zone or Segment payload names refuses its delete as
+  `reference.in_use`, with or without a replacement: no route retargets the payloads. Dwellings move to a replacement
+  Equipment Set.
+- **A Dwelling across Segments** refuses only for the Dwelling an action joins, so a generic write or a Zone moved
+  between Segments never blocks the repair.
+- **The dialog seam grew two hooks**: `context.draft(namespace)` reads another section's draft, and `refresh(draft,
+  context)` runs after every edit; the Occupancy section reads the certification category through them.
+- **Library Programs on a Zone** stay with P4a-09 (P4a-07b step 1); `Assignments.assign_program` takes its inputs as
+  arguments for the library callback.

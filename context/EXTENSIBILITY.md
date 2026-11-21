@@ -875,7 +875,10 @@ PhComposerUI.get("panel").segmentSettingsSection("example.segment.note", {
 `phc-segment-settings-label` for a label beside its control) and calls `context.changed()` after
 editing the draft: that marks the section changed and the dialog validates again. Only a changed
 section is validated and sent, so a section the user leaves alone keeps its stored payload.
-`context.state` is the panel state the dialog opened on. Save sends one
+`context.state` is the panel state the dialog opened on. A section that depends on another reads that section's
+draft as it stands with `context.draft(namespace)` (a copy, or null) and declares `refresh(draft, context)`, which
+the dialog calls after every edit; it never writes another's draft (Occupancy reads the certification category
+this way). Save sends one
 `ph_composer.zones.save_segment_settings`: the General values, the default, each changed section's
 payload by namespace, and the Segment's `extension_data` as read. Zones
 checks each payload with that namespace's installed validator (`Records::Extension#problems`), so a
@@ -889,7 +892,9 @@ A section's owner adds its own side effects to the same Undo step by declaring a
 contributor for `ph_composer.zones.segment_settings_saved` ("Transition contributors" in
 [CONTRACTS.md](CONTRACTS.md)). Its description is `building_segment_id` and `namespaces`, the
 namespaces whose payload changed. The owner requires `ph_composer.zones`, writes only its own kinds
-and leaves the Segment record to Zones.
+and leaves the Segment record to Zones; it may not change what Save staged. To write its own payload on the
+Segment's Zones, or a payload from its own action, it calls Zones' participant `ph_composer.zones.stage_extension`
+(CONTRACTS.md, "Occupancy"), which `save_segment_settings` names for its transition's contributors.
 
 A setting that reaches the HBJSON is exported by its owner, not by Zones. The owner's export contributor
 claims its namespace on the Building Segment kind (`entity_projections: [{"namespace", "target_kind" =>
@@ -910,7 +915,9 @@ validator) and `example_segment_note.js` (its section), loaded together by
 (`features/certification/`, `html/features/certification/section.js` and
 `python/ph_composer_translation/certification_sections.py`), which also exports;
 `tests/segment_certification_test.rb` runs a development namespace through the same claim.
-Airtightness (`features/programs/`, `html/features/programs/airtightness.js` and
+Occupancy (`features/programs/single_dwelling.rb`, `html/features/programs/occupancy.js`) is the section with a
+transition contributor and a `segmentHeading` contribution. Airtightness (`features/programs/`,
+`html/features/programs/airtightness.js` and
 `airtightness_sections.py`) shows the other shape: its Python section attaches at `ROOM`, one record per
 exported Zone of a Segment with settings, and sets the shared `BldgSegment` from each Room.
 

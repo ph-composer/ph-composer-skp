@@ -36,6 +36,11 @@ module PhComposer
         stored(model).to_h { |key, value| [key, value || FIELDS.fetch(key).last] }
       end
 
+      # Whether the Model names a default of `kind`: Programs and Equipment Sets do, Schedules and Dwellings do not.
+      def default_kind?(kind)
+        FIELDS.values.any? { |field_kind, _reserved| field_kind == kind }
+      end
+
       def kind_field(kind)
         FIELDS.find { |_key, (field_kind, _reserved)| field_kind == kind }.first
       end

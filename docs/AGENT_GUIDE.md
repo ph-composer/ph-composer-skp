@@ -436,6 +436,33 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
    copy that Schedule on its own with `use_library`, which gives the local one the library's values and source,
    or rename the local one; then copy the Program again. `keep_local` does not resolve it.
 
+### Dwellings and Single dwelling
+
+Every Building Segment starts as a single dwelling: on a residential Segment all its Zones are one house with the
+residential default Program, and only its bedrooms, occupants and Equipment Set are entered.
+
+1. Read `ph_composer.programs.zones`. Each Zone row gives its `assignment` as stored and what it works out to:
+   `program_id`, `dwelling_name`, `equipment_set_id`, `people`, `lighting_w`, `ventilation_m3h`. Each
+   `building_segments` row says whether `single_dwelling` applies, the house's counts, and its `findings`.
+2. For a house, save the Segment's `ph_composer.programs.segment` payload with
+   `ph_composer.zones.save_segment_settings`: all five fields, `single_dwelling` true and `bedrooms`. Leave
+   `occupants` null for the Phius rule (bedrooms + 1) and `default_program_id` and `equipment_set_id` null for
+   the Model's defaults.
+3. For apartments or other buildings, save the payload with `single_dwelling` false, keeping the house's
+   `bedrooms`, `occupants` and `equipment_set_id` as read if you want them kept. That makes one Dwelling named for
+   the Segment, holding those values, and puts every Zone in it, in the same Undo step. Then assign per Zone, each one Undo step,
+   naming Zones by the `reference` the read gives: `ph_composer.programs.assign_dwelling` with `choice` `shared`,
+   `each`, `none` or `existing` (with `dwelling_id`), `set_counts` for a Zone's bedrooms and occupants,
+   `assign_program` (null returns a Zone to its Segment's default) and `assign_equipment_set` for Dwellings or for
+   Zones in none. A Dwelling left with no Zones is deleted. A Dwelling with Zones in two Segments refuses
+   `programs.dwelling_across_segments`, and a Zone a single dwelling decides refuses `programs.single_dwelling`.
+4. Before switching Single dwelling back on, read `ph_composer.programs.single_dwelling_preview`: it lists the Zone
+   Programs and Dwellings that give way and the Zones' summed `bedrooms`, which you then send in the payload.
+   Switching on clears every Zone's assignment and deletes the Dwellings no Zone names.
+5. A non-residential Segment (its Phius certification `category`) is never a single dwelling. Changing the
+   category writes no assignment; the Segment's Zones then need a Program of their own or from the Segment's
+   `default_program_id`, which the `programs.unassigned_zone` finding reports.
+
 ### Spaces from loose Faces
 
 Ask the user to draw separate loose floor surfaces in SketchUp, inset from the walls or
