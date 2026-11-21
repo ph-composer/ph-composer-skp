@@ -101,7 +101,38 @@ module PhComposer
       def findings(input)
         rows = rows(input)
         program_findings(rows, input.catalog) + dwelling_findings(input, rows) + segment_findings(input, rows) +
-          equipment_findings(rows, input.catalog)
+          equipment_findings(rows, input.catalog) + text_findings(rows, input.catalog)
+      end
+
+      # Every name or device comment the export would write that reads as a local file path, which stays in the
+      # Model (its id, its type or nothing takes its place): the export refuses a path in the HBJSON or its result.
+      def text_findings(rows, catalog)
+        texts = rows.flat_map { |row| row_texts(row, catalog) }
+        texts.select { |_id, text| Diagnostics.absolute_path?(text.to_s.strip) }.uniq.map do |id, _text|
+          warn("programs.text_left_out", id, "A name or device comment that reads as a local file path stays in " \
+                                             "the Model; the export writes its id, its type or nothing in its place.",
+               [], nil)
+        end
+      end
+
+      # The [record id, text] pairs the export writes for one Zone's Room: its Program's name and its Schedules',
+      # its Dwelling's and Segment's names, and its Equipment Set's device names and comments.
+      def row_texts(row, catalog)
+        texts = []
+        if row.program
+          texts << [row.program_id, row.program.fetch("name")]
+          Program::SLOTS.each_key do |slot|
+            id = row.program.dig(*slot.split("."))
+            texts << [id, catalog.schedules[id]&.fetch("name")] if id
+          end
+        end
+        texts << [row.dwelling["id"] || row.segment&.id, row.dwelling.fetch("name")] if row.dwelling
+        texts << [row.segment.id, row.segment.name] if row.segment
+        set = catalog.equipment_sets[equipment_set_id(row, catalog)]
+        Array(set && set["devices"]).each do |device|
+          texts << [device.fetch("id"), device["display_name"]] << [device.fetch("id"), device["comment"]]
+        end
+        texts
       end
 
       def program_findings(rows, catalog)
@@ -255,8 +286,8 @@ module PhComposer
 
           found << warn("programs.equipment_set_non_residential", row.zone.id,
                         "#{row.zone.name} carries an Equipment Set in #{row.segment.name}, a non-residential " \
-                        "Building Segment: PHX reads its Program's equipment watts there and drops the devices.",
-                        [row.zone.id])
+                        "Building Segment, where its Program's equipment watts stand for the equipment: the Set's " \
+                        "devices are left out of the export.", [row.zone.id])
         end
         found.uniq { |finding| [finding.code, finding.record_id] }
       end
@@ -486,6 +517,9 @@ module PhComposer
         set_id = equipment_set_id(row, catalog)
         return [] unless set_id
         return [] if largest(group, input).zone.id != row.zone.id
+        # PHX takes a non-residential Room's equipment from its Program's watts and its Process loads' watts, so a
+        # device there would count twice.
+        return [] if row.segment&.category == "non_residential"
 
         units = units_of(row)
         counts = counts_of(row, group)

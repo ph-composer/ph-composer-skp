@@ -770,8 +770,9 @@ count or the Phius rule's, all on its largest Room by Floor area. Its Equipment 
 once on that Room, each device's `quantity` its own times the units, under the identifier `<set>-<device>`: PHX
 merges devices across a Segment's Rooms by identifier and sums their quantities. A Zone in no Dwelling carries
 its own Set's devices. Each device is a `Process` whose watts are honeybee-ph's `annual_avg_wattage` from the
-Dwelling's counts and iCFA, over honeybee's Always On (EnergyPlus only: PHX reads the device in a residential
-Segment and drops it in a non-residential one). Every identifier is Ruby's, so the HBJSON is the same each run.
+Dwelling's counts and iCFA, over honeybee's Always On (PHX reads the device in a residential Segment). A Set in a
+non-residential Segment is left out: PHX takes such a Room's equipment from its Program's watts and its Process
+loads' watts, so its devices would count twice. Every identifier is Ruby's, so the HBJSON is the same each run.
 
 **Set points.** Each Segment's winter and summer set points are its Zones' Programs' heating and cooling, each a
 constant or its temperature Schedule's value. Where the Zones' Programs disagree, the Segment carries its first
@@ -789,8 +790,8 @@ checked, or a single dwelling's Building Segment settings):
 | `programs.set_points_disagree` | no | A Segment's Zones' Programs give different set points; the row names the pair exported |
 | `programs.counts_missing` | no | A Dwelling on a Phius rule has no bedrooms or occupants, so it exports with none |
 | `programs.rule_without_dwelling` | no | A Zone of a Segment record in no Dwelling uses a rule Program |
-| `programs.equipment_set_non_residential` | no | A Zone carries an Equipment Set in a non-residential Segment, where PHX drops the devices |
-| `programs.text_left_out` | no | A name or device comment that reads as a local file path stays in the Model; its id, type or nothing takes its place |
+| `programs.equipment_set_non_residential` | no | A Zone carries an Equipment Set in a non-residential Segment; its devices are left out, the Program's equipment watts standing for them |
+| `programs.text_left_out` | no | A Program, Schedule, Dwelling or Segment name, or a device name or comment, the export would write reads as a local file path: it stays in the Model and its id, type or nothing takes its place |
 
 The occupancy reads' findings on exported Zones and Segments join the preflight as warnings. A message that would
 carry a name reading as a local file path says so in its place, in the preflight and in the export's notes. Program, Schedule,

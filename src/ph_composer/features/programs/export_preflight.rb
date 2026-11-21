@@ -86,11 +86,20 @@ module PhComposer
       def floor_areas(request)
         floors = Hash.new(0.0)
         request.query(FACES).fetch("faces").each do |row|
-          next unless row.dig("values", "face_type") == "Floor"
+          next unless written_floor?(row)
 
           floors[row.dig("reference", "zone_path")] += row.fetch("area_m2").to_f
         end
         floors
+      end
+
+      # Whether the Faces section writes this Floor, as its extraction decides (`written?`): it has a boundary
+      # condition and, on a Surface, a current pair.
+      def written_floor?(row)
+        values = row.fetch("values", {})
+        return false unless values["face_type"] == "Floor" && values["boundary_condition"]
+
+        values["boundary_condition"] != "Surface" || row["adjacency_state"] == "current"
       end
 
       # `state` less the Zones export leaves out with no Building Segment, and their Segments.

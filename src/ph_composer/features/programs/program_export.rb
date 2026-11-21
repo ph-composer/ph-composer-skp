@@ -85,7 +85,7 @@ module PhComposer
           end
 
           findings.each { |finding| reader.note(finding.code, finding.record_id, safe(finding.message)) }
-          ExportPlan.call(input, :text => text(reader))
+          ExportPlan.call(input, :text => TEXT)
         end
       end
 
@@ -96,17 +96,8 @@ module PhComposer
       end
 
       # A name or comment that reads as a local file path stays in the Model, since the export refuses one in the
-      # HBJSON or its result: `fallback` takes its place, with a note.
-      def text(reader)
-        lambda do |value, fallback|
-          next value unless Diagnostics.absolute_path?(value.to_s.strip)
-
-          written = fallback.to_s.empty? ? "nothing" : fallback
-          reader.note(TEXT_LEFT_OUT, fallback.to_s, "A name or comment that reads as a local file path stayed in " \
-                                                    "the Model; the export writes #{written} in its place.")
-          fallback
-        end
-      end
+      # HBJSON or its result: `fallback` takes its place. ExportPlan's `programs.text_left_out` findings note each.
+      TEXT = ->(value, fallback) { Diagnostics.absolute_path?(value.to_s.strip) ? fallback : value }
 
       # ---------------------------------------------------------------- the snapshot
 

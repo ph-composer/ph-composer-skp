@@ -225,6 +225,7 @@ class ProgramExportTest < PhComposerTestCase
     assert_equal "#{program} (Bedroom)", bedroom.fetch("name"), "the id takes the name's place"
     notes = extraction.findings.map { |finding| finding.fetch("code") }
     assert_includes notes, E::TEXT_LEFT_OUT
+    assert(preflight.any? { |finding| finding.fetch("code") == E::TEXT_LEFT_OUT }, "the preflight says so too")
     refute(extraction.findings.any? { |finding| PhComposer::Diagnostics.absolute_path?(finding.fetch("message")) })
   end
 
@@ -251,6 +252,22 @@ class ProgramExportTest < PhComposerTestCase
     refute row.fetch("blocks_export")
     type = extract.document.dig("sections", E::PROGRAM_TYPES, "records").first
     assert_equal [0.0, 0.0], [type.dig("people", "people_per_area"), type.dig("lighting", "watts_per_area")]
+  end
+
+  # A Floor the Faces section leaves out, one with no boundary condition, counts no area in the preflight either.
+  def test_the_preflight_counts_only_floors_the_export_writes
+    house_only
+    %w[Living Kitchen Bedroom].each do |name|
+      zone_faces(name).each do |face|
+        record = Z::Faces::FACE_STORE.read(face)
+        next unless record.fetch("face_type") == "Floor"
+
+        Z::Faces::FACE_STORE.write(face, record.reject { |key, _| %w[boundary_condition assembly_id].include?(key) })
+      end
+    end
+    assert(preflight.any? { |finding| finding.fetch("code") == "programs.no_floor_area" })
+    notes = extract.findings.map { |finding| finding.fetch("code") }
+    assert_includes notes, "programs.no_floor_area", "the export finds the same"
   end
 
   def test_a_zone_in_no_dwelling_keeps_no_counts_from_a_stale_assignment

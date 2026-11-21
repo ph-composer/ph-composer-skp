@@ -114,6 +114,9 @@ Contract: `context/CONTRACTS.md`, "Program export". Evidence: [PG10 offline](../
   divides by its mean.
 - **Hot water** follows Set Residential Program's code, shower 1.17 gallons per bedroom, not the 4.67 its
   docstring and Building America Table 11 give (F4a-20); a follow-up for honeybee-ph.
+- **No devices in a non-residential Segment.** The stage doc says PHX drops them there; PHX 1.59.1 drops the
+  appliance but builds a Process load from each Process's watts, so a device would count beside the Program's
+  equipment watts. The Set's devices are left out, with `programs.equipment_set_non_residential` (Codex review).
 - **Process watts** are honeybee-ph's own `annual_avg_wattage` over the Dwelling's counts and iCFA (EnergyPlus
   only; PHX reads the device). No Process schedule is in the Model, so each uses honeybee's Always On.
 - **A ventilation day off** runs at the minimum period's fraction; a fractional or activity day off at its

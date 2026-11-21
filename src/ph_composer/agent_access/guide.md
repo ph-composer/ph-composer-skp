@@ -474,7 +474,7 @@ residential default Program, and only its bedrooms, occupants and Equipment Set 
    Face. A `programs.counts_missing` row
    means a Dwelling exports with no bedrooms or occupants, `programs.set_points_disagree` names the set points its
    Building Segment exports, `programs.rule_without_dwelling` names Zones in no Dwelling on the residential default,
-   `programs.equipment_set_non_residential` a Set whose devices PHX drops, and `programs.text_left_out` a name that
+   `programs.equipment_set_non_residential` a Set left out in a non-residential Segment, and `programs.text_left_out` a name that
    stayed in the Model because it reads as a file path. Each row's `locate` opens the
    Zones / Programs view at its Zones for the user (`ph_composer.programs.locate`).
 8. The export writes each Zone's Room with a ProgramType (one per Dwelling for the residential default), its own

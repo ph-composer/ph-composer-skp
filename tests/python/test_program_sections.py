@@ -72,7 +72,7 @@ def test_each_room_carries_its_counts_dwelling_and_devices() -> None:
     assert len(devices("Living")) == 8 and devices("Kitchen") == []
     assert {quantity for _type, quantity in devices("Apt 2")} == {2}, "the default Set times two units"
     assert devices("Laundry") == [("PhClothesDryer", 1), ("PhClothesWasher", 1)]
-    assert devices("Lab") == devices("Laundry"), "a Set in a non-residential Segment still exports"
+    assert devices("Lab") == [], "a Set in a non-residential Segment is left out: the Program's watts stand for it"
     # The People extension's identifiers are Ruby's, so the HBJSON is the same each run.
     rows = {row["id"]: row for row in records(value, "rooms")}
     for name, room in by_name.items():

@@ -1084,53 +1084,7 @@
           "program_type_id": "pgm_FIXED0000002"
         },
         {
-          "devices": [
-            {
-              "attributes": {
-                "capacity": 0.1274,
-                "comment": "",
-                "display_name": "Laundry - washer",
-                "energy_demand": 120.0,
-                "energy_demand_per_use": 0.0,
-                "in_conditioned_space": true,
-                "modified_energy_factor": 2.7,
-                "quantity": 1,
-                "reference_energy_norm": 2,
-                "reference_quantity": 1,
-                "utilization_factor": 1.0,
-                "water_connection": "2-COLD WATER CONNECTION"
-              },
-              "bedrooms": 0.0,
-              "class": "PhClothesWasher",
-              "floor_area_ft2": 215.27820833419463,
-              "identifier": "eqs_FIXED0000001-dev_FIXED0000001",
-              "occupants": 0.0,
-              "process_id": "zon_XXXXXXXXXXXX-eqs_FIXED0000001-dev_FIXED0000001"
-            },
-            {
-              "attributes": {
-                "combined_energy_factor": 3.93,
-                "comment": "",
-                "display_name": "Laundry - dryer",
-                "dryer_type": "5-ELECTRIC EXHAUST AIR DRYER",
-                "energy_demand_per_use": 0.0,
-                "field_utilization_factor": 1.18,
-                "field_utilization_factor_type": 1,
-                "gas_consumption": 0.0,
-                "gas_efficiency_factor": 2.67,
-                "in_conditioned_space": true,
-                "quantity": 1,
-                "reference_energy_norm": 2,
-                "reference_quantity": 1
-              },
-              "bedrooms": 0.0,
-              "class": "PhClothesDryer",
-              "floor_area_ft2": 215.27820833419463,
-              "identifier": "eqs_FIXED0000001-dev_FIXED0000002",
-              "occupants": 0.0,
-              "process_id": "zon_XXXXXXXXXXXX-eqs_FIXED0000001-dev_FIXED0000002"
-            }
-          ],
+          "devices": [],
           "dwelling": null,
           "id": "zon_XXXXXXXXXXXX",
           "number_bedrooms": 0.0,

@@ -108,6 +108,8 @@ def test_the_five_journeys_read_back_occupancy_devices_ventilation_and_set_point
     assert len(devices["House"]) == 9, "eight default devices and the interior lighting"
     assert len(devices["Apartments"]) == 11, "the default eight, the Laundry's two and the interior lighting"
     assert devices["School"] == []
+    # The School's equipment is its Programs' watts alone: the Lab's Set is left out, so PHX adds no device Process.
+    assert "Laundry" not in wufi["School"]
     quantities = sorted(int(tags(device, "Quantity")[0]) for device in devices["Apartments"])
     assert quantities == sorted([3] * 8 + [1, 1, 1]), quantities
 
