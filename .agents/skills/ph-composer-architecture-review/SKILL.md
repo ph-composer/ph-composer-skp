@@ -14,7 +14,10 @@ Review alone does not authorize implementation, refactoring, commits or publicat
 Resolve paths from the repository root. Read `context/EXTENSIBILITY.md` and
 `context/CODING_STANDARDS.md`; use only the relevant sections of `context/TECH_STACK.md` and the
 owning plan. Read `context/UBIQUITOUS_LANGUAGE.md` for disputed domain names. For public queries,
-actions, host access or external adapters, also read `context/AGENT_INTERFACE.md`. Reuse already-read
+actions, host access or external adapters, also read `context/AGENT_INTERFACE.md`. For Building Segment
+settings, Programs or a feature's export contributor, read the matching sections of `context/CONTRACTS.md`
+("Programs, Schedules and Equipment Sets", "Occupancy", "Program export", "Building Segments at export").
+Reuse already-read
 authorities and verified checks while they remain current. These documents own the rules; do not
 copy them into another checklist or treat an unimplemented contract as an existing API.
 

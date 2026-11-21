@@ -84,8 +84,7 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
 
 ## Next
 
-1. P4a-01 to P4a-11 and P4a-11b are authorized (2026-11-20).
-   P4a-01's entry check resets the footprint baseline (C4a-14) and P4a-03's chooses the honeybee-ph
-   and PHX pins (C4a-11).
+1. The batched host sitting: every PG row and P4a-12's integrated run, after the bridge-launch
+   diagnosis ([STATUS](STATUS.md#host-sitting)). Then the archive PR, which closes #538.
 2. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
    with a reproducing test in each.

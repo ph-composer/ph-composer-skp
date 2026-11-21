@@ -159,10 +159,15 @@ first.
    heading row's settings icon opens the Segment's settings: its name, colour, whether new Zones
    join it, and the settings other features add. Its delete icon asks where its Zones go. Set the
    optional Level in the Level column, whose menu manages the Levels and their colours.
-3. Set Face Type, Face Boundary and Face Assembly from the context menu. To paint a value onto
+3. In each Segment's settings, set its **Occupancy** (Single dwelling, and the house's counts), its
+   **Phius certification** (building category, program, use, status and type), its **Airtightness**
+   (the blower-door result as n50 or q50, and the wind exposure) and read its **Comfort** set points,
+   which come from its Zones' Programs. Save writes every section in one Undo step. With no
+   blower-door result, the Zones keep their Program's infiltration.
+4. Set Face Type, Face Boundary and Face Assembly from the context menu. To paint a value onto
    several Faces, use the paint icon beside it in the column menu. An Attached zone, such as
    a garage or attic, defines a boundary with a temperature reduction factor.
-4. Check the Zones you want to pair and choose **Solve**. Include both Zones in a shared
+5. Check the Zones you want to pair and choose **Solve**. Include both Zones in a shared
    adjacency. Solve cuts partial overlaps and assigns the Surface boundary to the paired regions.
 
 Make Zone runs Suggest classification by default. The Geometry view's settings let you change
@@ -315,7 +320,12 @@ The [library file format](LIBRARY_FILE_FORMAT.md) covers the supported wire kind
 ## Export HBJSON
 
 Run preflight in the **Export** tab. Resolve the blocking findings and run Solve if the
-adjacencies need updating. Review warnings about omitted or uncertain geometry. Choose a
+adjacencies need updating. Review warnings about omitted or uncertain geometry. A finding's
+**Locate** frames its geometry or opens the tab and record it names; a Program finding opens
+**Zones > Programs** at its Zones. A Zone in no Building Segment is left out of the export with its
+Faces, Spaces, Edges and windows, and the report names it. A Surface Face paired with a Face of a
+left-out Zone blocks the export. When you move a Zone out of every Segment, PH-Composer offers to
+make such Faces an Attached zone boundary, in one Undo step. Choose a
 destination and write the HBJSON and its companion report. Use the findings in the Export tab to diagnose a stopped run. Save changes to the SKP through SketchUp.
 
 The report records exported quantities and findings. Share linked datasheets and photos

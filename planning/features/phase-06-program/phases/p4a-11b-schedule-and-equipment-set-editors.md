@@ -1,7 +1,7 @@
 # P4a-11b: The Schedule and Equipment Set editors
 
 DATE: 2026-11-20
-STATUS: Implemented on branch `feature/phase-06-program-p4a-11b` (2026-11-21); PG11b host rows owed. Split from P4a-11 on 2026-11-20 and authorized with it ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-21 (#551, `182f2f63`); PG11b host rows owed. Split from P4a-11 on 2026-11-20 and authorized with it ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

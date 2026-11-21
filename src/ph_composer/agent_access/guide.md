@@ -480,8 +480,11 @@ residential default Program, and only its bedrooms, occupants and Equipment Set 
    means a Dwelling exports with no bedrooms or occupants, `programs.set_points_disagree` names the set points its
    Building Segment exports, `programs.rule_without_dwelling` names Zones in no Dwelling on the residential default,
    `programs.equipment_set_non_residential` a Set left out in a non-residential Segment, and `programs.text_left_out` a name that
-   stayed in the Model because it reads as a file path. Each row's `locate` opens the
-   Zones / Programs view at its Zones for the user (`ph_composer.programs.locate`).
+   stayed in the Model because it reads as a file path. The occupancy reads' findings on exported Zones and
+   Segments come through as warnings too: `programs.unassigned_zone`, `programs.equipment_watts_residential`,
+   `programs.single_dwelling_overrides`, `programs.single_dwelling_no_effect`,
+   `programs.residential_without_dwelling` and `programs.non_residential_dwellings`. Each row's `locate` opens the
+   Zones / Programs view at its Zones, or a Segment's settings, for the user (`ph_composer.programs.locate`).
 8. The export writes each Zone's Room with a ProgramType (one per Dwelling for the residential default), its own
    People with the honeybee-ph bedrooms, occupants and dwelling, and its Equipment Set's devices, once per Dwelling
    on its largest Zone with each quantity times the Dwelling's units; each Building Segment carries the set points
