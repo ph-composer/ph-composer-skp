@@ -1,7 +1,7 @@
 # P4a-11: The Programs tab
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch `feature/phase-06-program-p4a-11` (2026-11-20); PG11 host rows owed. Split on 2026-11-20: steps 4 and 5 moved to [P4a-11b](p4a-11b-schedule-and-equipment-set-editors.md). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -73,3 +73,31 @@ PG11: panel gestures with Ed at the mouse; UI polish review recorded.
 ## Done when
 
 PG11 passes.
+
+## Split and decisions (2026-11-20)
+
+The stage was split because its five editors and the Ruby carry-overs are more than one reviewable PR. P4a-11
+is steps 1 to 3 and 6 to 8 with tests 1 to 3 as they apply to them; the Schedule editor (step 4) and the
+Equipment Set device editor (step 5) are [P4a-11b](p4a-11b-schedule-and-equipment-set-editors.md), with their
+tests and the PG11b host gate. Until P4a-11b lands, the Schedules and Equipment Sets subtabs show each record's
+values read only, under the same sidebar, header and lifecycle as Programs.
+
+Decided while implementing:
+
+- **Reads.** The tab reads the snapshot sections `ph_composer.programs.programs`, `schedules` and
+  `equipment_sets`, each the collection's `all` read. A Program row carries `missing`, each value its ProgramType
+  would lack as `{load, field}`, from the export preflight's own rule (`ExportPlan.missing_fields`), so the
+  cards' amber flags and the preflight never disagree. API 1.84.
+- **Delete with replacement** (carried from P4a-08): a Program or Equipment Set deleted with a replacement moves
+  every Zone assignment (`program_id`, `equipment_set_id`) and Segment setting (`default_program_id`,
+  `equipment_set_id`) naming it, through Zones' `stage_extension` participant, in the delete's Undo step; a
+  locked or shared Zone refuses the whole delete. The dialog's replacement is chosen, never assumed.
+- **Edits.** Each value commits as one `programs.update` of its whole load, guarded by the load as drawn, so a
+  value changed meanwhile refuses and the field shows the Model's value on the next paint. **+ New Schedule**
+  is two Undo steps: the Schedule's create, then the slot naming it.
+- **Header actions.** Rename, Duplicate and the overflow menu sit on the editor's title row, as the prototype and
+  this stage name them, not on sidebar rows.
+- **Units.** Hot water flow per area (EnergyPlus only) stays in L/h per m² in both systems: the units core has
+  no quantity for it yet.
+- **Routing.** Programs' records are `workedOn` the Programs tab; the Zones / Programs view no longer claims them.
+

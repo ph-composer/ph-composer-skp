@@ -167,38 +167,57 @@ module PhComposer
       # What a Program lacks that its ProgramType needs. A Schedule left empty is honeybee's Always On, except where
       # a Phius rule divides by its mean.
       def missing(program, schedules)
+        missing_fields(program, schedules).map { |entry| entry.fetch("text") }
+      end
+
+      # The same, each by the load and field the Programs tab flags: `{"load", "field", "text"}`.
+      def missing_fields(program, schedules)
         found = Program::SLOTS.keys.filter_map do |slot|
-          id = program.dig(*slot.split("."))
-          "#{slot.tr('._', '  ').sub(/ id\z/,
-                                     '')} names a Schedule that is not in the Model" if id && !schedules.key?(id)
+          load, field = slot.split(".")
+          id = program.dig(load, field)
+          next unless id && !schedules.key?(id)
+
+          gap(load, field, "#{slot.tr('._', '  ').sub(/ id\z/, '')} names a Schedule that is not in the Model")
         end
         people = program.fetch("people")
         if people["rule"]
-          found << "its occupancy Schedule is missing or never occupied" unless mean(schedules,
-                                                                                     people["occupancy_schedule_id"])
+          unless mean(schedules, people["occupancy_schedule_id"])
+            found << gap("people", "occupancy_schedule_id", "its occupancy Schedule is missing or never occupied")
+          end
         elsif people["people_per_area"].nil?
-          found << "people per area is missing"
+          found << gap("people", "people_per_area", "people per area is missing")
         end
         lighting = program.fetch("lighting")
         if lighting["rule"]
-          found << "its lighting Schedule is missing or never on" unless mean(schedules, lighting["schedule_id"])
+          unless mean(schedules, lighting["schedule_id"])
+            found << gap("lighting", "schedule_id", "its lighting Schedule is missing or never on")
+          end
         elsif lighting["watts_per_area"].nil?
-          found << "lighting W per area is missing"
+          found << gap("lighting", "watts_per_area", "lighting W per area is missing")
         end
         { "electric_equipment" => "electric equipment", "gas_equipment" => "gas equipment" }.each do |key, label|
-          found << "#{label} W per area is missing" if program.dig(key, "watts_per_area").nil?
+          next unless program.dig(key, "watts_per_area").nil?
+
+          found << gap(key, "watts_per_area", "#{label} W per area is missing")
         end
         water = program.fetch("service_hot_water")
-        found << "hot water flow per area is missing" if !water["rule"] && water["flow_per_area"].nil?
-        found << "infiltration per exterior area is missing" if program.dig("infiltration", "flow_per_exterior_area")
-                                                                       .nil?
+        if !water["rule"] && water["flow_per_area"].nil?
+          found << gap("service_hot_water", "flow_per_area", "hot water flow per area is missing")
+        end
+        if program.dig("infiltration", "flow_per_exterior_area").nil?
+          found << gap("infiltration", "flow_per_exterior_area", "infiltration per exterior area is missing")
+        end
         if VENTILATION_TERMS.all? { |key| program.dig("ventilation", key).nil? }
-          found << "ventilation sets no rate"
+          found << gap("ventilation", "flow_per_person", "ventilation sets no rate")
         end
         heating, cooling = set_point_pair(program, schedules)
-        found << "the heating set point is missing" if heating.nil?
-        found << "the cooling set point is missing" if cooling.nil?
+        found << gap("setpoint", "heating_c", "the heating set point is missing") if heating.nil?
+        found << gap("setpoint", "cooling_c", "the cooling set point is missing") if cooling.nil?
         found
+      end
+
+      def gap(load, field, text)
+        { "load" => load, "field" => field, "text" => text }
       end
 
       # The positive mean of a fractional Schedule's day, or nil.

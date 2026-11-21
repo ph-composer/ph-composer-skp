@@ -60,16 +60,18 @@ registry validation still exist.
 | [P4a-08](phases/p4a-08-dwellings-and-single-dwelling.md) | Dwellings, per-Zone assignment extension, derivations, Single dwelling, Occupancy section, the Segment heading contribution | P4a-07a, P4a-05 | programs | Single dwelling on and off, Undo/Redo, copy a Zone |
 | [P4a-09](phases/p4a-09-zones-programs-view.md) | Zones / Programs view, selection bar, Dwelling and lock bubbles | P4a-08, P4a-05, P4a-07b | programs, UI | Panel gestures with Ed |
 | [P4a-10](phases/p4a-10-program-export.md) | ProgramType, People, Process and set point export; Comfort section | P4a-08 | programs, export | Round trip of the five prototype journeys |
-| [P4a-11](phases/p4a-11-programs-tab.md) | The Programs tab | P4a-07a, P4a-07b, P4a-08 | programs, UI | Panel gestures with Ed |
+| [P4a-11](phases/p4a-11-programs-tab.md) | The Programs tab: subtabs, sidebars, record lifecycle, the Program editor | P4a-07a, P4a-07b, P4a-08 | programs, UI | Panel gestures with Ed |
+| [P4a-11b](phases/p4a-11b-schedule-and-equipment-set-editors.md) | The Schedule and Equipment Set editors (split from P4a-11, 2026-11-20) | P4a-11 | programs, UI | Panel gestures with Ed |
 | [P4a-12](phases/p4a-12-acceptance-and-handoff.md) | Register closed; context, docs, glossary; handoff to Phase 7 mechanical | all above | integration | Fresh-process integrated run |
 
 ```
-P4a-01 ── P4a-02 ─┬─ P4a-03 ── P4a-04 ── P4a-06 ── P4a-07a ──┬─ P4a-08 ─┬─ P4a-09 ─┐
-                  │                                          │          ├─ P4a-10 ─┤
-                  └─ P4a-05 ─────────────────────────────────┘          └─ P4a-11 ─┴─ P4a-12
+P4a-01 ── P4a-02 ─┬─ P4a-03 ── P4a-04 ── P4a-06 ── P4a-07a ──┬─ P4a-08 ─┬─ P4a-09 ────────────┐
+                  │                                          │          ├─ P4a-10 ────────────┤
+                  └─ P4a-05 ─────────────────────────────────┘          └─ P4a-11 ── P4a-11b ─┴─ P4a-12
 ```
 P4a-05 feeds P4a-08 (and through it P4a-09 and P4a-10). P4a-07b follows P4a-07a and feeds P4a-09 and P4a-11
 (library Programs copied with their Schedules); it can run beside P4a-08, whose files it does not touch.
+P4a-11b follows P4a-11, whose tab and record pages it fills in.
 
 P4a-03 and P4a-05 can run in parallel once P4a-02 merges; P4a-04 follows P4a-03 (both edit
 `features/zones/export.rb`; the PHX test group it once waited for exists) and P4a-06 follows P4a-04, which it requires. Each stage is one PR through the pr-loop ([stage brief](../../../.agents/stage-brief.md)),

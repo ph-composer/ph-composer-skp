@@ -116,6 +116,10 @@
   border-radius: var(--radius-sm); }
 .library-sidebar-name { overflow: hidden; text-overflow: ellipsis; }
 .library-sidebar-row-button > .phc-glyph { flex: none; margin-left: auto; color: var(--muted); }
+/* The record the work surface shows, as an active sidebar row: teal on its tint, unchanged on hover. */
+.phc-workspace .library-sidebar-row-button.is-current, .phc-workspace .library-sidebar-row-button.is-current:hover:enabled {
+  background: var(--interaction-highlight-tint); color: var(--interaction-highlight); font-weight: 600; }
+.library-sidebar-row-button > .library-sidebar-known { color: var(--interaction-highlight); }
 .library-sidebar-row-button > .phc-glyph svg { width: 14px; height: 14px; }
 .library-record-card { min-width: 220px; }
 .library-sidebar-row.is-dragging { opacity: .5; }

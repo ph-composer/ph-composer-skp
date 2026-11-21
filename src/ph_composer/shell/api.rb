@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 83
+    MINOR = 84
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -508,7 +508,16 @@ module PhComposer
                     "programs.equipment_set_non_residential and programs.text_left_out, and the view command " \
                     "programs.locate opens the Zones / Programs view with Zones checked. The Spaces export " \
                     "projection adds each Zone's floor_area_m2 and weighted_area_m2; the certification export " \
-                    "section registers its records as its projection." }
+                    "section registers its records as its projection." },
+      { "minor" => 84, "date" => "2026-11-20",
+        "change" => "The Programs tab's reads and a delete with a replacement. programs.delete and " \
+                    "equipment_sets.delete with a replacement_id move every Zone assignment and Building Segment " \
+                    "setting naming the record to the replacement, through ph_composer.zones.stage_extension, in " \
+                    "the same Undo step, and refuse as a Zone write does (target.locked, " \
+                    "target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and " \
+                    "equipment_sets carry each collection's all read. A programs.list and programs.all row adds " \
+                    "missing: each value its ProgramType would lack, by load and field, as the export preflight " \
+                    "reports it." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

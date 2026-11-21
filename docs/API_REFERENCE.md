@@ -18363,7 +18363,8 @@ Result:
           "extension_status",
           "stored",
           "default",
-          "use_count"
+          "use_count",
+          "missing"
         ],
         "properties": {
           "id": {
@@ -19392,6 +19393,26 @@ Result:
           "use_count": {
             "type": "integer",
             "minimum": 0
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "load",
+                "field"
+              ],
+              "properties": {
+                "load": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Each value its ProgramType would lack, by load and field, as the export preflight reports it."
           }
         }
       }
@@ -19491,7 +19512,8 @@ Result:
           "extension_status",
           "stored",
           "default",
-          "use_count"
+          "use_count",
+          "missing"
         ],
         "properties": {
           "id": {
@@ -20520,6 +20542,26 @@ Result:
           "use_count": {
             "type": "integer",
             "minimum": 0
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "load",
+                "field"
+              ],
+              "properties": {
+                "load": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Each value its ProgramType would lack, by load and field, as the export preflight reports it."
           }
         }
       }
@@ -59754,9 +59796,11 @@ Example params:
 
 Delete one Equipment Set; remaining uses refuse. Owner: `ph_composer.programs`.
 
-Undo step: Delete Equipment Set. A replacement takes every use, then the record goes, in one step.
+Undo step: Delete Equipment Set. A replacement takes every use, Zone assignments and Segment settings included, then the record goes, in one step.
 
-Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.default_in_use`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -62049,9 +62093,11 @@ Example params:
 
 Delete one Program; remaining uses refuse. Owner: `ph_composer.programs`.
 
-Undo step: Delete Program. A replacement takes every use, then the record goes, in one step.
+Undo step: Delete Program. A replacement takes every use, Zone assignments and Segment settings included, then the record goes, in one step.
 
-Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `programs.default_in_use`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -95357,3 +95403,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |
 | 1.82 | 2026-11-20 | The Zones / Programs view's reads and the library Program on Zones. programs.assign_library_program copies a library Program with its Schedules, or reuses its local copy, through ph_composer.library.copy_into_proposal and assigns it to Zones in one Undo step; the programs feature now requires ph_composer.library. programs.zones answers every Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or ventilation_m3h is unknown), and each Building Segment's sums for its heading row. |
 | 1.83 | 2026-11-20 | The Program export. Four export sections, programs.export.rooms, schedules, program_types and set_points, write each exported Zone's ProgramType, People counts, Dwelling and Equipment Set devices and each Building Segment's set points; the programs.zone_assignment and programs.segment extensions are now required, claimed by programs.export.rooms. programs.export_preflight is new, with codes programs.value_missing, programs.set_points_inverted, programs.rule_without_dwelling, programs.counts_missing, programs.equipment_set_non_residential and programs.text_left_out, and the view command programs.locate opens the Zones / Programs view with Zones checked. The Spaces export projection adds each Zone's floor_area_m2 and weighted_area_m2; the certification export section registers its records as its projection. |
+| 1.84 | 2026-11-20 | The Programs tab's reads and a delete with a replacement. programs.delete and equipment_sets.delete with a replacement_id move every Zone assignment and Building Segment setting naming the record to the replacement, through ph_composer.zones.stage_extension, in the same Undo step, and refuse as a Zone write does (target.locked, target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and equipment_sets carry each collection's all read. A programs.list and programs.all row adds missing: each value its ProgramType would lack, by load and field, as the export preflight reports it. |

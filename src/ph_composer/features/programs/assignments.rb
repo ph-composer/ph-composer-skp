@@ -98,6 +98,38 @@ module PhComposer
         { "dwelling_ids" => dwelling_ids.uniq, "zone_ids" => targets.map(&:id), "equipment_set_id" => set_id }
       end
 
+      # Payload keys naming a Program or an Equipment Set: on Zones, then on Segments.
+      RETARGETED = { PROGRAM_KIND => [%w[program_id], %w[default_program_id]],
+                     EQUIPMENT_SET_KIND => [%w[equipment_set_id], %w[equipment_set_id]] }.freeze
+
+      # Inside a Program's or Equipment Set's delete with a replacement: every Zone assignment and Segment setting
+      # naming `from` names `to` instead, staged through Zones in the delete's proposal. Answers the changed Zones as
+      # reference entries, which the delete's plan projects, as Zones are not this feature's to retarget (Dwellings
+      # move through their own retargeter).
+      def retarget(request, proposal, kind, from:, to:)
+        zone_keys, segment_keys = RETARGETED.fetch(kind)
+        state = OccupancyState.read(request, :proposal => proposal)
+        zones = state.zones.filter_map do |zone|
+          payload = renamed(zone.assignment, zone_keys, from, to)
+          { "reference" => zone.reference, "payload" => payload } if payload
+        end
+        segments = state.segments.filter_map do |segment|
+          payload = segment.stored && renamed(segment.settings, segment_keys, from, to)
+          { "id" => segment.id, "payload" => payload } if payload
+        end
+        unless segments.empty?
+          request.participate(STAGE, "namespace" => Occupancy::SEGMENT_NAMESPACE, "segments" => segments)
+        end
+        return [] if zones.empty?
+
+        request.participate(STAGE, "namespace" => Occupancy::ZONE_NAMESPACE, "zones" => zones).fetch("zone_entries")
+      end
+
+      def renamed(payload, keys, from, to)
+        hits = keys.select { |key| payload[key] == from }
+        hits.empty? ? nil : payload.merge(hits.to_h { |key| [key, to] })
+      end
+
       # ---------------------------------------------------------------- shared steps
 
       # The Zones `references` name, each resolved once, none in a single-dwelling Segment.

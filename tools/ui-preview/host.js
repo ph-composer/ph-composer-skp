@@ -51,6 +51,8 @@
     this.faces = JSON.parse(JSON.stringify(settings.faces || []));
     // The occupancy read (ph_composer.programs.zones): the fixture's, or none.
     this.occupancy = settings.occupancy ? JSON.parse(JSON.stringify(settings.occupancy)) : null;
+    // The Programs tab's catalogs (ph_composer.programs.programs, schedules, equipment_sets): the fixture's, or none.
+    this.programCatalog = settings.programCatalog ? JSON.parse(JSON.stringify(settings.programCatalog)) : null;
     // The Spaces read: the fixture's, or empty (the section is always published, as the host does).
     this.spaces = settings.spaces ? JSON.parse(JSON.stringify(settings.spaces)) : null;
     this.markTool = { active: false, weighting_factor: 1, gesture_limit: 250 };
@@ -140,6 +142,9 @@
         ["ph_composer.zones.options"]: { status: "completed", value: JSON.parse(JSON.stringify(this.zoneOptions)) },
         ["ph_composer.programs.occupancy"]: this.occupancy ? { status: "completed",
           value: JSON.parse(JSON.stringify(this.occupancy)) } : undefined,
+        ["ph_composer.programs.programs"]: this.catalogSection("programs"),
+        ["ph_composer.programs.schedules"]: this.catalogSection("schedules"),
+        ["ph_composer.programs.equipment_sets"]: this.catalogSection("equipment_sets"),
         [ZONES]: { status: "completed", code: "ok", revision: this.revision,
           value: { zones: this.zoneRows(), make_zone: this.makeZone, building_segments: this.segmentSums(),
             units: { ground_depth_mm: "mm", face_area_m2: "m2", unclassified_face_area_m2: "m2" } } },
@@ -681,6 +686,8 @@
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) return this.inventoryAction(payload);
     if (payload.name === "ph_composer.zones.options.manage") return this.manageZoneOptions(payload.params);
+    var catalogOutcome = this.programCatalogAction(payload);
+    if (catalogOutcome) return catalogOutcome;
     var programsOutcome = this.programsAction(payload);
     if (programsOutcome) return programsOutcome;
     var segmentOutcome = this.segmentAction(payload);
@@ -814,9 +821,161 @@
      source. */
   Host.prototype.programRecords = function () {
     var sources = this.programSources || {};
-    return ((this.occupancy || {}).choices || { programs: [] }).programs.map(function (program) {
+    var chosen = ((this.occupancy || {}).choices || { programs: [] }).programs.map(function (program) {
       return { id: program.id, values: { name: program.name, source: sources[program.id] || null } };
     });
+    // The Programs tab's catalog adds what the occupancy choices do not name, such as a copy made from its sidebar.
+    return chosen.concat(((this.programCatalog || {}).programs || []).filter(function (row) {
+      return !chosen.some(function (program) { return program.id === row.id; });
+    }));
+  };
+
+  Host.prototype.catalogSection = function (collection) {
+    if (!this.programCatalog) return undefined;
+    return { status: "completed", value: { records: JSON.parse(JSON.stringify(this.programCatalog[collection])),
+      unreadable: [] } };
+  };
+
+  /* Synthetic Programs tab writes over the three catalogs: create, update, duplicate, delete with a replacement,
+     and reset. It refuses a changed expected value with nothing written, a used record's delete without a
+     replacement, and a taken name, as features/programs/operations.rb does; the rest of Ruby's rules (the
+     Schedule a slot names, the fraction caps) are not modelled. A Program's `missing` is worked out again only for
+     its main values. Null for any other action. */
+  Host.prototype.programCatalogAction = function (payload) {
+    var host = this, catalog = this.programCatalog, params = payload.params || {};
+    var match = /^ph_composer\.programs\.(programs|schedules|equipment_sets)\.(create|update|duplicate|delete)$/
+      .exec(payload.name);
+    var reset = payload.name === "ph_composer.programs.reset_default";
+    if (!catalog || (!match && !reset)) return null;
+    function clone(value) { return JSON.parse(JSON.stringify(value)); }
+    function completed(value) { host.revision++; return { status: "completed", code: "ok", effect: "committed",
+      revision: host.revision, value: value, affected: [], findings: [], detail: null }; }
+    if (reset) {
+      var id = params.kind === "program" ? "pgm_PHCDEFAULT01" : "eqs_PHCDEFAULT01";
+      var row = (catalog[params.kind === "program" ? "programs" : "equipment_sets"]).filter(function (entry) {
+        return entry.id === id; })[0];
+      var pristine = (host.window.PhComposerPreviewFixtures.fromQuery("?fixture=programs").programCatalog ||
+        {})[params.kind === "program" ? "programs" : "equipment_sets"].filter(function (entry) {
+          return entry.id === id; })[0];
+      if (row && pristine) row.values = clone(pristine.values);
+      return completed({ id: id, removed_user_data: [] });
+    }
+    var collection = match[1], verb = match[2], rows = catalog[collection];
+    var label = { programs: "Program", schedules: "Schedule", equipment_sets: "Equipment Set" }[collection];
+    function find(id) { return rows.filter(function (entry) { return entry.id === id; })[0]; }
+    function taken(name, except) {
+      return rows.some(function (entry) { return entry.id !== except &&
+        entry.values.name.trim().toLowerCase() === String(name).trim().toLowerCase(); });
+    }
+    function freeName(stem) {
+      for (var n = 1; ; n++) { var name = stem + " " + n; if (!taken(name)) return name; }
+    }
+    function stale(row, expected) {
+      return Object.keys(expected || {}).some(function (key) {
+        return JSON.stringify(row.values[key] === undefined ? null : row.values[key]) !== JSON.stringify(expected[key]);
+      });
+    }
+    function remissing(row) {
+      if (collection !== "programs") return;
+      var values = row.values, gaps = [];
+      [["people", "people_per_area"], ["lighting", "watts_per_area"], ["electric_equipment", "watts_per_area"],
+        ["gas_equipment", "watts_per_area"], ["service_hot_water", "flow_per_area"],
+        ["infiltration", "flow_per_exterior_area"], ["setpoint", "heating_c"], ["setpoint", "cooling_c"]]
+        .forEach(function (pair) {
+          var load = values[pair[0]];
+          var schedule = pair[0] === "setpoint" && load[pair[1].replace("_c", "_schedule_id")];
+          if (!load.rule && !schedule && (load[pair[1]] === null || load[pair[1]] === undefined)) {
+            gaps.push({ load: pair[0], field: pair[1] });
+          }
+        });
+      if (["flow_per_person", "flow_per_area", "flow_per_zone", "air_changes_per_hour"].every(function (key) {
+        return values.ventilation[key] === null || values.ventilation[key] === undefined;
+      })) gaps.splice(gaps.length - 2, 0, { load: "ventilation", field: "flow_per_person" });
+      row.missing = gaps;
+    }
+    var row = params.id && find(params.id);
+    if (verb !== "create" && !row) return refused("target.not_found", "That " + label + " is gone.", host.revision);
+    if (verb === "create") {
+      var values = clone(params.values || {});
+      values.name = values.name || freeName(label);
+      var template = rows.filter(function (entry) { return !entry.default; })[0] || rows[0];
+      row = clone(template);
+      row.id = collection.slice(0, 3) + "_preview" + (++host.sequence);
+      row.default = false; row.use_count = 0; row.stored = true;
+      if (row.uses) row.uses = [];
+      row.values = Object.assign(clone(template.values), { source: { kind: "manual" } }, values);
+      if (collection === "programs") {
+        Object.keys(row.values).forEach(function (key) {
+          var load = row.values[key];
+          if (load && typeof load === "object" && !Array.isArray(load) && key !== "source") {
+            Object.keys(load).forEach(function (field) {
+              if (field !== "radiant_fraction" && !/fraction|target_temperature/.test(field)) load[field] = null;
+            });
+          }
+        });
+      }
+      if (collection === "equipment_sets") row.values.devices = [];
+      remissing(row); rows.push(row);
+      return completed({ id: row.id });
+    }
+    if (verb === "update") {
+      if (stale(row, params.expected_values)) {
+        return refused("target.changed", label + " " + row.values.name + " has changed since it was read.",
+          host.revision);
+      }
+      if (params.values.name !== undefined && taken(params.values.name, row.id)) {
+        return refused("validation.failed", "Another " + label + " is named " + params.values.name + ".",
+          host.revision);
+      }
+      Object.assign(row.values, clone(params.values)); row.stored = true; remissing(row);
+      return completed({ id: row.id });
+    }
+    if (verb === "duplicate") {
+      var copy = clone(row);
+      copy.id = row.id.slice(0, 3) + "_preview" + (++host.sequence);
+      copy.values.name = row.values.name + " (copy)";
+      for (var n = 2; taken(copy.values.name); n++) copy.values.name = row.values.name + " (copy " + n + ")";
+      copy.values.source = { kind: "derived" }; copy.default = false; copy.use_count = 0; copy.stored = true;
+      if (copy.uses) copy.uses = [];
+      rows.push(copy);
+      return completed({ id: copy.id });
+    }
+    if (stale(row, params.expected_values)) {
+      return refused("target.changed", label + " " + row.values.name + " has changed since it was read.",
+        host.revision);
+    }
+    if ((row.use_count > 0 || row.default) && !params.replacement_id) {
+      return refused(row.default ? "programs.default_in_use" : "reference.in_use", label + " " + row.values.name +
+        " is in use; name a replacement to delete it.", host.revision);
+    }
+    var replacement = params.replacement_id && find(params.replacement_id);
+    if (replacement) {
+      replacement.use_count += row.use_count;
+      if (row.default) replacement.default = true;
+    }
+    catalog[collection] = rows.filter(function (entry) { return entry.id !== row.id; });
+    return completed({ id: row.id, removed_user_data: [] });
+  };
+
+  /* A library Program copied from the Programs tab's sidebar: it arrives in the catalog with its source. */
+  Host.prototype.programCatalogCopy = function (params) {
+    var rows = this.libraryCatalogs[params.provider_id] || [];
+    var incoming = rows.filter(function (row) {
+      return row.kind === "programs" && row.library_id === params.library_id && row.record_id === params.record_id;
+    })[0];
+    if (!incoming || params.generation !== this.libraryGenerations[params.provider_id]) {
+      return refused("library.generation_stale", "The catalog changed. Refresh and choose again.", this.revision);
+    }
+    var template = JSON.parse(JSON.stringify(this.programCatalog.programs.filter(function (row) {
+      return row.id === "pgm_office"; })[0]));
+    template.id = "pgm_library" + (++this.sequence); template.use_count = 0; template.default = false;
+    template.values.name = incoming.snapshot.name;
+    template.values.source = { kind: "library", library_id: incoming.library_id, record_id: incoming.record_id,
+      library_name: incoming.library_name, snapshot: JSON.parse(JSON.stringify(incoming.snapshot)) };
+    this.programCatalog.programs.push(template);
+    this.revision += 1;
+    return { status: "completed", effect: "committed", revision: this.revision, value: { local_id: template.id,
+      assigned: false, dependencies: [] }, message: "Library copy applied." };
   };
 
   /* Synthetic Programs writes for the Zones / Programs view over the occupancy read: a Program (from this file or
@@ -1761,6 +1920,7 @@
       value: { local_id: local.id, assigned: Boolean(target) } };
   };
   Host.prototype.libraryCopy = function (payload) {
+    if (payload.params.kind === "programs" && this.programCatalog) return this.programCatalogCopy(payload.params);
     if (payload.params.kind !== "materials") return this.windowLibraryCopy(payload.params, false);
     var params = payload.params, rows = this.libraryCatalogs[params.provider_id] || [];
     var incoming = rows.filter(function (row) {
