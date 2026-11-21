@@ -221,13 +221,14 @@ function (RecordForm, ui, fields, loads) {
     var self = this, input = el("input", "pgm-device-number"), typed = this.typed, kept = typed[key];
     input.type = "text"; input.setAttribute("inputmode", "decimal"); input.setAttribute("autocomplete", "off");
     input.setAttribute("data-key", key);
-    input.seed = loads.editText(words, this.draft[key]); input.seedValue = this.draft[key];
+    // Kept text keeps the seed it was compared with, drawn in the same units, so it is never mistaken for one.
+    input.seed = kept ? kept.seed : loads.editText(words, this.draft[key]); input.seedValue = this.draft[key];
     input.value = kept ? kept.text : input.seed;
     input.entry = words; input.profile = kept ? kept.profile : loads.profile(words);
     if (words.help) ui.tooltip(input, words.help);
     input.addEventListener("input", function () {
       if (input.value === input.seed) delete typed[key];
-      else typed[key] = { text: input.value, profile: input.profile };
+      else typed[key] = { text: input.value, profile: input.profile, seed: input.seed };
       self.clearStatus();
     });
     this.inputs[key] = input;

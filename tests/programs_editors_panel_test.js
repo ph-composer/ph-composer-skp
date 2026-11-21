@@ -421,6 +421,21 @@ test("a number typed before the unit system changes keeps its units through a la
   assert.strictEqual(last(p).params.values.capacity_m3, 0.1, "0.1 m³, as typed in SI");
 });
 
+test("text that does not read yet, corrected after a unit switch, is read in the units it was typed in", function () {
+  var p = load("Equipment Sets");
+  p.snapshot(null, [WASHER], { unit_system: "SI" });
+  types(p);
+  click(labelled(shown(p), "button", "Edit Laundry - washer"));
+  var root = dialog(p);
+  type(field(root, "capacity_m3"), "abc");
+  p.snapshot(null, [WASHER], { unit_system: "IP" });
+  change(field(root, "water_connection"), "dhw");
+  // 4.5 is how the stored 0.1274 m³ reads in ft³, so only the units it was typed in tell the two apart.
+  type(field(root, "capacity_m3"), "4.5");
+  root.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(last(p).params.values.capacity_m3, 4.5, "4.5 m³, as the field reads in SI");
+});
+
 test("a choice lays the form out again and keeps a number not yet read", function () {
   var p = load("Equipment Sets");
   types(p);

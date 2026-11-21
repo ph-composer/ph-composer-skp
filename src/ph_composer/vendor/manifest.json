@@ -181,9 +181,9 @@
       "sha256": "1ba6547b5fb6af959b789532336b3179d65ead7cbaddb544ecf90568933d7e7a"
     },
     "html/features/programs/device_dialog.js": {
-      "bytes": 18154,
+      "bytes": 18303,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d64b57d3a2523fced88a14ba8330aaa64977aa5eb04ce5b0a1867865f216a985"
+      "sha256": "80c5e67c5aefe94eb97d0c6989cdf9571c32867a59b5249b44357081d568dc9c"
     },
     "html/features/programs/equipment_set_editor.js": {
       "bytes": 9698,
