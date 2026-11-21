@@ -361,6 +361,9 @@ Single dwelling switches through the Segment's settings Save; `ph_composer.progr
 says what switching it on replaces ([CONTRACTS.md](CONTRACTS.md), "Occupancy"). A library Program goes on Zones
 with `ph_composer.programs.assign_library_program` (API 1.82), which joins the library copy to its own Undo step,
 and `programs.zones` also answers every Dwelling, each Segment's heading sums and why an unknown value is unknown.
+The Program export (API 1.83) writes it all into the HBJSON; `ph_composer.programs.export_preflight` lists what
+blocks or weakens it, and the view command `ph_composer.programs.locate` opens the Zones / Programs view with a
+row's Zones checked ([CONTRACTS.md](CONTRACTS.md), "Program export").
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

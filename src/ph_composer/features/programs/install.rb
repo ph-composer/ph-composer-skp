@@ -35,6 +35,14 @@
 #   occupancy_reads.rb         the programs.zones and programs.dwellings reads, with their findings
 #   occupancy_declarations.rb  what occupancy registers
 #
+# The Program export: every Program, Schedule, Dwelling and Equipment Set an exported Zone uses, into the HBJSON:
+#
+#   ruleset_export.rb    pure: a Schedule's PH form as the honeybee ScheduleRuleset it writes
+#   export_plan.rb       pure: the ProgramTypes, Rooms, Schedules and Segment set points, and the export's findings
+#   program_export.rb    the four export sections, read from the snapshot
+#   program_report.rb    the export report's set points and Dwellings
+#   export_preflight.rb  the same findings read live, with a locate into the Zones / Programs view
+#
 # The panel half is html/features/programs/airtightness.js, occupancy.js and zones_view.js (the Zones /
 # Programs view).
 module PhComposer
@@ -64,6 +72,11 @@ require_relative "single_dwelling"
 require_relative "missing_values"
 require_relative "occupancy_reads"
 require_relative "occupancy_declarations"
+require_relative "ruleset_export"
+require_relative "export_plan"
+require_relative "export_preflight"
+require_relative "program_report"
+require_relative "program_export"
 
 module PhComposer
   module Programs
@@ -90,7 +103,19 @@ module PhComposer
       "airtightness.no_exposed_face" => "A Building Segment with an airtightness test result has no Outdoors or " \
                                         "Ground Face, so PHX would read no infiltration.",
       "airtightness.no_net_volume" => "A Building Segment with an n50 test result has no Space net volume to " \
-                                      "convert it over."
+                                      "convert it over.",
+      "programs.value_missing" => "A Program, or an Equipment Set, an exported Zone uses lacks a value its " \
+                                  "honeybee ProgramType needs, or is not in the Model.",
+      "programs.set_points_inverted" => "A Program's heating set point is above its cooling set point.",
+      "programs.rule_without_dwelling" => "A Zone in no Dwelling uses a Program whose Phius rules work over a " \
+                                          "Dwelling, so it exports as one unit with no occupants.",
+      "programs.no_floor_area" => "A Dwelling on a Phius rule Program has no Floor Face area, so its rule loads " \
+                                  "export at 0 per m².",
+      "programs.counts_missing" => "A Dwelling whose Zones use a Phius rule has no bedrooms or occupants, so it " \
+                                   "exports with none.",
+      "programs.equipment_set_non_residential" => "A Zone carries an Equipment Set in a non-residential Building " \
+                                                  "Segment, where PHX drops the devices.",
+      "programs.text_left_out" => "A name or comment that reads as a local file path stayed in the Model."
     }.freeze
 
     module_function
@@ -114,6 +139,8 @@ module PhComposer
       Declarations.install(feature)
       LibraryKinds.install(feature)
       OccupancyDeclarations.install(feature)
+      ProgramPreflight.install(feature)
+      ProgramExport.install(feature)
     end
   end
 end

@@ -153,7 +153,9 @@ def model_document() -> dict[str, Any]:
     payload["sections"].update(
         {section.id: {"version": 1, "records": []} for section in (WindowConstructionSection(), ApertureSection())}
     )
-    return payload
+    from program_free import without_programs
+
+    return without_programs(payload)
 
 
 def test_actual_model_references_share_authored_construction_and_exclude_unused_assemblies() -> None:

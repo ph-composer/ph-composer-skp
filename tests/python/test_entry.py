@@ -36,6 +36,10 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.spaces.export.spaces",
         "ph_composer.thermal_bridges.export.thermal_bridges",
         "ph_composer.programs.export.airtightness",
+        "ph_composer.programs.export.schedules",
+        "ph_composer.programs.export.program_types",
+        "ph_composer.programs.export.rooms",
+        "ph_composer.programs.export.set_points",
         "ph_composer.shading.export.shades",
     ]
     assert EXPORTERS == ()

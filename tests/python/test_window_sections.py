@@ -24,6 +24,7 @@ from ph_composer_translation.window_sections import (
     ApertureSection,
     WindowConstructionSection,
 )
+from program_free import without_programs
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "tests/fixtures/windows/aperture_export_section.json"
@@ -35,7 +36,7 @@ def windows() -> dict[str, Any]:
 
 
 def document() -> dict[str, Any]:
-    value = json.loads(LEGACY.read_text())
+    value = without_programs(json.loads(LEGACY.read_text()))
     value["sections"].update(windows()["sections"])
     assembly = value["sections"]["ph_composer.assemblies.export.constructions"]["records"][0]["id"]
     value["sections"][FaceSection.id]["records"] = [
@@ -280,7 +281,7 @@ def test_inputs_all_requires_declared_typed_requirement_and_sorts_ids() -> None:
 
 
 def test_empty_registered_window_sections_preserve_exact_legacy_hbjson() -> None:
-    payload = json.loads(LEGACY.read_text())
+    payload = without_programs(json.loads(LEGACY.read_text()))
     payload["sections"].update(
         {section.id: {"version": 1, "records": []} for section in (WindowConstructionSection(), ApertureSection())}
     )

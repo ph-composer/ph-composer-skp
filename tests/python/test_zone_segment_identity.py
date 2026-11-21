@@ -15,13 +15,14 @@ from ph_composer_translation.contract import RecordError
 from ph_composer_translation.coordinator import translate
 from ph_composer_translation.model_sections import ZoneSection
 from ph_composer_translation.window_sections import ApertureSection, WindowConstructionSection
+from program_free import without_programs
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures/phase_one/two_zones_extraction.json"
 ADOPTED_KEY = "bseg_" + hashlib.sha256(b"Synthetic Building").hexdigest()[:16]
 
 
 def document(version: int = 2) -> dict[str, Any]:
-    payload: dict[str, Any] = json.loads(FIXTURE.read_text())
+    payload: dict[str, Any] = without_programs(json.loads(FIXTURE.read_text()))
     payload["sections"].update(
         {section.id: {"version": 1, "records": []} for section in (WindowConstructionSection(), ApertureSection())}
     )

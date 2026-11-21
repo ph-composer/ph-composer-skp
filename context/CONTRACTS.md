@@ -668,7 +668,8 @@ for the Zones / Programs view (P4a-09); `Assignments.assign_program` takes its i
   dwelling applies on a residential Segment only (the certification category); then every Zone uses the Model's
   default Program and is in the house, which is no record, and its Zone assignments are ignored.
 
-Both extensions are `local_only` until the Program export claims them, so a payload never blocks an export.
+Both extensions are `required` since API 1.83: the Program export's rooms section claims them ("Program export",
+below), so a payload on an exported Zone or Segment is read, and one this version does not understand blocks.
 Zones never reads them. Programs writes them through Zones' proposal participant
 `ph_composer.zones.stage_extension` (a namespace and whole payloads for named Zone occurrences and Segments, each
 checked by the installed validator, a Zone as one Zone update step chained after any earlier write of it in the
@@ -724,6 +725,78 @@ each a warning. A Segment row also carries its Zones' findings, one per code, fo
 ventilation term over people still unknown leaves the Zone's ventilation unknown. Programs' own
 actions refuse a Dwelling across Segments only for the Dwelling they join, so one already across never blocks the
 repair.
+
+## Program export
+
+Since API 1.83, `ph_composer.programs` writes everything Programs owns into the HBJSON
+(`features/programs/program_export.rb`). One pure plan (`ExportPlan`, plain records in, SI values out) is worked
+out once per export from the snapshot, and the preflight reads the same findings live. Four sections carry it to
+the Python sections in `python/ph_composer_translation/program_sections.py`, which build honeybee objects from the
+records and compute nothing beyond honeybee's and honeybee-ph's own conversions:
+
+| Section | Records | Python |
+| --- | --- | --- |
+| `programs.export.rooms` | One per exported Zone: its ProgramType id, its People extension's `number_bedrooms` and `number_people`, its Dwelling (`identifier`, `num_dwellings`) or null, and its devices. Claims `programs.zone_assignment` and `programs.segment`; requires Zones, Faces, Spaces and Certification; its projection is the plan | `RoomProgramSection`, at `ROOM`: the ProgramType, the Room's own copy of its People, a `Process` per device |
+| `programs.export.schedules` | Each Schedule a ProgramType names, and a constant one per set point given as a number (`<program>-heating_setpoint`) | `ScheduleSection`: a `ScheduleRuleset` with honeybee-ph's operating days, weeks and periods |
+| `programs.export.program_types` | One per Program, or per Program and Dwelling where a Phius rule applies | `ProgramTypeSection`: a `ProgramType` |
+| `programs.export.set_points` | One per exported Building Segment: `winter_c`, `summer_c`, and its Dwellings' counts for the report | `SetPointSection`, at `SEGMENT`: `BldgSegment.set_points` |
+
+**ProgramTypes.** A Program whose People, Lighting or Service hot water names a Phius rule exports once per
+Dwelling, as honeybee-ph's Set Residential Program builds one per dwelling group, under the id
+`<program>-<dwelling>` (a single dwelling's house is named by its Segment id): people per m² of the Rooms' Floor
+Face area from the Dwelling's occupants over the presence Schedule's mean; lighting per m² from honeybee-ph
+`phius_residential.lighting_interior` over its iCFA and units, as peak watts over the lighting Schedule's mean ×
+8,760 h, with a `PhPhiusLightingInterior` device on the Lighting; hot water per m² from Building America gallons a
+day by units and bedrooms, as Set Residential Program codes it. A Zone in no Dwelling on such a Program is a group of
+its own, one unit and no occupants, as honeybee-ph works its rules over an untagged Room. Any other Program
+exports once under its own id. Ventilation is the Program's, its empty terms 0; Infiltration is the Program's,
+which the airtightness section replaces on a Segment with a test result. Every load id is the ProgramType's with
+the load's name.
+
+**Schedules.** `RulesetExport` writes a Schedule's PH form: its 24-hour profile is the operating day, applied on
+`days_per_week` days from Monday over the year less `52 - weeks_per_year` weeks off, one block centred on 1 August
+and moved inside the year where it would run past it; every other day is the off day, at `fraction_off`,
+`watts_off` or, for ventilation, the minimum period's fraction. A Schedule of every day and every week is its
+operating day alone. A temperature Schedule is one constant. Every ruleset carries honeybee-ph's
+`operating_days_wk` and `operating_weeks_year`; a ventilation Schedule also carries its four periods, high,
+standard, basic and minimum end to end from midnight, which PHX reads as the ventilation pattern. Occupancy and
+lighting Schedules carry no periods until honeybee-ph's `annual_average_operating_fraction` and PHX's use of it
+are fixed, so PHX reads their hourly values.
+
+**Rooms.** Each Room takes its own copy of its ProgramType's People, with honeybee-ph's counts and a `PhDwellings`
+its Dwelling's Rooms share (`num_dwellings` its units; a Zone in no Dwelling an untagged one of 0). A Dwelling's
+counts sum over its Rooms: each Zone's own while the Dwelling's count is its Zones' sum, else the Dwelling's own
+count or the Phius rule's, all on its largest Room by Floor area. Its Equipment Set, or the Model's default, goes
+once on that Room, each device's `quantity` its own times the units, under the identifier `<set>-<device>`: PHX
+merges devices across a Segment's Rooms by identifier and sums their quantities. A Zone in no Dwelling carries
+its own Set's devices. Each device is a `Process` whose watts are honeybee-ph's `annual_avg_wattage` from the
+Dwelling's counts and iCFA, over honeybee's Always On (PHX reads the device in a residential Segment). A Set in a
+non-residential Segment is left out: PHX takes such a Room's equipment from its Program's watts and its Process
+loads' watts, so its devices would count twice. Every identifier is Ruby's, so the HBJSON is the same each run.
+
+**Set points.** Each Segment's winter and summer set points are its Zones' Programs' heating and cooling, each a
+constant or its temperature Schedule's value. Where the Zones' Programs disagree, the Segment carries its first
+Zone's by id. A legacy Zone names no Segment record, so its BldgSegment keeps honeybee-ph's 20 and 25 °C.
+
+**Findings** (`programs.export_preflight`, the same rows the export notes or stops on; each row's `locate` runs
+the view command `programs.locate`, which opens the Zones tab on the Zones / Programs view with the row's Zones
+checked, or a single dwelling's Building Segment settings):
+
+| Code | Blocks | When |
+| --- | --- | --- |
+| `programs.value_missing` | yes | A Program an exported Zone uses lacks a value its ProgramType needs (a per-area value, a rule's Schedule, a ventilation rate, a set point), or a Program or Equipment Set it names is gone |
+| `programs.set_points_inverted` | yes | A Program's heating set point is above its cooling one, read through its temperature Schedules |
+| `programs.no_floor_area` | no | A Dwelling on a Phius rule Program has no Floor Face area, so its rule loads export at 0 per m² (honeybee-ph's Set Residential Program refuses such Rooms) |
+| `programs.set_points_disagree` | no | A Segment's Zones' Programs give different set points; the row names the pair exported |
+| `programs.counts_missing` | no | A Dwelling on a Phius rule has no bedrooms or occupants, so it exports with none |
+| `programs.rule_without_dwelling` | no | A Zone of a Segment record in no Dwelling uses a rule Program |
+| `programs.equipment_set_non_residential` | no | A Zone carries an Equipment Set in a non-residential Segment; its devices are left out, the Program's equipment watts standing for them |
+| `programs.text_left_out` | no | A Program, Schedule, Dwelling or Segment name, or a device name or comment, the export would write reads as a local file path: it stays in the Model and its id, type or nothing takes its place |
+
+The occupancy reads' findings on exported Zones and Segments join the preflight as warnings. A message that would
+carry a name reading as a local file path says so in its place, in the preflight and in the export's notes. Program, Schedule,
+Equipment Set and Dwelling `user_data` stays in the Model with a finding; the report's Programs part lists each
+Segment's set points and its Dwellings' units and counts from the Python result.
 
 ## This computer's settings file
 

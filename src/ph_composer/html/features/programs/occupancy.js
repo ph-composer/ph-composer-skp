@@ -13,8 +13,9 @@
    The Single dwelling tag on a heading, and every locked cell of the Zones / Programs view, opens the lock bubble:
    "<Segment> is a single dwelling", why its Zones are locked, and Open settings, which opens the Segment's settings
    dialog through the Zones tab's `segmentSettings` intent. */
-PhComposerUI.define("features/programs/occupancy", ["panel", "workspace", "snapshot", "table_views"],
-function (panel, ui, snapshot, tableViews) {
+PhComposerUI.define("features/programs/occupancy", ["panel", "workspace", "snapshot", "table_views", "units",
+  "unit_preferences", "fields"],
+function (panel, ui, snapshot, tableViews, units, preferences, fields) {
   "use strict";
   var NAMESPACE = "ph_composer.programs.segment";
   var CERTIFICATION = "ph_composer.certification.segment";
@@ -228,6 +229,28 @@ function (panel, ui, snapshot, tableViews) {
       return { single_dwelling: Boolean(draft.single_dwelling), default_program_id: draft.default_program_id || null,
         bedrooms: parsed(draft.bedrooms), occupants: parsed(draft.occupants),
         equipment_set_id: draft.equipment_set_id || null };
+    }
+  });
+
+  /* The Comfort section: the Segment's heating and cooling set points, read only. They come from its Zones'
+     Programs (Q4a-04) and the export writes them to its BldgSegment; where the Programs disagree, the first
+     Zone's pair is the one written. */
+  panel.segmentSettingsSection("ph_composer.programs.comfort", {
+    title: "Comfort", order: 50, readOnly: true,
+    render: function (segment, draft, context) {
+      var node = ui.element("div"), row = segmentRow(context.state, segment.id);
+      var points = row && row.set_points, quantity = fields.TEMPERATURE_C;
+      var profile = units.profile(quantity, preferences.current());
+      function value(number) {
+        return ui.element("span", "", number === null || number === undefined ? "None set" :
+          units.format(number, quantity, profile));
+      }
+      node.appendChild(field("Heating set point", value(points ? points.heating_c : null)));
+      node.appendChild(field("Cooling set point", value(points ? points.cooling_c : null)));
+      node.appendChild(ui.element("p", "phc-zone-option-help", points && !points.agree ?
+        "Its Zones' Programs give different set points; the export writes the first Zone's. Set them on the " +
+        "Programs to change them." : "From its Zones' Programs. Set them on the Programs to change them."));
+      return node;
     }
   });
 

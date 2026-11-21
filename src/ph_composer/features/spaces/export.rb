@@ -48,7 +48,7 @@ module PhComposer
                                               ],
                                               "space_schedule" => [Export::Privacy.fields(SCHEDULE)]
                                             }, :report => method(:report),
-                                            :projection => method(:zone_net_volumes)) { |reader| records(reader) }
+                                            :projection => method(:zone_totals)) { |reader| records(reader) }
         feature.query(PREFLIGHT, :description => "Spaces export checks: every finding with where it is and its repair.",
                                  :refuses => [], :params => Shapes::NONE, :result => Export::PREFLIGHT_RESULT,
                                  :examples => [{}]) { |request| preflight(request) }
@@ -307,12 +307,13 @@ module PhComposer
         rows.sort_by { |row| row.fetch("id") }
       end
 
-      # The section's registered projection, for a contributor that needs each exported Zone's net volume
-      # (`reader.section(SECTION)`): one row per Zone that holds a Volume, in Zone id order, with the sum of its
-      # Volumes' net volumes as the metrics measure them (net floor area times average clear ceiling height),
-      # which is what honeybee-ph and PHX read back. What sits in a Zone in no Building Segment is left out with
-      # it, and a Volume with no height counts nothing here: the section's records refuse it.
-      def zone_net_volumes(reader)
+      # The section's registered projection, for a contributor that needs each exported Zone's Space totals
+      # (`reader.section(SECTION)`): one row per Zone that holds a Volume, in Zone id order, with the sums of its
+      # Volumes' floor area, weighted floor area (iCFA) and net volume as the metrics measure them (net volume is
+      # net floor area times average clear ceiling height), which is what honeybee-ph and PHX read back. What sits
+      # in a Zone in no Building Segment is left out with it, and a Volume with no height counts no volume here:
+      # the section's records refuse it.
+      def zone_totals(reader)
         snapshot = reader.snapshot
         kept = lambda do |dictionary, kind|
           snapshot.records(dictionary, :kind => kind)
@@ -320,7 +321,7 @@ module PhComposer
         end
         spaces = kept.call(SPACE_STORE.dictionary, "group").to_h { |entry, record| [entry.path, record] }
         segments_in = kept.call(FLOOR_SEGMENT_STORE.dictionary, "face").group_by { |entry, _| entry.path[0...-1] }
-        totals = Hash.new(0.0)
+        totals = Hash.new { |hash, key| hash[key] = TOTALS.to_h { |total| [total, 0.0] } }
         kept.call(VOLUME_STORE.dictionary, "group").each do |entry, record|
           zone_id = spaces[entry.path[0...-1]]&.fetch("zone_id", nil)
           next unless zone_id
@@ -328,9 +329,10 @@ module PhComposer
           metrics = segments_in.fetch(entry.path, []).map do |segment, segment_record|
             Metrics.segment(segment.geometry.loops_m, segment.geometry.normal, segment_record)
           end
-          totals[zone_id] += Metrics.volume(record, metrics).fetch("net_volume_m3") || 0.0
+          volume = Metrics.volume(record, metrics)
+          TOTALS.each { |total| totals[zone_id][total] += volume.fetch(total) || 0.0 }
         end
-        totals.sort.map { |zone_id, volume| { "zone_id" => zone_id, "net_volume_m3" => volume } }
+        totals.sort.map { |zone_id, sums| { "zone_id" => zone_id }.merge(sums) }
       end
 
       # One note per Zone in no Building Segment counting the Spaces inside it that leave with it.

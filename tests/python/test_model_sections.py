@@ -23,6 +23,7 @@ from ph_composer_translation.site_sections import SiteSection
 from ph_composer_translation.space_sections import SpaceSection
 from ph_composer_translation.thermal_bridge_sections import ThermalBridgeSection
 from ph_composer_translation.window_sections import ApertureSection, WindowConstructionSection
+from program_free import program_sections, without_programs
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "tests" / "fixtures" / "phase_one" / "two_zones_extraction.json"
@@ -33,7 +34,7 @@ def load_fixture() -> dict[str, Any]:
     value["sections"].update(
         {section.id: {"version": 1, "records": []} for section in (WindowConstructionSection(), ApertureSection())}
     )
-    return cast(dict[str, Any], value)
+    return without_programs(value)
 
 
 def test_normal_composition_uses_only_authored_constructions() -> None:
@@ -134,6 +135,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             SpaceSection(),
             ThermalBridgeSection(),
             AirtightnessSection(),
+            *program_sections(),
             ShadeSection(),
         ),
     ).to_document()
@@ -167,6 +169,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             SpaceSection(),
             ThermalBridgeSection(),
             AirtightnessSection(),
+            *program_sections(),
             ShadeSection(),
         ),
     ).to_document()
@@ -206,6 +209,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             SpaceSection(),
             ThermalBridgeSection(),
             AirtightnessSection(),
+            *program_sections(),
             ShadeSection(),
         ),
     ).to_document()
@@ -273,6 +277,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             SpaceSection(),
             ThermalBridgeSection(),
             AirtightnessSection(),
+            *program_sections(),
             ShadeSection(),
         ),
     )
@@ -323,6 +328,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 SpaceSection(),
                 ThermalBridgeSection(),
                 AirtightnessSection(),
+                *program_sections(),
                 ShadeSection(),
             ),
         ).to_document(),
@@ -380,6 +386,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 SpaceSection(),
                 ThermalBridgeSection(),
                 AirtightnessSection(),
+                *program_sections(),
                 ShadeSection(),
             ),
         ).to_document(),
@@ -411,6 +418,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 SpaceSection(),
                 ThermalBridgeSection(),
                 AirtightnessSection(),
+                *program_sections(),
                 ShadeSection(),
             ),
         ).to_document(),
@@ -444,6 +452,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 SpaceSection(),
                 ThermalBridgeSection(),
                 AirtightnessSection(),
+                *program_sections(),
                 ShadeSection(),
             ),
         ).to_document(),
