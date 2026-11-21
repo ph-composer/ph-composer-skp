@@ -777,6 +777,7 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
 | `actions(row)`, `zoneActions(row)`, `action(row, item, control)`, `inspect`, `locate(row)`, `clearLocate`, `selected(row)` | Row actions (`control` is the pressed button, to anchor what it opens), the Zone row's actions after Make independent, Locate (`clearLocate` answers whether it cleared anything), and which rows paint as selected (Spaces: the row open in the edit context) |
 | `checkedZones()`, `checkZones(keys)` | The Zone rows every row beneath which this view has checked, and checking everything beneath Zones another view handed over |
 | `segmentSums(group, profile)` | The text of the view's columns on a Segment heading row, by field: `group` is `{ key, segment, rows }`, its key as the Zones and Spaces reads key their `building_segments` sums (the Segment's id, a legacy Zone's Segment name, or `""` for none), the Segment record (null for none or one not adopted) and its Zone rows. Geometry shows the Segment's gross area, Spaces its areas, volume and airflows. A view reads published sums and adds none of its own |
+| `segmentCell(td, group, field, profile)` | A Segment heading cell the view draws itself, answering true when it did, after the host's Name cell: Programs puts a single dwelling's bedrooms, occupants and Equipment Set there as inputs, and an amber "?" on a sum some Zone lacks |
 | `check(context)`, `selectionBar(overview)`, `settings`, `navigate(intent)`, `count`, `placeholder` | Checkboxes for the rows it checks, a selection bar, a settings control for the page header, a navigation intent's `check`, what the control row's count adds after the Zones ("4 Spaces"), and the text filter's placeholder |
 | `draftReason`, `cancelDrafts`, `canCancelDrafts`, `leaveReason`, `leave`, `escape` | Work a filter, a switch or shutting a row must not hide, and how the guard's notice cancels it (offered only while `canCancelDrafts` answers, never for an edit already sent); what holds a switch; what stops on a switch away; Escape, true when the view used it |
 
@@ -845,12 +846,19 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   });
   ```
 
+  A tag with `open(anchor)` is a button (its accessible name `label`, else its text) that hands itself to `open` as
+  the anchor for what it shows: the Single dwelling tag opens the lock bubble. Another tab or a view opens one
+  Segment's settings dialog with `panel.navigate("overview", { segmentSettings: id })`, as the heading's Settings
+  does, the lock bubble's Open settings among them.
+
 **Contributor tasks traced.** "Add the Spaces view" (P3a-07) adds one module under
 `html/features/spaces/` registering under `"ph_composer.zones"`: Space, Volume and Floor Segment rows
 three deep through `children`, sums on the Zone row through `value`; no Zones file changes. "Add an
 Occupancy view" registers `columns` and `value` with no `children`, as the example does, and
 `segmentSums` for its heading sums. "Tag the Segments that are single dwellings" (Programs, P4a-08)
-registers one heading contribution; no Zones file changes.
+registers one heading contribution; no Zones file changes. "Add the Programs view" (P4a-09) registers one view
+under `html/features/programs/` with `columns`, `value`, `cell`, `check`, `selectionBar`, `segmentSums` and
+`segmentCell`; the host gained `segmentCell`, a tag's `open` and the `segmentSettings` intent, each generic.
 
 ### Building Segment settings
 

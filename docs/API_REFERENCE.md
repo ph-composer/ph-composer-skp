@@ -16367,6 +16367,8 @@ Result:
           "equipment_set_id",
           "zone_ids",
           "building_segment_ids",
+          "floor_area_m2",
+          "icfa_m2",
           "findings"
         ],
         "properties": {
@@ -16434,6 +16436,14 @@ Result:
             "items": {
               "type": "string"
             }
+          },
+          "floor_area_m2": {
+            "type": "number",
+            "x-unit": "m2"
+          },
+          "icfa_m2": {
+            "type": "number",
+            "x-unit": "m2"
           },
           "findings": {
             "type": "array",
@@ -21927,7 +21937,7 @@ Example params:
 
 ### `ph_composer.programs.zones`
 
-Every Zone's assignment and what it works out to: its Program, Dwelling, peak people, lighting and ventilation, with findings; and each Building Segment's occupancy, set points and Single dwelling preview. Owner: `ph_composer.programs`.
+Every Zone's assignment and what it works out to: its Program, Dwelling, peak people, lighting and ventilation, with findings and why a value is unknown; each Building Segment's occupancy, sums, set points and Single dwelling preview; and every Dwelling. Owner: `ph_composer.programs`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.zones.list` instead.
 
@@ -21953,6 +21963,7 @@ Result:
   "required": [
     "zones",
     "building_segments",
+    "dwellings",
     "choices"
   ],
   "properties": {
@@ -21972,6 +21983,7 @@ Result:
           "dwelling_id",
           "dwelling_name",
           "single_dwelling",
+          "dwelling_units",
           "equipment_set_id",
           "floor_area_m2",
           "icfa_m2",
@@ -21979,6 +21991,7 @@ Result:
           "lighting_w",
           "ventilation_m3h",
           "ventilation_source",
+          "missing",
           "findings"
         ],
         "properties": {
@@ -22047,6 +22060,13 @@ Result:
             "type": "boolean",
             "description": "Whether its Segment's setting decides it."
           },
+          "dwelling_units": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Its Dwelling's units; null in none."
+          },
           "equipment_set_id": {
             "type": [
               "string",
@@ -22097,6 +22117,13 @@ Result:
               null
             ]
           },
+          "missing": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Why each of people, lighting_w and ventilation_m3h that is null is unknown, keyed as the row keys it."
+          },
           "findings": {
             "type": "array",
             "items": {
@@ -22139,6 +22166,7 @@ Result:
           "dwelling_count",
           "set_points",
           "single_dwelling_preview",
+          "sums",
           "findings"
         ],
         "properties": {
@@ -22346,6 +22374,77 @@ Result:
               }
             }
           },
+          "sums": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bedrooms",
+              "occupants",
+              "floor_area_m2",
+              "icfa_m2",
+              "people",
+              "lighting_w",
+              "ventilation_m3h",
+              "incomplete"
+            ],
+            "properties": {
+              "bedrooms": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "occupants": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "floor_area_m2": {
+                "type": "number",
+                "x-unit": "m2"
+              },
+              "icfa_m2": {
+                "type": "number",
+                "x-unit": "m2"
+              },
+              "people": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "lighting_w": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W"
+              },
+              "ventilation_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h"
+              },
+              "incomplete": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "people",
+                    "lighting_w",
+                    "ventilation_m3h"
+                  ]
+                },
+                "description": "The loads some Zone lacks; their sums cover the others."
+              }
+            },
+            "description": "Its heading row: the counts of the Dwellings its Zones are in, their areas and loads."
+          },
           "findings": {
             "type": "array",
             "items": {
@@ -22371,6 +22470,129 @@ Result:
           }
         }
       }
+    },
+    "dwellings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "units",
+          "single_dwelling",
+          "own_bedrooms",
+          "own_occupants",
+          "bedrooms",
+          "occupants",
+          "occupants_rule",
+          "equipment_set_id",
+          "zone_ids",
+          "building_segment_ids",
+          "floor_area_m2",
+          "icfa_m2",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "units": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "single_dwelling": {
+            "type": "boolean"
+          },
+          "own_bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "own_occupants": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "occupants": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "occupants_rule": {
+            "type": "boolean"
+          },
+          "equipment_set_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "zone_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "building_segment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "floor_area_m2": {
+            "type": "number",
+            "x-unit": "m2"
+          },
+          "icfa_m2": {
+            "type": "number",
+            "x-unit": "m2"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Every Dwelling, as programs.dwellings answers it."
     },
     "choices": {
       "type": "object",
@@ -57866,6 +58088,162 @@ Example params:
   "dwelling_ids": [
     "dwl_Ab12Cd34Ef56"
   ]
+}
+```
+
+### `ph_composer.programs.assign_library_program`
+
+Copy a library Program into the Model with its Schedules, or reuse its local copy, and assign it to Zones, in one Undo step. Owner: `ph_composer.programs`.
+
+Undo step: Assign Library Program. Copies or reuses the Program and its Schedules; writes each Zone's assignment.
+
+Calls: `ph_composer.zones.stage_extension`, `ph_composer.library.copy_into_proposal`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.dependency_missing`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `programs.dwelling_across_segments`, `programs.single_dwelling`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "copy"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Each Zone occurrence, as zones.all or programs.zones returns its reference.",
+      "minItems": 1
+    },
+    "copy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_id",
+        "kind",
+        "generation",
+        "library_id",
+        "record_id",
+        "choice"
+      ],
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "programs"
+          ]
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "choice": {
+          "type": "string",
+          "enum": [
+            "create",
+            "keep_local",
+            "use_library"
+          ]
+        },
+        "local_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_values": {
+          "type": "object"
+        }
+      },
+      "description": "The library row and the choice its resolution allows, as ph_composer.library.copy takes them, without an assignment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "program_id",
+    "dependencies"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "program_id": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "The Schedules copied or reused, as the copy answers them."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        101
+      ]
+    }
+  ],
+  "copy": {
+    "provider_id": "provider.example",
+    "kind": "programs",
+    "generation": 3,
+    "library_id": "phius.multifamily",
+    "record_id": "corridor",
+    "choice": "create"
+  }
 }
 ```
 
@@ -94767,3 +95145,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |
 | 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |
 | 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |
+| 1.82 | 2026-11-20 | The Zones / Programs view's reads and the library Program on Zones. programs.assign_library_program copies a library Program with its Schedules, or reuses its local copy, through ph_composer.library.copy_into_proposal and assigns it to Zones in one Undo step; the programs feature now requires ph_composer.library. programs.zones answers every Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or ventilation_m3h is unknown), and each Building Segment's sums for its heading row. |

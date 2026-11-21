@@ -8,7 +8,11 @@
    non-residential; this section never changes the category. Switching it on names what gives way (each Zone's own
    Program, its Dwellings and their Equipment Sets) and enters the Zones' summed bedrooms, both from Ruby's preview;
    Save is the confirmation. What switching does to the Zones is Ruby's (features/programs/single_dwelling.rb); the
-   rows read `ph_composer.programs.zones` through its snapshot section. */
+   rows read `ph_composer.programs.zones` through its snapshot section.
+
+   The Single dwelling tag on a heading, and every locked cell of the Zones / Programs view, opens the lock bubble:
+   "<Segment> is a single dwelling", why its Zones are locked, and Open settings, which opens the Segment's settings
+   dialog through the Zones tab's `segmentSettings` intent. */
 PhComposerUI.define("features/programs/occupancy", ["panel", "workspace", "snapshot", "table_views"],
 function (panel, ui, snapshot, tableViews) {
   "use strict";
@@ -22,7 +26,35 @@ function (panel, ui, snapshot, tableViews) {
     "Phius certification first.";
   var SINGLE = "Its Zones are one dwelling with the residential default.";
   var NUMBER = /^\+?(\d+\.?\d*|\.\d+)$/;
+  var LOCKED = "Its Zones are one dwelling with the residential default Program. Bedrooms, occupants and the " +
+    "Equipment Set are entered once, on the Building Segment row. Switch Single dwelling off in its settings to " +
+    "assign its Zones one by one.";
   var views = typeof WeakMap === "function" ? new WeakMap() : null;
+  var lock = null;
+
+  /* The lock bubble, anchored to the tag or cell that opened it; a second press on the same anchor closes it. Its
+     root mounts in the workspace, outside the table, so the table's scroller never clips it. */
+  function lockBubble(anchor, segment) {
+    var open = lock && !lock.panel.hidden && lock.trigger === anchor;
+    if (lock) { lock.close(false); if (lock.root.parentNode) lock.root.parentNode.removeChild(lock.root); }
+    lock = null;
+    if (open) return null;
+    var bubble = lock = new ui.Bubble(anchor, segment.name + " is a single dwelling",
+      { detachedTrigger: true, ownTrigger: true });
+    bubble.root.classList.add("phc-lock-bubble");
+    bubble.content.appendChild(ui.element("p", "phc-lock-bubble-text", LOCKED));
+    var settings = ui.button("Open settings", function () {
+      bubble.close(false);
+      panel.navigate("overview", { segmentSettings: segment.id });
+    });
+    settings.className = "primary";
+    var actions = ui.element("div", "phc-lock-bubble-actions");
+    actions.appendChild(settings);
+    bubble.content.appendChild(actions);
+    (anchor.closest(".phc-workspace") || document.body).appendChild(bubble.root);
+    bubble.open();
+    return bubble;
+  }
 
   function read(state) { return snapshot.value(state, SECTION) || { zones: [], building_segments: [], choices: {} }; }
 
@@ -205,11 +237,21 @@ function (panel, ui, snapshot, tableViews) {
       var row = segmentRow(state, segment.id);
       if (!row) return null;
       var bedrooms = row.dwelling ? row.dwelling.bedrooms : null;
-      var tags = row.single_dwelling ? [{ text: "Single dwelling", tooltip: segment.values.name + " is a single " +
-        "dwelling: its Zones are one house with the residential default. Switch it off in its settings to " +
-        "assign them one by one." + (bedrooms === null ? " Its bedrooms are not entered yet." : "") }] : [];
+      var tags = row.single_dwelling ? [{ text: "Single dwelling", label: segment.values.name + " is a single " +
+        "dwelling: why its Zones are locked", tooltip: segment.values.name + " is a single dwelling: its Zones are " +
+        "one house with the residential default." + (bedrooms === null ? " Its bedrooms are not entered yet." : ""),
+        open: function (anchor) { lockBubble(anchor, { id: segment.id, name: segment.values.name }); } }] : [];
       return { tags: tags, findings: row.findings.map(function (finding) { return { message: finding.message }; }) };
     } });
 
-  return { NAMESPACE: NAMESPACE, FIELDS: FIELDS, DEFAULTS: DEFAULTS, parsed: parsed };
+  /* Closes the lock bubble, if open: a view that leaves, or Escape, takes it with it. Answers whether it was open. */
+  function closeLock() {
+    var open = Boolean(lock && !lock.panel.hidden);
+    if (lock) { lock.close(false); if (lock.root.parentNode) lock.root.parentNode.removeChild(lock.root); }
+    lock = null;
+    return open;
+  }
+
+  return { NAMESPACE: NAMESPACE, FIELDS: FIELDS, DEFAULTS: DEFAULTS, parsed: parsed, read: read,
+    lockBubble: lockBubble, closeLock: closeLock };
 });

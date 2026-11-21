@@ -31,10 +31,12 @@
 #   assignments.rb             assign a Program, a Dwelling, counts and an Equipment Set, through Zones' participant
 #   single_dwelling.rb         the contributor to Zones' settings Save that switches Single dwelling, and its preview
 #   derive/occupancy.rb        pure: effective Program and Dwelling, counts, people, lighting, ventilation, set points
+#   missing_values.rb          pure: why a Zone's people, lighting or ventilation is unknown, for the view's "?"
 #   occupancy_reads.rb         the programs.zones and programs.dwellings reads, with their findings
 #   occupancy_declarations.rb  what occupancy registers
 #
-# The panel half is html/features/programs/airtightness.js and occupancy.js.
+# The panel half is html/features/programs/airtightness.js, occupancy.js and zones_view.js (the Zones /
+# Programs view).
 module PhComposer
   module Programs
     FEATURE_ID = "ph_composer.programs"
@@ -59,6 +61,7 @@ require_relative "occupancy_state"
 require_relative "derive/occupancy"
 require_relative "assignments"
 require_relative "single_dwelling"
+require_relative "missing_values"
 require_relative "occupancy_reads"
 require_relative "occupancy_declarations"
 
@@ -95,7 +98,7 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => 1,
                                              :requires => ["ph_composer.zones", "ph_composer.spaces",
-                                                           "ph_composer.certification"])
+                                                           "ph_composer.certification", "ph_composer.library"])
       CODES.each { |code, description| feature.code(code, :description => description) }
       feature.extension(Airtightness::EXTENSION)
       feature.query(READ, :description => "One Building Segment's airtightness settings, with the defaults where " \

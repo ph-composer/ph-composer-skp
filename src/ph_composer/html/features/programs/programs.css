@@ -1,0 +1,44 @@
+/* The Zones / Programs view (features/programs/zones_view.js) and the lock bubble (occupancy.js). It reuses the
+   kit's chips, locked pill and bubble; these rules give them the view's own states. */
+
+/* A Program or Equipment Set the Zone takes by default reads as inherited: muted and italic, its source in its
+   tooltip. */
+.phc-table select.phc-enum-cell.is-default { color: var(--muted); font-style: italic; }
+
+/* A value the Segment's Single dwelling decides: the kit's locked pill, pressed to see why. */
+.phc-workspace .phc-table button.phc-enum-pill.phc-programs-locked { height: 24px; min-height: 24px; margin: 0 4px;
+  border: 0; color: var(--muted); box-shadow: none; font: inherit; font-size: var(--text-sm); text-align: left;
+  cursor: pointer; }
+.phc-workspace .phc-table button.phc-enum-pill.phc-programs-locked:hover { color: var(--ink); }
+
+/* The Dwelling chip: the Dwelling's name, or a dashed "None", opening the Dwelling bubble. */
+.phc-workspace .phc-table button.phc-dwelling-chip { width: auto; max-width: calc(100% - 8px); height: 24px;
+  min-height: 24px; margin: 0 4px; padding: 0 10px; overflow: hidden; border: 1px solid var(--line);
+  border-radius: var(--radius-pill); background: var(--surface-alt); box-shadow: none; font-size: var(--text-sm);
+  line-height: 22px; text-overflow: ellipsis; white-space: nowrap; }
+.phc-workspace .phc-table button.phc-dwelling-chip.is-none { border-style: dashed; background: transparent;
+  color: var(--muted); }
+
+.phc-programs-muted { color: var(--muted); }
+
+/* A value the Model cannot work out yet: a compact amber "?" naming why in its tooltip. */
+.phc-programs-missing { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: var(--radius-pill);
+  background: var(--warning-surface); color: var(--warning-ink); font-weight: 600; line-height: 18px;
+  text-align: center; cursor: help; }
+
+/* The house row's bedrooms, while not entered, wait in amber. */
+.phc-table .phc-cell-input.phc-house-input.is-needed { background: var(--warning-surface); color: var(--warning-ink);
+  font-weight: 600; }
+.phc-table .phc-cell-input.phc-house-input.is-needed::placeholder { color: var(--warning-ink); }
+
+/* The Dwelling bubble: its choice, then the Dwelling's values in two columns. */
+.phc-dwelling-choose { display: grid; gap: 4px; margin: 0 0 10px; }
+.phc-dwelling-detail { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0;
+  align-items: center; }
+.phc-dwelling-detail dt { color: var(--muted); }
+.phc-dwelling-detail dd { display: flex; align-items: center; gap: 4px; margin: 0; }
+.phc-dwelling-input { width: 64px; text-align: right; }
+.phc-dwelling-rule { display: inline-flex; color: var(--muted); cursor: help; }
+
+.phc-lock-bubble-text { margin: 0; line-height: 1.4; }
+.phc-lock-bubble-actions { display: flex; justify-content: flex-end; margin-top: 10px; }

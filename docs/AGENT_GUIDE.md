@@ -462,6 +462,12 @@ residential default Program, and only its bedrooms, occupants and Equipment Set 
 5. A non-residential Segment (its Phius certification `category`) is never a single dwelling. Changing the
    category writes no assignment; the Segment's Zones then need a Program of their own or from the Segment's
    `default_program_id`, which the `programs.unassigned_zone` finding reports.
+6. To give Zones a Program from a library file, read the source's `programs` rows with `ph_composer.library.in_file`
+   (load its `schedules` too: the copy brings the Schedules the Program names), then call
+   `ph_composer.programs.assign_library_program` with the Zones and `copy`: the row's `provider_id`, `kind`
+   `programs`, `generation`, `library_id`, `record_id` and the `choice` its resolution allows (`create`, or
+   `keep_local` with the local id once it is in the file). The copy and the assignment are one Undo step. A Zone row
+   whose `people`, `lighting_w` or `ventilation_m3h` is null says why in `missing`.
 
 ### Spaces from loose Faces
 

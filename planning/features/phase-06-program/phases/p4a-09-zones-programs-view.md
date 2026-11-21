@@ -1,7 +1,7 @@
 # P4a-09: The Zones / Programs view
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch `feature/phase-06-program-p4a-09` (2026-11-20); PG09's host rows owed. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -74,3 +74,27 @@ recorded.
 ## Done when
 
 PG09 passes.
+
+## Implementation decisions (2026-11-20)
+
+Recorded by the stage; [STATUS](../STATUS.md) holds the ledger row.
+
+- **A library Program on Zones is Programs' own action.** The coordinator's assignment callback cannot write a Zone:
+  `ph_composer.library.copy` names no Zones participant (`operation.participant_missing`), and the library does not
+  depend on Programs. `ph_composer.programs.assign_library_program` joins the copy through
+  `ph_composer.library.copy_into_proposal` (the Windows Installs save's route) and then assigns as `assign_program`
+  does: one Undo step, refused together. Programs now requires `ph_composer.library`. The library Program kind's
+  own assignment stays the Model's default.
+- **The house row writes through Zones' settings Save** (`ph_composer.zones.save_segment_settings` with only the
+  `ph_composer.programs.segment` payload), as the Occupancy section does, since the house's values live on the
+  Segment payload (P4a-08).
+- **The read grew, Ruby still derives.** `programs.zones` adds every Dwelling, each Zone's `dwelling_units` and
+  `missing` (the reason behind each amber "?", `missing_values.rb`) and each Segment's heading `sums`, with
+  `incomplete` for a load some Zone lacks; API 1.82.
+- **Three generic host hooks**, each in `context/EXTENSIBILITY.md`: a view's `segmentCell` (the house row's inputs),
+  a heading tag's `open` (the Single dwelling tag opens the lock bubble) and the Zones tab's `segmentSettings`
+  intent (the lock bubble's Open settings).
+- **Library Programs load once the view shows**: each source's `programs` and `schedules` catalogs, through the
+  library's own stores; a row whose local copy needs review is refused with the reason, for P4a-11's sidebar.
+- **Locked counts read a dash**, as the prototype's, in the kit's locked pill; "in <Dwelling>" is for a Dwelling
+  that holds its own count.

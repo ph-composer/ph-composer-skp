@@ -235,6 +235,36 @@ Use the table to review iCFA, net volume and airflows. Locate an item from its r
 changes a Space's Zone assignment and keeps its position. **Remove** returns its Floor Segments
 to plain geometry. **Delete** erases those Faces.
 
+## Assign Programs, Dwellings and Equipment Sets
+
+1. Use **Zones > Programs** to see each Zone's Program, Dwelling, bedrooms, occupants and Equipment Set,
+   with its floor area, iCFA and the peak people, lighting and ventilation the export writes. Each
+   Building Segment's heading row sums them. A column header's tooltip names the area a value is
+   worked out on.
+2. A residential Building Segment starts as a single dwelling. Its Zones are one house with the
+   residential default Program, and their cells are locked. Enter the house's bedrooms, and its
+   occupants and Equipment Set if they differ from the defaults, on the Segment's heading row. The
+   bedrooms read as an amber **?** until entered. Click a locked cell or the **Single dwelling** tag to
+   see why, and **Open settings** to switch Single dwelling off in the Segment's settings.
+3. With Single dwelling off, choose each Zone's Program. A Zone with none uses its Segment's
+   default Program, else the Model's, shown in italics. Programs from an added library file are
+   listed after this file's own; choosing one copies it with its Schedules and assigns it in one
+   step.
+4. Click a Zone's Dwelling, or **None**, to choose its Dwelling: an existing one, a new one, or none.
+   The same bubble edits the Dwelling's units, and shows its Zones, bedrooms, occupants and iCFA.
+   Enter bedrooms and occupants on each Zone of a Dwelling; the Dwelling totals them. Left empty,
+   occupants follow the Phius rule, bedrooms + 1 per unit.
+5. Choose an Equipment Set for a Dwelling on any of its Zones, or for a Zone in no Dwelling. A Zone in
+   a non-residential Building Segment shows a dash: PHX reads its Program's equipment watts there.
+6. To assign several Zones at once, check them and choose a Building Segment, Program, Dwelling (one
+   shared, one each, none, or an existing one) or Equipment Set in the selection bar. Each choice is
+   one Undo step for every checked Zone. Zones of a single dwelling cannot be checked.
+
+A value PH-Composer cannot work out yet reads as an amber **?**; its tooltip names what is
+missing. A Zone's alert flag names its findings, such as a Program with equipment watts in a
+residential Building Segment. Areas and ventilation follow the unit system (ft² and cfm in IP);
+lighting stays in W. Escape closes an open bubble, then clears the checked Zones.
+
 ## Reuse library definitions
 
 Use **Libraries** to add a file, a folder of files or a connection supplied by a hosted provider.

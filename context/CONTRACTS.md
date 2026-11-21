@@ -680,6 +680,15 @@ first, and refuse `programs.single_dwelling` for a Zone a single dwelling decide
 `programs.dwelling_across_segments` for a Dwelling whose Zones would lie in two Segments (no Segment counts as
 one). The generic metadata routes may store either; the reads report it as a finding.
 
+**A library Program on Zones.** `ph_composer.programs.assign_library_program` takes the Zones and the library row
+with the choice its resolution allows (`create`, `keep_local` with the local id, `use_library` with its expected
+values), as `ph_composer.library.copy` takes them without an assignment. It joins the copy to its own proposal
+through `ph_composer.library.copy_into_proposal`, which copies the Program with its Schedules or reuses the local
+copy, then assigns the local Program as `assign_program` does, so both are one Undo step and refuse together. The
+coordinator's own assignment callback cannot write Zones: `ph_composer.library.copy` names no Zones participant,
+and the library does not depend on Programs, so the feature's action joins the copy instead, as the Windows
+Installs save does. A Zone of a single dwelling refuses `programs.single_dwelling` and the copy with it.
+
 **Switching Single dwelling.** Zones' settings Save stages the payload; Programs' contributor to
 `ph_composer.zones.segment_settings_saved` adds the side effects when `single_dwelling` itself changes on a
 residential Segment. On: every Zone's assignment is cleared and each Dwelling no Zone then names is deleted;
@@ -695,7 +704,12 @@ payload, not on a Dwelling the switch would have to link.
 Equipment Set; floor area and iCFA from Spaces; peak people, interior lighting W and ventilation m³/h with its
 source; findings), one row per Segment (category, settings, whether Single dwelling applies, the house, set
 points and whether its Zones' Programs agree, the switch-on preview, findings) and the Program and Equipment Set
-choices; the panel reads it as the snapshot section `ph_composer.programs.occupancy`.
+choices; the panel reads it as the snapshot section `ph_composer.programs.occupancy`. Since API 1.82 it also
+answers every Dwelling as `programs.dwellings` does (each with its Zones' floor area and iCFA), each Zone's
+`dwelling_units` and `missing`, a sentence for each null people, lighting or ventilation naming what it waits for
+(a Program value, the Dwelling's bedrooms, a Schedule, Spaces), and each Segment's `sums` for its heading row: the
+bedrooms and occupants of the Dwellings its Zones are in, its floor area and iCFA, and its people, lighting and
+ventilation summed over the Zones that have one, with `incomplete` naming each load some Zone lacks.
 `ph_composer.programs.dwellings` lists every Dwelling, the houses among them with a null id. The derivations are
 CONTRACTS section 6 of the Phase 4a packet: people from the Dwelling's occupants over the presence Schedule's
 mean (its daily full-load hours over 24, as honeybee-ph's `annual_average_operating_fraction`), shared by floor
