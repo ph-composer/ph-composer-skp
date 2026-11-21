@@ -1222,6 +1222,109 @@
   FIXTURES.climatefail = attachedFixture({ station: Object.assign({}, NEAREST, { elevation_m: NEAREST.elevation_m +
     400 }) });
 
+  /* ------------------------------------------------------------ Programs: the Zones / Programs view (P4a-09) */
+
+  // The occupancy read (ph_composer.programs.zones) over three Segments, in the shapes Ruby declares: House a
+  // single dwelling with no bedrooms entered yet (prototype journey 1); Apartments switched off with two apartments
+  // and a corridor in no Dwelling (journeys 2 and 3); School non-residential, its Classroom unassigned and flagged
+  // (journey 4). A library file offers Phius multifamily Programs (journey 3). The preview host answers the
+  // Programs writes over it (host.js `programsAction`); the derived loads are illustrative.
+  function programZone(id, name, segment, path) {
+    return { id: id, schema_version: 3, user_data: {}, extension_data: {}, reference: { zone_id: id,
+      zone_path: [path] }, state: "found", face_count: 0, face_area_m2: 0, unclassified_face_area_m2: 0,
+      values: { name: name, building_segment_id: segment, level_id: null, ground_depth_mm: 0 } };
+  }
+  function occupancyZone(id, name, segment, path, area, values) {
+    return Object.assign({ zone_id: id, reference: { zone_id: id, zone_path: [path] }, name: name,
+      building_segment_id: segment, assignment: { program_id: null, dwelling_id: null, equipment_set_id: null,
+        bedrooms: null, occupants: null }, program_id: "pgm_PHCDEFAULT01", program_name: "Residential default",
+      dwelling_id: null, dwelling_name: null, single_dwelling: false, dwelling_units: null, equipment_set_id: null,
+      floor_area_m2: area, icfa_m2: area * 0.9, people: null, lighting_w: null, ventilation_m3h: null,
+      ventilation_source: "by_program", missing: {}, findings: [] }, values);
+  }
+  function occupancySegment(id, name, category, single, values) {
+    return Object.assign({ id: id, name: name, category: category, settings: { single_dwelling: single,
+      default_program_id: null, bedrooms: null, occupants: null, equipment_set_id: null }, stored: !single,
+      single_dwelling: single, dwelling: null, dwelling_count: 0, set_points: { heating_c: 20, cooling_c: 25,
+        agree: true }, single_dwelling_preview: { building_segment_id: id, programs: [], dwelling_ids: [],
+        equipment_set_ids: [], bedrooms: null, occupants: null }, findings: [],
+      sums: { bedrooms: null, occupants: null, floor_area_m2: 0, icfa_m2: 0, people: null, lighting_w: null,
+        ventilation_m3h: null, incomplete: [] } }, values);
+  }
+  var NO_BEDROOMS = "Enter the bedrooms of House: the Phius rule counts occupants from them.";
+  // What Ruby says of a Zone with the residential default in no Dwelling (features/programs/missing_values.rb).
+  function noDwelling(name) {
+    var people = name + " is in no Dwelling, so the Phius occupancy rule has no occupants.";
+    return { people: people, lighting_w: name + " is in no Dwelling, so the Phius lighting rule has no units.",
+      ventilation_m3h: "Ventilation per person waits for the people. " + people };
+  }
+  FIXTURES.programs = {
+    parts: [],
+    zones: [programZone("zon_living", "Living", "bsg_house", 101),
+      programZone("zon_bedroom", "Bedroom", "bsg_house", 102),
+      programZone("zon_apt1", "Apt 1", "bsg_apartments", 201),
+      programZone("zon_apt2", "Apt 2", "bsg_apartments", 202),
+      programZone("zon_corridor", "Corridor", "bsg_apartments", 203),
+      programZone("zon_classroom", "Classroom", "bsg_school", 301)],
+    zoneOptions: { building_segments: [
+      { id: "bsg_house", schema_version: 1, values: { name: "House", colour: "#268589",
+        export_identifier: "segment_house" }, usage: { live: 2, recoverable: 0 }, extension_data: {} },
+      { id: "bsg_apartments", schema_version: 1, values: { name: "Apartments", colour: "#5588BB",
+        export_identifier: "segment_apartments" }, usage: { live: 3, recoverable: 0 }, extension_data: {} },
+      { id: "bsg_school", schema_version: 1, values: { name: "School", colour: "#CB7854",
+        export_identifier: "segment_school" }, usage: { live: 1, recoverable: 0 }, extension_data: {} }],
+      levels: [], default_segment_id: "bsg_house", adoption: { required: false, sources: [] } },
+    occupancy: {
+      zones: [
+        occupancyZone("zon_living", "Living", "bsg_house", 101, 30, { single_dwelling: true, dwelling_name: "House",
+          dwelling_units: 1, lighting_w: 62, missing: { people: NO_BEDROOMS,
+            ventilation_m3h: "Ventilation per person waits for the people. " + NO_BEDROOMS } }),
+        occupancyZone("zon_bedroom", "Bedroom", "bsg_house", 102, 14, { single_dwelling: true,
+          dwelling_name: "House", dwelling_units: 1, lighting_w: 29, missing: { people: NO_BEDROOMS,
+            ventilation_m3h: "Ventilation per person waits for the people. " + NO_BEDROOMS } }),
+        occupancyZone("zon_apt1", "Apt 1", "bsg_apartments", 201, 60, { missing: noDwelling("Apt 1") }),
+        occupancyZone("zon_apt2", "Apt 2", "bsg_apartments", 202, 55, { missing: noDwelling("Apt 2") }),
+        occupancyZone("zon_corridor", "Corridor", "bsg_apartments", 203, 24, { missing: noDwelling("Corridor") }),
+        occupancyZone("zon_classroom", "Classroom", "bsg_school", 301, 70, { people: 3.5, lighting_w: 490,
+          ventilation_m3h: 420, findings: [{ code: "programs.unassigned_zone", severity: "warning",
+            message: "Classroom has no Program of its own or from School." }] })],
+      building_segments: [
+        occupancySegment("bsg_house", "House", "residential", true, { dwelling: { name: "House", units: 1,
+          bedrooms: null, occupants: null, occupants_rule: false, equipment_set_id: null }, dwelling_count: 1,
+          sums: { bedrooms: null, occupants: null, floor_area_m2: 44, icfa_m2: 39.6, people: null, lighting_w: 91,
+            ventilation_m3h: null, incomplete: ["people", "ventilation_m3h"] } }),
+        occupancySegment("bsg_apartments", "Apartments", "residential", false, {
+          findings: [{ code: "programs.residential_without_dwelling", severity: "warning",
+            message: "Apartments is residential and has no Dwelling." }],
+          sums: { bedrooms: null, occupants: null, floor_area_m2: 139, icfa_m2: 125.1, people: null,
+            lighting_w: null, ventilation_m3h: null, incomplete: ["people", "lighting_w", "ventilation_m3h"] } }),
+        occupancySegment("bsg_school", "School", "non_residential", false, {
+          findings: [{ code: "programs.unassigned_zone", severity: "warning",
+            message: "Classroom has no Program of its own or from School." }],
+          sums: { bedrooms: null, occupants: null, floor_area_m2: 70, icfa_m2: 63, people: 3.5, lighting_w: 490,
+            ventilation_m3h: 420, incomplete: [] } })],
+      // The read lists a single dwelling's house among the Dwellings, with a null id.
+      dwellings: [{ id: null, name: "House", units: 1, single_dwelling: true, own_bedrooms: null, own_occupants: null,
+        bedrooms: null, occupants: null, occupants_rule: false, equipment_set_id: null,
+        zone_ids: ["zon_living", "zon_bedroom"], building_segment_ids: ["bsg_house"], floor_area_m2: 44,
+        icfa_m2: 39.6, findings: [] }],
+      choices: { programs: [{ id: "pgm_office", name: "Phius NR Office" },
+        { id: "pgm_PHCDEFAULT01", name: "Residential default" }],
+        equipment_sets: [{ id: "eqs_PHCDEFAULT01", name: "Phius single-family" },
+          { id: "eqs_apartment", name: "Apartment kitchen" }],
+        default_program_id: "pgm_PHCDEFAULT01", default_equipment_set_id: "eqs_PHCDEFAULT01" }
+    },
+    libraryProviders: [{ id: "phius_mf", provider_kind: "ph_composer.library.file", label: "Phius Multifamily",
+      kinds: ["programs", "schedules"] }],
+    libraryCatalogs: { phius_mf: [
+      { kind: "schedules", library_id: "phius.multifamily", library_name: "Phius Multifamily",
+        record_id: "corridor-hours", wire_schema_version: 1, snapshot: { name: "Corridor hours" } },
+      { kind: "programs", library_id: "phius.multifamily", library_name: "Phius Multifamily",
+        record_id: "corridor", wire_schema_version: 1, snapshot: { name: "Phius MF Corridor" } },
+      { kind: "programs", library_id: "phius.multifamily", library_name: "Phius Multifamily",
+        record_id: "lobby", wire_schema_version: 1, snapshot: { name: "Phius MF Lobby" } }] }
+  };
+
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
     // The Spaces section summed again after the preview host writes rates, by the same rule as the fixtures.

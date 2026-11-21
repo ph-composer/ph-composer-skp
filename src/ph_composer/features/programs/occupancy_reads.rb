@@ -32,7 +32,7 @@ module PhComposer
       def zones(request)
         rows = build(request)
         { "zones" => rows.fetch(:zones), "building_segments" => rows.fetch(:segments),
-          "choices" => choices(request) }
+          "dwellings" => rows.fetch(:dwellings), "choices" => choices(request) }
       end
 
       # The Programs and Equipment Sets a Zone or a Segment may name, by name, and the Model's defaults.
@@ -76,25 +76,30 @@ module PhComposer
         dwelling = row.fetch(:dwelling)
         members = dwelling ? groups.fetch(dwelling.fetch("key")).map { |member| member.fetch(:input) } : []
         dwelling_counts = dwelling && counts.fetch(dwelling.fetch("key"))
+        means = program ? { "people" => inputs.mean(program, "people", "occupancy_schedule_id"),
+                            "lighting" => inputs.mean(program, "lighting", "schedule_id") } : {}
         people = program && Derive.people(program, input, :dwelling_counts => dwelling_counts,
                                                           :dwelling_area_m2 => members.sum(&:floor_area_m2),
-                                                          :presence_mean => inputs.mean(program, "people",
-                                                                                        "occupancy_schedule_id"))
+                                                          :presence_mean => means["people"])
         lighting = program && Derive.lighting(program, input, :units => dwelling&.fetch("units"),
                                                               :dwelling_icfa_m2 => members.sum(&:icfa_m2),
-                                                              :schedule_mean => inputs.mean(program, "lighting",
-                                                                                            "schedule_id"))
+                                                              :schedule_mean => means["lighting"])
         ventilation = program ? Derive.ventilation(program, input, :people => people) : { "m3h" => nil,
                                                                                           "source" => nil }
+        derived = { "people" => people, "lighting_w" => lighting, "ventilation_m3h" => ventilation.fetch("m3h") }
+        missing = MissingValues.call(derived, MissingValues::Facts.new(:program => program, :zone => zone,
+                                                                       :input => input, :dwelling => dwelling,
+                                                                       :counts => dwelling_counts, :means => means))
         { "zone_id" => zone.id, "reference" => zone.reference, "name" => zone.name,
           "building_segment_id" => zone.segment_id, "assignment" => zone.assignment,
           "program_id" => row.fetch(:program_id), "program_name" => program&.fetch("name"),
           "dwelling_id" => dwelling&.fetch("id"), "dwelling_name" => dwelling&.fetch("name"),
           "single_dwelling" => dwelling ? dwelling.fetch("single") : false,
+          "dwelling_units" => dwelling&.fetch("units"),
           "equipment_set_id" => dwelling ? dwelling["equipment_set_id"] : zone.assignment["equipment_set_id"],
           "floor_area_m2" => input.floor_area_m2, "icfa_m2" => input.icfa_m2,
           "people" => people, "lighting_w" => lighting, "ventilation_m3h" => ventilation.fetch("m3h"),
-          "ventilation_source" => ventilation.fetch("source"),
+          "ventilation_source" => ventilation.fetch("source"), "missing" => missing,
           "findings" => zone_findings(inputs, zone, program) }
       end
 
@@ -142,7 +147,8 @@ module PhComposer
           "own_bedrooms" => dwelling["bedrooms"], "own_occupants" => dwelling["occupants"],
           "equipment_set_id" => dwelling["equipment_set_id"],
           "zone_ids" => rows.map { |row| row.fetch(:zone).id }, "building_segment_ids" => segments.compact,
-          "findings" => findings }.merge(counts)
+          "floor_area_m2" => rows.sum { |row| row.fetch(:input).floor_area_m2 },
+          "icfa_m2" => rows.sum { |row| row.fetch(:input).icfa_m2 }, "findings" => findings }.merge(counts)
       end
 
       # Dwellings no Zone counts in: kept as stored, read with no Zones.
@@ -151,7 +157,7 @@ module PhComposer
           { "id" => record.fetch("id"), "name" => record.fetch("name"), "units" => record.fetch("units"),
             "single_dwelling" => false, "own_bedrooms" => record["bedrooms"], "own_occupants" => record["occupants"],
             "equipment_set_id" => record["equipment_set_id"], "zone_ids" => [], "building_segment_ids" => [],
-            "findings" => [] }.merge(Derive.counts(record, []))
+            "floor_area_m2" => 0.0, "icfa_m2" => 0.0, "findings" => [] }.merge(Derive.counts(record, []))
         end
       end
 
@@ -170,6 +176,7 @@ module PhComposer
           "dwelling_count" => segment.single? && !zones.empty? ? 1 : dwellings.length,
           "set_points" => set_points,
           "single_dwelling_preview" => SingleDwelling.preview(state, segment.id),
+          "sums" => sums(zones, dwelling_rows),
           "findings" => segment_findings(segment, zones, dwellings, set_points) + member_findings(zones) }
       end
 
@@ -192,6 +199,21 @@ module PhComposer
                                                                  "Dwellings.")
         end
         found
+      end
+
+      # What a Segment's heading row shows for its Zones: the counts of the Dwellings they are in (a single
+      # dwelling's house among them), their areas and their loads. A load sums the Zones that have one, and
+      # `incomplete` names each load some Zone lacks, so the heading never passes a partial sum off as whole.
+      def sums(zones, dwelling_rows)
+        ids = zones.map { |row| row.fetch("zone_id") }
+        counted = dwelling_rows.reject { |row| (row.fetch("zone_ids") & ids).empty? }
+        loads = %w[people lighting_w ventilation_m3h]
+        { "bedrooms" => Derive.sum(counted.map { |row| row.fetch("bedrooms") }),
+          "occupants" => Derive.sum(counted.map { |row| row.fetch("occupants") }),
+          "floor_area_m2" => zones.sum { |row| row.fetch("floor_area_m2") },
+          "icfa_m2" => zones.sum { |row| row.fetch("icfa_m2") } }
+          .merge(loads.to_h { |key| [key, Derive.sum(zones.map { |row| row.fetch(key) })] })
+          .merge("incomplete" => loads.select { |key| zones.any? { |row| row.fetch(key).nil? } })
       end
 
       # Its Zones' findings, one per code for the heading: the Zone's own words for one Zone, else a count.

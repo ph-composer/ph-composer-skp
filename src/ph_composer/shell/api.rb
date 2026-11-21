@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 81
+    MINOR = 82
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -489,7 +489,15 @@ module PhComposer
                     "Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments " \
                     "and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension " \
                     "stages a feature's payload on Zones and Segments; save_segment_settings names it for its " \
-                    "transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it." }
+                    "transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it." },
+      { "minor" => 82, "date" => "2026-11-20",
+        "change" => "The Zones / Programs view's reads and the library Program on Zones. " \
+                    "programs.assign_library_program copies a library Program with its Schedules, or reuses its " \
+                    "local copy, through ph_composer.library.copy_into_proposal and assigns it to Zones in one Undo " \
+                    "step; the programs feature now requires ph_composer.library. programs.zones answers every " \
+                    "Dwelling (dwellings, as programs.dwellings answers them, each with its floor_area_m2 and " \
+                    "icfa_m2), each Zone's dwelling_units and missing (why each null people, lighting_w or " \
+                    "ventilation_m3h is unknown), and each Building Segment's sums for its heading row." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

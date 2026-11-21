@@ -12,7 +12,9 @@ module PhComposer
                                                           "returns its reference.").merge("minItems" => 1)
       NULLABLE_ID = ->(prefix, description) { SchemaShapes.id(prefix, description, :nullable => true) }
       COUNT = { "type" => %w[number null], "minimum" => 0 }.freeze
+      AREA = { "type" => "number", "x-unit" => "m2" }.freeze
       ZONE_EXAMPLE = { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [101] }.freeze
+      LIBRARY_COPY = "ph_composer.library.copy_into_proposal"
       ASSIGN = %w[geometry.invalid programs.dwelling_across_segments programs.single_dwelling extension.invalid
                   extension.migration_required extension.schema_unsupported extension.unavailable record.unreadable
                   reference.in_use reference.invalid target.ambiguous target.changed target.locked target.not_found
@@ -38,6 +40,7 @@ module PhComposer
                                                                          "Single dwelling, whose house is no record."),
         "dwelling_name" => { "type" => %w[string null] },
         "single_dwelling" => { "type" => "boolean", "description" => "Whether its Segment's setting decides it." },
+        "dwelling_units" => Shapes.described({ "type" => %w[integer null] }, "Its Dwelling's units; null in none."),
         "equipment_set_id" => Shapes.described({ "type" => %w[string null] }, "Its Dwelling's Set, or its own " \
                                                                               "when in none; null for the Model's " \
                                                                               "default."),
@@ -47,6 +50,9 @@ module PhComposer
         "lighting_w" => { "type" => %w[number null], "x-unit" => "W", "description" => "Peak interior lighting." },
         "ventilation_m3h" => { "type" => %w[number null], "x-unit" => "m3/h" },
         "ventilation_source" => { "type" => %w[string null], "enum" => ["by_program", "detailed", nil] },
+        "missing" => Shapes.described({ "type" => "object", "additionalProperties" => Shapes::TEXT },
+                                      "Why each of people, lighting_w and ventilation_m3h that is null is unknown, " \
+                                      "keyed as the row keys it."),
         "findings" => Shapes.list(FINDING)
       })
       HOUSE = Shapes.object({ "name" => Shapes::TEXT, "units" => Shapes::COUNT, "bedrooms" => COUNT,
@@ -74,6 +80,14 @@ module PhComposer
                                         "cooling_c" => { "type" => %w[number null] },
                                         "agree" => { "type" => "boolean" } }),
         "single_dwelling_preview" => PREVIEW,
+        "sums" => Shapes.described(Shapes.object({
+          "bedrooms" => COUNT, "occupants" => COUNT,
+          "floor_area_m2" => AREA, "icfa_m2" => AREA,
+          "people" => { "type" => %w[number null] }, "lighting_w" => { "type" => %w[number null], "x-unit" => "W" },
+          "ventilation_m3h" => { "type" => %w[number null], "x-unit" => "m3/h" },
+          "incomplete" => Shapes.list({ "type" => "string", "enum" => %w[people lighting_w ventilation_m3h] },
+                                      :description => "The loads some Zone lacks; their sums cover the others.")
+        }), "Its heading row: the counts of the Dwellings its Zones are in, their areas and loads."),
         "findings" => Shapes.list(FINDING)
       })
       NAMED = Shapes.object({ "id" => Shapes::TEXT, "name" => Shapes::TEXT })
@@ -87,7 +101,9 @@ module PhComposer
         "single_dwelling" => { "type" => "boolean" }, "own_bedrooms" => COUNT, "own_occupants" => COUNT,
         "bedrooms" => COUNT, "occupants" => COUNT, "occupants_rule" => { "type" => "boolean" },
         "equipment_set_id" => { "type" => %w[string null] }, "zone_ids" => Shapes.list(Shapes::TEXT),
-        "building_segment_ids" => Shapes.list(Shapes::TEXT), "findings" => Shapes.list(FINDING)
+        "building_segment_ids" => Shapes.list(Shapes::TEXT),
+        "floor_area_m2" => AREA, "icfa_m2" => AREA,
+        "findings" => Shapes.list(FINDING)
       })
 
       module_function
@@ -97,6 +113,7 @@ module PhComposer
         feature.extension(Occupancy::SEGMENT_EXTENSION)
         CODES.each { |code, description| feature.code(code, :description => description) }
         assign_program(feature)
+        assign_library_program(feature)
         assign_dwelling(feature)
         set_counts(feature)
         assign_equipment_set(feature)
@@ -129,6 +146,49 @@ module PhComposer
                                                           "program_id" => "pgm_Ab12Cd34Ef56" }]) do |request, proposal|
           Assignments.assign_program(request, proposal, :zones => request.params.fetch("zones"),
                                                         :program_id => request.params.fetch("program_id"))
+        end
+      end
+
+      # A library Program chosen on Zones (Q4a-22): the library copy joins this action's proposal through the
+      # coordinator's participant, copying the Program with its Schedules or reusing the local copy, and the
+      # assignment follows, so both are one Undo step and refuse together (context/EXTENSIBILITY.md, "Library
+      # kinds": a feature's own action joins a copy through `copy_into_proposal`).
+      def assign_library_program(feature)
+        text = { "type" => "string", "minLength" => 1 }
+        copy = Shapes.object({ "provider_id" => text, "kind" => { "type" => "string", "enum" => ["programs"] },
+                               "generation" => { "type" => "integer", "minimum" => 1 }, "library_id" => text,
+                               "record_id" => text,
+                               "choice" => { "type" => "string", "enum" => %w[create keep_local use_library] },
+                               "local_id" => text, "expected_values" => Shapes::OBJECT },
+                             :optional => %w[local_id expected_values],
+                             :description => "The library row and the choice its resolution allows, as " \
+                                             "ph_composer.library.copy takes them, without an assignment.")
+        params = Shapes.object({ "zones" => ZONES, "copy" => copy })
+        result = Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT), "program_id" => Shapes::TEXT,
+                                 "dependencies" => Shapes.list(Shapes::OBJECT, :description => "The Schedules " \
+                                                                                               "copied or reused, " \
+                                                                                               "as the copy " \
+                                                                                               "answers them.") })
+        example = { "zones" => [ZONE_EXAMPLE], "copy" => { "provider_id" => "provider.example", "kind" => "programs",
+                                                           "generation" => 3, "library_id" => "phius.multifamily",
+                                                           "record_id" => "corridor", "choice" => "create" } }
+        feature.action("#{PREFIX}.assign_library_program",
+                       :description => "Copy a library Program into the Model with its Schedules, or reuse its local " \
+                                       "copy, and assign it to Zones, in one Undo step.",
+                       :refuses => (ASSIGN + %w[library.catalog_stale library.dependency_missing
+                                                library.local_choice_required library.review_required
+                                                library.row_unavailable]).uniq,
+                       :params => params, :result => result, :undo_name => "Assign Library Program",
+                       :participants => [Assignments::STAGE, LIBRARY_COPY],
+                       :side_effects => "Copies or reuses the Program and its Schedules; writes each Zone's " \
+                                        "assignment.",
+                       :examples => [example]) do |request, proposal|
+          copied = request.participate(LIBRARY_COPY, request.params.fetch("copy"))
+          id = copied.fetch("local_id")
+          raise CodedError.new("library.local_choice_required", "Choose the local copy to use.") unless id
+
+          Assignments.assign_program(request, proposal, :zones => request.params.fetch("zones"), :program_id => id)
+                     .merge("dependencies" => copied.fetch("dependencies"))
         end
       end
 
@@ -201,12 +261,16 @@ module PhComposer
 
       def reads(feature)
         zones = Shapes.object({ "zones" => Shapes.list(ZONE_ROW), "building_segments" => Shapes.list(SEGMENT_ROW),
+                                "dwellings" => Shapes.list(DWELLING_ROW, :description => "Every Dwelling, as " \
+                                                                                         "programs.dwellings " \
+                                                                                         "answers it."),
                                 "choices" => CHOICES })
         feature.query("#{PREFIX}.zones", :response => { "bounded" => false, "prefer" => "ph_composer.zones.list" },
                                          :description => "Every Zone's assignment and what it works out to: its " \
                                                          "Program, Dwelling, peak people, lighting and " \
-                                                         "ventilation, with findings; and each Building Segment's " \
-                                                         "occupancy, set points and Single dwelling preview.",
+                                                         "ventilation, with findings and why a value is unknown; " \
+                                                         "each Building Segment's occupancy, sums, set points " \
+                                                         "and Single dwelling preview; and every Dwelling.",
                                          :refuses => OccupancyState::REFUSES, :params => Shapes::NONE,
                                          :result => zones, :examples => [{}]) do |request|
           OccupancyReads.zones(request)

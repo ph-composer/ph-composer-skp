@@ -905,7 +905,10 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
         "No Zones yet. Select geometry in SketchUp, then right-click and choose Make Zone.",
       value: function (row, field) { return row.heading ? headingValue(row, field) : value(own, row, field, profile); },
       cell: function (td, row, field) {
-        if (row.heading) return state.segments.cell(td, row, field);
+        if (row.heading) {
+          return state.segments.cell(td, row, field) ||
+            call(own, "segmentCell", [td, SegmentRows.group(row), field, profile], false);
+        }
         return (row.depth !== 0 || Boolean(row.record.zone)) && state.zoneCells.render(td, row, field) ||
           call(own, "cell", [td, row, field], false);
       },
@@ -1014,7 +1017,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
   /* Another tab can open this one on a view (`panel.navigate("overview", { view })`) and, with `check`, with
      rows checked and, with `locate: true`, framed, as the Assemblies tab's "Select faces using" does. The
      named view is shown first, through the view row's guards; `intent.viewShown` says whether it was, and a
-     refused switch applies nothing. */
+     refused switch applies nothing. `segmentSettings` opens one Building Segment's settings dialog. */
   panel.section("ph_composer.overview", render, { order: 10, onNavigate: function (root, intent) {
     if (!screen) return;
     if (intent.view) {
@@ -1023,6 +1026,8 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       if (!intent.viewShown) return;
     }
     if (intent.check) call(active(screen), "navigate", [intent]);
+    // `segmentSettings` names a Building Segment whose settings dialog opens, as its heading's Settings does.
+    if (intent.segmentSettings) screen.segments.openSettings(intent.segmentSettings);
     panel.repaint();
   } });
   panel.workedOn("ph_composer.zones", "overview");

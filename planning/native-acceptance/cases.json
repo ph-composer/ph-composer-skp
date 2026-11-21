@@ -5283,6 +5283,26 @@
         "src/ph_composer/html/features/zones/segment_settings.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG09",
+      "label": "The Zones / Programs view on the installed RBZ, in fresh synthetic Models of the house and apartment references, Ed at the mouse: the view listed after Spaces; the house's locked Zones and the lock bubble from a locked cell and the Single dwelling tag, Open settings opening the Segment's settings; the house row's bedrooms, occupants and Equipment Set saved; Single dwelling switched off and the Dwelling bubble's choice and units; apartments made one Dwelling each and Program, Dwelling and Equipment Set applied from the selection bar; a library Program from an added file copied on choice and reused by a second Zone; a non-residential Segment's flags and assignments; each cell edit and bar choice one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 px; UI polish review recorded",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/occupancy_reads.rb",
+        "src/ph_composer/features/programs/occupancy_declarations.rb",
+        "src/ph_composer/features/programs/missing_values.rb",
+        "src/ph_composer/html/features/programs/zones_view.js",
+        "src/ph_composer/html/features/programs/zones_cells.js",
+        "src/ph_composer/html/features/programs/zones_selection.js",
+        "src/ph_composer/html/features/programs/library_programs.js",
+        "src/ph_composer/html/features/programs/occupancy.js",
+        "src/ph_composer/html/features/programs/programs.css",
+        "src/ph_composer/html/features/zones/overview.js",
+        "src/ph_composer/html/features/zones/segment_rows.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -188,8 +188,15 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       parts.flag.setAttribute("role", "img"); parts.flag.setAttribute("aria-label", words);
       ui.tooltip(parts.flag, words);
     }
+    // A tag that explains itself further (`open`) is a button, which hands the contribution itself as the anchor
+    // for what it opens; any other tag is a label.
     parts.tags.replaceChildren.apply(parts.tags, given.tags.map(function (tag) {
-      var node = ui.element("span", "phc-segment-tag", tag.text);
+      var node = tag.open ? ui.button(tag.text, function () { tag.open(node); }) :
+        ui.element("span", "phc-segment-tag", tag.text);
+      if (tag.open) {
+        node.className = "phc-segment-tag is-action";
+        node.setAttribute("aria-label", tag.label || tag.text);
+      }
       if (tag.tooltip) ui.tooltip(node, tag.tooltip);
       return node;
     }));
@@ -218,6 +225,16 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     var segment = row.record.building_segment;
     if (item.id === "settings") return this.settings.open(segment, this.usage(segment));
     if (item.id === "delete") return this.confirmDelete(segment, row.record.zones);
+    return null;
+  };
+
+  /* Opens one Segment's settings by id, as its heading's Settings does, from a navigation intent (a lock bubble's
+     Open settings). A held edit refuses it with its reason; an id this Model does not have opens nothing. */
+  SegmentRows.prototype.openSettings = function (id) {
+    var reason = this.guard();
+    if (reason) return this.refuse(reason);
+    var segment = zoneOptions.find(this.options, "building_segment", id);
+    if (segment) this.settings.open(segment, this.usage(segment));
     return null;
   };
 

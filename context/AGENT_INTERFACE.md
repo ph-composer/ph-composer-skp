@@ -358,7 +358,9 @@ Program, Dwelling, counts and Equipment Set are written by `ph_composer.programs
 `assign_dwelling`, `set_counts` and `assign_equipment_set`, each one Undo step, and read back with what they
 work out to by `ph_composer.programs.zones` (with each Segment's occupancy) and `ph_composer.programs.dwellings`.
 Single dwelling switches through the Segment's settings Save; `ph_composer.programs.single_dwelling_preview`
-says what switching it on replaces ([CONTRACTS.md](CONTRACTS.md), "Occupancy").
+says what switching it on replaces ([CONTRACTS.md](CONTRACTS.md), "Occupancy"). A library Program goes on Zones
+with `ph_composer.programs.assign_library_program` (API 1.82), which joins the library copy to its own Undo step,
+and `programs.zones` also answers every Dwelling, each Segment's heading sums and why an unknown value is unknown.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

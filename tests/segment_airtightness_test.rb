@@ -48,9 +48,11 @@ class SegmentAirtightnessTest < PhComposerTestCase
 
   # ---------------------------------------------------------------- the feature and the extension
 
-  def test_the_feature_requires_zones_spaces_and_certification_and_writes_the_choices
+  # The library joins Programs' own assign_library_program action to a library copy.
+  def test_the_feature_requires_zones_spaces_certification_and_the_library_and_writes_the_choices
     feature = PhComposer::Registry.current.features.fetch(P::FEATURE_ID)
-    assert_equal %w[ph_composer.certification ph_composer.spaces ph_composer.zones], feature.requires.sort
+    assert_equal %w[ph_composer.certification ph_composer.library ph_composer.spaces ph_composer.zones],
+                 feature.requires.sort
     write_or_compare(CHOICES, { "bases" => A::BASES, "wind_exposures" => A::WIND_EXPOSURES,
                                 "defaults" => A::DEFAULTS })
   end

@@ -681,6 +681,8 @@
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) return this.inventoryAction(payload);
     if (payload.name === "ph_composer.zones.options.manage") return this.manageZoneOptions(payload.params);
+    var programsOutcome = this.programsAction(payload);
+    if (programsOutcome) return programsOutcome;
     var segmentOutcome = this.segmentAction(payload);
     if (segmentOutcome) return segmentOutcome;
     var airflowOutcome = this.spacesAirflowAction(payload);
@@ -808,6 +810,257 @@
       value: {}, affected: [], findings: [], detail: null };
   };
 
+  /* The Programs the occupancy read offers, as library resolution reads local records: a copied one carries its
+     source. */
+  Host.prototype.programRecords = function () {
+    var sources = this.programSources || {};
+    return ((this.occupancy || {}).choices || { programs: [] }).programs.map(function (program) {
+      return { id: program.id, values: { name: program.name, source: sources[program.id] || null } };
+    });
+  };
+
+  /* Synthetic Programs writes for the Zones / Programs view over the occupancy read: a Program (from this file or
+     copied from a library row), a Dwelling, a Zone's counts, an Equipment Set and a Dwelling's own values. The
+     rules they enforce are Ruby's (features/programs/assignments.rb); this answers only enough of them to drive
+     the panel: it refuses a single dwelling's Zone, a Dwelling across two Segments and counts on a Zone in none, as
+     Ruby does. It is a simulation, not the contract: a library copy only creates, its Schedules are not modelled,
+     and the people and ventilation it fills in are illustrative. Null for any other action. */
+  Host.prototype.programsAction = function (payload) {
+    var host = this, section = this.occupancy, params = payload.params, name = payload.name;
+    var prefix = "ph_composer.programs.";
+    if (!section || name.indexOf(prefix) !== 0) return null;
+    var verb = name.slice(prefix.length);
+    function zoneOf(reference) {
+      return section.zones.filter(function (row) { return row.zone_id === reference.zone_id; })[0];
+    }
+    function dwelling(id) { return section.dwellings.filter(function (row) { return row.id === id; })[0]; }
+    function program(id) { return section.choices.programs.filter(function (row) { return row.id === id; })[0]; }
+    function done(value) {
+      host.recountDwellings();
+      host.revision++;
+      return { status: "completed", code: "ok", effect: "committed", revision: host.revision, value: value || {},
+        affected: [], findings: [], detail: null };
+    }
+    var zones = (params.zones || []).map(zoneOf);
+    if (params.zone) zones = [zoneOf(params.zone)];
+    var locked = zones.filter(function (row) { return row && row.single_dwelling; })[0];
+    if (locked) {
+      return refused("programs.single_dwelling", locked.name + " is in a single dwelling: switch Single dwelling " +
+        "off in its settings to assign its Zones. Nothing was written.", this.revision);
+    }
+    function assign(id) {
+      zones.forEach(function (row) {
+        var segment = section.building_segments.filter(function (entry) {
+          return entry.id === row.building_segment_id;
+        })[0];
+        row.assignment.program_id = id;
+        row.program_id = id || segment.settings.default_program_id || section.choices.default_program_id;
+        row.program_name = program(row.program_id).name;
+        row.findings = row.findings.filter(function (finding) { return finding.code !== "programs.unassigned_zone"; });
+      });
+      section.building_segments.forEach(function (segment) {
+        segment.findings = segment.findings.filter(function (finding) {
+          return finding.code !== "programs.unassigned_zone" || section.zones.some(function (row) {
+            return row.building_segment_id === segment.id && row.findings.some(function (own) {
+              return own.code === "programs.unassigned_zone";
+            });
+          });
+        });
+      });
+    }
+    if (verb === "assign_program") { assign(params.program_id); return done({ program_id: params.program_id }); }
+    if (verb === "assign_library_program") {
+      var copy = params.copy, row = (this.libraryCatalogs[copy.provider_id] || []).filter(function (entry) {
+        return entry.kind === "programs" && entry.record_id === copy.record_id;
+      })[0];
+      if (!row || copy.generation !== this.libraryGenerations[copy.provider_id]) {
+        return refused("library.catalog_stale", "The library changed. Choose again. Nothing was written.",
+          this.revision);
+      }
+      var id = copy.local_id;
+      if (copy.choice === "create") {
+        id = "pgm_library" + (++this.sequence);
+        section.choices.programs.push({ id: id, name: row.snapshot.name });
+        section.choices.programs.sort(function (a, b) { return a.name.localeCompare(b.name); });
+        this.programSources = this.programSources || {};
+        this.programSources[id] = { kind: "library", library_id: row.library_id, record_id: row.record_id,
+          snapshot: JSON.parse(JSON.stringify(row.snapshot)) };
+      }
+      assign(id);
+      return done({ program_id: id, zone_ids: zones.map(function (entry) { return entry.zone_id; }),
+        dependencies: [] });
+    }
+    if (verb === "assign_dwelling") {
+      var target = params.choice === "existing" ? params.dwelling_id : null;
+      var joined = target ? dwelling(target) : null;
+      if (joined && zones.concat(section.zones.filter(function (row) {
+        return row.assignment.dwelling_id === target;
+      })).some(function (row) { return row.building_segment_id !== zones[0].building_segment_id; })) {
+        return refused("programs.dwelling_across_segments", joined.name + " would hold Zones in two Building " +
+          "Segments; a Dwelling lies in one. Nothing was written.", this.revision);
+      }
+      function make(stem) {
+        var made = { id: "dwl_preview" + (++host.sequence), name: stem, units: 1, single_dwelling: false,
+          own_bedrooms: null, own_occupants: null, bedrooms: null, occupants: null, occupants_rule: false,
+          equipment_set_id: null, zone_ids: [], building_segment_ids: [], floor_area_m2: 0, icfa_m2: 0,
+          findings: [] };
+        section.dwellings.push(made);
+        return made.id;
+      }
+      if (params.choice === "shared") target = make(zones[0].name);
+      zones.forEach(function (row) {
+        var id = params.choice === "each" ? make(row.name) : params.choice === "none" ? null : target;
+        row.assignment.dwelling_id = id;
+        if (!id) { row.assignment.bedrooms = null; row.assignment.occupants = null; }
+      });
+      return done({});
+    }
+    if (verb === "set_counts" && !zones[0].assignment.dwelling_id) {
+      return refused("validation.failed", zones[0].name + " is in no Dwelling, so it holds no counts. Nothing was " +
+        "written.", this.revision);
+    }
+    if (verb === "set_counts") {
+      zones[0].assignment.bedrooms = params.bedrooms; zones[0].assignment.occupants = params.occupants;
+      return done({ zone_id: zones[0].zone_id });
+    }
+    if (verb === "assign_equipment_set") {
+      (params.dwelling_ids || []).forEach(function (id) { dwelling(id).equipment_set_id = params.equipment_set_id; });
+      zones.forEach(function (row) { row.assignment.equipment_set_id = params.equipment_set_id; });
+      return done({});
+    }
+    if (verb === "dwellings.update") {
+      var record = dwelling(params.id);
+      var key = Object.keys(params.values)[0], seen = key === "units" ? record.units : record.own_bedrooms;
+      if (seen !== params.expected_values[key]) {
+        return refused("target.changed", "The Dwelling changed since it was read. Nothing was written.",
+          this.revision);
+      }
+      if (key === "units") record.units = params.values.units; else record.own_bedrooms = params.values.bedrooms;
+      return done({ id: record.id });
+    }
+    return null;
+  };
+
+  /* What every Dwelling and Zone row reads after a write: each Dwelling's Zones, counts by the Phius rule, areas
+     and Set, each Zone's Dwelling name, units, counts' findings, and each Segment's heading sums. An emptied
+     Dwelling goes, as Ruby deletes it. */
+  Host.prototype.recountDwellings = function () {
+    var section = this.occupancy;
+    section.dwellings = section.dwellings || [];
+    // A single dwelling's house (a null id) stays while its Segment is single; any other Dwelling while a Zone
+    // names it.
+    section.dwellings = section.dwellings.filter(function (record) {
+      if (record.single_dwelling) return section.building_segments.some(function (segment) {
+        return segment.single_dwelling && record.building_segment_ids.indexOf(segment.id) >= 0;
+      });
+      return section.zones.some(function (row) { return row.assignment.dwelling_id === record.id; });
+    });
+    section.dwellings.forEach(function (record) {
+      if (record.single_dwelling) return;
+      var members = section.zones.filter(function (row) { return row.assignment.dwelling_id === record.id; });
+      function sum(key) {
+        var values = members.map(function (row) { return row.assignment[key]; }).filter(function (value) {
+          return value !== null && value !== undefined;
+        });
+        return values.length ? values.reduce(function (a, b) { return a + b; }, 0) : null;
+      }
+      record.zone_ids = members.map(function (row) { return row.zone_id; });
+      record.building_segment_ids = members.map(function (row) { return row.building_segment_id; })
+        .filter(function (id, index, all) { return all.indexOf(id) === index; });
+      record.bedrooms = record.own_bedrooms !== null ? record.own_bedrooms : sum("bedrooms");
+      var occupants = record.own_occupants !== null ? record.own_occupants : sum("occupants");
+      record.occupants_rule = occupants === null && record.bedrooms !== null;
+      record.occupants = record.occupants_rule ? record.bedrooms + record.units : occupants;
+      record.floor_area_m2 = members.reduce(function (a, row) { return a + row.floor_area_m2; }, 0);
+      record.icfa_m2 = members.reduce(function (a, row) { return a + row.icfa_m2; }, 0);
+    });
+    section.zones.forEach(function (row) {
+      if (row.single_dwelling) return;
+      var record = section.dwellings.filter(function (entry) { return entry.id === row.assignment.dwelling_id; })[0];
+      row.dwelling_id = record ? record.id : null; row.dwelling_name = record ? record.name : null;
+      row.dwelling_units = record ? record.units : null;
+      row.equipment_set_id = record ? record.equipment_set_id : row.assignment.equipment_set_id;
+      if (record && record.occupants !== null && row.people === null) {
+        row.people = Math.round(record.occupants * row.floor_area_m2 / record.floor_area_m2 * 100) / 100;
+        delete row.missing.people;
+      }
+    });
+    section.building_segments.forEach(function (segment) {
+      var members = section.zones.filter(function (row) { return row.building_segment_id === segment.id; });
+      var counted = segment.single_dwelling && segment.dwelling ? [segment.dwelling] :
+        section.dwellings.filter(function (record) { return record.building_segment_ids.indexOf(segment.id) >= 0; });
+      function total(rows, key) {
+        var values = rows.map(function (row) { return row[key]; }).filter(function (value) { return value !== null; });
+        return values.length ? values.reduce(function (a, b) { return a + b; }, 0) : null;
+      }
+      // A fixture written before the heading sums (zoneoptions) has none to keep.
+      if (!segment.sums) return;
+      segment.sums.bedrooms = total(counted, "bedrooms"); segment.sums.occupants = total(counted, "occupants");
+      ["people", "lighting_w", "ventilation_m3h"].forEach(function (key) {
+        segment.sums[key] = total(members, key);
+        var index = segment.sums.incomplete.indexOf(key), lacking = members.some(function (row) {
+          return row[key] === null;
+        });
+        if (lacking && index < 0) segment.sums.incomplete.push(key);
+        if (!lacking && index >= 0) segment.sums.incomplete.splice(index, 1);
+      });
+      if (!segment.single_dwelling && segment.category === "residential") {
+        var none = !counted.length;
+        segment.findings = segment.findings.filter(function (finding) {
+          return finding.code !== "programs.residential_without_dwelling";
+        });
+        if (none) segment.findings.push({ code: "programs.residential_without_dwelling", severity: "warning",
+          message: segment.name + " is residential and has no Dwelling." });
+      }
+    });
+  };
+
+  /* The Segment's occupancy as a settings Save leaves it: the house's counts while single (occupants by the Phius
+     rule when empty, and the Zones' people from them), and on switching off, one Dwelling named for the Segment
+     holding them, which every Zone joins unlocked, as features/programs/single_dwelling.rb does. */
+  Host.prototype.occupancySettingsSaved = function (id, payload) {
+    var section = this.occupancy;
+    if (!section) return;
+    section.dwellings = section.dwellings || [];
+    var segment = section.building_segments.filter(function (entry) { return entry.id === id; })[0];
+    if (!segment) return;
+    var members = section.zones.filter(function (row) { return row.building_segment_id === id; });
+    var wasSingle = segment.single_dwelling;
+    segment.settings = Object.assign({}, segment.settings, payload);
+    segment.stored = true;
+    if (segment.category !== "residential") return;
+    if (wasSingle && !payload.single_dwelling) {
+      var record = { id: "dwl_preview" + (++this.sequence), name: segment.name, units: 1, single_dwelling: false,
+        own_bedrooms: payload.bedrooms, own_occupants: payload.occupants, bedrooms: null, occupants: null,
+        occupants_rule: false, equipment_set_id: payload.equipment_set_id, zone_ids: [], building_segment_ids: [],
+        floor_area_m2: 0, icfa_m2: 0, findings: [] };
+      section.dwellings.push(record);
+      segment.single_dwelling = false; segment.dwelling = null;
+      members.forEach(function (row) {
+        row.single_dwelling = false; row.assignment.dwelling_id = record.id;
+      });
+    } else if (segment.single_dwelling) {
+      var bedrooms = payload.bedrooms, rule = payload.occupants === null && bedrooms !== null;
+      var occupants = rule ? bedrooms + 1 : payload.occupants;
+      segment.dwelling = { name: segment.name, units: 1, bedrooms: bedrooms, occupants: occupants,
+        occupants_rule: rule, equipment_set_id: payload.equipment_set_id };
+      section.dwellings.forEach(function (row) {
+        if (!row.single_dwelling || row.building_segment_ids.indexOf(id) < 0) return;
+        Object.assign(row, { bedrooms: bedrooms, occupants: occupants, occupants_rule: rule,
+          equipment_set_id: payload.equipment_set_id });
+      });
+      var area = members.reduce(function (a, row) { return a + row.floor_area_m2; }, 0);
+      members.forEach(function (row) {
+        row.equipment_set_id = payload.equipment_set_id;
+        if (occupants === null) return;
+        row.people = Math.round(occupants * row.floor_area_m2 / area * 100) / 100;
+        row.ventilation_m3h = Math.round(row.people * 30 + row.floor_area_m2 * 1.08);
+        row.missing = {};
+      });
+    }
+    this.recountDwellings();
+  };
+
   /* Synthetic Building Segment writes for the Zones tab's heading rows and settings dialog: New (with Zones moved
      in), rename, delete with a destination, Save and moving Zones. The rules they enforce are Ruby's; this answers
      only enough of them to drive the panel. Null for any other action. */
@@ -889,6 +1142,9 @@
         saved.extension_data[namespace] = { schema_version: 1, payload: params.extension_payloads[namespace],
           references: [], export_relevance: "local_only" };
       });
+      if (params.extension_payloads["ph_composer.programs.segment"]) {
+        this.occupancySettingsSaved(saved.id, params.extension_payloads["ph_composer.programs.segment"]);
+      }
       return done({ id: saved.id, namespaces: Object.keys(params.extension_payloads).sort() });
     }
     return null;
@@ -1088,7 +1344,8 @@
   Host.prototype.libraryResolution = function (row, kind) {
     var source = function (record) { var s = record.values.source;
       return s && s.kind === "library" && s.library_id === row.library_id && s.record_id === row.record_id; };
-    var records = kind && kind !== "materials" ? this.windows[kind].records : this.materials.records;
+    var records = kind === "programs" ? this.programRecords() : kind === "schedules" ? [] :
+      kind && kind !== "materials" ? this.windows[kind].records : this.materials.records;
     var exact = records.filter(source);
     var candidates = exact.length ? exact : records.filter(function (record) {
       return record.values.name === row.snapshot.name;
