@@ -1289,8 +1289,8 @@
   }
   function scheduleRow(id, name, values, uses) {
     return catalogRow("schedule", id, name, Object.assign({ days_per_week: 7, weeks_per_year: 52 }, values),
-      { uses: uses || [], use_count: (uses || []).length, profile: { hours: [], daily_full_load_hours: 24,
-        annual_full_load_hours: 8760 } });
+      // The preview host draws each profile from these values (host.js `scheduleProfile`).
+      { uses: uses || [], use_count: (uses || []).length, profile: null });
   }
   var DEFAULT_SOURCE = { kind: "ph_composer_default" };
   var PROGRAM_CATALOG = {
@@ -1339,18 +1339,27 @@
       scheduleRow("sch_PHCDEFAULT06", "Constant ventilation", { source: DEFAULT_SOURCE, type: "ventilation",
         periods: [{ period: "high", hours: 0, fraction: 1 }, { period: "standard", hours: 24, fraction: 1 },
           { period: "basic", hours: 0, fraction: 0.5 }, { period: "minimum", hours: 0, fraction: 0.3 }] }),
+      scheduleRow("sch_heating", "Heating setback", { type: "temperature", value_c: 20 }),
       scheduleRow("sch_office", "Office hours", { type: "fractional", start_h: 7, end_h: 19, fraction_on: 0.8,
         fraction_off: 0, days_per_week: 5 }, [{ program_id: "pgm_office", name: "Phius NR Office",
         slot: "people.occupancy_schedule_id" }])
     ],
     equipment_sets: [
+      // Devices as features/programs/equipment_types.rb stores them: every field its type carries.
       catalogRow("equipment_set", "eqs_PHCDEFAULT01", "Phius single-family", { source: DEFAULT_SOURCE, devices: [
         { id: "dev_PHCDEFAULT01", type: "fridge_freezer", display_name: "Fridge-freezer", quantity: 1,
-          in_conditioned_space: true, reference_quantity: 1, reference_energy_norm: 1, energy_demand: 1 },
+          in_conditioned_space: true, comment: "", reference_quantity: 4, reference_energy_norm: 1, energy_demand: 1,
+          energy_demand_per_use: 0 },
         { id: "dev_PHCDEFAULT02", type: "dishwasher", display_name: "Dishwasher", quantity: 1,
-          in_conditioned_space: true, reference_quantity: 1, reference_energy_norm: 2, energy_demand: 269 },
+          in_conditioned_space: true, comment: "", reference_quantity: 1, reference_energy_norm: 2, energy_demand: 269,
+          energy_demand_per_use: 0, capacity_type: 1, capacity_place_settings: 12, water_connection: "cold_water" },
+        { id: "dev_PHCDEFAULT04", type: "clothes_dryer", display_name: "Laundry - dryer", quantity: 1,
+          in_conditioned_space: true, comment: "", reference_quantity: 1, reference_energy_norm: 2,
+          energy_demand_per_use: 0, dryer_type: "electric_exhaust_air", combined_energy_factor: 3.93,
+          gas_consumption: 0, gas_efficiency_factor: 2.67, field_utilization_factor_type: 1,
+          field_utilization_factor: 1.18 },
         { id: "dev_PHCDEFAULT08", type: "phius_mel", display_name: "Phius MEL", quantity: 1,
-          in_conditioned_space: true, reference_quantity: 3 }] },
+          in_conditioned_space: true, comment: "", reference_quantity: 3 }] },
       { stored: false, default: true, use_count: 3 }),
       catalogRow("equipment_set", "eqs_apartment", "Apartment kitchen", { devices: [] },
         { default: false, use_count: 1 })

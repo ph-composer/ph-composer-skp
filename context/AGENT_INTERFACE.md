@@ -342,10 +342,11 @@ certification payload with its defaults applied, the read other features take it
 the same way.
 Programs, Schedules and Equipment Sets (API 1.79) have `create`, `update`, `duplicate` and `delete`, and
 `list` and `all` reads whose rows carry `stored`, what uses each record and, for a Schedule, its `profile`;
-`ph_composer.programs.schedules.profile` draws unsaved Schedule values. An Equipment Set's devices change one
-at a time with `equipment_sets.add_device`, `update_device` and `delete_device`, laid out by
-`equipment_sets.device_types`. The reads answer PH-Composer's residential default Program, its Schedules and the
-default Equipment Set until a write stores them ([CONTRACTS.md](CONTRACTS.md), "Programs, Schedules and
+`ph_composer.programs.schedules.profile` draws unsaved Schedule values, and a profile names its `weekdays` (API
+1.85). An Equipment Set's devices change one at a time with `equipment_sets.add_device`, `update_device` and
+`delete_device`, laid out by `equipment_sets.device_types`, whose fields declare `applies_when` where they mean
+something only under another field's values (API 1.85). The reads answer PH-Composer's residential default
+Program, its Schedules and the default Equipment Set until a write stores them ([CONTRACTS.md](CONTRACTS.md), "Programs, Schedules and
 Equipment Sets"); `ph_composer.programs.settings.get` and `.update` read and choose the Model's defaults, and
 `ph_composer.programs.reset_default` restores one. The panel-closed
 [Programs walkthrough](../tools/examples/programs/program_records_walkthrough.rb) authors through each kind.

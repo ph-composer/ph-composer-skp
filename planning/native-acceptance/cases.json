@@ -5335,10 +5335,29 @@
         "src/ph_composer/html/features/programs/record_page.js",
         "src/ph_composer/html/features/programs/program_editor.js",
         "src/ph_composer/html/features/programs/program_loads.js",
-        "src/ph_composer/html/features/programs/record_bodies.js",
         "src/ph_composer/html/features/programs/programs.css",
         "src/ph_composer/html/library/sidebar.js",
         "src/ph_composer/html/library/rows.js"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "PG11b",
+      "label": "The Schedule and Equipment Set editors on the installed RBZ, in a fresh synthetic Model, Ed at the mouse: a fractional, an activity, a temperature and a ventilation Schedule edited field by field, the ventilation total amber until 24 h and Escape restoring the periods, the strip and week row following each save; an Equipment Set's devices added (a gas dryer's gas fields shown only for a gas dryer), edited from the row's Edit and from a row click, and deleted with the confirmation naming the Set and its Dwellings; each edit one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 and 360 px; UI polish review recorded",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/operations.rb",
+        "src/ph_composer/features/programs/declarations.rb",
+        "src/ph_composer/features/programs/schedule.rb",
+        "src/ph_composer/features/programs/equipment_types.rb",
+        "src/ph_composer/html/features/programs/tab.js",
+        "src/ph_composer/html/features/programs/record_page.js",
+        "src/ph_composer/html/features/programs/schedule_editor.js",
+        "src/ph_composer/html/features/programs/equipment_set_editor.js",
+        "src/ph_composer/html/features/programs/device_dialog.js",
+        "src/ph_composer/html/features/programs/program_loads.js",
+        "src/ph_composer/html/features/programs/programs.css"
       ],
       "native_control_required": true
     }

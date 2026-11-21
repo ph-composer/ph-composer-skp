@@ -419,7 +419,10 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
 4. Add, edit and delete devices one at a time with `ph_composer.programs.equipment_sets.add_device`,
    `update_device` and `delete_device`. `equipment_sets.device_types` lists each of the fourteen types with the
    fields it carries, the reference quantity codes and energy norms it allows, and a new device's values. A
-   device's type is fixed once added.
+   field with `applies_when` means something only under another field's values, such as a clothes dryer's gas
+   fields under `dryer_type` `gas_exhaust_air`; the device still carries it. A device's type is fixed once
+   added. A Schedule row's `profile` (and `ph_composer.programs.schedules.profile`) names the `weekdays` its
+   operating day applies on, Monday first.
 5. Choose another default with `ph_composer.programs.settings.update`, naming only the default you change in
    `values` and `expected_values`. Deleting the Model's default refuses `programs.default_in_use` unless you name
    a `replacement_id`, which becomes the default; a used Schedule refuses `reference.in_use` unless you name a

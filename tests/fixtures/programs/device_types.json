@@ -1,0 +1,695 @@
+[
+  {
+    "defaults": {
+      "capacity_place_settings": 12.0,
+      "capacity_type": 1,
+      "comment": "",
+      "display_name": "Kitchen dishwasher",
+      "energy_demand": 269.0,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 2,
+      "reference_quantity": 1,
+      "water_connection": "cold_water"
+    },
+    "energy_norms": [
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "capacity_type",
+        "schema": {
+          "description": "1, standard.",
+          "enum": [
+            1
+          ],
+          "type": "integer"
+        }
+      },
+      {
+        "key": "capacity_place_settings",
+        "schema": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      {
+        "key": "water_connection",
+        "schema": {
+          "enum": [
+            "dhw",
+            "cold_water"
+          ],
+          "type": "string"
+        }
+      }
+    ],
+    "hbph_class": "PhDishwasher",
+    "label": "Dishwasher",
+    "phius_rule": false,
+    "reference_quantities": [
+      1,
+      2,
+      5
+    ],
+    "type": "dishwasher"
+  },
+  {
+    "defaults": {
+      "capacity_m3": 0.1274,
+      "comment": "",
+      "display_name": "Laundry - washer",
+      "energy_demand": 120.0,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "modified_energy_factor": 2.7,
+      "quantity": 1,
+      "reference_energy_norm": 2,
+      "reference_quantity": 1,
+      "utilization_factor": 1.0,
+      "water_connection": "cold_water"
+    },
+    "energy_norms": [
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "capacity_m3",
+        "schema": {
+          "exclusiveMinimum": 0,
+          "type": "number",
+          "x-unit": "m3"
+        }
+      },
+      {
+        "key": "modified_energy_factor",
+        "schema": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      {
+        "key": "water_connection",
+        "schema": {
+          "enum": [
+            "dhw",
+            "cold_water"
+          ],
+          "type": "string"
+        }
+      },
+      {
+        "key": "utilization_factor",
+        "schema": {
+          "minimum": 0,
+          "type": "number"
+        }
+      }
+    ],
+    "hbph_class": "PhClothesWasher",
+    "label": "Clothes washer",
+    "phius_rule": false,
+    "reference_quantities": [
+      1,
+      2,
+      5
+    ],
+    "type": "clothes_washer"
+  },
+  {
+    "defaults": {
+      "combined_energy_factor": 3.93,
+      "comment": "",
+      "display_name": "Laundry - dryer",
+      "dryer_type": "electric_exhaust_air",
+      "energy_demand_per_use": 0.0,
+      "field_utilization_factor": 1.18,
+      "field_utilization_factor_type": 1,
+      "gas_consumption": 0.0,
+      "gas_efficiency_factor": 2.67,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 2,
+      "reference_quantity": 1
+    },
+    "energy_norms": [
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "dryer_type",
+        "schema": {
+          "enum": [
+            "clothes_line",
+            "drying_closet_cold",
+            "drying_closet_cold_extract_air",
+            "condensation",
+            "electric_exhaust_air",
+            "gas_exhaust_air",
+            "heat_pump"
+          ],
+          "type": "string"
+        }
+      },
+      {
+        "key": "combined_energy_factor",
+        "schema": {
+          "exclusiveMinimum": 0,
+          "type": "number",
+          "x-unit": "lb/kWh"
+        }
+      },
+      {
+        "applies_when": {
+          "dryer_type": [
+            "gas_exhaust_air"
+          ]
+        },
+        "key": "gas_consumption",
+        "schema": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      {
+        "applies_when": {
+          "dryer_type": [
+            "gas_exhaust_air"
+          ]
+        },
+        "key": "gas_efficiency_factor",
+        "schema": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      {
+        "key": "field_utilization_factor_type",
+        "schema": {
+          "description": "1, timer controls.",
+          "enum": [
+            1
+          ],
+          "type": "integer"
+        }
+      },
+      {
+        "key": "field_utilization_factor",
+        "schema": {
+          "minimum": 0,
+          "type": "number"
+        }
+      }
+    ],
+    "hbph_class": "PhClothesDryer",
+    "label": "Clothes dryer",
+    "phius_rule": false,
+    "reference_quantities": [
+      1,
+      2,
+      5
+    ],
+    "type": "clothes_dryer"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "Kitchen refrigerator",
+      "energy_demand": 1.0,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 1,
+      "reference_quantity": 4
+    },
+    "energy_norms": [
+      1,
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhRefrigerator",
+    "label": "Refrigerator",
+    "phius_rule": false,
+    "reference_quantities": [
+      4,
+      5
+    ],
+    "type": "refrigerator"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "Kitchen freezer",
+      "energy_demand": 1.0795,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 1,
+      "reference_quantity": 4
+    },
+    "energy_norms": [
+      1,
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhFreezer",
+    "label": "Freezer",
+    "phius_rule": false,
+    "reference_quantities": [
+      4,
+      5
+    ],
+    "type": "freezer"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "Kitchen fridge/freeze combo",
+      "energy_demand": 1.22,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 1,
+      "reference_quantity": 4
+    },
+    "energy_norms": [
+      1,
+      2
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhFridgeFreezer",
+    "label": "Fridge-freezer",
+    "phius_rule": false,
+    "reference_quantities": [
+      4,
+      5
+    ],
+    "type": "fridge_freezer"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "cooktop_type": "electricity",
+      "display_name": "Kitchen cooking",
+      "energy_demand": 0.2,
+      "energy_demand_per_use": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_energy_norm": 1,
+      "reference_quantity": 1
+    },
+    "energy_norms": [
+      1
+    ],
+    "fields": [
+      {
+        "key": "reference_energy_norm",
+        "schema": {
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year.",
+          "type": "integer"
+        }
+      },
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "energy_demand_per_use",
+        "schema": {
+          "description": "PHPP only; WUFI-Passive and METr ignore it.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      },
+      {
+        "key": "cooktop_type",
+        "schema": {
+          "enum": [
+            "electricity",
+            "natural_gas",
+            "lpg"
+          ],
+          "type": "string"
+        }
+      }
+    ],
+    "hbph_class": "PhCooktop",
+    "label": "Cooktop",
+    "phius_rule": false,
+    "reference_quantities": [
+      1,
+      2,
+      5
+    ],
+    "type": "cooktop"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "PHIUS+ MELS",
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_quantity": 3
+    },
+    "energy_norms": [],
+    "fields": [],
+    "hbph_class": "PhPhiusMEL",
+    "label": "Phius MEL",
+    "phius_rule": true,
+    "reference_quantities": [
+      3,
+      5
+    ],
+    "type": "phius_mel"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "PHIUS+ Interior Lighting",
+      "high_efficacy_fraction": 1.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_quantity": 6
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "high_efficacy_fraction",
+        "schema": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "fraction"
+        }
+      }
+    ],
+    "hbph_class": "PhPhiusLightingInterior",
+    "label": "Phius interior lighting",
+    "phius_rule": true,
+    "reference_quantities": [
+      6,
+      7,
+      5
+    ],
+    "type": "phius_lighting_interior"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "PHIUS+ Exterior Lighting",
+      "high_efficacy_fraction": 1.0,
+      "in_conditioned_space": false,
+      "quantity": 1,
+      "reference_quantity": 6
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "high_efficacy_fraction",
+        "schema": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "fraction"
+        }
+      }
+    ],
+    "hbph_class": "PhPhiusLightingExterior",
+    "label": "Phius exterior lighting",
+    "phius_rule": true,
+    "reference_quantities": [
+      6,
+      7,
+      5
+    ],
+    "type": "phius_lighting_exterior"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "PHIUS+ Garage Lighting",
+      "high_efficacy_fraction": 1.0,
+      "in_conditioned_space": false,
+      "quantity": 1,
+      "reference_quantity": 2
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "high_efficacy_fraction",
+        "schema": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "fraction"
+        }
+      }
+    ],
+    "hbph_class": "PhPhiusLightingGarage",
+    "label": "Phius garage lighting",
+    "phius_rule": true,
+    "reference_quantities": [
+      2,
+      8
+    ],
+    "type": "phius_lighting_garage"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "User defined",
+      "energy_demand": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_quantity": 5
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhCustomAnnualElectric",
+    "label": "Custom annual electric",
+    "phius_rule": false,
+    "reference_quantities": [
+      5
+    ],
+    "type": "custom_annual_electric"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "User defined - lighting",
+      "energy_demand": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_quantity": 5
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhCustomAnnualLighting",
+    "label": "Custom annual lighting",
+    "phius_rule": false,
+    "reference_quantities": [
+      5
+    ],
+    "type": "custom_annual_lighting"
+  },
+  {
+    "defaults": {
+      "comment": "",
+      "display_name": "User defined - Misc electric loads",
+      "energy_demand": 0.0,
+      "in_conditioned_space": true,
+      "quantity": 1,
+      "reference_quantity": 5
+    },
+    "energy_norms": [],
+    "fields": [
+      {
+        "key": "energy_demand",
+        "schema": {
+          "description": "Per unit, over reference_energy_norm's period.",
+          "minimum": 0,
+          "type": "number",
+          "x-unit": "kWh"
+        }
+      }
+    ],
+    "hbph_class": "PhCustomAnnualMEL",
+    "label": "Custom annual MEL",
+    "phius_rule": false,
+    "reference_quantities": [
+      5
+    ],
+    "type": "custom_annual_mel"
+  }
+]

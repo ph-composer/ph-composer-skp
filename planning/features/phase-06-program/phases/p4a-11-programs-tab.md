@@ -1,7 +1,7 @@
 # P4a-11: The Programs tab
 
 DATE: 2026-11-15
-STATUS: Implemented on branch `feature/phase-06-program-p4a-11` (2026-11-20); PG11 host rows owed. Split on 2026-11-20: steps 4 and 5 moved to [P4a-11b](p4a-11b-schedule-and-equipment-set-editors.md). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main ([#550](https://github.com/ph-composer/ph-composer-skp/pull/550), squash `67899146`, 2026-11-21); PG11 host rows owed. Split on 2026-11-20: steps 4 and 5 moved to [P4a-11b](p4a-11b-schedule-and-equipment-set-editors.md). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

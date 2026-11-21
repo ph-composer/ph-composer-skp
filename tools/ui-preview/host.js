@@ -53,6 +53,10 @@
     this.occupancy = settings.occupancy ? JSON.parse(JSON.stringify(settings.occupancy)) : null;
     // The Programs tab's catalogs (ph_composer.programs.programs, schedules, equipment_sets): the fixture's, or none.
     this.programCatalog = settings.programCatalog ? JSON.parse(JSON.stringify(settings.programCatalog)) : null;
+    // Each Schedule's profile drawn from its values, as the host's read does.
+    if (this.programCatalog) {
+      this.programCatalog.schedules.forEach(function (row) { row.profile = scheduleProfile(row.values); });
+    }
     // The Spaces read: the fixture's, or empty (the section is always published, as the host does).
     this.spaces = settings.spaces ? JSON.parse(JSON.stringify(settings.spaces)) : null;
     this.markTool = { active: false, weighting_factor: 1, gesture_limit: 250 };
@@ -278,7 +282,9 @@
     if (message.type === "action.invoke") this.invoke(message.payload);
     if (message.type === "query.invoke") {
       if (message.payload.name.indexOf(TB) === 0) this.scheduleQuery(message.payload);
-      else if (message.payload.name.indexOf(CLIMATE) === 0) this.climateQuery(message.payload);
+      else if (message.payload.name === "ph_composer.programs.equipment_sets.device_types") {
+        this.deviceTypesQuery(message.payload);
+      } else if (message.payload.name.indexOf(CLIMATE) === 0) this.climateQuery(message.payload);
       else this.libraryQuery(message.payload);
     }
     if (message.type === "file_export.invoke") this.publish("file_export.result", {
@@ -397,6 +403,18 @@
       this.snapshot();
     }
     this.publish("view.result", { request_id: payload.request_id, session: payload.session, outcome: outcome });
+  };
+
+  /* The device types, from the golden the Ruby suite keeps equal to features/programs/equipment_types.rb's catalog
+     (tests/fixtures/programs/device_types.json), so the device dialog lays out what Ruby declares. */
+  Host.prototype.deviceTypesQuery = function (payload) {
+    var host = this;
+    host.window.fetch("../../tests/fixtures/programs/device_types.json").then(function (response) {
+      return response.json();
+    }).then(function (types) {
+      host.publish("query.result", { request_id: payload.request_id, session: payload.session,
+        outcome: { status: "completed", code: "ok", revision: host.revision, value: { types: types } } });
+    });
   };
 
   /* Height from solid's two reads, as SketchUp would answer them with a 36 m3 solid selected over a 12 m2 floor. */
@@ -667,8 +685,11 @@
     if (payload.name.indexOf("ph_composer.zones.options.") === 0 ||
         payload.name.indexOf("ph_composer.windows.") === 0 ||
         payload.name.indexOf("ph_composer.assemblies.") === 0 || payload.name.indexOf(TB) === 0 ||
-        payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) this.window.setTimeout(apply, 0);
-    else apply();
+        payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0 ||
+        // The device dialog's own request (record_form.js) is answered later, as SketchUp answers it.
+        /^ph_composer\.programs\.equipment_sets\.(add|update)_device$/.test(payload.name)) {
+      this.window.setTimeout(apply, 0);
+    } else apply();
   };
 
   Host.prototype.apply = function (payload) {
@@ -843,8 +864,8 @@
      its main values. Null for any other action. */
   Host.prototype.programCatalogAction = function (payload) {
     var host = this, catalog = this.programCatalog, params = payload.params || {};
-    var match = /^ph_composer\.programs\.(programs|schedules|equipment_sets)\.(create|update|duplicate|delete)$/
-      .exec(payload.name);
+    var match = new RegExp("^ph_composer\\.programs\\.(programs|schedules|equipment_sets)\\." +
+      "(create|update|duplicate|delete|add_device|update_device|delete_device)$").exec(payload.name);
     var reset = payload.name === "ph_composer.programs.reset_default";
     if (!catalog || (!match && !reset)) return null;
     function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -895,6 +916,7 @@
     }
     var row = params.id && find(params.id);
     if (verb !== "create" && !row) return refused("target.not_found", "That " + label + " is gone.", host.revision);
+    if (/_device$/.test(verb)) return this.deviceAction(row, verb, params, completed);
     if (verb === "create") {
       var values = clone(params.values || {});
       values.name = values.name || freeName(label);
@@ -915,6 +937,13 @@
         });
       }
       if (collection === "equipment_sets") row.values.devices = [];
+      if (collection === "schedules") {
+        // The type's own form, as features/programs/schedule.rb's FORM_DEFAULTS gives it.
+        var type = values.type || "fractional";
+        row.values = Object.assign({ name: values.name, notes: "", datasheet_links: [], source: { kind: "manual" },
+          type: type, days_per_week: 7, weeks_per_year: 52 }, clone(SCHEDULE_FORMS[type]), values);
+        row.profile = scheduleProfile(row.values);
+      }
       remissing(row); rows.push(row);
       return completed({ id: row.id });
     }
@@ -927,7 +956,12 @@
         return refused("validation.failed", "Another " + label + " is named " + params.values.name + ".",
           host.revision);
       }
+      if (params.values.periods && params.values.periods.reduce(function (sum, period) {
+        return sum + period.hours; }, 0) !== 24) {
+        return refused("validation.failed", "Ventilation period hours must total 24.", host.revision);
+      }
       Object.assign(row.values, clone(params.values)); row.stored = true; remissing(row);
+      if (collection === "schedules") row.profile = scheduleProfile(row.values);
       return completed({ id: row.id });
     }
     if (verb === "duplicate") {
@@ -955,6 +989,36 @@
     }
     catalog[collection] = rows.filter(function (entry) { return entry.id !== row.id; });
     return completed({ id: row.id, removed_user_data: [] });
+  };
+
+  /* One device added, edited or deleted, as features/programs/operations.rb does it: a new device holds the values
+     sent (the dialog sends them all); an edit or delete refuses a changed expected value with nothing written. Type
+     rules are not checked. */
+  Host.prototype.deviceAction = function (set, verb, params, completed) {
+    var host = this, devices = set.values.devices;
+    function clone(value) { return JSON.parse(JSON.stringify(value)); }
+    if (verb === "add_device") {
+      var id = "dev_preview" + (++host.sequence);
+      devices.push(Object.assign({ id: id, type: params.type }, clone(params.values || {})));
+      set.stored = true;
+      return completed({ id: set.id, device_id: id });
+    }
+    var device = devices.filter(function (entry) { return entry.id === params.device_id; })[0];
+    if (!device) return refused("target.not_found", "That device is gone.", host.revision);
+    var expected = params.expected_values || {};
+    if (Object.keys(expected).some(function (key) {
+      return JSON.stringify(device[key] === undefined ? null : device[key]) !== JSON.stringify(expected[key]);
+    })) {
+      return refused("target.changed", "Device " + device.display_name + " has changed since it was read.",
+        host.revision);
+    }
+    if (verb === "update_device") {
+      Object.keys(params.values).forEach(function (key) {
+        if (params.values[key] === null) delete device[key]; else device[key] = params.values[key];
+      });
+    } else set.values.devices = devices.filter(function (entry) { return entry !== device; });
+    set.stored = true;
+    return completed({ id: set.id, device_id: params.device_id, removed_user_data: [] });
   };
 
   /* A library Program copied from the Programs tab's sidebar: it arrives in the catalog with its source. */
@@ -2022,6 +2086,39 @@
         return cell.kind === "empty" ? null : classify(cell, side); })];
     }).sort(function (a, b) { return JSON.stringify(a).localeCompare(JSON.stringify(b)); });
     return { edges: edges, copy_key: JSON.stringify([values.rows_m, values.columns_m, shape]), copy_slots: slots };
+  }
+
+  /* A new Schedule's form by type, as features/programs/schedule.rb's FORM_DEFAULTS. */
+  var SCHEDULE_FORMS = {
+    fractional: { start_h: 0, end_h: 24, fraction_on: 1, fraction_off: 0 },
+    activity: { start_h: 0, end_h: 24, watts_on: 120, watts_off: 120 },
+    temperature: { value_c: 20 },
+    ventilation: { periods: [{ period: "high", hours: 0, fraction: 1 }, { period: "standard", hours: 24, fraction: 1 },
+      { period: "basic", hours: 0, fraction: 0.5 }, { period: "minimum", hours: 0, fraction: 0.3 }] }
+  };
+
+  /* A Schedule's profile as features/programs/schedule.rb's ScheduleProfile draws it, for the preview's writes. */
+  function scheduleProfile(values) {
+    var hours = [], type = values.type, hour;
+    function on(start, stop, at) { return start < stop ? at >= start && at < stop : start > stop ?
+      at >= start || at < stop : false; }
+    if (type === "ventilation") {
+      values.periods.forEach(function (period) {
+        for (hour = 0; hour < period.hours; hour++) hours.push(period.fraction);
+      });
+    } else {
+      for (hour = 0; hour < 24; hour++) {
+        if (type === "temperature") hours.push(values.value_c);
+        else hours.push(on(values.start_h, values.end_h, hour) ? values[type === "activity" ? "watts_on" :
+          "fraction_on"] : values[type === "activity" ? "watts_off" : "fraction_off"]);
+      }
+    }
+    var fraction = type === "fractional" || type === "ventilation";
+    var daily = fraction ? hours.reduce(function (sum, value) { return sum + value; }, 0) : null;
+    var days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    return { hours: hours, daily_full_load_hours: daily,
+      annual_full_load_hours: daily === null ? null : daily * values.days_per_week * values.weeks_per_year,
+      weekdays: days.slice(0, type === "temperature" ? 7 : values.days_per_week) };
   }
 
   function refused(code, message, revision) {

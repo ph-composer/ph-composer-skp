@@ -289,8 +289,18 @@ lighting stays in W. Escape closes an open bubble, then clears the checked Zones
    high-efficacy fraction stays editable.
 5. To add a Program from a library file, choose the file in the Programs sidebar's source list and click
    a row. Adding it copies it with its Schedules; a row already in this file shows a check.
-6. Schedules and Equipment Sets show their values read only for now: a Schedule's PH form, full-load hours
-   and the loads that use it; an Equipment Set's devices.
+6. A Schedule shows its PH form by type: the operating hours and the level while operating and
+   otherwise for a fractional or activity Schedule, one value for a temperature Schedule, and for a
+   ventilation Schedule its four periods (high, standard, basic and minimum), each hours per day and a
+   fraction of the design flow. Each change is one Undo step. A ventilation Schedule's hours must total
+   24: while they do not, the total turns amber and nothing is saved; Escape restores the periods. Below
+   the form, the 24-hour strip, the days of the week it applies on, its full-load hours and the loads
+   that use it. The hourly editor is planned.
+7. An Equipment Set lists its devices with their quantity, energy demand (or the Phius rule a rule
+   device follows), whether each is in conditioned space and its reference quantity. **Add device**
+   opens a form laid out for the device's type, with only the fields that apply, such as a gas
+   dryer's gas fields. Click a row, or its pencil, to edit it; the type is fixed once added. Delete
+   asks first and names the Dwellings that use the Set. Each change is one Undo step.
 
 Values follow the unit system: people and watts per ft², cfm per person and per ft², and °F in IP.
 Hot water flow stays in L/h per m².

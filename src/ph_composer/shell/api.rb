@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 84
+    MINOR = 85
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -517,7 +517,13 @@ module PhComposer
                     "target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and " \
                     "equipment_sets carry each collection's all read. A programs.list and programs.all row adds " \
                     "missing: each value its ProgramType would lack, by load and field, as the export preflight " \
-                    "reports it." }
+                    "reports it." },
+      { "minor" => 85, "date" => "2026-11-21",
+        "change" => "A Schedule's profile (programs.schedules.profile and each schedules row's profile) adds " \
+                    "weekdays, the days its operating day applies on, Monday first. An " \
+                    "equipment_sets.device_types field adds applies_when where it means something only under " \
+                    "another field's values: a clothes dryer's gas_consumption and gas_efficiency_factor, under " \
+                    "dryer_type gas_exhaust_air." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

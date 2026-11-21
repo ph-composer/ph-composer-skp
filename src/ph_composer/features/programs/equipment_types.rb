@@ -27,8 +27,12 @@ module PhComposer
         "gas_exhaust_air" => "6-GAS EXHAUST AIR DRYER", "heat_pump" => "7-HEAT PUMP DRYER"
       }.freeze
       COOKTOP_TYPES = { "electricity" => "1-ELECTRICITY", "natural_gas" => "2-NATURAL GAS", "lpg" => "3-LPG" }.freeze
+      # A dryer's gas fields mean something only for a gas dryer: the device still stores them, and the dialog shows
+      # them only then.
+      GAS_DRYER = { "dryer_type" => ["gas_exhaust_air"] }.freeze
 
-      # Each optional field a type may carry: its schema, and the honeybee-ph attribute and enumeration it maps to.
+      # Each optional field a type may carry: its schema, the honeybee-ph attribute and enumeration it maps to, and
+      # `applies_when`, the values of another field under which it means something, where it does not always.
       FIELDS = {
         "reference_energy_norm" => { "schema" => { "type" => "integer",
                                                    "description" => "The period energy_demand is given for: 1 a " \
@@ -51,8 +55,8 @@ module PhComposer
                           "hbph" => "dryer_type", "values" => DRYER_TYPES },
         "combined_energy_factor" => { "schema" => { "type" => "number", "exclusiveMinimum" => 0,
                                                     "x-unit" => "lb/kWh" } },
-        "gas_consumption" => { "schema" => { "type" => "number", "minimum" => 0 } },
-        "gas_efficiency_factor" => { "schema" => { "type" => "number", "minimum" => 0 } },
+        "gas_consumption" => { "schema" => { "type" => "number", "minimum" => 0 }, "applies_when" => GAS_DRYER },
+        "gas_efficiency_factor" => { "schema" => { "type" => "number", "minimum" => 0 }, "applies_when" => GAS_DRYER },
         "field_utilization_factor_type" => { "schema" => { "type" => "integer", "enum" => [1],
                                                            "description" => "1, timer controls." } },
         "field_utilization_factor" => { "schema" => { "type" => "number", "minimum" => 0 } },
@@ -237,15 +241,22 @@ module PhComposer
       end
 
       # What the device dialog and an agent read: each type with its label, rule flag, allowed codes, fields with
-      # their schemas, and the values a new device takes.
+      # their schemas (and `applies_when` where a field means something only under another's values), and the
+      # values a new device takes.
       def catalog
         TYPES.map do |name, type|
           { "type" => name, "label" => type.fetch("label"), "hbph_class" => type.fetch("hbph_class"),
             "phius_rule" => type.fetch("phius_rule"), "reference_quantities" => type.fetch("reference_quantities"),
             "energy_norms" => type.fetch("energy_norms"),
-            "fields" => type.fetch("fields").map { |key| { "key" => key, "schema" => FIELDS.fetch(key)["schema"] } },
+            "fields" => type.fetch("fields").map { |key| catalog_field(key) },
             "defaults" => device(name, "dev_AAAAAAAAAAAA").reject { |key, _| %w[id type].include?(key) } }
         end
+      end
+
+      def catalog_field(key)
+        field = FIELDS.fetch(key)
+        entry = { "key" => key, "schema" => field.fetch("schema") }
+        field["applies_when"] ? entry.merge("applies_when" => field.fetch("applies_when")) : entry
       end
     end
   end

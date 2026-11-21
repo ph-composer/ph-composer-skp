@@ -7,7 +7,9 @@
    Duplicate and an overflow menu holding Delete and, on PH-Composer's own default, Reset to PH-Composer default.
    New and Duplicate act at once under a free name and open the title for renaming; Delete confirms in the shared
    dialog and, while anything uses the record, asks for its replacement. Every request is the page's
-   (features/programs/tab.js `run`), one at a time. `body(page)` makes the editor below the header. */
+   (features/programs/tab.js `run`), one at a time. `body(page)` makes the editor below the header: it has `root` and
+   `render(row, context)`, and may have `headerAction` (the record's primary action, set between the icon tools and
+   the overflow menu), `guard()` or `typing()` (why the page may not move on) and `dispose()`. */
 PhComposerUI.define("features/programs/record_page", ["workspace", "library/sidebar", "library/store"],
 function (ui, Sidebar, Store) {
   "use strict";
@@ -34,10 +36,11 @@ function (ui, Sidebar, Store) {
     this.deleteItem = this.menu.add("Delete " + kind.label, function () { self.confirmDelete(); },
       { destructive: true });
     this.tools.appendChild(this.renameButton); this.tools.appendChild(this.duplicateButton);
-    this.tools.appendChild(this.menu.root);
     this.head.appendChild(this.identity); this.head.appendChild(this.tools);
     this.empty = el("p", "muted pgm-empty");
     this.body = body(this);
+    if (this.body.headerAction) this.tools.appendChild(this.body.headerAction);
+    this.tools.appendChild(this.menu.root);
     this.main.appendChild(this.head); this.main.appendChild(this.empty); this.main.appendChild(this.body.root);
     this.root.appendChild(this.main);
     if (kind.library) this.schedules = new Store(host.session, host.send, "schedules", host.changed);
@@ -119,7 +122,8 @@ function (ui, Sidebar, Store) {
       this.resetItem.hidden = !this.kind.reserved || row.id !== this.kind.reserved;
       this.menu.setUnavailable(enabled ? null : "Wait for the last change to finish.");
       // Fields stay usable while a write is out, so a focused one keeps its focus; the page sends one at a time.
-      this.body.render(row, Object.assign({ enabled: context.available }, context.bodyContext(this.kind, row)));
+      this.body.render(row, Object.assign({ enabled: context.available, state: state },
+        context.bodyContext(this.kind, row)));
     }
     if (this.schedules) {
       this.schedules.update(state);
@@ -140,7 +144,9 @@ function (ui, Sidebar, Store) {
 
   RecordPage.prototype.guard = function () {
     if (this.renaming) return "Finish or cancel the name edit.";
-    if (this.body.typing && this.body.typing()) return "Finish or cancel the value being typed.";
+    var held = this.body.guard ? this.body.guard() : this.body.typing && this.body.typing() &&
+      "Finish or cancel the value being typed.";
+    if (held) return held;
     return this.sidebar.guard();
   };
 
@@ -153,15 +159,23 @@ function (ui, Sidebar, Store) {
     this.sidebar.revealLocal(id);
   };
 
+  /* Whether the shown record may give way (to New, Duplicate or Delete); says why not when it may not. */
+  RecordPage.prototype.mayLeave = function () {
+    var held = this.guard();
+    if (held) this.host.refuse(held);
+    return !held;
+  };
+
   RecordPage.prototype.create = function () {
     var self = this;
+    if (!this.mayLeave()) return;
     this.host.run(this.host.prefix(this.kind) + ".create", { values: this.kind.createValues || {} },
       function (outcome) { self.opened(outcome); return null; });
   };
 
   RecordPage.prototype.duplicate = function () {
     var self = this, row = this.record();
-    if (!row) return;
+    if (!row || !this.mayLeave()) return;
     this.host.run(this.host.prefix(this.kind) + ".duplicate", { id: row.id },
       function (outcome) { self.opened(outcome); return null; });
   };
@@ -252,7 +266,7 @@ function (ui, Sidebar, Store) {
      which must be of the same type for a Schedule. */
   RecordPage.prototype.confirmDelete = function () {
     var self = this, row = this.record(), kind = this.kind;
-    if (!row) return;
+    if (!row || !this.mayLeave()) return;
     // Anything naming it counts, Segment settings and Dwellings too (`use_count`); the words name its Zones.
     var uses = this.useCount(row), used = row.use_count > 0 || row.default;
     var others = this.records.filter(function (other) {

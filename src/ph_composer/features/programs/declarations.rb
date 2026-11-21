@@ -99,7 +99,10 @@ module PhComposer
         "daily_full_load_hours" => { "type" => %w[number null], "x-unit" => "h",
                                      "description" => "Null for an activity or temperature Schedule." },
         "annual_full_load_hours" => { "type" => %w[number null], "x-unit" => "h",
-                                      "description" => "The daily hours on days_per_week × weeks_per_year days." }
+                                      "description" => "The daily hours on days_per_week × weeks_per_year days." },
+        "weekdays" => SchemaShapes.list({ "type" => "string", "enum" => ScheduleProfile::WEEKDAYS },
+                                        :description => "The days the profile applies on, Monday first: the first " \
+                                                        "days_per_week, or every day for a temperature Schedule.")
       }).freeze
 
       module_function
