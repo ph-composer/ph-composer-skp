@@ -45,7 +45,7 @@ global (`core/records/catalog.rb`), so each payload gets its own:
 
 | Section | Namespace | Payload |
 | --- | --- | --- |
-| Occupancy | `ph_composer.programs.segment` | `single_dwelling` (bool, default true when the extension is absent), `dwelling_id` (reference to `programs.dwelling`, set while single), `default_program_id` (reference to `programs.program`; null means the Model's default Program) |
+| Occupancy | `ph_composer.programs.segment` | `single_dwelling` (bool, default true when the extension is absent), `default_program_id` (reference to `programs.program`; null means the Model's default Program), and while single the house's `bedrooms`, `occupants` and `equipment_set_id` (P4a-08 replaced `dwelling_id` with these: a contributor cannot change what Save staged, [stage doc](phases/p4a-08-dwellings-and-single-dwelling.md#implementation-decisions-2026-11-20)) |
 | Phius certification | `ph_composer.certification.segment` | `category` (`residential`, `non_residential`), `program`, `use`, `status`, `type`, each an enum mapped to honeybee-ph `PhiusCertification` |
 | Airtightness | `ph_composer.programs.airtightness` | `basis` (`n50`, `q50`), `value` (number or null), `wind_exposure` (the seven `PhWindExposureType` values) |
 | Comfort | none, read only | Set points derived from the Zones' Programs |

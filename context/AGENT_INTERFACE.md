@@ -353,6 +353,12 @@ The three are library kinds too (API 1.80): `ph_composer.library.copy` copies a 
 Schedule it names in one Undo step and answers them as `dependencies`, and a Program or Equipment Set copy may
 assign itself as the Model's default (CONTRACTS.md, "Library dependencies"); the
 [Program library walkthrough](../tools/examples/library/programs_walkthrough.rb) copies one with the panel closed.
+Occupancy (API 1.81): Dwellings have the same six operations under `ph_composer.programs.dwellings`; a Zone's
+Program, Dwelling, counts and Equipment Set are written by `ph_composer.programs.assign_program`,
+`assign_dwelling`, `set_counts` and `assign_equipment_set`, each one Undo step, and read back with what they
+work out to by `ph_composer.programs.zones` (with each Segment's occupancy) and `ph_composer.programs.dwellings`.
+Single dwelling switches through the Segment's settings Save; `ph_composer.programs.single_dwelling_preview`
+says what switching it on replaces ([CONTRACTS.md](CONTRACTS.md), "Occupancy").
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 80
+    MINOR = 81
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -477,7 +477,19 @@ module PhComposer
                     "library.dependency_missing when the loaded catalog of that kind does not hold one. Library " \
                     "export writes each dependency of a written row, whatever kinds or records select, and refuses " \
                     "library.dependency_missing for one it cannot write; its omissions list a declared part's map " \
-                    "the file leaves out as <path>.user_data, such as devices[].user_data." }
+                    "the file leaves out as <path>.user_data, such as devices[].user_data." },
+      { "minor" => 81, "date" => "2026-11-20",
+        "change" => "Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, " \
+                    "create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on " \
+                    "Zones and ph_composer.programs.segment on Building Segments, both local_only; " \
+                    "programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling " \
+                    "is deleted), set_counts and assign_equipment_set, each one Undo step, refusing " \
+                    "programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, " \
+                    "programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching " \
+                    "Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments " \
+                    "and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension " \
+                    "stages a feature's payload on Zones and Segments; save_segment_settings names it for its " \
+                    "transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

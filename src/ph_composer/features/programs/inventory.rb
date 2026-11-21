@@ -2,9 +2,9 @@
 
 module PhComposer
   module Programs
-    # The rows Programs reads answer: each record as stored, or its unwritten default, with what uses it. At this
-    # stage a Program and an Equipment Set are used by the Model's defaults and a Schedule by the Programs naming
-    # it; Zone assignments and Dwellings join them when they exist.
+    # The rows Programs reads answer: each record as stored, or its unwritten default, with what uses it: a Program
+    # and an Equipment Set by the Model's defaults, a Schedule by the Programs naming it, a Dwelling by the Zones
+    # whose assignment names it.
     module Inventory
       module_function
 
@@ -22,6 +22,7 @@ module PhComposer
 
       def context(request, kind, records)
         return { "programs" => Store.all(request, PROGRAM_KIND).first } if kind == SCHEDULE_KIND
+        return { "zones" => OccupancyState.read(request).zones } if kind == DWELLING_KIND
 
         { "default_id" => Settings.default_id(request.model, kind), "records" => records }
       end
@@ -29,6 +30,11 @@ module PhComposer
       def row(request, kind, record, stored, context)
         base = view(request, kind, record, stored)
         return base.merge(schedule_uses(record, context.fetch("programs"))) if kind == SCHEDULE_KIND
+
+        if kind == DWELLING_KIND
+          uses = context.fetch("zones").count { |zone| zone.assignment["dwelling_id"] == record.fetch("id") }
+          return base.merge("default" => false, "use_count" => uses)
+        end
 
         default = record.fetch("id") == context.fetch("default_id")
         base.merge("default" => default, "use_count" => default ? 1 : 0)

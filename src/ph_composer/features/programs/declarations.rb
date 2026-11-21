@@ -74,9 +74,9 @@ module PhComposer
     # and Equipment Sets").
     module Declarations
       COLLECTIONS = { "programs" => Program::KIND, "schedules" => Schedule::KIND,
-                      "equipment_sets" => EquipmentSet::KIND }.freeze
+                      "equipment_sets" => EquipmentSet::KIND, "dwellings" => Dwelling::KIND }.freeze
       EXAMPLES = { "programs" => "pgm_Ab12Cd34Ef56", "schedules" => "sch_Ab12Cd34Ef56",
-                   "equipment_sets" => "eqs_Ab12Cd34Ef56" }.freeze
+                   "equipment_sets" => "eqs_Ab12Cd34Ef56", "dwellings" => "dwl_Ab12Cd34Ef56" }.freeze
       DEVICES = "#{FEATURE_ID}.equipment_sets".freeze
       SET_ID = SchemaShapes.id("eqs", "The Equipment Set.").freeze
       DEVICE_ID = SchemaShapes.id("dev", "The device, by its id within the Equipment Set.").freeze

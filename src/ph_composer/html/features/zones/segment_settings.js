@@ -4,7 +4,8 @@
    request, `ph_composer.zones.save_segment_settings`, and one Undo step across every section. A section is
    validated and sent once the user has changed it, so one left alone keeps its stored payload. Save stays
    disabled while a changed section reports a problem, and Cancel, the close icon and Escape write nothing. The
-   dialog names no section and no other feature. */
+   dialog names no section and no other feature. A section may read another's draft, never write it
+   (`context.draft(namespace)`), and is told after every edit in the dialog (`refresh`). */
 PhComposerUI.define("features/zones/segment_settings", ["panel", "workspace", "request",
   "features/zones/zone_options"],
 function (panel, ui, requests, zoneOptions) {
@@ -66,8 +67,9 @@ function (panel, ui, requests, zoneOptions) {
       var part = ui.element("div", "phc-segment-settings-section");
       part.setAttribute("data-namespace", entry.spec.namespace);
       part.appendChild(ui.element("h3", "", entry.spec.title));
-      var context = { readOnly: Boolean(entry.spec.readOnly), state: self.snapshot,
-        changed: function () { entry.changed = true; self.edited(); } };
+      var context = entry.context = { readOnly: Boolean(entry.spec.readOnly), state: self.snapshot,
+        changed: function () { entry.changed = true; self.edited(); },
+        draft: function (namespace) { return self.draftOf(namespace); } };
       var node = entry.spec.render(segment, entry.draft, context);
       if (node) part.appendChild(node);
       body.appendChild(part);
@@ -168,9 +170,19 @@ function (panel, ui, requests, zoneOptions) {
     return found;
   };
 
-  /* An edit clears what the last refused Save said, then validates again. */
+  /* A copy of another section's draft as it stands, or null when no section has that namespace. */
+  SegmentSettings.prototype.draftOf = function (namespace) {
+    var entry = (this.sections || []).filter(function (item) { return item.spec.namespace === namespace; })[0];
+    return entry ? copy(entry.draft) : null;
+  };
+
+  /* An edit clears what the last refused Save said, tells every section that reads another's draft, then
+     validates again. */
   SegmentSettings.prototype.edited = function () {
     this.message = "";
+    (this.sections || []).forEach(function (entry) {
+      if (entry.spec.refresh) entry.spec.refresh(entry.draft, entry.context);
+    });
     this.validate();
   };
 

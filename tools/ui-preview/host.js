@@ -49,6 +49,8 @@
       building_segments: [], levels: [], default_segment_id: null, adoption: { required: false, sources: [] }
     }));
     this.faces = JSON.parse(JSON.stringify(settings.faces || []));
+    // The occupancy read (ph_composer.programs.zones): the fixture's, or none.
+    this.occupancy = settings.occupancy ? JSON.parse(JSON.stringify(settings.occupancy)) : null;
     // The Spaces read: the fixture's, or empty (the section is always published, as the host does).
     this.spaces = settings.spaces ? JSON.parse(JSON.stringify(settings.spaces)) : null;
     this.markTool = { active: false, weighting_factor: 1, gesture_limit: 250 };
@@ -136,6 +138,8 @@
         [PARTS]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: records, units: { length_mm: "mm" }, next_cursor: null, total: records.length } },
         ["ph_composer.zones.options"]: { status: "completed", value: JSON.parse(JSON.stringify(this.zoneOptions)) },
+        ["ph_composer.programs.occupancy"]: this.occupancy ? { status: "completed",
+          value: JSON.parse(JSON.stringify(this.occupancy)) } : undefined,
         [ZONES]: { status: "completed", code: "ok", revision: this.revision,
           value: { zones: this.zoneRows(), make_zone: this.makeZone, building_segments: this.segmentSums(),
             units: { ground_depth_mm: "mm", face_area_m2: "m2", unclassified_face_area_m2: "m2" } } },

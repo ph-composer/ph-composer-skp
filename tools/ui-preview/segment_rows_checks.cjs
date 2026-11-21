@@ -1,7 +1,8 @@
 /* Building Segment heading rows and the settings dialog in the real panel with synthetic data
    (context/EXTENSIBILITY.md, "Zone views" and "Building Segment settings"): headings in Geometry and Spaces at every panel size, New Building Segment and its name in
-   place, moving a checked Zone from the selection bar, Delete with a destination, a long name, and the settings
-   dialog with the development Note section (tools/examples/zones/example_segment_note.js). The preview host
+   place, moving a checked Zone from the selection bar, Delete with a destination, a long name, the settings
+   dialog with every shipped section and the development Note section (tools/examples/zones/example_segment_note.js),
+   and the Occupancy section with the Single dwelling tag and findings on the headings. The preview host
    answers the writes; native transactions and Undo remain SketchUp acceptance gates. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -36,7 +37,10 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   await page.goto(`${BASE}?fixture=zoneoptions`);
   await page.getByRole("heading", { name: "Zones", exact: true }).waitFor();
   assert.deepEqual(await headings(page), ["Annex", "House"]);
-  assert.deepEqual(await heading(page, "House").locator(".phc-segment-tag").allTextContents(), ["Default"]);
+  assert.deepEqual(await heading(page, "House").locator(".phc-segment-tag").allTextContents(),
+    ["Default", "Single dwelling"]);
+  assert.equal(await heading(page, "Annex").locator(".phc-segment-flag").getAttribute("aria-label"),
+    "Annex is residential and has no Dwelling.");
   assert.equal(await page.locator(`${shownTable} th`, { hasText: "Building" }).count(), 0, "no Segment column");
 
   step("headings at every panel size, Geometry and Spaces");
@@ -100,12 +104,13 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
     getComputedStyle(node).color !== getComputedStyle(node.closest("tr").nextElementSibling.querySelector("td.col-name")).color),
   true, "the No Building Segment heading is muted");
 
-  step("the settings dialog: General and the registered Note section, Save held by a problem");
+  step("the settings dialog: General, the shipped sections and the registered Note section, Save held by a problem");
   await house.hover();
   await house.getByRole("button", { name: "Settings for House", exact: true }).click();
   const settings = page.getByRole("dialog", { name: "Building Segment settings", exact: true });
   await settings.waitFor();
-  assert.deepEqual(await settings.locator("h3").allTextContents(), ["General", "Note"]);
+  assert.deepEqual(await settings.locator("h3").allTextContents(),
+    ["General", "Occupancy", "Phius certification", "Airtightness", "Note"]);
   assert.equal(await settings.getByRole("checkbox", { name: "New Zones join this Segment", exact: true }).isDisabled(), true);
   const save = settings.getByRole("button", { name: "Save", exact: true });
   assert.equal(await save.isDisabled(), false, "an untouched section holds nothing");
@@ -135,6 +140,41 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
     .filter(entry => entry.id === "bsg_house")[0]);
   assert.equal(saved.values.name, "Main house");
   assert.deepEqual(saved.extension_data["example.segment.note"].payload, { text: "North wing" });
+
+  step("Occupancy: a single dwelling's house rows, disabled with its reason on a non-residential category");
+  const main = heading(page, "Main house");
+  await main.hover();
+  await main.getByRole("button", { name: "Settings for Main house", exact: true }).click();
+  await settings.waitFor();
+  const single = settings.getByRole("checkbox", { name: "Single dwelling", exact: true });
+  assert.equal(await single.isChecked(), true, "an absent payload reads as a single dwelling");
+  assert.equal(await settings.getByRole("combobox", { name: "Default Program for its Zones", exact: true })
+    .isDisabled(), true);
+  const bedrooms = settings.getByRole("textbox", { name: "Bedrooms", exact: true });
+  assert.equal(await bedrooms.getAttribute("placeholder"), "?");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert(await settings.evaluate(node => node.scrollWidth <= node.clientWidth),
+      `the Occupancy section fits at ${width} x ${height}`);
+    await settings.locator("[data-namespace='ph_composer.programs.segment']").screenshot({
+      path: path.join(output, `occupancy-${width}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  const category = settings.getByRole("combobox", { name: "Building category", exact: true });
+  await category.selectOption("non_residential");
+  assert.equal(await single.isDisabled(), true);
+  assert.match(await settings.locator("[data-namespace='ph_composer.programs.segment']").innerText(),
+    /Residential Building Segments only/);
+  await settings.locator("[data-namespace='ph_composer.programs.segment']").screenshot({
+    path: path.join(output, "occupancy-non-residential.png") });
+  await category.selectOption("residential");
+  await bedrooms.fill("3");
+  await settings.getByRole("button", { name: "Save", exact: true }).click();
+  await settings.waitFor({ state: "detached" });
+  const occupancy = await page.evaluate(() => window.previewHost.zoneOptions.building_segments
+    .filter(entry => entry.id === "bsg_house")[0].extension_data["ph_composer.programs.segment"].payload);
+  assert.deepEqual(occupancy, { single_dwelling: true, default_program_id: null, bedrooms: 3, occupants: null,
+    equipment_set_id: null });
 
   step("a long name is cut in its cell and whole in its tooltip");
   const long = "Residential tower with retail podium and below-grade parking, phase two";

@@ -6,9 +6,11 @@ module PhComposer
     # callback calls the same operation its action does. Every write reads through Store, so a write that
     # touches an unwritten default writes its bundle first, in the same proposal and Undo step.
     module Operations
-      LABELS = { PROGRAM_KIND => "Program", SCHEDULE_KIND => "Schedule", EQUIPMENT_SET_KIND => "Equipment Set" }.freeze
+      LABELS = { PROGRAM_KIND => "Program", SCHEDULE_KIND => "Schedule", EQUIPMENT_SET_KIND => "Equipment Set",
+                 DWELLING_KIND => "Dwelling" }.freeze
       DEFAULTS = { PROGRAM_KIND => Program.method(:defaults), SCHEDULE_KIND => Schedule.method(:defaults),
-                   EQUIPMENT_SET_KIND => EquipmentSet.method(:defaults) }.freeze
+                   EQUIPMENT_SET_KIND => EquipmentSet.method(:defaults),
+                   DWELLING_KIND => Dwelling.method(:defaults) }.freeze
       DEFAULT_IN_USE = "programs.default_in_use"
 
       module_function
@@ -134,7 +136,7 @@ module PhComposer
 
       def delete_default_kind(request, proposal, kind, before, replacement)
         id = before.fetch("id")
-        if Settings.default_id(request.model, kind) == id && replacement.nil?
+        if Settings.default_kind?(kind) && Settings.default_id(request.model, kind) == id && replacement.nil?
           raise CodedError.new(DEFAULT_IN_USE, "#{LABELS.fetch(kind)} #{before.fetch('name')} is the Model's " \
                                                "default; name a replacement to delete it.", "id" => id)
         end

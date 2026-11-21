@@ -18,7 +18,7 @@ module PhComposer
     # target.not_found there until a Programs write stores it; reset_default stores it unchanged.
     module Store
       KINDS = { PROGRAM_KIND => Program::KIND, SCHEDULE_KIND => Schedule::KIND,
-                EQUIPMENT_SET_KIND => EquipmentSet::KIND }.freeze
+                EQUIPMENT_SET_KIND => EquipmentSet::KIND, DWELLING_KIND => Dwelling::KIND }.freeze
       BUNDLES = {
         PROGRAM_KIND => [[PROGRAM_KIND, DefaultProgram::PROGRAM]] +
                         DefaultProgram::SCHEDULES.map { |record| [SCHEDULE_KIND, record] },

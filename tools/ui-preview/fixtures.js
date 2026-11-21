@@ -849,6 +849,31 @@
         usage: { live: 1, recoverable: 0 } }],
     default_segment_id: "bsg_house", adoption: { required: false, sources: [] }
   };
+  // The occupancy read: House a single dwelling with no bedrooms entered; Annex switched off, its Zone in an
+  // Office Program, with the finding a residential Segment with no Dwelling gives.
+  FIXTURES.zoneoptions.occupancy = {
+    zones: [],
+    building_segments: [
+      { id: "bsg_house", name: "House", category: "residential", settings: { single_dwelling: true,
+        default_program_id: null, bedrooms: null, occupants: null, equipment_set_id: null }, stored: false,
+        single_dwelling: true, dwelling: { name: "House", units: 1, bedrooms: null, occupants: null,
+          occupants_rule: false, equipment_set_id: null }, dwelling_count: 1,
+        set_points: { heating_c: 20, cooling_c: 25, agree: true },
+        single_dwelling_preview: { building_segment_id: "bsg_house", programs: [], dwelling_ids: [],
+          equipment_set_ids: [], bedrooms: null, occupants: null }, findings: [] },
+      { id: "bsg_annex", name: "Annex", category: "residential", settings: { single_dwelling: false,
+        default_program_id: "pgm_office", bedrooms: null, occupants: null, equipment_set_id: null }, stored: true,
+        single_dwelling: false, dwelling: null, dwelling_count: 0,
+        set_points: { heating_c: 20, cooling_c: 25, agree: true },
+        single_dwelling_preview: { building_segment_id: "bsg_annex", programs: [], dwelling_ids: [],
+          equipment_set_ids: [], bedrooms: null, occupants: null },
+        findings: [{ code: "programs.residential_without_dwelling", severity: "warning",
+          message: "Annex is residential and has no Dwelling." }] }],
+    choices: { programs: [{ id: "pgm_office", name: "Office" }, { id: "pgm_PHCDEFAULT01",
+      name: "Residential default" }], equipment_sets: [{ id: "eqs_PHCDEFAULT01",
+      name: "Residential default devices" }], default_program_id: "pgm_PHCDEFAULT01",
+      default_equipment_set_id: "eqs_PHCDEFAULT01" }
+  };
   FIXTURES.zoneoptions.zones.forEach(function (entry) {
     entry.schema_version = 2;
     entry.values = { name: entry.values.name, ground_depth_mm: entry.values.ground_depth_mm,

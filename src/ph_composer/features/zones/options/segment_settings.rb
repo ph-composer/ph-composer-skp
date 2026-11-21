@@ -58,17 +58,17 @@ module PhComposer
         # The one staging route for settings on a catalog record: `payloads` by namespace, each checked by its
         # installed validator (Records::Extension#problems) and written in this proposal, guarded by the
         # record's `extension_data` as the caller read it. Answers the namespaces whose payload changed, sorted.
-        # A later stage exposes this route to Programs as the `stage_extension` participant.
+        # Other features reach it through the `stage_extension` participant (ExtensionStaging).
         def stage_extensions(request, proposal, kind_id, id, payloads, expected_extension_data)
           return [] if payloads.empty?
 
-          before = request.engine.find(kind_id, id, :change_set => proposal.record_changes)
+          before = request.engine.find(kind_id, id, :change_set => proposal)
           update = { "reference" => { "kind" => kind_id, "id" => id },
                      "expected_metadata" => { "user_data" => before.fetch("user_data", {}),
                                               "extension_data" => expected_extension_data },
                      "extension_payloads" => payloads }
           request.engine.propose_metadata_update(kind_id, id, proposal, update)
-          after = request.engine.find(kind_id, id, :change_set => proposal.record_changes)
+          after = request.engine.find(kind_id, id, :change_set => proposal)
           payloads.keys.sort.reject do |namespace|
             before.dig("extension_data", namespace) == after.dig("extension_data", namespace)
           end
@@ -145,6 +145,8 @@ module PhComposer
                                          "default, and a payload per settings namespace, in one Undo step.",
                          :params => SAVE_PARAMS, :result => SAVE_RESULT, :refuses => REFUSALS,
                          :transitions => [SegmentSettings::TRANSITION],
+                         # Its transition's contributors stage their own payloads through Zones' participant.
+                         :participants => [ExtensionStaging::NAME],
                          :undo_name => "Change Building Segment Settings",
                          :side_effects => "Writes the Segment's values and settings; a rename or a new default " \
                                           "also rewrites each member Zone's evidence. Every contributor to " \
