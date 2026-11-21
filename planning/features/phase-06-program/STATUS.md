@@ -43,7 +43,7 @@ The one place this packet's progress is read from.
 
 ## Closing gates
 
-P4a-12 step 1, on the tree of `01fc8c86` with this fold (2026-11-21). Counts are from the commands' own output.
+P4a-12 step 1, on the tree of `077d9d45` with this fold (2026-11-21). Counts are from the commands' own output.
 
 | Gate | Result |
 | --- | --- |
@@ -101,7 +101,7 @@ not posted, since squash-merged commits cannot carry inline comments: `53c72dbc`
 `10766bee` (#541), `43fb2fc6` (#543), `f71ffe15` (#544), `84771d72` (#545), `6849bee4` and `7e7d1c8a` (#546),
 `c4a8280e`, `5192c7ad`, `5c0e5331` and `08b0c7d1` (#547), `3bcccda8` (#548), `a897827b` (#549), `91fdb172`,
 `b0c01812` and `14b2d1a8` (#550), `afcbdc04` (#551). Thirteen had no finding; the three docs-only commits' claims
-hold. Six findings, each reproduced by a test that failed before its fix, all fixed in ``01fc8c86``:
+hold. Six findings, each reproduced by a test that failed before its fix, all fixed in ``077d9d45``:
 
 | Commit | Finding | Disposition |
 | --- | --- | --- |
