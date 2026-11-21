@@ -11,7 +11,7 @@ reached no bridge).
 
 Commands:
 `ruby -Itests tests/zones_programs_view_test.rb` (4 runs, 84 assertions, 0 failures on each Ruby);
-`node --test tests/zones_programs_panel_test.js` (15 pass);
+`node --test tests/zones_programs_panel_test.js` (20 pass);
 `make ui-checks UI_CHECKS="tools/ui-preview/programs_view_checks.cjs tools/ui-preview/segment_rows_checks.cjs"`
 (pass, through `browser_evidence.cjs`).
 
@@ -26,7 +26,7 @@ Commands:
 | Journey 3: a library Program copied on choice and reused | Pass | Ruby `test_a_library_program_on_a_zone_copies_once_and_a_second_zone_reuses_it`: `assign_library_program` copies Office with its Schedule and assigns Apt 1 in one operation, Undo removes all, Redo restores; `keep_local` on Corridor copies nothing more. Browser check step 3: the library row offered under "copies into this file", one `assign_library_program`, then listed once under In this file and assigned to Apt 2 with `assign_program` |
 | Journey 4: the school's flag and assignment | Pass | Browser check step 4: the Classroom's row flag names its finding, its Equipment Set reads a dash, and assigning Phius NR Office clears the flag |
 | The Dwelling bubble | Pass | Panel test: its choice applies `assign_dwelling` at once (`none`), Units writes `dwellings.update` guarded by the units read |
-| Every edit one Undo step; a stale value refuses and the cell returns to the Model's value | Pass, offline | Each control sends one action with the painted `expected_revision` (panel tests); a refused outcome leaves the Program select at the Model's value; Ruby: the house row's settings Save is one operation and a stale revision refuses `revision.stale`; the library copy and assignment are one operation |
+| Every edit one Undo step; a stale value refuses and the cell returns to the Model's value | Pass, offline | Each control sends one action with the painted `expected_revision`, and a typed count or house value the revision its first keystroke saw (panel tests); a refused outcome leaves the Program select, and a focused Dwelling Units field, at the Model's value; Ruby: the house row's settings Save is one operation and a stale revision refuses `revision.stale`; the library copy and assignment are one operation |
 | Unknown values | Pass | Ruby `test_the_read_gives_heading_sums_unknown_value_reasons_and_the_dwellings`: people unknown until the house's bedrooms, with the reason; heading sums with `incomplete`; the Dwellings in the read. Panel test: the amber "?" with its reason on the row and the heading |
 | IP and SI | Pass | Panel tests: ft², cfm and W headers; 215.3 ft² and 29.4 cfm cells. Browser check: the IP headers |
 | 420 px: the table scrolls, the selection bar wraps | Pass | Browser check: no sideways pane scroll at 1280, 420 and 360 px with the bar showing (`pane_fit.cjs`); `programs-420.png` shows the bar wrapped to one field a line |

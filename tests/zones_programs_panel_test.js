@@ -383,3 +383,77 @@ test("IP cells show ft² and cfm values", function () {
   assert.strictEqual(cell(rowNamed(p, "Corridor"), "floor_area_m2").textContent, "215.3");
   assert.strictEqual(cell(rowNamed(p, "Corridor"), "ventilation_m3h").textContent, "29.4");
 });
+
+/* A later snapshot: the fixture with `change` applied to its occupancy read, at `revision`. */
+function republish(p, revision, change) {
+  var next = snapshot({});
+  next.revision = revision;
+  change(next.sections["ph_composer.programs.occupancy"].value);
+  p.panel.receive({ type: "panel.snapshot", payload: next });
+}
+
+function typeInto(p, input, text) {
+  input.focus();
+  input.value = text;
+  input.listeners.input({});
+}
+
+test("a count typed before the Model changed is sent at the revision it was typed against", function () {
+  var p = load();
+  var input = labelled(rowNamed(p, "Apt 1"), "input", "Bedrooms in Apt 1");
+  typeInto(p, input, "3");
+  republish(p, REVISION + 1, function (value) { value.zones[1].assignment.bedrooms = 4; });
+  input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+  assert.deepStrictEqual(plain([last(p).name, last(p).expected_revision, last(p).params.bedrooms]),
+    ["ph_composer.programs.set_counts", REVISION, 3]);
+});
+
+test("the house row's typed bedrooms are sent at the revision they were typed against", function () {
+  var p = load();
+  var input = labelled(heading(p, "House"), "input", "Bedrooms in House");
+  typeInto(p, input, "3");
+  republish(p, REVISION + 1, function (value) { value.building_segments[0].settings.bedrooms = 2; });
+  input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+  assert.deepStrictEqual(plain([last(p).name, last(p).expected_revision]),
+    ["ph_composer.zones.save_segment_settings", REVISION]);
+});
+
+test("a refused Units write puts the Model's units back in the focused field", function () {
+  var p = load();
+  click(cell(rowNamed(p, "Apt 1"), "dwelling").querySelector("button"));
+  var units = labelled(bubble(p, "Dwelling of Apt 1"), "input", "Units of Apt 1");
+  units.focus();
+  change(units, "2");
+  p.panel.receive({ type: "action.result", payload: { request_id: last(p).request_id, session: "session-a",
+    outcome: { status: "refused", code: "revision.stale", effect: "none", revision: REVISION,
+      message: "The Model changed since it was read. Nothing was written." } } });
+  var again = labelled(bubble(p, "Dwelling of Apt 1"), "input", "Units of Apt 1");
+  assert.strictEqual(again.value, "1");
+  assert.strictEqual(again.disabled, false);
+});
+
+test("an Equipment Set chosen explicitly shows even when it is the Model's default", function () {
+  var p = load();
+  republish(p, REVISION, function (value) { value.zones[2].equipment_set_id = "eqs_PHCDEFAULT01"; });
+  var select = labelled(rowNamed(p, "Corridor"), "select", "Equipment Set for Corridor");
+  assert.strictEqual(select.value, "eqs_PHCDEFAULT01");
+  assert.ok(select.querySelectorAll("option").some(function (node) {
+    return node.value === "eqs_PHCDEFAULT01" && node.textContent === "Phius single-family";
+  }));
+});
+
+test("a Dwelling of Zones in no Building Segment is not offered to a Zone in one", function () {
+  var p = load();
+  republish(p, REVISION, function (value) {
+    value.dwellings.push({ id: "dwl_out", name: "Shed", units: 1, single_dwelling: false, own_bedrooms: null,
+      own_occupants: null, bedrooms: null, occupants: null, occupants_rule: false, equipment_set_id: null,
+      zone_ids: ["zon_x"], building_segment_ids: [], floor_area_m2: 5, icfa_m2: 5, findings: [] });
+    value.dwellings.push({ id: "dwl_empty", name: "Spare", units: 1, single_dwelling: false, own_bedrooms: null,
+      own_occupants: null, bedrooms: null, occupants: null, occupants_rule: false, equipment_set_id: null,
+      zone_ids: [], building_segment_ids: [], floor_area_m2: 0, icfa_m2: 0, findings: [] });
+  });
+  click(cell(rowNamed(p, "Corridor"), "dwelling").querySelector("button"));
+  var names = labelled(bubble(p, "Dwelling of Corridor"), "select", "Dwelling of Corridor").querySelectorAll("option")
+    .map(function (node) { return node.textContent; });
+  assert.deepStrictEqual(plain(names), ["Apt 1", "Spare", "New dwelling", "Not a dwelling"]);
+});

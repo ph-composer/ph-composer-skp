@@ -196,9 +196,9 @@
       "sha256": "07bfa14dd4eb3c7151f66ef2afafda528c6022590921ad735464be415032e7a0"
     },
     "html/features/programs/zones_cells.js": {
-      "bytes": 29507,
+      "bytes": 30619,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "45a3713f3b227fb2ad7a1f8e7a41b61675ceae9430e83ea70470a05dd865c299"
+      "sha256": "16fa102b86432c56bec48d52a478f79c9e9d1de0be50d1ad0116f47dd11baa73"
     },
     "html/features/programs/zones_selection.js": {
       "bytes": 8596,
@@ -206,9 +206,9 @@
       "sha256": "4471fdd8cfca4c0a2ce844c2ccb90cf11c7c57bb4e6361f448ab5c12ba14e100"
     },
     "html/features/programs/zones_view.js": {
-      "bytes": 12238,
+      "bytes": 12537,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "05691350aa00c14b8c900c553db89c291e51271716bc567ce31622497708f9fd"
+      "sha256": "ab42fccb9dfa380f41ce60d8216692f1ba65ac45826c155faeb6e8e55f986315"
     },
     "html/features/spaces/actions.js": {
       "bytes": 18546,

@@ -35,12 +35,14 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
     return value === null || value === undefined ? "" : String(Math.round(value * 100) / 100);
   }
 
-  /* Every write this view makes: one in flight, each carrying the revision the view last painted. */
+  /* Every write this view makes: one in flight, each carrying the revision the view last painted, or the one a
+     typed entry began at. `failures` counts refusals, so a surface that holds a focused field repaints after one. */
   function Writes(host) {
     var self = this;
-    this.host = host;
+    this.host = host; this.failures = 0;
     this.channel = requests.channel(host.session, function (type, payload) {
-      host.send(type, Object.assign({}, payload, { expected_revision: self.revision }));
+      var revision = self.pinned !== undefined ? self.pinned : self.revision;
+      host.send(type, Object.assign({}, payload, { expected_revision: revision }));
     }, "programs-zones");
   }
 
@@ -51,13 +53,17 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
 
   Writes.prototype.busy = function () { return this.channel.busy(); };
 
-  /* Sends one action; `done(outcome)` names what changed in a notice. A refusal is the panel's notice. */
-  Writes.prototype.run = function (name, params, done) {
+  /* Sends one action; `done(outcome)` names what changed in a notice. A refusal is the panel's notice. `revision`,
+     when given, is the one the entry was read at: a Model that has moved on since refuses it. */
+  Writes.prototype.run = function (name, params, done, revision) {
     if (this.channel.busy()) { this.host.refuse("Wait for the last change to finish."); return false; }
+    var self = this;
+    this.pinned = revision;
     this.channel.run(name, params, { onDone: function (outcome) {
       var words = done ? done(outcome) : null;
       if (words) panel.notify(words, "success");
-    } });
+    }, onFail: function () { self.failures += 1; } });
+    this.pinned = undefined;
     panel.repaint();
     return true;
   };
@@ -244,6 +250,11 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       cell = this.cells[key] = { input: ui.element("input", "phc-cell-input") };
       cell.input.type = "text"; cell.input.setAttribute("inputmode", "decimal");
       cell.input.addEventListener("change", function () { self.commitCount(cell); });
+      // An entry is read against the revision its first keystroke saw, so a change made meanwhile refuses it.
+      cell.input.addEventListener("input", function () {
+        if (!cell.typed) cell.revision = self.writes.revision;
+        cell.typed = true;
+      });
       cell.input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") { event.preventDefault(); self.commitCount(cell); }
         if (event.key === "Escape" && cell.input.value !== cell.seed) {
@@ -255,7 +266,6 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
     var value = countText(zone.assignment[field]);
     if (document.activeElement !== cell.input || !cell.typed) { cell.input.value = value; cell.typed = false; }
     cell.seed = value;
-    cell.input.oninput = function () { cell.typed = true; };
     cell.input.placeholder = field === "bedrooms" ? "0" : (dwelling && dwelling.occupants_rule ? "Phius rule" : "");
     cell.input.setAttribute("aria-label", (field === "bedrooms" ? "Bedrooms" : "Occupants") + " in " +
       row.record.name);
@@ -268,7 +278,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
   };
 
   ZoneCells.prototype.commitCount = function (cell) {
-    var value = parsed(cell.input.value);
+    var value = parsed(cell.input.value), revision = cell.typed ? cell.revision : undefined;
     cell.typed = false;
     if (cell.input.value.trim() === cell.seed) return;
     if (value === undefined) {
@@ -281,21 +291,21 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
     // Enter and the change that follows on leaving send once.
     cell.seed = cell.input.value.trim();
     this.writes.run(PREFIX + ".set_counts", { zone: copy(cell.zone.reference), bedrooms: counts.bedrooms,
-      occupants: counts.occupants });
+      occupants: counts.occupants }, null, revision);
   };
 
-  /* The Equipment Set choices: the Model's default first, then every Set by name. */
+  /* The Equipment Set choices: "Model default" (none of its own), then every Set by name, the default's own
+     record among them, so a Set chosen explicitly stays selectable even when it is also the default. */
   ZoneCells.prototype.setChoices = function () {
-    var choices = this.data.read().choices, sets = choices.equipment_sets || [];
-    var named = sets.filter(function (set) { return set.id === choices.default_equipment_set_id; })[0];
-    return [["", named ? named.name : "Model default"]].concat(sets.filter(function (set) {
-      return set.id !== choices.default_equipment_set_id;
-    }).map(function (set) { return [set.id, set.name]; }));
+    var sets = this.data.read().choices.equipment_sets || [];
+    return [["", "Model default"]].concat(sets.map(function (set) { return [set.id, set.name]; }));
   };
 
+  /* A Set's name; null names the Model's default Set. */
   ZoneCells.prototype.setName = function (id) {
-    var choice = this.setChoices().filter(function (pair) { return pair[0] === (id || ""); })[0];
-    return choice ? choice[1] : "Model default";
+    var choices = this.data.read().choices, target = id || choices.default_equipment_set_id;
+    var set = (choices.equipment_sets || []).filter(function (entry) { return entry.id === target; })[0];
+    return set ? set.name : "Model default";
   };
 
   ZoneCells.prototype.equipmentSet = function (td, row, zone, segment) {
@@ -413,7 +423,9 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       }
       return;
     }
-    var focused = detail.contains(document.activeElement), key = JSON.stringify(dwelling);
+    // A focused field holds while its Dwelling is unchanged; a write sent or refused repaints it from the Model.
+    var focused = detail.contains(document.activeElement);
+    var key = JSON.stringify([dwelling, this.writes.busy(), this.writes.failures]);
     if (focused && held.detailFor === key) return;
     held.detailFor = key;
     var parts = [];
@@ -504,7 +516,10 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
           event.preventDefault(); entry.input.value = entry.seed;
         }
       });
-      entry.input.addEventListener("input", function () { entry.typed = true; });
+      entry.input.addEventListener("input", function () {
+        if (!entry.typed) entry.revision = self.writes.revision;
+        entry.typed = true;
+      });
     }
     entry.group = group; entry.field = field;
     var stored = segment.settings[field], seed = countText(stored);
@@ -525,7 +540,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
   };
 
   ZoneCells.prototype.commitHouse = function (entry) {
-    var value = parsed(entry.input.value);
+    var value = parsed(entry.input.value), revision = entry.typed ? entry.revision : undefined;
     entry.typed = false;
     if (entry.input.value.trim() === entry.seed) return;
     if (value === undefined) {
@@ -536,10 +551,10 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
     var change = {};
     change[entry.field] = value;
     entry.seed = entry.input.value.trim();
-    this.saveHouse(entry.group, change);
+    this.saveHouse(entry.group, change, revision);
   };
 
-  ZoneCells.prototype.saveHouse = function (group, change) {
+  ZoneCells.prototype.saveHouse = function (group, change, revision) {
     var record = group.segment, segment = this.data.segment(record.id);
     var options = snapshot.value(this.host.snapshot, OPTIONS) || {}, defaultId = options.default_segment_id || null;
     var payload = Object.assign({}, occupancy.DEFAULTS, segment.settings, change), payloads = {};
@@ -549,7 +564,7 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
       expected_values: copy(values), default: defaultId === record.id, expected_default_segment_id: defaultId,
       extension_payloads: payloads, expected_extension_data: copy(record.extension_data || {}) }, function () {
       return segment.name + " saved.";
-    });
+    }, revision);
   };
 
   /* After a paint: the Dwelling bubble follows the Model, and cells of rows that left are forgotten. */

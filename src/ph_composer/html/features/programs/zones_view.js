@@ -52,11 +52,15 @@ function (panel, ui, units, preferences, fields, tableViews, occupancy, ZoneCell
     if (!id) return null;
     return this.value.dwellings.filter(function (row) { return row.id === id; })[0] || null;
   };
-  /* The Dwellings a Zone of `segmentId` may join, by name: those in its Segment, those in none, and its own. */
+  /* The Dwellings a Zone of `segmentId` may join, by name: its own, those holding no Zone, and those whose Zones
+     all lie in its Segment. The read leaves No Building Segment out of `building_segment_ids`, so a Dwelling with
+     Zones and none listed holds Zones in no Segment, and only a Zone in none may join it. */
   Data.prototype.segmentDwellings = function (segmentId, own) {
     return this.value.dwellings.filter(function (row) {
       if (row.single_dwelling || !row.id) return false;
-      return row.id === own || !row.building_segment_ids.length || row.building_segment_ids.indexOf(segmentId) >= 0;
+      if (row.id === own || !row.zone_ids.length) return true;
+      var segments = row.building_segment_ids;
+      return segments.length ? segments.length === 1 && segments[0] === segmentId : !segmentId;
     });
   };
   Data.prototype.zoneNames = function (ids) {
