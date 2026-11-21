@@ -25,8 +25,8 @@ function load() {
   var modules = panelSource.start(context, ["sections/shell", "features/programs/tab"]);
   var p = { context: context, panel: modules.panel, modules: modules, sent: sent };
   p.actions = function () { return sent.filter(function (message) { return message.type === "action.invoke"; }); };
-  p.snapshot = function (programs) {
-    p.panel.receive({ type: "panel.snapshot", payload: snapshot(programs) });
+  p.snapshot = function (programs, schedules) {
+    p.panel.receive({ type: "panel.snapshot", payload: snapshot(programs, schedules) });
   };
   p.snapshot(programs());
   p.panel.showTab("programs");
@@ -66,14 +66,15 @@ function programs(changes) {
     use_count: 0, missing: [{ load: "people", field: "people_per_area" }] })];
 }
 
-function snapshot(programRows) {
+function snapshot(programRows, extra) {
   var schedule = row("schedule", "sch_occ", "Occupancy", { type: "fractional", days_per_week: 7, weeks_per_year: 52,
     start_h: 0, end_h: 24, fraction_on: 1, fraction_off: 0 }, { uses: [], use_count: 0,
     profile: { hours: [], daily_full_load_hours: 24, annual_full_load_hours: 8760 } });
   return { product: "PH-Composer", version: "test", session: "session-a", revision: REVISION, file_name: "a.skp",
     edit_path: [], preferences: { unit_system: "SI" }, sections: {
       "ph_composer.programs.programs": { status: "completed", value: { records: programRows, unreadable: [] } },
-      "ph_composer.programs.schedules": { status: "completed", value: { records: [schedule], unreadable: [] } },
+      "ph_composer.programs.schedules": { status: "completed", value: { records: [schedule].concat(extra || []),
+        unreadable: [] } },
       "ph_composer.programs.equipment_sets": { status: "completed", value: { records: [], unreadable: [] } },
       "ph_composer.programs.occupancy": { status: "completed", value: { zones: [
         { zone_id: "zon_a", program_id: "pgm_PHCDEFAULT01", equipment_set_id: null },
@@ -182,4 +183,17 @@ test("Reset is offered on PH-Composer's own default only; a set point may be bel
   type(heating, "-5");
   enter(heating);
   assert.deepStrictEqual(plain([last(p).params.id, last(p).params.values.setpoint.heating_c]), ["pgm_office", -5]);
+});
+
+test("a Schedule select made anew when the Schedules change keeps the focus", function () {
+  var p = load();
+  click(card(p, "lighting").querySelector(".pgm-card-head"));
+  var select = labelled(card(p, "lighting"), "select", "Lighting lighting schedule");
+  select.focus();
+  var added = row("schedule", "sch_new", "Evening", { type: "fractional", days_per_week: 7, weeks_per_year: 52,
+    start_h: 18, end_h: 23, fraction_on: 1, fraction_off: 0 }, { uses: [], use_count: 0, profile: {} });
+  p.snapshot(programs(), [added]);
+  var again = labelled(card(p, "lighting"), "select", "Lighting lighting schedule");
+  assert.notStrictEqual(again, select, "rebuilt for the new Schedule");
+  assert.strictEqual(p.context.document.activeElement, again);
 });

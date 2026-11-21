@@ -56,8 +56,10 @@
 .pgm-title-editor { display: flex; flex: 1; align-items: center; gap: 4px; min-width: 0; }
 .phc-workspace .pgm-title-input { flex: 1; min-width: 0; height: 32px; min-height: 32px; padding: 0 6px;
   font-size: var(--text-xl); font-weight: 600; }
-.pgm-badge { flex: none; padding: 1px 7px; border-radius: 10px; background: var(--surface-alt);
-  color: var(--muted-strong); font-size: var(--text-xs); font-weight: 600; white-space: nowrap; }
+/* A long source truncates within the header; its tooltip holds the whole of it. */
+.pgm-badge { flex: 0 1 auto; min-width: 0; max-width: 100%; overflow: hidden; padding: 1px 7px; border-radius: 10px;
+  background: var(--surface-alt); color: var(--muted-strong); font-size: var(--text-xs); font-weight: 600;
+  text-overflow: ellipsis; white-space: nowrap; }
 .pgm-badge.is-lib { background: var(--interaction-highlight-soft); color: var(--interaction-highlight); }
 .pgm-tools { display: flex; flex: none; align-items: center; gap: 4px; }
 .pgm-empty { margin: 24px 0; }

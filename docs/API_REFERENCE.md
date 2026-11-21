@@ -58729,7 +58729,7 @@ Example params:
 
 Delete one Dwelling; remaining uses refuse. Owner: `ph_composer.programs`.
 
-Undo step: Delete Dwelling. A replacement takes every use, Zone assignments and Segment settings included, then the record goes, in one step.
+Undo step: Delete Dwelling. A replacement takes every use, then the record goes, in one step.
 
 Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
@@ -63810,7 +63810,7 @@ Example params:
 
 Delete one Schedule; remaining uses refuse. Owner: `ph_composer.programs`.
 
-Undo step: Delete Schedule. A replacement takes every use, Zone assignments and Segment settings included, then the record goes, in one step.
+Undo step: Delete Schedule. A replacement takes every use, then the record goes, in one step.
 
 Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 

@@ -174,6 +174,7 @@ module PhComposer
                                                                      "one takes instead. Needed while anything " \
                                                                      "uses it.") }
         staged = [PROGRAM_KIND, EQUIPMENT_SET_KIND].include?(kind.id)
+        moved = staged ? ", Zone assignments and Segment settings included" : ""
         handler = lambda do |request, proposal|
           params = request.params
           Operations.delete(request, proposal, kind.id, :id => params.fetch("id"),
@@ -187,9 +188,8 @@ module PhComposer
                                                                     :optional => %w[expected_values replacement_id]),
                                            :result => Shapes.with_removed_user_data(Shapes::RESULT),
                                            :undo_name => "Delete #{kind.label}",
-                                           :side_effects => "A replacement takes every use, Zone assignments and " \
-                                                            "Segment settings included, then the record goes, in " \
-                                                            "one step.",
+                                           :side_effects => "A replacement takes every use#{moved}, then the " \
+                                                            "record goes, in one step.",
                                            :examples => [{ "id" => example }], &handler)
       end
 

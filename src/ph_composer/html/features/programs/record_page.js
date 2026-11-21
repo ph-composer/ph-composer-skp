@@ -112,7 +112,7 @@ function (ui, Sidebar, Store) {
     if (row) {
       if (!this.renaming) this.title.textContent = row.values.name;
       var badge = this.kind.badge(row);
-      this.badge.textContent = badge || ""; this.badge.hidden = !badge;
+      this.badge.textContent = badge || ""; this.badge.hidden = !badge; ui.tooltip(this.badge, badge || "");
       this.badge.classList.toggle("is-lib", Boolean(row.values.source && row.values.source.kind === "library"));
       this.renameButton.disabled = !enabled || Boolean(this.renaming);
       this.duplicateButton.disabled = !enabled;

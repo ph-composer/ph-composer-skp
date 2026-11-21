@@ -124,11 +124,14 @@ function (ui, loads) {
       return id + ":" + schedules[id].values.name + ":" + schedules[id].values.type;
     }).join("|"), values.source || null, loads.system()];
     if (ui.memoPaint(card, "body", signature, null)) {
-      var focused = document.activeElement;
+      // A value field is reused, so it comes back itself; a Schedule select is made anew, so its slot finds it.
+      var focused = card.body.contains(document.activeElement) ? document.activeElement : null;
+      var slot = focused && focused.getAttribute("data-slot");
       this.buildBody(card);
-      if (focused && focused !== document.activeElement && card.body.contains(focused)) {
-        focused.focus({ preventScroll: true });
-      }
+      var again = slot ? card.body.querySelectorAll("[data-slot]").filter(function (node) {
+        return node.getAttribute("data-slot") === slot;
+      })[0] : focused;
+      if (again && again !== document.activeElement && card.body.contains(again)) again.focus({ preventScroll: true });
     }
     this.fill(card);
   };

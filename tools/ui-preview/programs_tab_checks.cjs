@@ -198,6 +198,14 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
 
   step("the pane at every panel size: the sidebar drops beneath the editor, which stays where it was");
   await page.getByRole("tab", { name: "Programs" }).click();
+  // A long source badge truncates within the header rather than widening the pane.
+  await page.evaluate(() => {
+    const office = window.previewHost.programCatalog.programs.filter(row => row.id === "pgm_office")[0];
+    office.default = false;
+    office.values.source.library_name = "Phius Non-Residential programs for schools, offices and laboratories, 2024";
+    window.previewHost.snapshot();
+  });
+  await page.locator(`${shown} .pgm-badge`, { hasText: "laboratories" }).waitFor();
   const editorTop = await page.locator(`${shown} .pgm-main`).evaluate(node => node.getBoundingClientRect().top);
   for (const [width, height] of PANEL_SIZES) {
     await setPanelSize(page, width, height);
