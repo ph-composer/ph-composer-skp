@@ -80,7 +80,7 @@ def main() -> None:
     parser.add_argument("--token-file", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=600)
-    parser.add_argument("--codex-model", default="gpt-6.1-sol")
+    parser.add_argument("--codex-model", default="gpt-6.2-sol")
     args = parser.parse_args()
 
     token = args.token_file.expanduser().read_text().strip()

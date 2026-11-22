@@ -51,7 +51,7 @@ where they differ.
 ## Review and merge
 
 - Run one Sonnet read-through before the gate, then Codex through the conductor's review command. Use the
-  model the brief names: gpt-6.1-sol by default, gpt-6-astra where the plan asks for the stronger lane. On a
+  model the brief names: gpt-6.2-sol by default, gpt-6-astra where the plan asks for the stronger lane. On a
   usage-limit refusal, stop and report.
 - If the stage owns a host case, stop after the last review fix and report "ready for host" with the
   recipe path and the PR head SHA. Do not arm the merge. The conductor runs the case on that head and
