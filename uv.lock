@@ -285,7 +285,7 @@ dev = [
     { name = "ruff", specifier = ">=0.6" },
     { name = "ty", specifier = "==0.0.87" },
 ]
-phx = [{ name = "phx", specifier = "==1.59.3" }]
+phx = [{ name = "phx", specifier = "==1.59.4" }]
 
 [[package]]
 name = "ph-units"
@@ -298,7 +298,7 @@ wheels = [
 
 [[package]]
 name = "phx"
-version = "1.59.3"
+version = "1.59.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "honeybee-core" },
@@ -310,9 +310,9 @@ dependencies = [
     { name = "rich" },
     { name = "xlwings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/06/3e22e1ca427fb416822f2d5c10ca271b575de19909f3fdbf14cac3d29238/phx-1.59.3.tar.gz", hash = "sha256:3b8b4a508fb0f01caa935db30a7b44ae1db61b3d3fee230c7cc83ba4615ff12c", size = 393871, upload-time = "2026-11-22T15:39:10.639Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/f1/090112877aefdd610c4bc97be57f88821697217e0431b944a3806acb9775/phx-1.59.4.tar.gz", hash = "sha256:7baf44dcdc0b2afa1fad1c1a4642c62550aa61345e02c648e6fe6047a67cb40a", size = 394387, upload-time = "2026-11-22T16:36:20.928Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/cd/cee5a3859f1dcf1e41cd263f9683a9f13d7ae1cea636963f376bb806b44f/phx-1.59.3-py3-none-any.whl", hash = "sha256:43af3528f55e07e981c76f5d61a9ea79959ed4fb6e97b9c85ba72b2a7e5d4c39", size = 477180, upload-time = "2026-11-22T15:39:09.279Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/9b/6bd4b7f9f11ea5b616003657b69b2a67fb6ab085bb7d175a2470beece2e2/phx-1.59.4-py3-none-any.whl", hash = "sha256:2253624ee069372b21738b27f6f3b1cd1ed6199e89c0ea6b51c624950b35f188", size = 477490, upload-time = "2026-11-22T16:36:19.098Z" },
 ]
 
 [[package]]

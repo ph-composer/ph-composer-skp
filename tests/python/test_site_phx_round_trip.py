@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import re
 from typing import Any
+from xml.etree import ElementTree
 
 import pytest
 
@@ -20,16 +21,8 @@ metr_builder = pytest.importorskip("PHX.to_METr_JSON.metr_builder")
 
 CASES = ("heat_1", "heat_2", "cool_1", "cool_2")
 WUFI_CASES = ("Heating1", "Heating2", "Cooling", "Cooling2")
-
-
-def phx_document(record: dict[str, Any] | None = None, annex: bool = False) -> dict[str, Any]:
-    """The reference extraction with its Building Segments named without a space: PHX 1.59.3 names the Room it
-    merges each segment into after the segment's display name (`cleanup.merge_rooms`), and a Room identifier may
-    not hold a space, so a Segment named "Main Building" fails the conversion. A PHX follow-up."""
-    value = document(record, annex)
-    for zone in value["sections"]["ph_composer.zones.export.zones"]["records"]:
-        zone["building_segment"] = zone["building_segment"].replace(" ", "_")
-    return value
+#: The second Segment's name: a space, an ampersand, parentheses and a comma.
+ANNEX = "Annex & Garage (North), 2"
 
 
 def convert(result: dict[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -66,7 +59,21 @@ def wufi_items(xml: str, tag: str) -> list[float]:
 def test_board_18_reads_back_in_wufi_xml_and_metr_json() -> None:
     record = site_record()
     climate = record["climate"]
-    xml, metr = convert(run(phx_document(annex=True)))
+    value = document(annex=True)
+    for zone in value["sections"]["ph_composer.zones.export.zones"]["records"]:
+        if zone["building_segment"] == "Annex":
+            zone["building_segment"] = ANNEX
+    xml, metr = convert(run(value))
+
+    # The Segments keep their names, spaces and punctuation included, on each Variant and its Zone: before 1.59.4
+    # PHX used the name as the merged Room's identifier, which may hold neither (PH-Tools/PHX#175).
+    wufi_names = {
+        variant.findtext("Name"): [zone.findtext("Name") for zone in variant.iter("Zone")]
+        for variant in ElementTree.fromstring(xml).iter("Variant")
+    }
+    assert wufi_names == {"Main Building": ["Main Building"], ANNEX: [ANNEX]}
+    metr_names = {variant["n"]: [zone["n"] for zone in variant["building"]["lZone"]] for variant in metr["lVariant"]}
+    assert metr_names == wufi_names
 
     # Each Building Segment is its own PHX variant, and each carries the same site.
     assert wufi(xml, "Latitude") == ["40.0"] * 2 and wufi(xml, "Longitude") == ["-100.0"] * 2
@@ -98,7 +105,7 @@ def test_a_site_alone_reads_back_its_location_over_the_default_climate() -> None
     record = site_record()
     record.update(climate=None, provenance=None)
     record["location"]["hours_from_utc"] = -6
-    xml, metr = convert(run(phx_document(record)))
+    xml, metr = convert(run(document(record)))
 
     assert wufi(xml, "Latitude") == ["40.0"] and wufi(xml, "dUTC") == ["-6"]
     site = cli_loc(metr)
