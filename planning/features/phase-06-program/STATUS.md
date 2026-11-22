@@ -1,7 +1,7 @@
 # Phase 4a status
 
 DATE: 2026-11-21
-STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-11b merged; P4a-12 implemented on branch, its integrated run and every PG host row owed to one batched sitting. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
+STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-12 merged. The batched host sitting ran 2026-11-21 ([Host sitting](#host-sitting)): eleven cases pass; PG09 fails on a product defect and PG10 and PG12 on PHX device handling; four host UI polish verdicts wait on Ed. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -56,42 +56,48 @@ P4a-12 step 1, on the tree of `077d9d45` with this fold (2026-11-21). Counts are
 
 ## Host sitting
 
-Ed chose to be away while the loop ran, so no stage launched SketchUp after P4a-03 and every host row waits for
-one batched sitting on the final head, under one computer-use card, run by the conductor
-([native acceptance skill](../../../.agents/skills/ph-composer-native-acceptance/SKILL.md)). Each row is recorded with
-`acceptance_case.py begin` and `finish` under its case id in the [case ledger](../../native-acceptance/cases.json);
-none is a Pass until then. **B**: bridge and hostkit, no card. **H**: a full-screen hold (native Edit-menu Undo
-and Redo). **E**: Ed at the mouse.
+Ran 2026-11-21 on `08a06474` (the merged P4a-12 head), installed RBZ sha256 `4f3f3d66`, SketchUp 26.1.188, in four
+parts: bridge and System Events rows by subagents, scripted panel reads with native captures, then one full-screen
+hold from the conductor for every real panel gesture (normal composition). Fixtures are synthetic reference models
+built through public operations (private run folder). Every run is a ledger row in
+[results.jsonl](../../native-acceptance/results.jsonl); a case's later run supersedes the `unknown` panel rows of
+its earlier ones. Evidence: `evidence/<case>-host-sitting-20261121.md`, `evidence/<case>-panel-host-sitting-20261121.md`
+and [the gesture runs](evidence/gestures-host-sitting-20261121.md).
 
-**Diagnose first.** The two launches of P4a-02 and P4a-03 (`hostkit launch` on `10766bee` among them) reached no
-bridge in 180 s, and SketchUp listed no readable window; each was quit through hostkit. Read-only checks since
-(2026-11-21): no SketchUp crash report in `~/Library/Logs/DiagnosticReports`; Trimble entitlement activation
-succeeded at the last launch (2026-11-20 18:39Z, no error code); the bridge plugin and the extension were
-reinstalled into Plugins at those launches; the bridge console log's last "bridge started" line is
-2026-11-20T16:11:54Z, so on the failed launches the plugin never loaded. Likely cause: SketchUp stopped before
-loading extensions at a modal (Welcome or sign-in, file recovery, or an extension policy prompt). At the sitting,
-read SketchUp's windows first, before any case.
+**Launch failure, cause found.** SketchUp 2026 loads no Ruby extension until the app is activated, and a locked
+screen cannot activate it: a launch during a screen lock (08:00, 2026-11-21) opened the document with no
+extension and no bridge, reproducing the P4a-02/P4a-03 failures. Background `app_*` clicks are refused while
+locked. Host launches need the screen unlocked.
 
-| Case | Owed | Needs |
+**Background control cannot reach the panel.** Background `app_*` clicks, keys and scrolls into the HtmlDialog web
+view are refused as a canvas; real panel input needs full-screen control from the conductor.
+
+| Case | Result | Open |
 | --- | --- | --- |
-| PG01 | Native Edit-menu Undo and Redo of a Segment delete and a move; the ledger row reads `unknown` | H |
-| PG02 | Every host row: the settings dialog's save as one Undo step, a refused payload, the transition contributor and heading contributions on the installed RBZ; panel gestures (heading rows, New Building Segment in place, Move from both bars, Delete with a destination); the host UI polish review | B, H, E |
-| PG03 | The packaged RBZ export with a Zone left out and its read-back; the move-out offer and the move-back notice in the panel | B, E |
-| PG04 | The installed-RBZ export with certification values and their PHX read-back | B |
-| PG05 | Spaces gestures (By Program, the first-entry notice, From Program), native Undo, and the RBZ export | B, H, E |
-| PG06 | The installed-RBZ export of an n50 and a q50 result and their PHX read-back | B |
-| PG07 | The panel-closed walkthrough on the installed RBZ, native Undo and Redo, save and fresh-process reopen | B, H |
-| PG07b | A copy from a library file on the installed RBZ, native Undo and Redo | B, H |
-| PG08 | Single dwelling on and off, native Undo and Redo, copying a Zone; the Single dwelling tag and findings on Segment headings in every view | B, H, E |
-| PG09 | Panel gestures in the Zones / Programs view, native Undo and Redo, the host UI polish review | H, E |
-| PG10 | The packaged RBZ export of the five journeys, its PHX round trip, Comfort and Locate in SketchUp | B, E |
-| PG11 | Panel gestures in the Programs tab, native Undo and Redo, the host UI polish review | H, E |
-| PG11b | Panel gestures in the Schedule and Equipment Set editors, native Undo and Redo, the host UI polish review | H, E |
-| PG12 | The integrated run from a fresh process on the three reference models (P4a-12 step 2); add case `PG12` to the case ledger first | B, H, E |
+| PG01 | Pass (bridge walkthrough, native Edit-menu Undo/Redo, save and reopen) | |
+| PG02 | Pass (bridge rows; gestures: New in place, Move from the bar, Delete with a destination, Undo/Redo) | Host UI polish verdict (Ed) |
+| PG03 | Pass (RBZ export, PHX read-back; gestures: offer, Make Attached zone, move-back notice) | |
+| PG04 | Pass (RBZ export, PHX read-back; gestures: dialog section, save, Undo/Redo) | |
+| PG05 | Pass (export, PHX read-back; gestures: real Enter commits a rate, From Program, Undo/Redo) | |
+| PG06 | Pass (n50/q50 PHX read-back; gestures: section, a zero holds Save, save, Undo/Redo) | |
+| PG07 | Pass (walkthrough, native Undo/Redo, save and reopen) | |
+| PG07b | Pass (library copy reusing Schedules, native Undo/Redo) | |
+| PG08 | Pass (assign actions, Single dwelling on/off, cross-Segment refusal, Zone copy; gestures: tags in every view, on/off, Undo/Redo) | Apartments derivations not exercised on the host |
+| PG09 | **Fail**: the house row's Equipment Set refuses "Residential default devices" while the default Set is unwritten ("eqs_PHCDEFAULT01 does not exist"), scripted and by real click | Product fix; host UI polish verdict (Ed) |
+| PG10 | **Fail**: after PHX 1.59.1 the Apartments Segment has no interior lighting device (PHX takes Lighting from a Segment's first Room only); Comfort and Locate pass | PHX fix, or order a lighting-rule Room first |
+| PG11 | Pass (gestures: cards by pointer and keyboard, fixed value with Return, New Program in place, Undo/Redo) | Host UI polish verdict (Ed) |
+| PG11b | Pass (gestures: ventilation total amber and Escape, Add device, Undo/Redo) | Host UI polish verdict (Ed) |
+| PG12 | **Fail**: the PG10 lighting fault, and PHX copies the House's 9 devices onto the Attached zone (18); the panel walk passes | PHX fixes |
 
-The Design System artifact was re-synced from `main` at `67899146` by the conductor (`bundle.css` and the
-LibrarySidebar README), covering the kit and stylesheet changes of #548 and #550; P4a-11b changed only
-`features/programs/programs.css`, which is not bundled.
+The PHX faults reproduce in the pinned wheels on the HBJSON PH-Composer writes (PHX `from_HBJSON/cleanup.py`
+Lighting from the first merged Room; `to_WUFI`/`create_variant.py` adds devices to every zone, attached zones
+included); fixing them is a PHX change, outside this packet's authorization. Visual defects found in the sitting,
+for the polish pass: the Test result unit stacked under its field; a trash icon on "Make Attached zone"; Locate
+also opening the Segment's settings and its checked rows sitting under the selection bar; "Apartments's"; the
+bedrooms "?" kept on a heading after Single dwelling is off or the Segment turns non-residential; the No Spaces
+row's amber starting at Name; the in-place Segment name field about 90 px wide; heading tags wrapping to a third
+line and no Segment name at 360 px; the Dwelling bubble text clipped; device names and type lines cut or run on; a
+focused field blocking a subtab switch until a click elsewhere.
 
 ## Catch-up review
 

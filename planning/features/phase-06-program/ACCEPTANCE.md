@@ -1,7 +1,7 @@
 # Phase 4a acceptance register
 
 DATE: 2026-11-15
-STATUS: Offline rows recorded for PG01 to PG12 (PG07b and PG11b split from PG07 and PG11 on 2026-11-20); every host row, and PG12's integrated run, owed to one batched sitting ([STATUS](STATUS.md#host-sitting)). Nothing here is Complete until then.
+STATUS: Offline rows recorded for PG01 to PG12 (PG07b and PG11b split from PG07 and PG11 on 2026-11-20). Host sitting 2026-11-21 ([STATUS](STATUS.md#host-sitting)): PG01 to PG08, PG11 and PG11b pass on the host; PG09 fails (default Equipment Set unwritten), PG10 and PG12 fail (PHX device handling); the UI polish verdicts for PG02, PG09, PG11 and PG11b wait on Ed. The per-row State column below records the offline and stage-time state; the host results are in STATUS.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
