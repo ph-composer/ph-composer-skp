@@ -10,9 +10,14 @@ module PhComposer
       # side effects through the `segment_settings_saved` transition. Writing a payload touches the Segment
       # alone (a Zone's evidence holds the Segment's values, not its settings), so a locked member Zone never
       # blocks it; a rename or a new default still rewrites its members as any option edit does.
+      #
+      # Before the payloads are staged, the `segment_settings_saving` transition lets a section's owner write the
+      # records of its own that a payload is about to name (Programs stores an unwritten default there), since each
+      # staged payload's references must resolve when it is staged.
       module SegmentSettings
         SAVE = "#{FEATURE_ID}.save_segment_settings"
         CREATE = "#{FEATURE_ID}.create_segment"
+        SAVING = "#{FEATURE_ID}.segment_settings_saving"
         TRANSITION = "#{FEATURE_ID}.segment_settings_saved"
         DEFAULT_NAME = "Building Segment"
 
@@ -35,6 +40,8 @@ module PhComposer
           default_id = default ? id : current_default
           general(request, proposal, id, values, default_id) if general_changed?(record, values, default_id,
                                                                                  current_default)
+          request.contribute_transition(SAVING, { "building_segment_id" => id,
+                                                  "extension_payloads" => extension_payloads })
           namespaces = stage_extensions(request, proposal, SEGMENT_KIND, id, extension_payloads,
                                         expected_extension_data)
           request.contribute_transition(TRANSITION, { "building_segment_id" => id, "namespaces" => namespaces })
@@ -144,13 +151,14 @@ module PhComposer
                          :description => "Save one Building Segment's settings dialog: its name, colour and " \
                                          "default, and a payload per settings namespace, in one Undo step.",
                          :params => SAVE_PARAMS, :result => SAVE_RESULT, :refuses => REFUSALS,
-                         :transitions => [SegmentSettings::TRANSITION],
+                         :transitions => [SegmentSettings::SAVING, SegmentSettings::TRANSITION],
                          # Its transition's contributors stage their own payloads through Zones' participant.
                          :participants => [ExtensionStaging::NAME],
                          :undo_name => "Change Building Segment Settings",
                          :side_effects => "Writes the Segment's values and settings; a rename or a new default " \
                                           "also rewrites each member Zone's evidence. Every contributor to " \
-                                          "#{SegmentSettings::TRANSITION} adds its own changes in the same step.",
+                                          "#{SegmentSettings::SAVING} and #{SegmentSettings::TRANSITION} adds " \
+                                          "its own changes in the same step.",
                          :examples => [save_example]) do |request, proposal|
             values = request.params
             SegmentSettings.save(request, proposal,

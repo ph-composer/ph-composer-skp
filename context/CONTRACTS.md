@@ -474,7 +474,8 @@ entries for one occurrence that differ, or an entry naming nothing to write, ref
 `params.invalid`. Each target resolves through its owner's writable resolver and refuses with the
 owner's `target.*` code; a payload follows the engine's rules (`extension.unavailable`,
 `.migration_required`, `.schema_unsupported`, a failed validator as `validation.failed`) and every
-record it names must resolve (`reference.invalid`); the owner then validates the whole record. Every
+record it names must resolve (`reference.invalid`) in the proposal as it stands, so a record staged earlier in
+the same proposal counts; the owner then validates the whole record. Every
 target is checked before any step is built, the batch writes in one step and one Undo entry, and a
 batch that writes what is stored adds no step; clearing a map the record never stored is such a batch
 (`Records::Metadata.updated` leaves it absent). The Window action runs the copied-identity repair
@@ -701,6 +702,11 @@ copy, then assigns the local Program as `assign_program` does, so both are one U
 coordinator's own assignment callback cannot write Zones: `ph_composer.library.copy` names no Zones participant,
 and the library does not depend on Programs, so the feature's action joins the copy instead, as the Windows
 Installs save does. A Zone of a single dwelling refuses `programs.single_dwelling` and the copy with it.
+
+**A Segment naming an unwritten default.** Occupancy settings may name the residential default Program or the
+default Equipment Set while it is unwritten. Programs' contributor to `ph_composer.zones.segment_settings_saving`
+stores that bundle before Zones stages the payload, in the same Undo step, as the assign actions do; an id that names
+no record is left to Zones, which refuses `reference.invalid` and writes nothing.
 
 **Switching Single dwelling.** Zones' settings Save stages the payload; Programs' contributor to
 `ph_composer.zones.segment_settings_saved` adds the side effects when `single_dwelling` itself changes on a
@@ -1465,6 +1471,12 @@ and `references`, the Zone's and Faces' new records as typed `{kind, key, record
 for remapping a child's own references. Windows contributes `ph_composer.windows.units.follow_zone_copy`:
 every Unit inside the occurrence whose id another occurrence holds gets a new id, and copied payloads
 are remapped across the copy.
+
+`ph_composer.zones.segment_settings_saving` is emitted by every `ph_composer.zones.save_segment_settings`
+after Zones staged the General values and before it stages any settings payload. Its description is
+`building_segment_id` and `extension_payloads`, the payloads by namespace as the Save sent them. A section's
+owner answers it to write records of its own kinds that a payload is about to name, since Zones resolves each
+payload's references as it stages it (Programs stores an unwritten default there); it never writes the Segment.
 
 `ph_composer.zones.segment_settings_saved` is emitted by `ph_composer.zones.save_segment_settings`
 after Zones staged the Segment's General values and every settings payload. Its description is

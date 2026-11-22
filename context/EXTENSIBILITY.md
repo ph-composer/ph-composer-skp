@@ -908,7 +908,10 @@ default still rewrites each member Zone. Cancel, the close icon and Escape write
 A section's owner adds its own side effects to the same Undo step by declaring a transition
 contributor for `ph_composer.zones.segment_settings_saved` ("Transition contributors" in
 [CONTRACTS.md](CONTRACTS.md)). Its description is `building_segment_id` and `namespaces`, the
-namespaces whose payload changed. The owner requires `ph_composer.zones`, writes only its own kinds
+namespaces whose payload changed. An owner whose payload names a record of its own that must exist first (a default
+it stores only on first use) answers `ph_composer.zones.segment_settings_saving` as well, which every Save emits
+before Zones stages the payloads; its description is `building_segment_id` and `extension_payloads`, the payloads
+by namespace as sent. Either way the owner requires `ph_composer.zones`, writes only its own kinds
 and leaves the Segment record to Zones; it may not change what Save staged. To write its own payload on the
 Segment's Zones, or a payload from its own action, it calls Zones' participant `ph_composer.zones.stage_extension`
 (CONTRACTS.md, "Occupancy"), which `save_segment_settings` names for its transition's contributors.

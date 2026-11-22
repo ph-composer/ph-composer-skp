@@ -127,7 +127,7 @@ module PhComposer
           before = find(kind_id, id, :change_set => change_set)
           after = DeepCopy.call(before)
           label, target = metadata_target(kind, after, update)
-          target.replace(Metadata.planned(self, @catalog, target, update, label))
+          target.replace(Metadata.planned(self, @catalog, target, update, label, :change_set => change_set))
           if staged
             check_valid!(kind, after)
             change_set.restage(kind.id, id, :after => after)

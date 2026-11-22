@@ -426,6 +426,48 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     assert_equal office, zone_row("Apt 1").dig("assignment", "program_id")
   end
 
+  # ---------------------------------------------------------------- settings naming an unwritten default
+
+  def test_settings_naming_the_unwritten_default_set_store_it_in_the_same_undo_step
+    set_id = P::DefaultEquipmentSet::SET_ID
+    refute stored?("equipment_sets", set_id)
+
+    completed(save("House", SEGMENT_NAMESPACE => settings("equipment_set_id" => set_id)))
+    assert stored?("equipment_sets", set_id)
+    assert_equal set_id, segments.fetch("House").dig("settings", "equipment_set_id")
+
+    @model.undo
+    refute stored?("equipment_sets", set_id)
+    assert_nil segments.fetch("House").dig("settings", "equipment_set_id")
+  end
+
+  def test_settings_naming_the_unwritten_default_program_store_it_with_its_schedules
+    program_id = P::DefaultProgram::PROGRAM_ID
+    refute stored?("programs", program_id)
+
+    payload = settings("single_dwelling" => false, "default_program_id" => program_id)
+    completed(save("Apartments", SEGMENT_NAMESPACE => payload))
+    assert stored?("programs", program_id)
+    P::DefaultProgram::SCHEDULES.each { |schedule| assert stored?("schedules", schedule.fetch("id")) }
+
+    @model.undo
+    refute stored?("programs", program_id)
+  end
+
+  def test_a_settings_save_refused_after_storing_a_default_leaves_it_unwritten
+    revision = @session.revision
+    payload = settings("equipment_set_id" => P::DefaultEquipmentSet::SET_ID, "bedrooms" => -1)
+    refused(save("House", SEGMENT_NAMESPACE => payload), "validation.failed")
+    refute stored?("equipment_sets", P::DefaultEquipmentSet::SET_ID)
+    assert_equal revision, @session.revision
+  end
+
+  def test_settings_naming_an_unknown_set_refuse_and_leave_the_default_unwritten
+    refused(save("House", SEGMENT_NAMESPACE => settings("equipment_set_id" => "eqs_000000000000")),
+            "reference.invalid")
+    refute stored?("equipment_sets", P::DefaultEquipmentSet::SET_ID)
+  end
+
   # ---------------------------------------------------------------- copy
 
   def test_a_copied_zone_keeps_its_assignment_and_dwelling
@@ -621,6 +663,11 @@ class OccupancyAssignmentsTest < PhComposerTestCase
 
   def codes(row)
     row.fetch("findings").map { |finding| finding.fetch("code") }
+  end
+
+  # Whether the Programs read of `collection` (programs, schedules, equipment_sets) reports record `id` stored.
+  def stored?(collection, id)
+    query("#{P::FEATURE_ID}.#{collection}.all").fetch("records").find { |row| row.fetch("id") == id }.fetch("stored")
   end
 
   def query(name, params = {})

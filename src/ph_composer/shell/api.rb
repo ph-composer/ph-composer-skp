@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 85
+    MINOR = 86
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -523,7 +523,12 @@ module PhComposer
                     "weekdays, the days its operating day applies on, Monday first. An " \
                     "equipment_sets.device_types field adds applies_when where it means something only under " \
                     "another field's values: a clothes dryer's gas_consumption and gas_efficiency_factor, under " \
-                    "dryer_type gas_exhaust_air." }
+                    "dryer_type gas_exhaust_air." },
+      { "minor" => 86, "date" => "2026-11-21",
+        "change" => "ph_composer.zones.save_segment_settings also emits ph_composer.zones.segment_settings_saving, " \
+                    "before it stages the payloads, with building_segment_id and extension_payloads; a Segment's " \
+                    "occupancy settings naming an unwritten default Program or Equipment Set store it in the same " \
+                    "step." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
