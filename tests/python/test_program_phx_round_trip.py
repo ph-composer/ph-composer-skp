@@ -139,7 +139,10 @@ def test_the_interior_lighting_device_survives_whichever_room_comes_first() -> N
         xml, _metr = convert(reordered)
         block = wufi_variants(xml)["Apartments"]
         devices = re.findall(r"<Device index=\"\d+\">(.*?)</Device>", block, re.S)
-        assert len(devices) == 11, [room["display_name"] for room in rooms]
+        order = [room["display_name"] for room in rooms]
+        assert len(devices) == 11, order
+        # WUFI-Passive's device type 14 is the interior lighting.
+        assert [tags(device, "Type") for device in devices].count(["14"]) == 1, order
 
 
 def test_utilization_patterns_read_back_the_schedule_forms() -> None:
