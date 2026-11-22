@@ -5360,6 +5360,21 @@
         "src/ph_composer/html/features/programs/programs.css"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG12",
+      "label": "The Phase 4a integrated run on the installed RBZ from a fresh process, on the three synthetic reference models (the House, the Apartments and common areas, the two Segments): Building Segments and their settings (certification, airtightness, occupancy), Spaces airflows, Programs, Dwellings and Equipment Sets read and written through registered operations; Export of each and the WUFI XML and METr JSON from the pinned PHX read back; native Undo and Redo from the Edit menu of one step per feature; the panel's views and dialogs on those models, Ed at the mouse",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/*",
+        "src/ph_composer/features/spaces/*",
+        "src/ph_composer/features/programs/*",
+        "src/ph_composer/features/certification/*",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/*"
+      ],
+      "native_control_required": true
     }
   ]
 }
