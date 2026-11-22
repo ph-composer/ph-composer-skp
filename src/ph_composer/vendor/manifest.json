@@ -201,9 +201,9 @@
       "sha256": "4b01ded1845b7c5e7be2c4f507707b18aa1eccd6c46e05a7b5a7341728cf5b98"
     },
     "html/features/programs/program_editor.js": {
-      "bytes": 16777,
+      "bytes": 16933,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9255b7b77fc11c484715c1d1ca6e1033fed9d545666122f0ba5dc952db57a929"
+      "sha256": "1778d188e6168b6519cf92215ffb6e796119ce71d83b66e41d823b15d978b536"
     },
     "html/features/programs/program_loads.js": {
       "bytes": 12037,
@@ -221,9 +221,9 @@
       "sha256": "fdd8c2a3a0d1228b1318c3468ae0f6fc253a90e259dfd6f22a1c16903e4a028c"
     },
     "html/features/programs/schedule_editor.js": {
-      "bytes": 18833,
+      "bytes": 18983,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d93f2e8c549d7170b30fef081e5d80824377ebbdbc16c261c8c30d328354854d"
+      "sha256": "808a62533c5ec9b9dbdd3511b1349208e99581a39ca881a37724b4f4ca7c58eb"
     },
     "html/features/programs/tab.js": {
       "bytes": 11980,
@@ -431,9 +431,9 @@
       "sha256": "918fe136617fd341fd5bd51d85125284fe06b0f99c978070010234b46a1576fa"
     },
     "html/features/zones/overview.js": {
-      "bytes": 60447,
+      "bytes": 60582,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "06ed13a8c9fd4b66d49a7e7aab9142569d6e9f01c8a8ac469e07d8a1c8fef211"
+      "sha256": "aff113a35c020539f0a4d63537acc775e0bcadf4bf8da53850f6da6d71e1b76f"
     },
     "html/features/zones/segment_rows.js": {
       "bytes": 31812,
@@ -676,9 +676,9 @@
       "sha256": "546b151d94680e2f749130504603c156510e42e5d5e0484492ec413135f501be"
     },
     "html/subtabs.js": {
-      "bytes": 8011,
+      "bytes": 8493,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b699d6c02050bd439adc56b4ccc9e1736cdf71d2d74d4f08f23799ea4d54bc88"
+      "sha256": "a06f080522bdce18699c9aa04ba3d8dfe3db37564be108d05d9ba8623aee839f"
     },
     "html/support/index.html": {
       "bytes": 1144,
@@ -701,9 +701,9 @@
       "sha256": "67b3aae962e07aad51941da947e82e10afe2fe3907c1cb1043a0cb35cba903db"
     },
     "html/table.js": {
-      "bytes": 35555,
+      "bytes": 36087,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d96a16ac532254f6a4b2cd7e29ff52fb60fa3812c80e3ce2c0de930775fd43a2"
+      "sha256": "1d904a7ecc89ee6e3e7ee3b3d5c23f91a9a42ed0b575bbdc2c8a49ea00ed2fb2"
     },
     "html/table_contributions.js": {
       "bytes": 3017,

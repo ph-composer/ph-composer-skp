@@ -4,8 +4,9 @@
    guard(nextId) returns a refusal message while a draft or operation must remain visible; refused(reason, nextId)
    then runs. reselected(id) runs when the shown tab is chosen again, for an owner whose surface is covered.
    A focused field holds a switch only while it holds an edit: an owner that tracks its own entry says so on the
-   field (`field.typed`, true from the first keystroke until Enter, Escape or leaving ends it); any other field
-   holds while its value differs from the one it had when focus arrived or its last change applied. */
+   field (`field.typed`, true from the first keystroke until Enter, Escape or leaving ends it, and `field.seed`,
+   the text it shows from the Model, which typed back holds nothing); any other field holds while its value
+   differs from the one it had when focus arrived or its last change applied. */
 PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
   "use strict";
   var sequence = 0;
@@ -24,6 +25,7 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
     this.root.setAttribute("role", "tablist");
     this.root.setAttribute("aria-label", options.label);
     var self = this;
+    this.onField = function (event) { self.remember(event.target); };
     var prefix = "phc-subtabs-" + (++sequence);
     this.tabs.forEach(function (tab, index) {
       if (!tab.id || self.buttons[tab.id]) throw new Error("Subtab ids must be present and unique.");
@@ -35,8 +37,8 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
       tab.surface.setAttribute("role", "tabpanel");
       tab.surface.setAttribute("aria-labelledby", button.id);
       // The value a focused field started from, and again after each change it applied.
-      tab.surface.addEventListener("focusin", function (event) { self.remember(event.target); });
-      tab.surface.addEventListener("change", function (event) { self.remember(event.target); });
+      tab.surface.addEventListener("focusin", self.onField);
+      tab.surface.addEventListener("change", self.onField);
       button.addEventListener("mousedown", function (event) {
         // Preserve input focus before a pointer click can blur and hide its work surface.
         if (tab.id !== self.active && self.focusedInput()) event.preventDefault();
@@ -93,7 +95,10 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
     if (focused.readOnly) return false;
     if (focused.isContentEditable) return true;
     if (!/^(input|select|textarea)$/i.test(focused.tagName)) return false;
-    if (typeof focused.typed === "boolean") return focused.typed;
+    // An owner's entry typed back to the value it shows from the Model (`field.seed`) holds nothing either.
+    if (typeof focused.typed === "boolean") {
+      return focused.typed && !(typeof focused.seed === "string" && focused.value.trim() === focused.seed);
+    }
     return !this.started || this.started.node !== focused || this.started.value !== focused.value;
   };
   Subtabs.prototype.remember = function (node) {
@@ -146,6 +151,11 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
   Subtabs.prototype.dispose = function () {
     this.disposed = true;
     this.root.removeEventListener("scroll", this.onScroll);
+    var onField = this.onField;
+    this.tabs.forEach(function (tab) {
+      tab.surface.removeEventListener("focusin", onField);
+      tab.surface.removeEventListener("change", onField);
+    });
     if (this.resize) this.resize.disconnect();
   };
   return Subtabs;

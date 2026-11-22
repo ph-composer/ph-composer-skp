@@ -81,6 +81,17 @@ test("an owner's typed flag decides for its field: held while typed, free once E
   assert.strictEqual(o.tabs.select("second"), true, "Enter applied it and repainted the value");
 });
 
+test("an owner's entry typed back to the value it shows from the Model holds nothing", function () {
+  var o = setup();
+  visit(o, "0.4");
+  o.input.seed = "0.4";
+  o.input.typed = true;
+  o.input.value = "0.2";
+  assert.strictEqual(o.tabs.select("second"), false, "a changed value holds");
+  o.input.value = " 0.4";
+  assert.strictEqual(o.tabs.select("second"), true, "typed back, it does not");
+});
+
 test("focus in a read-only field holds no edit and never holds the tab", function () {
   var o = setup();
   o.input.readOnly = true;

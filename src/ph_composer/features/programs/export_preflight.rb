@@ -145,19 +145,21 @@ module PhComposer
         end
       end
 
-      # What a row's Locate opens: its Zones checked, less a single dwelling's, which the Segment's settings decide
-      # and whose settings open instead.
+      # What a row's Locate opens: its Zones checked, less a single dwelling's, which the Segment's settings decide.
+      # Locate only locates: a row with Zones to check opens nothing else, and only a row with none (a single
+      # dwelling's) opens that Segment's settings instead.
       def locate_params(state, zone_ids, segment_id)
         zones = zone_ids.filter_map { |id| state.zone(id) }
         single, checkable = zones.partition { |zone| state.segment(zone.segment_id)&.single? }
-        segment_id ||= single.first&.segment_id
         params = {}
-        unless checkable.empty?
+        if checkable.empty?
+          segment_id ||= single.first&.segment_id
+          params["building_segment_id"] = segment_id if segment_id
+        else
           params["zones"] = checkable.first(LOCATE_LIMIT).map do |zone|
             DeepCopy.call(zone.reference.slice("zone_id", "zone_path"))
           end
         end
-        params["building_segment_id"] = segment_id if segment_id
         params.empty? ? nil : { "name" => LOCATE, "params" => params }
       end
 

@@ -167,8 +167,8 @@ check({ name: "programs_view", output }, async ({ newPage, step }) => {
   for (const [width, height] of [[1280, 520], [420, 732], [360, 520]]) {
     await setPanelSize(page, width, height);
     await page.evaluate(() => {
-      const mount = document.querySelector(".phc-zone-view:not([hidden])");
-      if (mount) mount.scrollTop = 0;
+      document.querySelector(".phc-zone-view:not([hidden]) .phc-table-mount").scrollTop = 0;
+      document.querySelector(".panel-panes").scrollTop = 0;
       const host = window.previewHost;
       host.publish("panel.navigate", { session: host.session, owner: "ph_composer.zones", intent: {
         view: "ph_composer.programs.zones", zones: [{ zone_id: "zon_classroom", zone_path: [301] }] } });

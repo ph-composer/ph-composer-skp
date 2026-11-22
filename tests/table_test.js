@@ -91,12 +91,18 @@ test("a table narrowed after it opened turns to its first identity column once, 
     h.root.clientWidth = 340;
     h.root.rect = { left: 0, right: 340, top: 0, bottom: 400, width: 340, height: 400 };
     paint(h, { tree: true });
-    tagged(h, "col-name", "th")[0].rect = { left: 190, right: 410, top: 0, bottom: 38, width: 220, height: 38 };
+    // The stub lays nothing out, so Name stays where an unscrolled narrow table puts it: past the frame's edge.
+    tagged(h, "col-name", "th")[0].rect = { left: 330, right: 550, top: 0, bottom: 38, width: 220, height: 38 };
     h.tables.orientNarrow(h.root);
     assert.strictEqual(h.root.scrollLeft || 0, 0, "a wide panel stays where it is");
     h.context.innerWidth = 360;
     h.tables.orientNarrow(h.root);
-    assert.strictEqual(h.root.scrollLeft, 190, "narrowed later, it opens at Name");
+    assert.strictEqual(h.root.scrollLeft, 330, "narrowed later, it opens at Name");
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 0, "widened, it goes back to the start");
+    h.context.innerWidth = 360;
+    h.tables.orientNarrow(h.root);
     h.root.scrollLeft = 40;
     h.tables.orientNarrow(h.root);
     assert.strictEqual(h.root.scrollLeft, 40, "a pan made since is kept");
@@ -105,7 +111,14 @@ test("a table narrowed after it opened turns to its first identity column once, 
     h.context.innerWidth = 420;
     h.root.scrollLeft = 0;
     h.tables.orientNarrow(h.root);
-    assert.strictEqual(h.root.scrollLeft, 190, "narrowed again, it turns again");
+    assert.strictEqual(h.root.scrollLeft, 330, "narrowed again, it turns again");
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    tagged(h, "col-name", "th")[0].rect = { left: 120, right: 340, top: 0, bottom: 38, width: 220, height: 38 };
+    h.root.scrollLeft = 12;
+    h.context.innerWidth = 360;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 12, "a pan that already shows Name is kept");
   });
 
 test("a tree marks its table for group headings, and a chevron does not repeat the row's kind", function () {

@@ -231,6 +231,19 @@ test("Escape ends a typed entry, so its still-focused field no longer holds the 
   assert.strictEqual(tab("Programs").getAttribute("aria-selected"), "true", "Escape ended the entry");
 });
 
+test("a field typed away from its value and back holds neither the page nor the subtabs", function () {
+  var p = load("Schedules");
+  open(p, "Ventilation");
+  var minimum = labelled(shown(p), "input", "Minimum fraction of design flow");
+  var programs = p.context.document.querySelectorAll("[role='tab']").filter(function (node) {
+    return node.textContent === "Programs"; })[0];
+  var stored = minimum.value;
+  type(minimum, "0.2");
+  type(minimum, stored);
+  click(programs);
+  assert.strictEqual(programs.getAttribute("aria-selected"), "true", "the restored value lets the page move on");
+});
+
 test("a fraction typed while hours are held joins the draft and goes with them", function () {
   var p = load("Schedules");
   open(p, "Ventilation");

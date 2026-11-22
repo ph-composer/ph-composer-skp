@@ -227,13 +227,13 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     if (state.tabsSignature !== signature && listed.length < 2) {
       // One view, or none: no row to choose from, and its surface simply shows.
       state.tabsSignature = signature;
-      if (state.tabs) state.tabs.disposed = true;
+      if (state.tabs) state.tabs.dispose();
       state.tabs = null;
       root.querySelector(".phc-view-tabs").replaceChildren();
       slot(state, listed[0]).surface.hidden = false;
     } else if (state.tabsSignature !== signature) {
       state.tabsSignature = signature;
-      if (state.tabs) state.tabs.disposed = true;
+      if (state.tabs) state.tabs.dispose();
       state.tabs = new Subtabs({ label: "Zone views", state: state, stateKey: "viewId",
         tabs: listed.map(function (view) {
           return { id: view.id, label: view.label, surface: slot(state, view).surface };
@@ -800,7 +800,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     var renaming = screen.segments.revealRename();
     screen.reveal = false;
     if (renaming && renaming.closest("tr")) reveal = [renaming.closest("tr")];
-    if (reveal.length) revealRows(own.mount, Array.prototype.slice.call(reveal), screen.bar);
+    // A row a filter keeps hidden has no place to scroll to; the shown ones decide.
+    reveal = Array.prototype.filter.call(reveal, function (row) { return !row.hidden; });
+    if (reveal.length) revealRows(own.mount, reveal, screen.bar);
   }
 
   /* Scrolls the table, then the pane, so `rows` sit between the table's sticky header and the floating selection
