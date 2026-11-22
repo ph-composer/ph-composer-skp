@@ -79,10 +79,11 @@ PhComposerUI.define("features/programs/airtightness", ["panel", "workspace"], fu
         if (!Object.prototype.hasOwnProperty.call(draft, key)) draft[key] = DEFAULTS[key];
       });
       var disabled = Boolean(context.readOnly);
-      var result = ui.element("span");
-      var unitLabel = ui.element("span", "", " " + unit(draft.basis));
+      // The basis, the value and its unit read as one line, like the dialog's other rows.
+      var result = ui.element("span", "phc-airtightness-result");
+      var unitLabel = ui.element("span", "phc-airtightness-unit", unit(draft.basis));
       var basis = select("Test result basis", BASES, draft.basis, disabled, function (value) {
-        draft.basis = value; unitLabel.textContent = " " + unit(value); context.changed();
+        draft.basis = value; unitLabel.textContent = unit(value); context.changed();
       });
       var value = ui.element("input");
       value.type = "text"; value.setAttribute("type", "text"); value.setAttribute("inputmode", "decimal");
@@ -91,8 +92,7 @@ PhComposerUI.define("features/programs/airtightness", ["panel", "workspace"], fu
       value.value = draft.value === null || draft.value === undefined ? "" : String(draft.value);
       value.disabled = disabled;
       value.addEventListener("input", function () { draft.value = value.value; context.changed(); });
-      result.appendChild(basis); result.appendChild(ui.element("span", "", " "));
-      result.appendChild(value); result.appendChild(unitLabel);
+      result.appendChild(basis); result.appendChild(value); result.appendChild(unitLabel);
       part.appendChild(row("Test result", result));
       part.appendChild(row("Wind exposure", select("Wind exposure", WIND_EXPOSURES, draft.wind_exposure, disabled,
         function (choice) { draft.wind_exposure = choice; context.changed(); })));

@@ -70,6 +70,9 @@ check({ name: "programs_view", output }, async ({ newPage, step }) => {
   const program = living.getByRole("combobox", { name: "Program for Living", exact: true });
   await program.waitFor();
   assert.match(await program.getAttribute("class"), /is-default/, "the effective Program reads inherited");
+  const houseCells = await heading(page, "House").evaluate(tr => ["bedrooms", "occupants", "equipment_set"]
+    .map(field => tr.querySelector(`.col-${field}`).querySelectorAll("input, select").length));
+  assert.deepEqual(houseCells, [0, 0, 0], "no longer single, the heading gives its house inputs back");
 
   step("the Dwelling bubble names the house's Dwelling and its values");
   await living.locator(".col-dwelling button").click();
@@ -79,6 +82,18 @@ check({ name: "programs_view", output }, async ({ newPage, step }) => {
     .locator("option:checked").textContent(), "House");
   assert.equal(await dwelling.getByRole("textbox", { name: "Units of House", exact: true }).inputValue(), "1");
   await page.screenshot({ path: path.join(output, "j1-unlocked.png") });
+  await page.keyboard.press("Escape");
+
+  step("Not a dwelling: the bubble's sentence wraps inside it");
+  await page.locator(`${shownTable} tr[data-row-key='["Zone",[203]]'] .col-dwelling button`).click();
+  const none = page.getByRole("dialog", { name: "Dwelling of Corridor", exact: true });
+  const sentence = none.locator(".phc-dwelling-detail > p");
+  await sentence.waitFor();
+  const fits = await sentence.evaluate(node => {
+    const box = node.getBoundingClientRect(), bubble = node.closest(".phc-bubble").getBoundingClientRect();
+    return node.scrollWidth <= node.clientWidth + 1 && box.right <= bubble.right;
+  });
+  assert.equal(fits, true, "the sentence is not clipped at the bubble's edge");
   await page.keyboard.press("Escape");
 
   step("journey 2: apartments made one Dwelling each from the selection bar");
@@ -144,6 +159,35 @@ check({ name: "programs_view", output }, async ({ newPage, step }) => {
     const facts = await paneFacts(page, { floating: [".phc-selection-bar"] });
     assert.equal(facts.sideways, false, `the Zones pane scrolls sideways at ${width} x ${height}`);
     await page.screenshot({ path: path.join(output, `programs-${width}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+
+  step("an export finding's Locate checks its Zones clear of the selection bar and opens nothing else");
+  await page.getByRole("button", { name: "Clear selection", exact: true }).click();
+  for (const [width, height] of [[1280, 520], [420, 732], [360, 520]]) {
+    await setPanelSize(page, width, height);
+    await page.evaluate(() => {
+      const mount = document.querySelector(".phc-zone-view:not([hidden])");
+      if (mount) mount.scrollTop = 0;
+      const host = window.previewHost;
+      host.publish("panel.navigate", { session: host.session, owner: "ph_composer.zones", intent: {
+        view: "ph_composer.programs.zones", zones: [{ zone_id: "zon_classroom", zone_path: [301] }] } });
+    });
+    await page.locator(".phc-selection-bar:not([hidden])").waitFor();
+    const placed = await page.evaluate(() => {
+      const row = document.querySelector(".phc-zone-view:not([hidden]) tr.is-checked").getBoundingClientRect();
+      const head = document.querySelector(".phc-zone-view:not([hidden]) thead").getBoundingClientRect();
+      const bar = document.querySelector(".phc-selection-bar:not([hidden])");
+      const pane = document.querySelector(".panel-panes").getBoundingClientRect();
+      const barTop = bar.classList.contains("is-docked") ? Infinity : bar.getBoundingClientRect().top;
+      return { clearOfBar: row.bottom <= barTop, belowHeader: row.top >= head.bottom - 1,
+        inPane: row.top >= pane.top && row.bottom <= pane.bottom,
+        dialog: Boolean(document.querySelector("dialog[open]")) };
+    });
+    assert.deepEqual(placed, { clearOfBar: true, belowHeader: true, inPane: true, dialog: false },
+      `the located Classroom at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `locate-${width}.png`) });
+    await page.getByRole("button", { name: "Clear selection", exact: true }).click();
   }
   await setPanelSize(page, 1280, 800);
 

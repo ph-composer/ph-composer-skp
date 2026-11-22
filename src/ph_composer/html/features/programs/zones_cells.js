@@ -497,8 +497,19 @@ function (panel, ui, requests, snapshot, units, preferences, fields, occupancy) 
      occupancy payload as the settings dialog's Save writes it. */
   ZoneCells.prototype.houseCell = function (td, group, field) {
     var segment = group.segment && this.data.segment(group.segment.id);
-    if (!segment || !segment.single_dwelling || !segment.dwelling) return false;
+    if (!segment || !segment.single_dwelling || !segment.dwelling) {
+      // A Segment no longer a single dwelling (switched off, or not residential) gives its inputs back. The table
+      // writes a cell's text only where it differs, and an input's text is as empty as a blank sum, so the cell
+      // is cleared here and the sum painted into it.
+      if (td._houseCell) {
+        td._houseCell = false;
+        td.replaceChildren();
+        td.classList.remove("phc-editable-cell", "phc-pill-cell", "is-numeric");
+      }
+      return false;
+    }
     var house = segment.dwelling, self = this, key = "house:" + segment.id + ":" + field;
+    td._houseCell = true;
     var held = this.writes.busy() || Boolean(this.host.draftReason());
     if (field === "equipment_set") {
       var cell = this.select(td, key, "Equipment Set for " + house.name, this.setChoices(),

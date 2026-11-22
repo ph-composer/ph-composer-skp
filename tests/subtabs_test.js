@@ -32,15 +32,53 @@ test("subtabs show exactly one surface and remember the active tab in session-ow
   assert.strictEqual(setup().tabs.active, "first", "a new session's page state starts independently");
 });
 
-test("switching never hides or moves a focused input", function () {
-  var o = setup();
+/* Focus as the browser gives it: the field takes focus, and focusin bubbles to its surface. */
+function visit(o, value) {
+  o.input.value = value || "";
   o.input.focus();
+  o.first.listeners.focusin({ target: o.input });
+}
+
+test("switching never hides or moves a focused input that holds an edit", function () {
+  var o = setup();
+  visit(o, "20");
+  o.input.value = "21";
   assert.strictEqual(o.tabs.select("second"), false);
   assert.strictEqual(o.document.activeElement, o.input);
   assert.deepStrictEqual([o.first.hidden, o.second.hidden], [false, true]);
   var prevented = false;
   o.tabs.buttons.second.listeners.mousedown({ preventDefault: function () { prevented = true; } });
   assert.strictEqual(prevented, true);
+});
+
+test("a focused field the user only visited, or put back, never holds the tab", function () {
+  var o = setup();
+  visit(o, "20");
+  var prevented = false;
+  o.tabs.buttons.second.listeners.mousedown({ preventDefault: function () { prevented = true; } });
+  assert.strictEqual(prevented, false, "the click may take focus from an unchanged field");
+  o.input.value = "21";
+  o.input.value = "20";
+  assert.strictEqual(o.tabs.select("second"), true);
+  assert.deepStrictEqual([o.first.hidden, o.second.hidden], [true, false]);
+});
+
+test("a change that applied sets the value a field holds against", function () {
+  var o = setup();
+  visit(o, "Mon");
+  o.input.value = "Tue";
+  o.first.listeners.change({ target: o.input });
+  assert.strictEqual(o.tabs.select("second"), true);
+});
+
+test("an owner's typed flag decides for its field: held while typed, free once Escape or Enter ends it", function () {
+  var o = setup();
+  visit(o, "20");
+  o.input.typed = true;
+  assert.strictEqual(o.tabs.select("second"), false, "typed, even back at its value");
+  o.input.value = "1.25";
+  o.input.typed = false;
+  assert.strictEqual(o.tabs.select("second"), true, "Enter applied it and repainted the value");
 });
 
 test("focus in a read-only field holds no edit and never holds the tab", function () {

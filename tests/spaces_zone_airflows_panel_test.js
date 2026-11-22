@@ -131,7 +131,7 @@ test("a Zone with no Spaces shows an amber No Spaces row naming why", function (
   assert.ok(row && !row.hidden, "the row shows under its open Zone");
   var name = row.querySelectorAll("td").filter(function (td) { return td.classList.contains("col-name"); })[0];
   assert.strictEqual(name.textContent, "No Spaces");
-  assert.ok(name.classList.contains("is-flagged"));
+  assert.ok(row.classList.contains("is-flagged"), "the row is amber across, its Actions and Hierarchy cells too");
   assert.match(name.getAttribute("data-tooltip"), /^No Spaces: this Zone exports its geometry/);
   assert.match(row.querySelector(".phc-row-marker").getAttribute("aria-label"), /no iCFA, net volume or ventilation/);
 });

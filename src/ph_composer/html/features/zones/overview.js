@@ -45,12 +45,15 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     level: { mode: "ph_composer.zones.by_level" } };
   var ZONE_SORTED = ["name", "level", "ground_depth_mm"];
   var ZONE_FILTERED = { level: true };
-  var ZONE_WIDTHS = { name: 142, level: 112, ground_depth_mm: 128 };
+  // Name holds a Segment heading's two tags (Default, Single dwelling) side by side.
+  var ZONE_WIDTHS = { name: 172, level: 112, ground_depth_mm: 128 };
   // Listed while no view is: the Zone rows alone, with nothing beneath them.
   var NO_VIEW = { id: "", label: "Zones" };
 
   var screen = null;
   var MIN_MOUNT = 240;
+  // The space kept between a revealed row and the floating selection bar, and the table kept clear above it.
+  var REVEAL_GAP = 8, ROW_KEPT = 36;
   var ZONE_DRAFT = "Finish or cancel the Zone edit first.";
 
   /* One view's hook, called with its own state first; `fallback` when the view does not supply it. */
@@ -786,20 +789,47 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     root.hidden = true;
     var own = screen && screen.session === state.session && active(screen);
     if (screen) screen.bar = null;
-    if (!own || !overview) return;
+    if (!own || !overview) {
+      if (screen) screen.reveal = false;
+      return;
+    }
     screen.bar = call(own, "selectionBar", [overview], null);
     place(own, screen.bar);
+    // Once the bar has its place: rows a Locate checked, or a new Segment's name field, come into view.
+    var reveal = screen.reveal ? own.mount.querySelectorAll("tr.is-checked") : [];
+    var renaming = screen.segments.revealRename();
+    screen.reveal = false;
+    if (renaming && renaming.closest("tr")) reveal = [renaming.closest("tr")];
+    if (reveal.length) revealRows(own.mount, Array.prototype.slice.call(reveal), screen.bar);
+  }
+
+  /* Scrolls the table, then the pane, so `rows` sit between the table's sticky header and the floating selection
+     bar: all of them where they fit, else the first at the top. */
+  function revealRows(mount, rows, bar) {
+    var floating = bar && !bar.root.hidden && !bar.root.classList.contains("is-docked") ? bar.root : null;
+    var head = mount.querySelector("thead"), pane = mount.closest(".panel-panes");
+    [[mount, head ? head.offsetHeight : 0], [pane, 0]].forEach(function (pair) {
+      var scroller = pair[0];
+      if (!scroller) return;
+      var frame = scroller.getBoundingClientRect(), top = frame.top + pair[1], bottom = frame.bottom;
+      if (floating) bottom = Math.min(bottom, floating.getBoundingClientRect().top - REVEAL_GAP);
+      var first = rows[0].getBoundingClientRect(), last = rows[rows.length - 1].getBoundingClientRect();
+      var delta = Math.max(0, last.bottom - bottom);
+      if (first.top - delta < top) delta = first.top - top;
+      if (delta) scroller.scrollTop += delta;
+    });
   }
 
   /* The table takes the height its pane leaves, however the tabs and the control row wrap, so the tab does
      not scroll and a floating selection bar sits at the pane's visible bottom. Below MIN_MOUNT the pane
-     scrolls instead. Where the floating bar would cover the table's header, it docks beneath the table and
-     the table is fitted again around it. */
+     scrolls instead. Where the floating bar would cover the table's header or leave less than a row beneath it
+     (a bar of wrapped controls on a narrow panel), it docks beneath the table and the table is fitted again
+     around it, so a checked row always has somewhere to show. */
   function place(own, bar) {
     var mount = own.mount, pane = mount.closest(".panel-panes");
     if (!pane || !mount.closest("[data-pane]") || !mount.getClientRects().length) return;
     var refit = function () { fit(mount, pane); }, head = mount.querySelector("thead");
-    if (bar) bar.reserve(mount, head ? head.offsetHeight : 0, refit); else refit();
+    if (bar) bar.reserve(mount, (head ? head.offsetHeight : 0) + ROW_KEPT, refit); else refit();
   }
 
   /* Below the table: the rest of the overview (a docked bar) and any section another feature adds to the pane. */
@@ -899,6 +929,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       expanded: state.expanded,
       expandable: function (row) { return Boolean(parents[row.key]); },
       decorate: function (td, row, field) { if (!row.heading) call(own, "decorate", [td, row, field]); },
+      flagged: function (row) { return !row.heading && Boolean(call(own, "rowFlagged", [row], false)); },
       columnWidths: own.columnWidths, visibleCount: projection.visibleCount + hidden.groupsShown,
       disabled: state.edits.busy(),
       empty: zoneRows.length || groupRows.length ? "No Zones match this filter." :
@@ -1027,9 +1058,12 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       if (!intent.viewShown) return;
     }
     if (intent.check) call(active(screen), "navigate", [intent]);
-    if (intent.zones) call(active(screen), "checkZones", [intent.zones.map(function (zone) {
-      return JSON.stringify(["Zone", zone.zone_path]);
-    })]);
+    if (intent.zones) {
+      call(active(screen), "checkZones", [intent.zones.map(function (zone) {
+        return JSON.stringify(["Zone", zone.zone_path]);
+      })]);
+      screen.reveal = true;
+    }
     // `segmentSettings` names a Building Segment whose settings dialog opens, as its heading's Settings does.
     if (intent.segmentSettings) screen.segments.openSettings(intent.segmentSettings);
     panel.repaint();
@@ -1038,6 +1072,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
   panel.section("ph_composer.zones.selection_bar", renderBar, { order: 1000 });
   if (window.addEventListener) window.addEventListener("resize", function () {
     var own = screen && active(screen);
-    if (own) place(own, screen.bar);
+    if (!own) return;
+    place(own, screen.bar);
+    // A panel narrowed after it opened turns its table to the Name column, as one opened narrow does.
+    tables.orientNarrow(own.mount);
   });
 });

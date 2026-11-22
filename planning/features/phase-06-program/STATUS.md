@@ -104,7 +104,9 @@ also opening the Segment's settings and its checked rows sitting under the selec
 bedrooms "?" kept on a heading after Single dwelling is off or the Segment turns non-residential; the No Spaces
 row's amber starting at Name; the in-place Segment name field about 90 px wide; heading tags wrapping to a third
 line and no Segment name at 360 px; the Dwelling bubble text clipped; device names and type lines cut or run on; a
-focused field blocking a subtab switch until a click elsewhere.
+focused field blocking a subtab switch until a click elsewhere. The visual-defects stage (branch
+`fix/phase-06-visual-defects`, part of #538) fixes the eleven in the panel and the finding text, with preview
+before and after captures at 1280, 420 and 360 px kept privately; the host check on its head is owed before merge.
 
 ## Catch-up review
 

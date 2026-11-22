@@ -683,8 +683,10 @@ this foundation when their feature lands.
   Cancel as its action and Save as its primary.
 - `Subtabs` reports a refused tab by name (`refused(reason, nextId)`) and a click on the shown tab
   (`reselected(id)`), so an owner whose surface is covered can leave that session the way its Cancel
-  does. A focused field in the shown surface holds a switch, except a search field, checkbox or radio,
-  whose value already applies.
+  does. A focused field in the shown surface holds a switch while it holds an edit: never a search field,
+  checkbox or radio, whose value already applies; while typed, for an owner that marks its field's entry
+  (`field.typed`, which Enter, Escape and leaving end); otherwise while its value differs from the one it had
+  when focus arrived or its last change applied.
 - One floating notice, the panel's (`panel.notify`). A feature view does not build its own. An
   information notice fades on the next interaction and never blocks the control beneath it.
   `panel.notify(message, tone, action)` may carry `{ label, run }`, the way out on the notice itself

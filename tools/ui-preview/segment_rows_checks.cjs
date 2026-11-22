@@ -54,6 +54,21 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   await page.getByRole("tab", { name: "Spaces", exact: true }).click();
   assert.deepEqual(await headings(page), ["Annex", "House"]);
   await page.screenshot({ path: path.join(output, "spaces-headings-1280.png") });
+  const tagLine = await heading(page, "House").locator(".phc-segment-tag").evaluateAll(tags =>
+    tags.map(tag => Math.round(tag.getBoundingClientRect().top)));
+  assert.equal(new Set(tagLine).size, 1, "the House heading's tags share one line");
+
+  step("a panel narrowed after it opened turns to the Name column, so headings show their names");
+  for (const [width, height] of PANEL_SIZES.slice(1)) {
+    await setPanelSize(page, width, height);
+    const shown = await heading(page, "House").locator(".phc-segment-name").evaluate(node => {
+      const box = node.getBoundingClientRect(), frame = node.closest(".phc-table-mount").getBoundingClientRect();
+      return box.left >= frame.left && box.left + 20 <= frame.right;
+    });
+    assert.equal(shown, true, `the House heading names itself at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `spaces-headings-narrowed-${width}.png`) });
+    await setPanelSize(page, 1280, 800);
+  }
   await page.getByRole("tab", { name: "Geometry", exact: true }).click();
 
   step("a heading's actions show on hover; Delete holds on the last Segment");
@@ -63,12 +78,23 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   await house.getByRole("button", { name: "Delete House", exact: true }).waitFor();
   await page.screenshot({ path: path.join(output, "heading-actions.png") });
 
-  step("New Building Segment opens its name in place; Enter renames it");
+  step("New Building Segment opens its name in place, scrolled into view; Enter renames it");
+  await page.evaluate(() => { const mount = document.querySelector(".phc-zone-view:not([hidden]) .phc-table-mount");
+    mount.scrollTop = mount.scrollHeight; });
   await page.getByRole("button", { name: "New Building Segment", exact: true }).click();
   const name = page.getByRole("textbox", { name: "Building Segment name", exact: true });
   await name.waitFor();
   assert.equal(await name.inputValue(), "Building Segment 3");
   assert.equal(await name.evaluate(node => node === document.activeElement), true, "the name has focus");
+  const field = await name.evaluate(node => ({ width: node.getBoundingClientRect().width,
+    column: node.closest("td").clientWidth, text: node.scrollWidth <= node.clientWidth }));
+  assert(field.width >= field.column - 20, `the name field spans the Name column (${field.width} of ${field.column})`);
+  assert.equal(field.text, true, "the whole default name shows");
+  assert.equal(await name.evaluate(node => {
+    const box = node.getBoundingClientRect(), mount = node.closest(".phc-table-mount");
+    const top = mount.getBoundingClientRect().top + mount.querySelector("thead").offsetHeight;
+    return box.top >= top && box.bottom <= mount.getBoundingClientRect().bottom;
+  }), true, "the new heading's name field is scrolled into view below the header");
   await page.screenshot({ path: path.join(output, "new-segment-name.png") });
   await name.fill("Garage");
   await name.press("Enter");
@@ -112,6 +138,10 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   assert.deepEqual(await settings.locator("h3").allTextContents(),
     ["General", "Occupancy", "Phius certification", "Airtightness", "Comfort", "Note"]);
   assert.equal(await settings.getByRole("checkbox", { name: "New Zones join this Segment", exact: true }).isDisabled(), true);
+  const result = await settings.locator(".phc-airtightness-result > *").evaluateAll(parts =>
+    parts.map(part => { const box = part.getBoundingClientRect(); return Math.round(box.top + box.height / 2); }));
+  assert.equal(result.length, 3);
+  assert(Math.max(...result) - Math.min(...result) <= 2, "the test result's basis, value and unit share one line");
   const save = settings.getByRole("button", { name: "Save", exact: true });
   assert.equal(await save.isDisabled(), false, "an untouched section holds nothing");
   await settings.getByRole("textbox", { name: "Note text", exact: true }).fill(" ");

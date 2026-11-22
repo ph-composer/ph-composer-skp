@@ -2,7 +2,10 @@
    rebuilding the view preserves that state's selected surface without touching Model data.
    new Subtabs({ label, state, stateKey, tabs: [{ id, label, surface }], guard, refused, changed, reselected })
    guard(nextId) returns a refusal message while a draft or operation must remain visible; refused(reason, nextId)
-   then runs. reselected(id) runs when the shown tab is chosen again, for an owner whose surface is covered. */
+   then runs. reselected(id) runs when the shown tab is chosen again, for an owner whose surface is covered.
+   A focused field holds a switch only while it holds an edit: an owner that tracks its own entry says so on the
+   field (`field.typed`, true from the first keystroke until Enter, Escape or leaving ends it); any other field
+   holds while its value differs from the one it had when focus arrived or its last change applied. */
 PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
   "use strict";
   var sequence = 0;
@@ -31,6 +34,9 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
       button.setAttribute("aria-controls", tab.surface.id);
       tab.surface.setAttribute("role", "tabpanel");
       tab.surface.setAttribute("aria-labelledby", button.id);
+      // The value a focused field started from, and again after each change it applied.
+      tab.surface.addEventListener("focusin", function (event) { self.remember(event.target); });
+      tab.surface.addEventListener("change", function (event) { self.remember(event.target); });
       button.addEventListener("mousedown", function (event) {
         // Preserve input focus before a pointer click can blur and hide its work surface.
         if (tab.id !== self.active && self.focusedInput()) event.preventDefault();
@@ -85,7 +91,13 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
     if (/^input$/i.test(focused.tagName) && /^(search|checkbox|radio)$/i.test(focused.type || "")) return false;
     // A read-only field (a setup to copy) holds no edit, so focus in it never holds the tab.
     if (focused.readOnly) return false;
-    return /^(input|select|textarea)$/i.test(focused.tagName) || Boolean(focused.isContentEditable);
+    if (focused.isContentEditable) return true;
+    if (!/^(input|select|textarea)$/i.test(focused.tagName)) return false;
+    if (typeof focused.typed === "boolean") return focused.typed;
+    return !this.started || this.started.node !== focused || this.started.value !== focused.value;
+  };
+  Subtabs.prototype.remember = function (node) {
+    this.started = node && "value" in node ? { node: node, value: node.value } : null;
   };
   Subtabs.prototype.select = function (id) {
     if (this.disposed || !this.buttons[id]) return false;

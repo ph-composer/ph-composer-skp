@@ -126,8 +126,8 @@ module PhComposer
         end
         dwelling_id = zone.assignment["dwelling_id"]
         if dwelling_id && !segment.single? && across?(inputs.state, dwelling_id)
-          found << finding("programs.dwelling_across_segments", "#{zone.name}'s Dwelling holds Zones in more than " \
-                                                                "one Building Segment.")
+          found << finding("programs.dwelling_across_segments",
+                           "#{Words.possessive(zone.name)} Dwelling holds Zones in more than one Building Segment.")
         end
         found
       end
@@ -185,8 +185,8 @@ module PhComposer
       def segment_findings(segment, zones, dwellings, set_points)
         found = []
         unless set_points.fetch("agree")
-          found << finding("programs.set_points_disagree", "The Programs of #{segment.name}'s Zones give " \
-                                                           "different set points.")
+          found << finding("programs.set_points_disagree",
+                           "The Programs of #{Words.possessive(segment.name)} Zones give different set points.")
         end
         if segment.stored && segment.settings["single_dwelling"] && segment.category == "non_residential"
           found << finding("programs.single_dwelling_no_effect", "Single dwelling has no effect in " \

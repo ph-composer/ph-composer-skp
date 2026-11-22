@@ -239,11 +239,10 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   }
 
   /* A muted value says why in its tooltip; every other cell's tooltip is its text, which the table sets. The
-     "No Spaces" row is amber across, its reason on its name. */
+     "No Spaces" row is amber across (`rowFlagged`), its reason on its name. */
   function decorate(vs, td, row, field) {
     var cell = cellOf(row, field);
     td.classList.toggle("is-muted", Boolean(cell && cell.muted));
-    td.classList.toggle("is-flagged", Boolean(row.record.noSpaces));
     if (row.record.noSpaces && field === "name") ui.tooltip(td, NO_SPACES_TIP);
     if (cell && cell.tooltip) ui.tooltip(td, cell.tooltip);
   }
@@ -468,6 +467,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     headerAction: function (vs, field, label) { return field === "weighting_factor" ? vs.paint.header(label) : null; },
     zoneRecord: zoneRecord, extraRows: extraRows, children: children,
     leadingColumns: leadingColumns, columns: columns, value: value, decorate: decorate, zoneMarker: marker,
+    rowFlagged: function (vs, row) { return Boolean(row.record.noSpaces); },
     sortValue: sortValue, sort: sort, search: search, queryMatch: queryMatch, count: count, segmentSums: segmentSums,
     colourBy: COLOUR_BY,
     menus: MENUS,

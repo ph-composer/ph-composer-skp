@@ -148,9 +148,9 @@ module PhComposer
           end
           heating, cooling = set_point_pair(program, catalog.schedules)
           if heating && cooling && heating > cooling
-            found << block("programs.set_points_inverted", program_id, "#{name}'s heating set point, " \
-                                                                       "#{heating} °C, is above its cooling set " \
-                                                                       "point, #{cooling} °C.", zone_ids)
+            found << block("programs.set_points_inverted", program_id,
+                           "#{Words.possessive(name)} heating set point, #{heating} °C, is above its cooling set " \
+                           "point, #{cooling} °C.", zone_ids)
           end
           # A legacy Zone names no Segment record, so it has no Dwelling to put it in: no note.
           alone = used.select { |row| row.dwelling.nil? && row.segment }
@@ -258,15 +258,16 @@ module PhComposer
           floors = group.map { |row| input.areas.fetch(row.zone.id).room_floor_area_m2 }
           if floors.none?(&:nil?) && !floors.sum.positive?
             found << warn("programs.no_floor_area", record_id,
-                          "#{dwelling.fetch('name')}'s Zones have no Floor Face, so its Phius rule loads export at 0 " \
-                          "per m² and EnergyPlus sees no people, lighting or hot water there.",
+                          "#{Words.possessive(dwelling.fetch('name'))} Zones have no Floor Face, so its Phius rule " \
+                          "loads export at 0 per m² and EnergyPlus sees no people, lighting or hot water there.",
                           group.map { |row| row.zone.id })
           end
           found
         end
       end
 
-      # A Segment whose Zones' Programs give more than one pair of set points: it carries its first Zone's.
+      # A Segment whose Zones' Programs give more than one pair of set points: it carries its first Zone's. Its
+      # Locate checks those Zones and opens nothing else; the Segment's settings stay on its heading.
       def segment_findings(input, rows)
         rows.group_by { |row| row.zone.segment_id }.filter_map do |segment_id, members|
           segment = members.first.segment
@@ -275,10 +276,11 @@ module PhComposer
           points = segment_set_points(members, input.catalog)
           next if points.fetch("agree")
 
+          first = members.find(&:program)&.zone&.name
           warn("programs.set_points_disagree", segment_id,
-               "The Programs of #{segment.name}'s Zones give different set points; it exports " \
+               "The Programs of #{Words.possessive(segment.name)} Zones give different set points; it exports " \
                "#{format_c(points['heating_c'])} °C heating and #{format_c(points['cooling_c'])} °C cooling, from " \
-               "#{members.find(&:program)&.zone&.name}'s Program.", members.map { |row| row.zone.id }, segment_id)
+               "#{Words.possessive(first)} Program.", members.map { |row| row.zone.id })
         end
       end
 

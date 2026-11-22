@@ -114,8 +114,10 @@ function (RecordForm, ui, fields, loads) {
     if (this.adding) {
       device.add("Type", this.select("type", this.types.map(function (entry) { return [entry.type, entry.label]; })));
     } else {
-      var fixed = el("span", "pgm-device-type", type.label);
-      fixed.appendChild(el("span", "muted", " To change the type, delete it and add another."));
+      // The type, then on its own muted line how to change it.
+      var fixed = el("span", "pgm-device-type");
+      fixed.appendChild(el("span", "", type.label));
+      fixed.appendChild(el("span", "pgm-device-help", "To change the type, delete it and add another."));
       device.add("Type", fixed);
     }
     device.add("Name", this.text("display_name"));

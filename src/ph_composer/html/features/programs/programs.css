@@ -36,9 +36,19 @@
 .phc-dwelling-detail { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0;
   align-items: center; }
 .phc-dwelling-detail dt { color: var(--muted); }
+/* "Not part of a Dwelling" spans both columns and wraps within the bubble. */
+.phc-dwelling-detail > p { grid-column: 1 / -1; margin: 0; white-space: normal; }
 .phc-dwelling-detail dd { display: flex; align-items: center; gap: 4px; margin: 0; }
 .phc-dwelling-input { width: 64px; text-align: right; }
 .phc-dwelling-rule { display: inline-flex; color: var(--muted); cursor: help; }
+
+/* The Airtightness test result (airtightness.js): basis, value and unit on one line, like the dialog's other rows.
+   The shared form dialog stretches every input and select, so these rules outrank it. */
+.phc-airtightness-result { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.phc-form-dialog .phc-airtightness-result select { flex: 0 0 auto; width: auto; }
+.phc-form-dialog .phc-airtightness-result input:not([type=checkbox]):not([type=color]) { flex: 1 1 0; width: auto;
+  min-width: 0; max-width: 140px; text-align: right; font-variant-numeric: tabular-nums; }
+.phc-airtightness-unit { flex: 0 0 auto; color: var(--muted-strong); white-space: nowrap; }
 
 .phc-lock-bubble-text { margin: 0; line-height: 1.4; }
 .phc-lock-bubble-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
@@ -186,6 +196,8 @@
 .pgm-device-check { display: flex; align-items: flex-start; gap: 6px; font-size: var(--text-sm); }
 .pgm-device-check input { margin-top: 2px; }
 .pgm-device-rule, .pgm-device-type { font-size: var(--text-sm); }
+.pgm-device-type { display: flex; flex-direction: column; gap: 2px; }
+.pgm-device-help { color: var(--muted); font-size: var(--text-xs); }
 .phc-form-dialog input.pgm-device-number { max-width: 140px; text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 500px) {
   .phc-form-dialog .pgm-device-row { grid-template-columns: minmax(0, 1fr); }

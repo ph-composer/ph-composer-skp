@@ -82,6 +82,8 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* A cell that still needs something from the user: amber, with the reason in its tooltip. A value not
    yet given reads "?". */
 .phc-table td.is-flagged { background: var(--warning-surface); color: var(--warning-ink); }
+/* A row flagged as a whole (`flagged`) is amber across, the opaque sticky identity cells included. */
+.phc-table tr.is-flagged > td { background-color: var(--warning-surface); color: var(--warning-ink); }
 /* A chip that still needs a value carries the amber itself, in the chip's own shape. */
 .phc-table td.is-flagged.has-chip { background: transparent; }
 /* A value still to choose reads as an empty slot, not as another hue: white with a dashed amber edge. */

@@ -429,8 +429,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     if (options.actionsCell) options.actionsCell(entry.cells.actions, row);
     var selected = options.selected && options.selected(row);
     var checked = paintRowCheck(cache, entry, row);
+    // `flagged(row)`: a row that needs something from the user as a whole is amber across, its identity cells too.
+    var flagged = Boolean(options.flagged && options.flagged(row));
     entry.node.className = "tier-" + row.depth + (row.heading ? " is-heading" : "") +
-      (selected ? " host-selected" : "") + (checked ? " is-checked" : "");
+      (selected ? " host-selected" : "") + (checked ? " is-checked" : "") + (flagged ? " is-flagged" : "");
     if (row.depth < tiers(cache) && !row.heading) entry.needChevron();
     if (entry.target) entry.target.disabled = Boolean(options.disabled);
     if (entry.chevron) {
@@ -590,13 +592,17 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
 
 
-  /* A tree may open a narrow view at its first identity column. Each mount keeps the one-time
-     orientation and later manual pans; no columns are reordered or hidden. */
+  /* A narrow view (500 px or less, where Actions and Hierarchy stop sticking) opens at its first identity
+     column. A mount turns once each time the panel becomes narrow, whether it opened narrow or was narrowed
+     later, and keeps any pan made since; no columns are reordered or hidden. Callers run it after a paint and
+     after a resize. */
   function orientNarrow(root) {
     var cache = root._table;
-    if (!cache || cache.initialScrollSet || !cache.empty.hidden || !root.clientWidth) return;
-    cache.initialScrollSet = true;
-    if (window.innerWidth > 500 || root.scrollLeft) return;
+    if (!cache || !cache.empty.hidden || !root.clientWidth) return;
+    if (window.innerWidth > 500) { cache.orientedNarrow = false; return; }
+    if (cache.orientedNarrow) return;
+    cache.orientedNarrow = true;
+    if (root.scrollLeft) return;
     var first = cache.columns.filter(function (column) {
       return column[0] !== "actions" && column[0] !== "hierarchy" && !cache.headers[column[0]].hidden;
     })[0];

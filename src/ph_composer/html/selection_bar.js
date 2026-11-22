@@ -39,16 +39,24 @@ PhComposerUI.define("selection_bar", ["dom", "icons"], function (dom, icons) {
      the owner places the bar after the work surface. `fit`, if given, sizes the work surface around the bar:
      it runs with the bar floating, and again if it docks. */
   SelectionBar.prototype.reserve = function (scroll, keep, fit) {
-    var root = this.root;
+    // Measuring sets the padding afresh, which would pull a scroll near the end back; the scroll is put back after.
+    var root = this.root, scrolled = scroll.scrollTop;
     root.classList.remove("is-docked");
     scroll.style.paddingBottom = root.hidden ? "" : (root.offsetHeight || FALLBACK_HEIGHT) + CLEARANCE + "px";
     if (fit) fit();
+    // The bar floats a little above the scroller's bottom edge, by however much its container's layout puts
+    // beneath the table; the padding covers that too, so the last row can still scroll clear of the bar.
+    if (!root.hidden) {
+      var over = scroll.getBoundingClientRect().bottom - root.getBoundingClientRect().top + CLEARANCE;
+      if (over > parseFloat(scroll.style.paddingBottom)) scroll.style.paddingBottom = Math.ceil(over) + "px";
+    }
     if (!root.hidden && keep !== undefined &&
         root.getBoundingClientRect().top < scroll.getBoundingClientRect().top + keep) {
       root.classList.add("is-docked");
       scroll.style.paddingBottom = "";
       if (fit) fit();
     }
+    if (scroll.scrollTop !== scrolled) scroll.scrollTop = scrolled;
   };
 
   return { SelectionBar: SelectionBar };

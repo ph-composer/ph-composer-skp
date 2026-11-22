@@ -115,17 +115,22 @@
 .phc-segment-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .phc-segment-flag { display: inline-flex; color: var(--warning-ink); }
 .phc-segment-flag[hidden], .phc-segment-tags[hidden] { display: none; }
-.phc-segment-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.phc-segment-tag { padding: 0 6px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill);
-  background: var(--paper); color: var(--muted); font-size: var(--text-xs); font-weight: 400; line-height: 16px;
-  white-space: nowrap; }
+/* The tags keep to the heading's second line: in a Name column narrowed below them the last one is cut, its words
+   kept in its tooltip or accessible name. */
+.phc-segment-tags { display: flex; flex-wrap: nowrap; gap: 4px; min-width: 0; overflow: hidden; }
+.phc-segment-tag:last-child { flex-shrink: 1; }
+.phc-segment-tag { flex: 0 0 auto; min-width: 0; overflow: hidden; padding: 0 6px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill); background: var(--paper); color: var(--muted); font-size: var(--text-xs);
+  font-weight: 400; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
 /* A tag that opens an explanation (a contribution's `open`) is a button in the tag's shape. */
 .phc-workspace .phc-table button.phc-segment-tag.is-action { width: auto; min-width: 0; height: auto; min-height: 0;
   margin: 0; padding: 0 6px; border-radius: var(--radius-pill); background: var(--paper); color: var(--muted);
   font-size: var(--text-xs); line-height: 16px; box-shadow: none; cursor: pointer; }
 .phc-workspace .phc-table button.phc-segment-tag.is-action:hover { border-color: var(--muted); color: var(--ink); }
-.phc-segment-rename { display: flex; align-items: center; gap: 2px; min-width: 0; }
-.phc-segment-rename input { min-width: 0; flex: 1 1 auto; font-weight: 600; }
+/* A new Segment's name field takes the whole Name column on the heading's first line, its check and cross on the
+   second, where the tags go. */
+.phc-segment-rename { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
+.phc-segment-rename input { flex: 1 0 100%; min-width: 0; font-weight: 600; }
 .phc-overview .phc-new-segment { flex: 0 0 auto; }
 
 /* The Building Segment settings dialog: General, then each registered section, label beside control. Its rules

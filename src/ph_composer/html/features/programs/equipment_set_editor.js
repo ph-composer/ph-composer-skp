@@ -16,7 +16,8 @@ function (ui, tables, requests, DeviceDialog) {
   var PREFIX = "ph_composer.programs.equipment_sets.";
   var COLUMNS = [["actions", "Actions"], ["device", "Device"], ["quantity", "Quantity"], ["energy", "Energy demand"],
     ["inside", "In conditioned space"], ["reference", "Reference quantity"]];
-  var WIDTHS = { device: 220, quantity: 90, energy: 170, inside: 150, reference: 160 };
+  // Sized for the residential default's names and Phius rule lines at the panel's usual width.
+  var WIDTHS = { device: 320, quantity: 80, energy: 220, inside: 130, reference: 160 };
 
   function SetEditor(host) {
     var self = this;
