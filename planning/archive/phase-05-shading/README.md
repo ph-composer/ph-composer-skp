@@ -8,7 +8,7 @@ ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 Tag Faces and Groups as shading from the right-click menu and export them as honeybee orphaned
 Shades, which PHX turns into shading components in WUFI-Passive and METr. No solar or shading
 solver. Follows [Phase 4: climate](../phase-04-climate/README.md) and precedes
-[Phase 6: Programs](../../features/phase-06-program/README.md). One feature, one flat packet.
+[Phase 6: Programs](../phase-06-program/README.md). One feature, one flat packet.
 
 ## Read order
 

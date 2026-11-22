@@ -65,7 +65,7 @@ only when all three are done and its evidence file exists.
 | [P4-09](phases/p4-09-electric-heaters.md) | Electric heaters | Requested | P4-07; the interview | | | | | | M09 |
 | [P4-10](phases/p4-10-pumps.md) | Pumps | Requested | P4-07; the interview | | | | | | M10 |
 | [P4-11](phases/p4-11-fans.md) | Fans | Requested | P4-10; the interview | | | | | | M11 |
-| [P4-12](phases/p4-12-appliances.md) | Appliances | Superseded by [Phase 4a](../phase-06-program/README.md) (Q4a-03) | n/a | | | | | | M12 |
+| [P4-12](phases/p4-12-appliances.md) | Appliances | Superseded by [Phase 4a](../../archive/phase-06-program/README.md) (Q4a-03) | n/a | | | | | | M12 |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping | Requested | P4-06; Phase 3b edge stages; the interview | | | | | | M13 |
 | [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting | Requested | P4-04, P4-13; Phase 3b edge stages; the interview | | | | | | M14 |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Acceptance and handoff | Scoped | all stages | | | | integration | | M15 |
@@ -110,8 +110,8 @@ only when all three are done and its evidence file exists.
 | Units Q3: power, energy, capacity, litres, ventilator efficiency displays | [units packet](../cross-phase/units/STATUS.md) | P4-05, P4-07, later families | Scoped (D4-11) |
 | The edge tagging rules in `context/`, the registry question (D3b-01) and moving the run builder to `core/` | Phase 3b P3b-09 handoff | P4-13 | Waiting on Phase 3b |
 | The balance by ventilator and the Ventilation and Heat pump assignment surfaces | Spaces STATUS, "Deferred out of this plan" | P4-05 (balance, Q11); Zone views not built (Q10) | Scoped |
-| Mechanical cooling and the mechanical room temperature (C4a-5): a Building Segment settings section and export contributor setting `set_points.mechanical_cooling` and `mech_room_temp` only, beside the set points Programs writes | [Phase 6 handoff](../phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) | Not yet allocated | Owed |
-| The ventilation unit per Space: Phase 6 ships the per-Zone airflow mode and per-Space rates; honeybee-ph carries the unit on the Room. The balance reads `by_program_zone_count` (was `inheriting_count`, CONTRACTS section 4) and skips a By Program Zone | [Phase 6 handoff](../phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) | P4-03, P4-05 | Owed |
+| Mechanical cooling and the mechanical room temperature (C4a-5): a Building Segment settings section and export contributor setting `set_points.mechanical_cooling` and `mech_room_temp` only, beside the set points Programs writes | [Phase 6 handoff](../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) | Not yet allocated | Owed |
+| The ventilation unit per Space: Phase 6 ships the per-Zone airflow mode and per-Space rates; honeybee-ph carries the unit on the Room. The balance reads `by_program_zone_count` (was `inheriting_count`, CONTRACTS section 4) and skips a By Program Zone | [Phase 6 handoff](../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) | P4-03, P4-05 | Owed |
 
 ## Deferred out of this plan
 
@@ -122,7 +122,7 @@ only when all three are done and its evidence file exists.
 | Boilers, wood boilers, district heat, PV (Q7) | Later scope; PV with roadmap 5.5 |
 | Equipment library kinds (Q8) | Roadmap 5.4 |
 | Ventilation and Heat pump views of the Zones tab (Q10) | After MS2, if wanted; the Zone views contract admits them |
-| Occupancy, lighting and the other Room loads (Q12) | [Phase 6 Programs](../phase-06-program/README.md): implemented through P4a-12 (2026-11-21), host acceptance owed |
+| Occupancy, lighting and the other Room loads (Q12) | [Phase 6 Programs](../../archive/phase-06-program/README.md): complete 2026-11-22 and archived; PG01 to PG12 pass on the host |
 
 ## Owed after the wireframe review
 

@@ -1,7 +1,7 @@
 # P4a-09: The Zones / Programs view
 
 DATE: 2026-11-15
-STATUS: Implemented on branch `feature/phase-06-program-p4a-09` (2026-11-20); PG09's host rows owed. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#548](https://github.com/ph-composer/ph-composer-skp/pull/548), squash `b7e8af70`). PG09 passes on the host after its fix in [#554](https://github.com/ph-composer/ph-composer-skp/pull/554); Ed approved its host UI polish 2026-11-22. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

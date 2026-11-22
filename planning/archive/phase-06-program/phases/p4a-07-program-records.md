@@ -1,7 +1,7 @@
 # P4a-07a: Program, Schedule and Equipment Set records
 
 DATE: 2026-11-15
-STATUS: Implemented on branch 2026-11-20 as P4a-07a; PG07's native Undo, Redo and reopen rows owed. Split on 2026-11-20: steps 7 and 8 (library kinds and dependency copy) and test 6 moved to [P4a-07b](p4a-07b-program-library-kinds.md). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#545](https://github.com/ph-composer/ph-composer-skp/pull/545), squash `cb991fd0`) as P4a-07a. PG07 passes on the host. Split on 2026-11-20: steps 7 and 8 (library kinds and dependency copy) and test 6 moved to [P4a-07b](p4a-07b-program-library-kinds.md). Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

@@ -5126,7 +5126,7 @@
       "id": "PG01",
       "label": "Building Segment membership on the installed RBZ with the panel closed, in a fresh synthetic Model: the walkthrough creates a second Segment, moves Zones into it and out of every Segment, deletes it with its Zones moved to none, is refused deleting the last Segment (zone.option_last_segment) and moves a Zone back, all through registered operations; native Undo and Redo of each step; save, fresh-process reopen and the same memberships read back",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/options/*",
         "src/ph_composer/features/zones/zone/*",
@@ -5142,7 +5142,7 @@
       "id": "PG02",
       "label": "Building Segment heading rows and settings on the installed RBZ: through the public API with the panel closed, New Building Segment with a Zone moved in and a settings save (rename, a development namespace's payload) are each one native Undo step that the bridge undoes and redoes, and a settings-only save is not blocked by a locked member Zone; the panel gestures (heading rows, New, Move, Delete, the settings dialog) with Ed at the mouse",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/options/*",
         "src/ph_composer/features/zones/zone/selection.rb",
@@ -5163,7 +5163,7 @@
       "id": "PG03",
       "label": "Building Segment export rules on the installed RBZ: the two-Segment reference exports through Export with the ADU Zone in no Building Segment after the panel's Attached zone offer (one native Undo step, undone and redone from the Edit menu), the left-out Zone, Spaces and Edges absent from the HBJSON and named in the report, the move-back notice; the WUFI XML and METr JSON from the pinned PHX read back the attached zone",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/export.rb",
         "src/ph_composer/features/zones/faces/export.rb",
@@ -5182,7 +5182,7 @@
       "id": "PG04",
       "label": "Phius certification on Building Segments on the installed RBZ: the settings dialog's Phius certification section shows the defaults on a new Segment, a change to all five values saves as one native Undo step that the Edit menu undoes and redoes, the values survive save and fresh-process reopen, Delete of a Segment with settings names them and a merge keeps the survivor's only; Export of the two-Segment reference writes each Segment's values to its BldgSegment and the WUFI XML and METr JSON from the pinned PHX read them back per Variant",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/certification/*",
         "src/ph_composer/html/features/certification/section.js",
@@ -5200,7 +5200,7 @@
       "id": "PG05",
       "label": "Detailed airflows per Zone on the installed RBZ: in the Spaces view a By Program Zone's cells read By Program and its sums a dash; typing one rate on one Space switches the Zone to detailed with the notice, its blanks reading 0; From Program on the Zone row confirms and clears every Space's rates as one native Undo step that the Edit menu undoes and redoes; a Zone with no Spaces shows the amber No Spaces row and the export preflight warns without blocking; Export of the reference writes 0 for a blank in a detailed Zone and no rate in a By Program Zone, and the WUFI XML and METr JSON from the pinned PHX read them back",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/spaces/scan/metrics.rb",
         "src/ph_composer/features/spaces/reads.rb",
@@ -5220,7 +5220,7 @@
       "id": "PG06",
       "label": "Building Segment airtightness on the installed RBZ: the settings dialog's Airtightness section shows n50, a blank test result and the default wind exposure on a new Segment, its unit follows the basis, a zero or negative result holds Save, a change saves as one native Undo step that the Edit menu undoes and redoes, the values survive save and fresh-process reopen, Delete of a Segment with settings names them; Export of a two-Segment reference with Spaces writes each Zone's Infiltration and the Segment's wind exposure, and the WUFI XML and METr JSON from the pinned PHX read back the entered q50, with PHX's n50 the entered n50, within 0.01",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/*",
         "src/ph_composer/html/features/programs/airtightness.js",
@@ -5235,7 +5235,7 @@
       "id": "PG07",
       "label": "Program, Schedule and Equipment Set records on the installed RBZ with the panel closed, in a fresh synthetic Model: the Programs walkthrough reads the residential default Program, its Schedules and the default Equipment Set unwritten, creates a Schedule and a Program, edits the default Program (writing it with its Schedules in one step), adds a device to the default Set, makes the new Program the default, deletes the residential default and resets it, all through registered operations; native Undo and Redo of each step from the Edit menu; save, fresh-process reopen and verify",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/schedule.rb",
         "src/ph_composer/features/programs/equipment_types.rb",
@@ -5255,7 +5255,7 @@
       "id": "PG07b",
       "label": "Program, Schedule and Equipment Set library kinds on the installed RBZ with the panel closed, in a fresh synthetic Model: the Program library walkthrough loads tools/examples/library/programs.json, copies the library Program with its two Schedules as the Model's default in one step and copies it again, reusing them; native Undo and Redo of the copy from the Edit menu",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/library/coordinator.rb",
         "src/ph_composer/library/dependencies.rb",
@@ -5271,7 +5271,7 @@
       "id": "PG08",
       "label": "Dwellings and Single dwelling on the installed RBZ, in a fresh synthetic Model of the house and apartment references: the House Segment reads as a single dwelling, its bedrooms saved in its settings; switching Single dwelling off in the Occupancy section makes the House Dwelling its Zones join, and back on clears them and deletes it, each one Save; per-Zone assign_dwelling, set_counts and assign_program each one step; a Dwelling across two Segments refused; copying a Zone keeps its Dwelling; native Undo and Redo of each from the Edit menu; the Single dwelling tag and occupancy findings on the Segment headings in Geometry and Spaces, Ed at the mouse",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/extension_staging.rb",
         "src/ph_composer/features/zones/zone/steps.rb",
@@ -5288,7 +5288,7 @@
       "id": "PG09",
       "label": "The Zones / Programs view on the installed RBZ, in fresh synthetic Models of the house and apartment references, Ed at the mouse: the view listed after Spaces; the house's locked Zones and the lock bubble from a locked cell and the Single dwelling tag, Open settings opening the Segment's settings; the house row's bedrooms, occupants and Equipment Set saved; Single dwelling switched off and the Dwelling bubble's choice and units; apartments made one Dwelling each and Program, Dwelling and Equipment Set applied from the selection bar; a library Program from an added file copied on choice and reused by a second Zone; a non-residential Segment's flags and assignments; each cell edit and bar choice one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 px; UI polish review recorded",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/occupancy_reads.rb",
         "src/ph_composer/features/programs/occupancy_declarations.rb",
@@ -5308,7 +5308,7 @@
       "id": "PG10",
       "label": "The Program export on the installed RBZ, in a fresh synthetic Model of the five journeys (tests/program_export_test.rb's House, Apartments and School): the export preflight shows the set points and non-residential Set warnings, a Locate opening the Zones / Programs view with its Zones checked; the export writes, and its HBJSON converted by PHX 1.59.1 reads back each Segment's units, occupants, bedrooms, devices and set points; the Comfort section of each Segment's settings shows its set points; a Program value cleared blocks the export",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/export_plan.rb",
         "src/ph_composer/features/programs/ruleset_export.rb",
@@ -5325,7 +5325,7 @@
       "id": "PG11",
       "label": "The Programs tab on the installed RBZ, in a fresh synthetic Model with a library file of Phius Programs added, Ed at the mouse: the tab after Zones with Programs, Schedules and Equipment Sets subtabs, each with its sidebar; a record opened from its row; a library Program added from the Programs sidebar with its Schedules; the accordion cards opened and closed by pointer and keyboard, their summaries and missing-value flags; a rule load switched to a fixed value and back; a value typed and committed; a Schedule chosen and one made with + New Schedule; New, rename in place, Duplicate, Delete of a used Program with a replacement (its Zones and Segment settings moved) and Reset on the residential default; each edit one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 px with the sidebar beneath the editor; UI polish review recorded",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/assignments.rb",
         "src/ph_composer/features/programs/operations.rb",
@@ -5345,7 +5345,7 @@
       "id": "PG11b",
       "label": "The Schedule and Equipment Set editors on the installed RBZ, in a fresh synthetic Model, Ed at the mouse: a fractional, an activity, a temperature and a ventilation Schedule edited field by field, the ventilation total amber until 24 h and Escape restoring the periods, the strip and week row following each save; an Equipment Set's devices added (a gas dryer's gas fields shown only for a gas dryer), edited from the row's Edit and from a row click, and deleted with the confirmation naming the Set and its Dwellings; each edit one native Undo step from the Edit menu, then Redo; IP and SI; the panel at 420 and 360 px; UI polish review recorded",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/programs/operations.rb",
         "src/ph_composer/features/programs/declarations.rb",
@@ -5365,7 +5365,7 @@
       "id": "PG12",
       "label": "The Phase 4a integrated run on the installed RBZ from a fresh process, on the three synthetic reference models (the House, the Apartments and common areas, the two Segments): Building Segments and their settings (certification, airtightness, occupancy), Spaces airflows, Programs, Dwellings and Equipment Sets read and written through registered operations; Export of each and the WUFI XML and METr JSON from the pinned PHX read back; native Undo and Redo from the Edit menu of one step per feature; the panel's views and dialogs on those models, Ed at the mouse",
       "mode": "mixed",
-      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-06-program/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/*",
         "src/ph_composer/features/spaces/*",

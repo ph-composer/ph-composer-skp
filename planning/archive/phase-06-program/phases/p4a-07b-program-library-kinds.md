@@ -1,7 +1,7 @@
 # P4a-07b: Program, Schedule and Equipment Set library kinds
 
 DATE: 2026-11-20
-STATUS: Implemented on branch `feature/phase-06-program-p4a-07b` (2026-11-20); PG07b's host rows owed. Split from P4a-07 and authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#546](https://github.com/ph-composer/ph-composer-skp/pull/546), squash `e6166275`). PG07b passes on the host. Split from P4a-07 on 2026-11-20. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

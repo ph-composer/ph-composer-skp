@@ -1,7 +1,7 @@
 # P4a-10: Program export
 
 DATE: 2026-11-15
-STATUS: Implemented on branch `feature/phase-06-program-p4a-10` (2026-11-20); PG10's host rows owed to the batched sitting. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-21 ([#549](https://github.com/ph-composer/ph-composer-skp/pull/549), squash `9105737e`). PG10 passes on the host after the PHX 1.59.3 pin in [#556](https://github.com/ph-composer/ph-composer-skp/pull/556). Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

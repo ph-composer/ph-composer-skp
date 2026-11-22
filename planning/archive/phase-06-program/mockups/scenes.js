@@ -1,6 +1,6 @@
 "use strict";
 /* Programs prototype: the scenes. Each shot is a PNG beside this page, captured by
-   `make ui-gallery MOCKUP=planning/features/phase-06-program/mockups/programs.html`, which also rewrites the
+   `make ui-gallery MOCKUP=planning/archive/phase-06-program/mockups/programs.html`, which also rewrites the
    scene table in README.md. `do` names steps in app.js; `size` defaults to 1280x800; `hover` and `select`
    are Playwright selectors acted on after the replay. */
 var SCENES = [

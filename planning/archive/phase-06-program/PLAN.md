@@ -1,7 +1,7 @@
 # Phase 4a delivery plan: Building Segments and Programs on the Zones tab
 
 DATE: 2026-11-15
-STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. The Programs tab review (G1) is done; P4a-12 is the closing outline. Progress is read from [STATUS](STATUS.md).
+STATUS: Complete 2026-11-22. Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated; not the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository, both deferred. P4a-01 to P4a-12 merged to main (PRs #539 to #552), the host sitting's fixes in #554 to #557; PG01 to PG12 pass on the host ([STATUS](STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -16,7 +16,7 @@ with the occupancy, loads, airtightness and ventilation the user set, read back 
 Behavior: the [Phase 4a PRD](PRD.md) and the [Building Segments PRD](building-segments/PRD.md).
 Records and seams: [CONTRACTS](CONTRACTS.md). Answers: [DECISIONS](DECISIONS.md). Acceptance
 register: [ACCEPTANCE](ACCEPTANCE.md). Library files: the
-[ph-composer-standards plan](../unscheduled/ph-composer-standards/README.md), whose stage S3 needs
+[ph-composer-standards plan](../../features/unscheduled/ph-composer-standards/README.md), whose stage S3 needs
 P4a-07b.
 
 Out of this plan: the items the PRDs list as out of scope, the honeybee-ph and PHX fix for F4a-13

@@ -1,7 +1,7 @@
 # P4a-08: Dwellings, Zone assignments and Single dwelling
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#547](https://github.com/ph-composer/ph-composer-skp/pull/547), squash `c2f771e5`). PG08 passes on the host; its Apartments derivations were not exercised there. Rewritten after the Programs tab review. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

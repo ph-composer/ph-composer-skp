@@ -125,7 +125,8 @@ contract.
 | The first bridge launch after a clean quit sometimes brought SketchUp up without the bridge; the next launch found the process, could not quit it within 30 s, killed it, and the relaunch loaded normally. | Treat a launch that ends with "SketchUp not running" and no bridge as retryable. |
 | `open` immediately after a kill can fail with `LSOpenURLs ... error -600` while the process is still exiting. | Wait for the process to disappear, then retry. |
 | SketchUp has one Plugins folder per major version; a `.rb` file placed there loads at startup. | The bridge is installed there and never in the RBZ. |
-| A launch fails while the Mac screen is locked. | A gate needs an unlocked screen. |
+| A launch fails while the Mac screen is locked. SketchUp 2026 loads no Ruby extension until the app is activated, and a locked screen cannot activate it: a launch during a lock opened the document with no extension and no bridge. Background computer-use clicks are refused while locked. 26.1.188, 2026-11-21. | A gate needs an unlocked screen. When a launch opens the document with no bridge, check for a lock before retrying. |
+| Background computer-use control (`app_*` clicks, keys and scrolls) into the panel's HtmlDialog web view is refused as if it were the canvas. 26.1.188, 2026-11-21. | Real panel input needs full-screen control from the top-level session; the bridge, System Events and scripted panel reads do not. |
 | A host check can fail because SketchUp is running with no Model open, which looks the same from outside as a running idle process. | Verify an active Model, not just a live process, before reading a gate result. |
 
 ## The panel's embedded browser

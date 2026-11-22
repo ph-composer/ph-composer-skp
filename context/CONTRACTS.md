@@ -764,9 +764,11 @@ Dwelling, as honeybee-ph's Set Residential Program builds one per dwelling group
 `<program>-<dwelling>` (a single dwelling's house is named by its Segment id): people per m² of the Rooms' Floor
 Face area from the Dwelling's occupants over the presence Schedule's mean; lighting per m² from honeybee-ph
 `phius_residential.lighting_interior` over its iCFA and units, as peak watts over the lighting Schedule's mean ×
-8,760 h, with a `PhPhiusLightingInterior` device on the Lighting; hot water per m² from Building America gallons a
-day by units and bedrooms, as Set Residential Program codes it. A Zone in no Dwelling on such a Program is a group of
-its own, one unit and no occupants, as honeybee-ph works its rules over an untagged Room. Any other Program
+8,760 h, with a `PhPhiusLightingInterior` device on the Lighting, which PHX 1.59.2 and later keeps when it merges a
+Segment's Rooms, whichever Room comes first (`tests/python/test_program_phx_round_trip.py`); hot water per m² from
+Building America gallons a day by units and bedrooms, as Set Residential Program codes it. A Zone in no Dwelling on
+such a Program is a group of its own, one unit and no occupants, as honeybee-ph works its rules over an
+untagged Room. Any other Program
 exports once under its own id. Ventilation is the Program's, its empty terms 0; Infiltration is the Program's,
 which the airtightness section replaces on a Segment with a test result. Every load id is the ProgramType's with
 the load's name.

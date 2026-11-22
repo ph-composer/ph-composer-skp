@@ -1,7 +1,7 @@
 # P4a-11b: The Schedule and Equipment Set editors
 
 DATE: 2026-11-20
-STATUS: Merged to main 2026-11-21 (#551, `182f2f63`); PG11b host rows owed. Split from P4a-11 on 2026-11-20 and authorized with it ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-21 ([#551](https://github.com/ph-composer/ph-composer-skp/pull/551), squash `182f2f63`). PG11b passes on the host; Ed approved its host UI polish 2026-11-22. Split from P4a-11 on 2026-11-20. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

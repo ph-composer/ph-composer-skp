@@ -1,7 +1,7 @@
 # P4a-02: Segment heading rows, table management and the settings dialog
 
 DATE: 2026-11-15
-STATUS: Implemented on branch 2026-11-20 ([STATUS](../STATUS.md)); PG02 panel gestures owed. Authorized 2026-11-20 with the rest of Phase 4a.
+STATUS: Merged to main 2026-11-20 ([#540](https://github.com/ph-composer/ph-composer-skp/pull/540), squash `90a5878f`). PG02 passes on the host; Ed approved its host UI polish 2026-11-22. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

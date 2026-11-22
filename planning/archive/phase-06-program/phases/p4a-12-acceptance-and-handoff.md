@@ -1,7 +1,7 @@
 # P4a-12: Acceptance and handoff
 
 DATE: 2026-11-15
-STATUS: Implemented on branch `feature/phase-06-program-p4a-12` (2026-11-21): steps 1, 3, 4 and 5 done; step 2, the integrated run, owed to the batched host sitting with every other PG host row. Written out from the outline on 2026-11-21. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-21 ([#552](https://github.com/ph-composer/ph-composer-skp/pull/552), squash `08a06474`): steps 1, 3, 4 and 5 in the PR; step 2, the integrated run, in the batched host sitting, where PG12 passes after the PHX 1.59.3 pin in [#556](https://github.com/ph-composer/ph-composer-skp/pull/556). Written out from the outline on 2026-11-21. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -66,3 +66,9 @@ later, when the sitting passes every owed PG row and PG12 or records an accepted
 ## Open
 
 Nothing beyond the stages' own contract questions.
+
+## Closed 2026-11-22
+
+Merged as #552. The sitting ran step 2: PG12 passes after the PHX 1.59.3 pin (#556), and every PG case passes on
+the host. The archive PR moved the packet and closes #538; the final state is in
+[STATUS](../STATUS.md#host-sitting).
