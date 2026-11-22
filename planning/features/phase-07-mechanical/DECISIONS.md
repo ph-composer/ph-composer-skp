@@ -1,7 +1,7 @@
 # Phase 4, mechanical: findings from source, and the decisions that follow
 
 DATE: 2026-10-21
-STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers.
+STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, all open.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -31,8 +31,8 @@ not that the consequence was reproduced on a host or in a test.
 | F6 | `Section.required_for_export` defaults True; Spaces is required (D3a-9); the thermal-bridge section will be the first optional one (D3b-20, H18) | Equipment chooses (D4-06) |
 | F7 | `stack.PACKAGES` lists `honeybee_ph` and `honeybee_energy_ph` and not `honeybee_phhvac`; `load` raises `ValueError` for an unlisted top-level package; the pinned wheel ships `honeybee_phhvac` | One line in P4-01 (CONTRACTS A1) |
 | F8 | `html/index.html` holds a disabled "Systems" button beside a disabled "Thermal Bridges" button, each with `data-tooltip="Planned"`; a `data-pane` is created by `panel.section` when absent, the tab button is not | P4-05 edits the composition root once (A2); 3b's P3b-05 edits the sibling button |
-| F9 | `core/units.rb` has `airflow`, `volume`, `heat_loss_rate`, `conductivity`, `length` and no electric-efficiency, litre or temperature quantity; the panel registry has 18 quantities (units STATUS) | A3 adds what V4 and the tank fields need |
-| F10 | Spaces' `ph_composer.spaces.all` `zones` rows carry `airflows` (null while any Space inherits), `inheriting_count` and `imbalanced`, and `Spaces::Metrics.imbalanced?` is the 10 percent rule | The balance by ventilator sums those rows per served Zone and reuses the rule (D4-10) |
+| F9 | `core/units.rb` has `airflow`, `volume`, `heat_loss_rate`, `conductivity`, `length` and no electric-efficiency, litre or temperature quantity; the panel registry has 18 quantities (units STATUS) | A3 adds what V4 and the tank fields need. Superseded 2026-11-22 by F31: `temperature` exists; electric efficiency and litres are still missing |
+| F10 | Spaces' `ph_composer.spaces.all` `zones` rows carry `airflows` (null while any Space inherits), `inheriting_count` and `imbalanced`, and `Spaces::Metrics.imbalanced?` is the 10 percent rule | The balance by ventilator sums those rows per served Zone and reuses the rule (D4-10). Changed 2026-11-22 (F24): the rows carry `airflow_mode` in place of `inheriting_count`, and `airflows` is null while the Zone is By Program |
 | F11 | `features/zones/colour_modes.rb` registers `entity_kind: "zone"` modes whose projection walks `entries(read.model)` | `by_ventilator` takes that shape; P4-01 confirms the projection can key by Zone id (CONTRACTS section 7, question 3) |
 
 ### honeybee-ph 1.33.65 and PHX
@@ -133,7 +133,8 @@ post-MVP request.
 
 D4-13's tab row gains two neighbours settled in the Climate packet on 2026-11-16: Climate is the
 first primary tab, and the row reads Climate, Zones, Assemblies, Window Types, Thermal Bridges,
-Programs, Mechanical, Library, Export.
+Programs, Mechanical, Library, Export. The row shipped with Programs after Zones (Part 4, F32);
+Mechanical's place in it is D4-27.
 
 ### Open after the review
 
@@ -142,7 +143,8 @@ Programs, Mechanical, Library, Export.
    on an indoor model to export. Ed has not confirmed that reading.
 2. D4-20 asks that kinds accept added fields. CONTRACTS section 2 fixes each kind at
    `schema_version` 1 with its final field set because the engine has no migrations. How a later
-   stage adds documentation fields is unanswered.
+   stage adds documentation fields is unanswered. Closed 2026-11-22 (Part 4, F34): the kind's
+   `schema_version` moves and the fixtures are rewritten.
 3. The HSPF conversion and the climate derating are not written. Every derived number on the
    Blended result wireframe is a placeholder. The cooling coil temperature shown is honeybee-ph's
    default and was not checked against the estimator, and the estimator's split above 682 kBtu/h
@@ -152,7 +154,65 @@ Programs, Mechanical, Library, Export.
 5. Pumps, Fans and Electric Heating have their table shape and columns from D4-13 and D4-20.
    Their interviews are otherwise open; Q6 still describes the Fan record.
 6. A served Room needs a service hot water load before its system means anything downstream
-   (F18). Phase 4a owns loads.
+   (F18). Phase 4a owns loads. Closed 2026-11-22 (Part 4, F33): every exported Room's ProgramType
+   carries one.
+
+## Part 4: review after Programs, 2026-11-22
+
+Phase 3b (thermal bridges), Climate, Shading and Programs all merged after Parts 1 and 2 were read
+at `420c783a`. This part re-reads what the packet depends on at `main` `8c710412`, the day
+[Phase 6: Programs](../../archive/phase-06-program/README.md) was archived. Findings continue from
+F20 and decisions from D4-20.
+
+Two kinds of result. Where the code settles a fact, the packet's documents are corrected in the
+same change and the finding says where. Where the code would reverse or extend an answer Ed gave,
+the row is an open decision with a recommendation: it binds nothing, and the earlier answer stands
+in CONTRACTS and the stage documents until Ed answers.
+
+"Run" means run on 2026-11-22 against the pinned wheels in this repository's virtual environment.
+"Read" means read in source and not reproduced.
+
+### Findings
+
+| # | Finding | Consequence |
+| --- | --- | --- |
+| F21 | Phase 3b is complete: P3b-01 to P3b-09 merged through PRs #302 and #308 to #315 and the packet was archived on 2026-10-26. The run builder still lives in `features/thermal_bridges/runs/` | Applied. The P3b-01 ordering gate, the shared-file coordination with a Phase 3b branch and the edge-stage gates on P4-13 and P4-14 are met. Piping and ducting wait on their interviews and on this phase's own stages. Moving the run builder to `core/` is still P4-13's |
+| F22 | `FEATURES` in `extension.rb` is `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs]`. `stack.PACKAGES` now lists `PHX` and still not `honeybee_phhvac`. Run against the `PLANNING_IDS` pattern: a planted `P4-01`, `M01`, `P4-08b` and `M16` all pass the lint | Applied. Equipment registers after `Programs`. A1 stands as drafted. A4 stands without the Phase 3b ordering and must also catch the lettered stage id and the two-digit register ids |
+| F23 | The pins moved: honeybee-ph 1.33.68 (was 1.33.65) and, as an optional `phx` test group that is not shipped, PHX 1.59.4. Run at 1.33.68: `RoomPhHvacProperties` has the methods F12 lists; `PhHotWaterSystem.recirc_temp` and `recirc_hours` have no setter and `number_tap_points` has one; no attribute of the class names a calculation method. [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) is open | F12, F14 and F17 hold at the new pin, so D4-12 and D4-18 stand. The field lists in the three PRDs were read at 1.33.65 and were not re-read; P4-01 re-reads the ones its stages use |
+| F24 | Spaces' reads changed in Phase 6 (`context/CONTRACTS.md`, "Translation sections and artifacts"; API 1.77). A Zone row carries `airflow_mode`, `by_program` until any of its Spaces stores a rate and `detailed` after; its `airflows` are null while By Program. Zone rows no longer carry `inheriting_count`; a `building_segments` row carries `by_program_zone_count`. Read in PHX 1.59.4 (`from_HBJSON/create_rooms.py`): a Space with no rate of its own takes its share of the Program's flow as both supply and extract | Applied as renames: F10, CONTRACTS section 4, P4-05 and M05 say "By Program" where they said "inherits". What the balance shows for a By Program Zone is D4-24 |
+| F25 | The [Phase 6 handoff](../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) left open how a Space would name a ventilation unit of its own. Run at 1.33.68: a honeybee-ph `Space` has no ventilation or unit attribute. Read in PHX 1.59.4 (`from_HBJSON/create_rooms.py`): each Space takes `vent_unit_id_num` from its host Room's `ph_hvac.ventilation_system` | The stack has nowhere to put a unit per Space, and V1 already says two different units mean the Zone is split. Serves on the Zone is the whole of it; nothing is added for a Space. That handoff row is closed |
+| F26 | Programs ships a Zone's assignment as a structured extension on the Zone record, `ph_composer.programs.zone_assignment`, not as a record of its own on the Zone Group (`context/CONTRACTS.md`, "Occupancy"). Programs writes it through Zones' proposal participant `ph_composer.zones.stage_extension`, which checks the payload with the namespace's validator and refuses as any Zone write does. The payload declares its references, so a named record refuses a plain delete as `reference.in_use`, and a delete with a replacement moves each payload in the same Undo step. The declaration admits `one` or `many` (`core/records/extension.rb`), but every reference Programs ships is `one`: no shipped payload exercises the in-use scan or the replacement move over a `many` reference. The payload travels with a copied Zone with no contributor. Declared `required` and claimed through `entity_projections`, it exports from Zones' own section | This is the shipped pattern for what D4-03 and D4-04 design differently: D4-21 |
+| F27 | "Equipment Set" is now a shipped term of Programs: the kind `ph_composer.programs.equipment_set` with prefix `eqs_`, the field `equipment_set_id`, the operations `ph_composer.programs.equipment_sets.*` and the codes `programs.equipment_set_non_residential` and `programs.equipment_watts_residential`. This packet plans the feature id `ph_composer.equipment`, the code noun `equipment` and the prefix `eqa_`, on a tab named Mechanical | D4-22 |
+| F28 | The Building Segment is the unit of export (`context/CONTRACTS.md`, "Building Segments at export"). A Zone in no Building Segment is left out with everything on it, and each owner notes `<noun>.zone_left_out` as info and skips its own findings inside that Zone. PHX merges a Segment's Rooms and writes one Variant per Segment. Programs refuses a Dwelling whose Zones lie in two Segments | Applied: `equipment.zone_omitted` becomes `equipment.zone_left_out` and follows that rule, read from the Zones projection's `exported`. What "for the building" means in D4-15 and D4-17, and an item that serves Zones in two Segments, is D4-23 |
+| F29 | The model assembly now attaches at four hosts, `MODEL`, `SEGMENT`, `ROOM` and `FACE`, in that order (`context/CONTRACTS.md`, "Translation sections and artifacts"). A `SEGMENT` host is the one `BldgSegment` a Segment's Rooms share, changed in place | D4-09's question names three hosts. Its answer stands: a duct or pipe belongs inside equipment's object, which no host is. The Segment settings of F30 attach at `SEGMENT` |
+| F30 | Phase 6 left three `BldgSegment` values to this phase (C4a-5 and its handoff): `set_points.mechanical_cooling`, `mech_room_temp` and `summer_ventilation`. Run at 1.33.68: they default to `False`, 20.0 and a `SummerVentilation` object with eleven fields (ventilation system, daytime and nighttime window and extract air changes, fan powers, the summer bypass mode and three nighttime controls). Read: honeybee_grasshopper_ph's Building Segment component takes `mechanical_cooling` and `mech_room_temp` as inputs (`gh_compo_io/building_segment.py`), and PHX 1.59.4 copies both to the Variant (`from_HBJSON/create_variant.py`). Programs' `SetPointSection.attach` sets `set_points.winter` and `.summer` in place and touches nothing else | Allocated to a new stage, [P4-08b](phases/p4-08b-segment-mechanical-settings.md), register row M16: a Building Segment settings section and its export, by the shipped seam (`context/EXTENSIBILITY.md`, "Building Segment settings"). Whether mechanical cooling is entered or derived is D4-26 |
+| F31 | Both unit registries now carry `temperature`, `temperature_difference`, `power`, `power_per_area`, `airflow_per_person` and `airflow_per_area` (`core/units.rb`, `html/unit_tables.js`). Neither carries an electric-efficiency or a litre quantity | Applied: D4-11 and A3 shrink to `electric_efficiency` and `volume_l`. F9 is superseded |
+| F32 | The tab row as shipped is Climate, Zones, Programs, Assemblies, Window Types, Thermal Bridges, Library, Export, then the reserved disabled Systems button (`html/index.html`). The row noted under "Recorded since" on 2026-11-17 put Programs after Thermal Bridges | A2 still turns the reserved button into the Mechanical tab (D4-13). Where it sits in the row is D4-27 |
+| F33 | Every Program holds a Service hot water load and the Program export writes a `ServiceHotWater` on every ProgramType (`context/CONTRACTS.md`, "Programs, Schedules and Equipment Sets"; `program_sections.py`) | Part 3's open item 6 is closed: an exported Room always carries the load. PHX still reads hot water from the system, not from that load (Phase 6 F4a-11) |
+| F34 | Phase 6 worked under Ed's standing guidance that there are no users and so no migrations: a schema that changes moves its version and the fixtures are rewritten ([Phase 6 CONTRACTS](../../archive/phase-06-program/CONTRACTS.md)). The Zone record moved to schema 3 that way | Part 3's open item 2 is closed: a later stage adds documentation fields by moving the kind's `schema_version` |
+| F35 | Programs works out everything it exports in one pure Ruby plan (`ExportPlan`), which the preflight reads for the same findings, and its Python sections compute nothing beyond honeybee's own conversions (`context/CONTRACTS.md`, "Program export"; AGENTS.md's rule that domain calculations live in Ruby) | Applied to CONTRACTS sections 1 and 6: the tank slotting (D4-07) and the blended heat pump (D4-15) are pure Ruby, read by the preflight and carried to Python as values |
+| F36 | `context/EXTENSIBILITY.md`, "Metadata and structured extension data", names "the future mechanical entities": each new entity keeps a `user_data` map, reads it with `extension_data` and `extension_status`, writes it through one guarded route, follows the lifecycle rules, carries it to its HBJSON object or leaves it out with `export.metadata_omitted`, and gains a row in `docs/USER_DATA.md` | Applied: CONTRACTS section 2 states the obligation and P4-02, P4-03 and P4-06 each gain the step |
+| F37 | The installed-size baseline was reset to 26,093,959 bytes at Phase 6's entry, against a ceiling of 28,000,000 (`tools/runtime/vendor.py`). Phase 6 closed with 1,171,308 bytes under the ceiling, so the ceiling binds before the growth allowance does | Applied: P4-01 measures the installed size at entry, and P4-15 and M15 cite these keys in place of Phase 3b's baseline |
+| F38 | Every Phase 6 export stage added a PHX round trip under `tests/python/test_*_phx_round_trip.py`, run in the `phx` group and skipped without it. This packet sends every PHX claim to metr-export, on the 2026-10-21 fact that PHX was not installed | D4-25 |
+| F39 | Phase 6 shipped the Zones / Programs view: assignment per Zone on the Zones tab, over checked rows, under Building Segment heading rows, with the rows of a single dwelling locked | No change. Q10 keeps a Zone view of equipment for later, and D4-20 puts Serves on each table. P4-05's Zone picker lists Zones under their Building Segment headings as that view does, Zones in no Segment included, and offers a whole Segment at once |
+
+### Decisions open
+
+None is answered. Each names what it would revise.
+
+| ID | Kind | Question | Recommendation | Would revise | Blocks |
+| --- | --- | --- | --- | --- | --- |
+| D4-21 | Code | Is Serves a record of its own on the Zone Group, as planned, or a structured extension on the Zone record, as Programs' assignment is (F26)? | The extension: `ph_composer.equipment.zone_serves` on the Zone record, a `one` reference for the Ventilator and Hot Water System slots and a `many` reference for each later family, written through `ph_composer.zones.stage_extension`, declared `required` and claimed by the equipment export. It retires the `eqa_` id, the Serves reference target, the Zone-copy contributor and CONTRACTS section 7's first question, and a copied Zone keeps what serves it with no code. Costs: every Serves write is a Zone record update, refused on a locked or shared Zone; the generic metadata routes can write the payload, so a rule that spans records is a finding there and a refusal only in equipment's own actions; and the `many` slots of the later families would be the first use of a `many` reference in a payload, which P4-01 proves by test before P4-03 leans on it | D4-03 and D4-04 in mechanism, not in outcome; F1 to F3 | P4-01, P4-03 |
+| D4-22 | Code | Does the feature keep the name `ph_composer.equipment` beside Programs' Equipment Sets (F27)? | No: `ph_composer.mechanical`, the code noun `mechanical`, the folders `features/mechanical/` and `html/features/mechanical/`, matching the tab. "Equipment" stays a glossary word for the records together. Nothing is built, so the rename costs only this packet's documents | The name in D4-02; its answer, one feature, stands | P4-01, P4-02 |
+| D4-23 | Code | A Building Segment exports as its own Variant (F28). What is "the building" for the blended heat pump (D4-15) and the hot water pooling note (D4-17), and may one item serve Zones in two Segments? | Per Building Segment. The blend is worked out once per exported Segment, from the outdoor equipment whose indoor units serve that Segment's Zones. The pooling note reads per Segment. An item serving Zones in two Segments is allowed, as honeybee-ph allows one object on any Rooms, with a non-blocking finding that each Segment's file carries the whole item | D4-15 and D4-17, by making them exact | P4-06, P4-08 |
+| D4-24 | UI, Code | What does the balance by ventilator show for a served Zone that is By Program (F24)? | The Program's flow for that Zone, counted as both supply and extract, which is what PHX writes. A new Model is a single dwelling on the residential default, so every Zone starts By Program and a dash would be the usual reading. It makes the Serves half of the feature read `ph_composer.programs.zones` and require Programs. Until answered the binding is the handoff's: a dash while any served Zone is By Program | Q11 and D4-10, by extending them | P4-05 |
+| D4-25 | Scope | PHX is installed for tests (F38). Do this phase's export stages prove what PHX builds from the HBJSON? | Yes. Each export stage adds a PHX round trip in the `phx` group, as Phase 6's did: one device for an item on several Rooms, tanks and heaters once, exhaust and supportive devices through a Room's Spaces. Opening the file in METr and every METr field claim stay metr-export's | The split in PLAN, ACCEPTANCE and CONTRACTS section 7 that sends every PHX claim to metr-export | P4-04, P4-06 and every later export stage |
+| D4-26 | Code, UI | Is mechanical cooling entered on the Building Segment or derived from the heat pumps that serve it (F30)? | Entered, as honeybee-ph's Grasshopper component has it: a switch in a Mechanical section of the Segment settings, off by default, beside the mechanical room temperature at 20 °C. A non-blocking finding when the switch and the blended heat pump's cooling disagree. Summer ventilation has eleven fields and gets its own interview | | P4-08b |
+| D4-27 | UI | Where does the Mechanical tab sit in the row as shipped (F32)? | After Thermal Bridges: Climate, Zones, Programs, Assemblies, Window Types, Thermal Bridges, Mechanical, Library, Export | The order noted on 2026-11-17 | P4-05 |
+
+### Part 3's open items, restated
+
+Items 2 and 6 are closed by F34 and F33. Items 1, 3, 4 and 5 stay open as written.
 
 ## Ledger
 
@@ -162,3 +222,4 @@ Programs, Mechanical, Library, Export.
 | 2026-10-21 | Ed answered D4-01 to D4-12, all as recommended. The bindings in CONTRACTS stand as drafted. |
 | 2026-11-15 | Wireframe review with Ed: findings F15 to F19, decisions D4-13 to D4-20 (Part 3). D4-08 and the interview answers Q4 (heat pumps), Q9, H1, H4 and H7 are revised. Bindings and stages not yet re-planned. |
 | 2026-11-17 | F20 recorded (what the estimator reads from climate) and the tab row's order noted, both from the [Climate packet](../../archive/phase-04-climate/PRD.md), which is now Phase 4 and precedes this phase. |
+| 2026-11-22 | Reviewed against `main` at `8c710412` after Phase 6 was archived (Part 4): findings F21 to F39, the settled ones applied to the packet; decisions D4-21 to D4-27 opened, none answered. Part 3's open items 2 and 6 closed. |

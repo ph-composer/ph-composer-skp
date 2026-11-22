@@ -1,14 +1,13 @@
 # P4-05: the Systems tab and the Ventilators view
 
 DATE: 2026-10-21
-STATUS: Scoped. To be re-planned against D4-13 and D4-20 (2026-11-15): the tab is Mechanical, with a subtab per system and a pill row, not an Equipment subtab with a family select. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Scoped. To be re-planned against D4-13 and D4-20 (2026-11-15): the tab is Mechanical, with a subtab per system and a pill row, not an Equipment subtab with a family select. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Corrected 2026-11-22 after Phase 6 Programs: the By Program wording and the units step; D4-24 and D4-27 are open. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4-04, D4-08, D4-10 and D4-11, and Q9 to Q11, V3 and V4. `html/index.html` is shared
-with Phase 3b's P3b-05: not open on both branches at once; each enables its own reserved button. Owns the panel: the Systems tab, the Equipment subtab, the family selector, the
+Requires P4-04, D4-08, D4-10 and D4-11, and Q9 to Q11, V3 and V4; D4-24 and D4-27 answered. Owns the panel: the Systems tab, the Equipment subtab, the family selector, the
 Ventilators table with the Serves column and the balance, the two disclosed fields, the W/cfm
 quantity, and the `By ventilator` Colour-by mode. Every control calls an operation P4-02 to P4-04
 registered; the panel computes nothing but the balance comes from a Ruby read (D4-10).
@@ -33,13 +32,17 @@ Paths are relative to `src/ph_composer/`.
    the choice remembered on this computer as a display preference, never written to the Model.
 3. **Balance read (D4-10).** `serves/balance.rb`, pure: per Ventilator, the served Zones' supply
    and extract sums from `ph_composer.spaces.all`'s Zone rows, null while any served Zone's sum is
-   null, `imbalanced` by `Spaces::Metrics`' rule. Exposed on `ventilators.all` rows and the
+   null, which is while it is By Program (`airflow_mode`, F24), `imbalanced` by `Spaces::Metrics`'
+   rule. D4-24, open, would count a By Program Zone's Program flow as its supply and extract, read
+   from `ph_composer.programs.zones`. Exposed on `ventilators.all` rows and the
    snapshot section.
 4. **Ventilators table.** `ventilators.js` on `html/inventory.js`: name, quantity, sensible,
    latent, electric efficiency (the new quantity), frost protection, defrost temperature, in
    conditioned space, the Serves column as Zone chips with a Zone picker calling `serves.assign`
-   (offering replace when the slot is filled, V1) and `serves.clear`, the balance columns (supply,
-   extract, marker, a dash while inheriting), and a per-row disclosure for the two optional fields
+   (listing Zones under their Building Segment headings as the Zone views do, Zones in no
+   Segment included, with a whole Segment offered at once, F39; offering replace when the slot is
+   filled, V1) and `serves.clear`, the balance columns (supply,
+   extract, marker, a dash while a served Zone is By Program), and a per-row disclosure for the two optional fields
    (V3). Add, duplicate, delete with the `ReplacementForm` offering replacement or clear (D4-05),
    in-place and range edits through `record_edits` and `inventory_grid`, column sort and value
    filters, a `tableId` so `table_contributions.js` can add the duct-length columns later
@@ -70,7 +73,7 @@ Paths are relative to `src/ph_composer/`.
 2. The Zone picker sends `serves.assign` with the Zone references, the slot and the item, and
    offers replace on `equipment.slot_filled`.
 3. The balance read on the reference rows gives 60 / 50 imbalanced, 40 / 40 not, 100 / 90 not,
-   and null with a dash when a served Zone inherits.
+   and null with a dash when a served Zone is By Program.
 4. `electric_efficiency` vectors: 0.55 Wh/m³ to its W/cfm value and back within the shared
    tolerance; the Ruby and panel registries agree.
 5. The family select changes the table without a Model write; the choice is remembered.

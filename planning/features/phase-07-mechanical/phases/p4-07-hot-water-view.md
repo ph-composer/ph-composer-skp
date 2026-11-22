@@ -1,7 +1,7 @@
 # P4-07: the Hot water view
 
 DATE: 2026-10-21
-STATUS: Scoped. To be re-planned against D4-13 and D4-17 (2026-11-15): three flat tables under the Hot Water subtab, not system rows with child rows. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Scoped. To be re-planned against D4-13 and D4-17 (2026-11-15): three flat tables under the Hot Water subtab, not system rows with child rows. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Corrected 2026-11-22: `temperature` already exists in both unit registries (F31, [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -26,7 +26,7 @@ Paths are relative to `src/ph_composer/`.
    heater rows beneath each system opened by its chevron, each editable in place; Add tank and
    Add heater on the system row; a tank's role and type as enum cells and its expected slot read
    from the row; a heater's variant choosing which cells are live.
-2. **Units (A3, D4-11).** `volume_l` and, if absent, `temperature` in both registries with vectors.
+2. **Units (A3, D4-11).** `volume_l` in both registries with vectors. `temperature` exists (F31).
 3. **Colour-by.** `by_hot_water_system`, `entity_kind: "zone"`, as `by_ventilator`.
 4. **Preview and checks.** Extend the preview fixture and `equipment_checks.cjs`; regenerate the
    manifests.
@@ -44,7 +44,7 @@ Paths are relative to `src/ph_composer/`.
    `expected_values`; a refused draft is kept.
 2. Add tank appends a child with defaults; Add heater with the chosen variant exposes only its
    fields.
-3. Litres and temperature vectors; a draft keeps its unit through a switch.
+3. Litres vectors; a litres and a temperature draft each keep their unit through a switch.
 4. `by_hot_water_system` entries per served Zone.
 
 ## Host gate

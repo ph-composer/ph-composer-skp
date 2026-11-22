@@ -1,7 +1,7 @@
 # Equipment
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7.
+STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7. Reviewed 2026-11-22 after Phase 6 Programs: the table of what `main` supplies is dated, and [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22) holds what changed and the open decisions D4-21 to D4-27.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -17,6 +17,24 @@ they can see.
 
 Read on 2026-10-21 at `420c783a`. Paths are relative to `src/ph_composer/`. This replaces the
 2026-09-18 port disposition, which assumed the foundation transplant was still ahead.
+
+The table is the record of that read and is not rewritten. Re-read on 2026-11-22 at `8c710412`,
+after Phase 3b, Climate, Shading and Programs, these rows have moved ([DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22)):
+
+- **A primary tab.** The row is Climate, Zones, Programs, Assemblies, Window Types, Thermal
+  Bridges, Library, Export, then the reserved Systems button (F32).
+- **Per-Zone airflow sums.** A Zone is By Program until one of its Spaces stores a rate, then in
+  Detailed airflows; the sums are null while By Program (F24).
+- **Export.** Sections attach at `MODEL`, `SEGMENT`, `ROOM` or `FACE`; a Zone in no Building
+  Segment is left out (F28, F29).
+- **The pinned runtime.** honeybee-ph 1.33.68; `stack.PACKAGES` still lacks `honeybee_phhvac`;
+  PHX 1.59.4 is installed for tests only (F22, F23).
+- **Display units.** `temperature` and `power` exist in both registries; litres and W/cfm do not
+  (F31).
+- **A feature's per-Zone assignment.** Programs ships one as a structured extension on the Zone
+  record (F26), which is what D4-21 weighs against the Serves record below.
+- **Building Segment settings.** A shipped seam; mechanical cooling, the mechanical room
+  temperature and summer ventilation use it (F30, stage P4-08b).
 
 | Need | State | Where |
 | --- | --- | --- |
@@ -100,7 +118,8 @@ a Space inherits it. Appliances are the exception, see family 7.
 - Registers Colour-by modes `By ventilator` and `By hot water system`.
 - Owns the airflow balance by ventilator, shown on the Ventilator's row (Q11): the served
   Zones' supply and extract sums from `ph_composer.spaces.all`, the same 10 percent marker, a
-  dash while any served Space inherits. The assignment half of this feature therefore requires
+  dash while any served Space inherits. Since Phase 6 "inherits" is the Zone's By Program airflow
+  mode; whether such a Zone shows a dash or its Program's flow is D4-24. The assignment half of this feature therefore requires
   `ph_composer.spaces` as well as `ph_composer.zones`; the definitions never do.
 
 ### Export
@@ -235,6 +254,12 @@ export the electric block becomes a linked supportive device of type 10 beside t
 ventilator, so a kitchen hood with a known draw is two honeybee-ph objects from one record.
 
 ## Family 7: Appliances
+
+Superseded 2026-11-14 and built in Phase 6: appliances and the Phius default set are Programs'
+Equipment Sets (`context/CONTRACTS.md`, "Programs, Schedules and Equipment Sets" and "Program
+export"), with Dwellings holding the bedroom and unit counts. The text below is the record of
+what was first scoped here. "Equipment" in this packet no longer includes them; the name is
+D4-22.
 
 `PhEquipment` subclasses in `honeybee_energy_ph/load/ph_equipment.py`: dishwasher, clothes
 washer, clothes dryer, refrigerator, freezer, fridge-freezer, cooktop, Phius MEL, Phius interior,

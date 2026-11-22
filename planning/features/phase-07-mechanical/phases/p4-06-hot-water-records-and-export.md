@@ -1,7 +1,7 @@
 # P4-06: Hot Water System records and export
 
 DATE: 2026-10-21
-STATUS: Scoped. To be re-planned against D4-17 to D4-19 (2026-11-15): Systems, Heaters and Tanks are three kinds, and recirculation temperature and hours are read from piping. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Scoped. To be re-planned against D4-17 to D4-19 (2026-11-15): Systems, Heaters and Tanks are three kinds, and recirculation temperature and hours are read from piping. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Corrected 2026-11-22 after Phase 6 Programs: the pinned wheel, the metadata step; D4-23 and D4-25 are open. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -46,13 +46,23 @@ Paths are relative to `src/ph_composer/`.
    differ (hot water H4). `result_fields` and `conformance` per CONTRACTS section 6. Contributor,
    preflight rows, fixture and report table as P4-04 built them.
 
+5. **Metadata (F36).** Each kind this stage adds keeps a `user_data` map, read and written as
+   P4-02's Ventilator's is, with its row in `docs/USER_DATA.md`. Under the first draft a tank and
+   a heater are `Records::Part`s of their System, as an Equipment Set's devices are; under D4-17
+   they are kinds of their own.
+
+Run at 1.33.68 on 2026-11-22: `recirc_temp` and `recirc_hours` have no setter and the class has
+no calculation-method attribute (F23), so D4-18 and D4-12 stand. PHX pools a Building Segment's
+systems, not the Model's (F28); the wording of the pooling note and an item across Segments are
+D4-23.
+
 ## Source
 
 | PH-Composer file | Disposition |
 | --- | --- |
 | `features/assemblies/assembly/schema.rb`, `assembly/operations.rb` | Pattern for nested children with regenerated ids |
 | `features/equipment/ventilators/`, `export.rb`, `equipment_sections.py` (P4-02, P4-04) | The sibling family's shape |
-| honeybee-ph `honeybee_phhvac/hot_water_system.py`, `hot_water_devices.py` (1.33.65) | The carrier; `PhHvacHotWaterHeaterBuilder` for the variant classes |
+| honeybee-ph `honeybee_phhvac/hot_water_system.py`, `hot_water_devices.py` (pinned 1.33.68) | The carrier; `PhHvacHotWaterHeaterBuilder` for the variant classes |
 
 ## Tests (write first)
 
@@ -63,7 +73,7 @@ Paths are relative to `src/ph_composer/`.
    an empty list gives four empty slots.
 4. The section builds the slots and heaters; two Rooms served by one system carry one identifier;
    conformance reads back capacity and identifier per slot.
-5. `piping_calc_method` set: no field in the dict on 1.33.65 and the finding; a stub class with
+5. `piping_calc_method` set: no field in the dict on the pinned wheel and the finding; a stub class with
    the attribute receives it.
 6. Two exported systems with different `recirc_temp_c` raise `equipment.recirc_disagrees`; an
    unserved system raises nothing.

@@ -20,19 +20,21 @@ Water System is an open plan item; acceptance is an HBJSON reload, METr rows go 
 Q13 added. honeybee-ph fields re-read at the pinned 1.33.65.
 
 This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
-[phase ledger](../STATUS.md), a gate stub until Phase 3b's edge stages merge and this interview runs.
+[phase ledger](../STATUS.md), a gate stub until this interview runs; Phase 3b's edge stages merged on
+2026-10-26.
 
 ## Next step
 
 Interview. Q1, how the trunk, branch and fixture tree is authored, decides most of the rest.
-Planning in detail waits for Phase 3b's P3b-04 at least, so the chain rule it reuses is real.
+The chain rule it reuses (P3b-04) is on `main`.
 
 ## Blockers
 
 - None from Phase 3b: the edge store, chain rule, edge tool and edge contributor are on `main`
   (P3b-03 to P3b-08); the rules are in `context/TECH_STACK.md`, "Edge-owned assignments".
 - The Hot Water System record, which the equipment packet owns; its family was interviewed on
-  2026-10-21 (H1 to H7): operating values sit on the system record, and the simplified methods
+  2026-10-21 (H1 to H7) and revised on 2026-11-15: tap points sit on the system record and
+  recirculation temperature and hours are read from this packet's recirculation pipes (D4-18), and the simplified methods
   wait on a honeybee-ph field (H5, [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135)).
 - None from the edge identity spike: it passed on 2026-09-18 ([B4](../../../archive/phase-00-foundation/evidence/spike-edge.md));
   its open cases closed in P3b-01 (T01).
@@ -56,3 +58,4 @@ None. Nothing is implemented.
 | 2026-10-21 | Phase 4 planned in detail; this packet's stage is a gate stub in the phase ledger. |
 | 2026-10-21 | Re-baselined against `main` at `420c783a`: foundation and remote blockers removed, Phase 3b dependencies named stage by stage, records and export mapping corrected, Q13 added. No interview, no implementation. |
 | 2026-10-26 | Phase 3b P3b-09 handoff: the edge tagging rules point at `context/TECH_STACK.md`, the edge stages are on `main`, and the edge registry question (D3b-01) is this packet's. |
+| 2026-11-22 | Phase reviewed after Phase 6 Programs: the stale Phase 3b gate wording removed here and in the PRD; recirculation temperature and hours noted as read from this packet's pipes (D4-18). No interview, no implementation. |

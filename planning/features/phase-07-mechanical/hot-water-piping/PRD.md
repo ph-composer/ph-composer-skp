@@ -1,7 +1,7 @@
 # Hot water piping
 
 DATE: 2026-10-21
-STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21.
+STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged, and the tab and hosts have moved (see the note under "What main and Phase 3b supply").
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -18,6 +18,14 @@ structure METr wants.
 Read on 2026-10-21 at `420c783a`. Paths are relative to `src/ph_composer/`. This replaces the
 2026-09-18 port disposition. Phase 3b (thermal bridges) is scoped and interviewed, with nine stages
 P3b-01 to P3b-09, none authorized; the rows marked "3b" exist only once that stage merges.
+
+Noted 2026-11-22, from the phase's [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22):
+Phase 3b closed on 2026-10-26, so every row marked "3b" is on `main`. The pinned honeybee-ph is
+1.33.68, and its piping fields below were not re-read. Recirculation temperature and hours are
+read from the recirculation pipes, not stored on the System (D4-18). Sections now attach at
+`MODEL`, `SEGMENT`, `ROOM` or `FACE`; the open plan item under "Export mapping" is unchanged,
+since none of the four is a hot water system (D4-09). "The Hot-water piping subtab of Systems"
+is, since D4-13, a Piping pill under Hot Water on the Mechanical tab.
 
 | Need | State | Where |
 | --- | --- | --- |

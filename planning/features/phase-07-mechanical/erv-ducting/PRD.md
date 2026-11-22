@@ -1,7 +1,7 @@
 # ERV ducting
 
 DATE: 2026-10-21
-STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21.
+STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged; see hot-water-piping's note of the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -16,7 +16,9 @@ draw over the model and tedious to measure any other way on a building with fort
 
 The same table as [hot-water-piping](../hot-water-piping/PRD.md#what-main-and-phase-3b-supply),
 read at the same head: the snapshot's Edge entries exist; the edge store, chain rule, stroke
-weight, edge tool and edge contributor are Phase 3b stages P3b-03 to P3b-08, none authorized;
+weight, edge tool and edge contributor are Phase 3b stages P3b-03 to P3b-08, none authorized
+(all merged by 2026-10-26; the note of 2026-11-22 in that table's section applies here too, with
+"the ERV ducting subtab" now a Ducting pill under Ventilation on the Mechanical tab);
 select then Assign is the primary route and the edge tool the secondary one. This packet adds:
 
 | Need | State | Where |

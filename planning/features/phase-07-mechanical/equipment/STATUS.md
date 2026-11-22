@@ -1,7 +1,7 @@
 # Equipment: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape, Ventilators and hot water interviewed 2026-10-21; families 3 to 7 not interviewed; stages tracked in the phase ledger; nothing authorized. Wireframes reviewed 2026-11-15: heat pumps settled (D4-14 to D4-16); Pumps, Fans and Electric Heating have their table shape and columns, their interviews otherwise open.
+STATUS: Scoped. Shared shape, Ventilators and hot water interviewed 2026-10-21; families 3 to 7 not interviewed; stages tracked in the phase ledger; nothing authorized. Wireframes reviewed 2026-11-15: heat pumps settled (D4-14 to D4-16); Pumps, Fans and Electric Heating have their table shape and columns, their interviews otherwise open. Reviewed 2026-11-22 after Phase 6 Programs: the phase DECISIONS Part 4 holds the findings and the open decisions D4-21 to D4-27.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -40,18 +40,20 @@ the interview state only.
 
 ## Next step
 
-Ed answers D4-01 to D4-12 in the [phase DECISIONS](../DECISIONS.md); families 3 to 7 are
-interviewed each before its stage (P4-08 to P4-12).
+Ed answers D4-21 to D4-27 in the [phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)
+(D4-01 to D4-20 are answered). Pumps, fans and electric heaters are interviewed each before its
+stage (P4-09 to P4-11); heat pumps were settled on 2026-11-15, and appliances are Programs'.
 
 ## Blockers
 
-- The remaining family interviews (3 to 7), each before its stage.
+- The remaining family interviews (pumps, fans, electric heaters), each before its stage.
 - H5: a calculation-method field on honeybee-ph's `PhHotWaterSystem`, read by PHX, before the
   simplified hot water methods can export: [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135), filed 2026-10-21, open. Nothing in the code blocks a start: the foundation,
   record engine, inventory table, Zone views and the Room-attaching export section all exist
   (see the PRD's table).
-- Two foundation touches the first stage makes: the Systems tab in `html/index.html` (D4), and
-  `honeybee_phhvac` added to the translation's `stack.PACKAGES` and `tests/python/test_imports.py`.
+- Two foundation touches: the reserved Systems button in `html/index.html` becomes the Mechanical
+  tab (D4-13; its place in the shipped row is D4-27), and `honeybee_phhvac` is added to the
+  translation's `stack.PACKAGES`, which still lacks it on 2026-11-22.
 - B4's proof, re-scoped: two Zones with two different ventilators, distinct on two Rooms when the
   exact HBJSON reloads in the pinned stack. One honeybee Room per Zone already holds, so the case
   is simpler than B4 feared. The PHX-to-METr half waits with
@@ -78,3 +80,4 @@ None. Nothing is implemented. The fan and appliance routes were read in source (
 | 2026-10-21 | Hot water interviewed: H1 to H7, as recommended except H3 (free tank list, slotted at export). H5 found honeybee-ph has no calculation-method field; upstream issue to file. No implementation. |
 | 2026-10-21 | H5 upstream issue filed: [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135). |
 | 2026-10-21 | Phase 4 planned in detail; stages, decisions and acceptance moved to the [phase ledger](../STATUS.md). |
+| 2026-11-22 | Reviewed after Phase 6 Programs, which built family 7 as Equipment Sets: findings F21 to F39 and open decisions D4-21 to D4-27 in the phase DECISIONS, Part 4. No implementation. |

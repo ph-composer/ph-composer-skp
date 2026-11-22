@@ -1,13 +1,13 @@
 # P4-15: acceptance and handoff
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4-01 to P4-14. Owns the integrated run that closes Phase 4, the context and product
+Requires P4-01 to P4-14 and P4-08b; P4-12 is superseded. Owns the integrated run that closes Phase 4, the context and product
 documentation, and the handoff of every METr row to metr-export. No new behavior. Phase 4 closing
 is the MVP Ed set in D1.
 
@@ -17,17 +17,22 @@ Behavior owner: the three PRDs' "Acceptance shape". Register: [ACCEPTANCE](../AC
 
 1. **Offline gates.** Both Ruby full gates, coverage, browser checks, the pinned runtime and
    Chromium 88 checks, the packaged inventory and the footprint through `vendor.py --check`
-   against its keys and the growth budget D3a-20 set, over the baseline Phase 3b's close recorded;
-   at the phase close, reset the baseline by a recorded decision.
+   against its keys: the 28,000,000 byte ceiling, and the growth allowance over the baseline
+   Phase 6 reset to 26,093,959 at its entry (F37). The ceiling is the nearer limit. At the phase
+   close, reset the baseline by a recorded decision.
 2. **Integrated host run.** Fresh process, normal installed RBZ, the reference model: author two
-   Ventilators, the Hot Water System and one item of each later family from scratch through the
-   panel; serve a nested Zone and a copied Zone; draw and assign the pipes and ducts; two Models
+   Ventilators, the Hot Water System and one item of each later family (heat pumps, electric
+   heaters, pumps, fans) from scratch through the panel; set a Building Segment's mechanical
+   settings; serve a nested Zone and a copied Zone, and leave one served Zone in no Building
+   Segment; draw and assign the pipes and ducts; two Models
    open; Undo and Redo across the session; save, close, reopen; export and reload; compare with
    ACCEPTANCE's tables. Run each case through `acceptance_case.py begin` and `finish`.
-3. **Register.** Consolidate M01 to M14 with their evidence links; mark each row Pass with its
+3. **Register.** Consolidate M01 to M14 and M16 with their evidence links (M12 is superseded); mark each row Pass with its
    provenance, or record why not.
-4. **Context.** Confirm `context/UBIQUITOUS_LANGUAGE.md` (the Systems table: Equipment, each
-   family, Serves, Piping, Ducting), `CONTRACTS.md`, `TECH_STACK.md`, `EXTENSIBILITY.md` (the
+4. **Context.** Confirm `context/UBIQUITOUS_LANGUAGE.md` (its "Systems terminology for planned
+   features" table: Equipment, each family, Serves, Piping, Ducting, and the Space-level
+   "Ventilation assignment" row, which F25 makes a Zone relation), `docs/USER_DATA.md` (a row per
+   new entity, F36), `CONTRACTS.md`, `TECH_STACK.md`, `EXTENSIBILITY.md` (the
    Serves record as the third Zone-occurrence child; sections that add to a required object) and
    `AGENT_INTERFACE.md` say what was built.
 5. **Product docs.** `docs/PRODUCT.md` describes equipment, piping and ducting as built; the

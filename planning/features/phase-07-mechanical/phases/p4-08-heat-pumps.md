@@ -1,7 +1,7 @@
 # P4-08: heat pumps
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview. Interview settled at the wireframe review of 2026-11-15 (D4-14 to D4-16); the full document is owed and the stage also waits on Climate. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Requested. A gate stub: written in full after its interview. Interview settled at the wireframe review of 2026-11-15 (D4-14 to D4-16); the full document is owed and the stage also waits on Climate. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Climate's gate was met on 2026-11-18. Noted 2026-11-22 after Phase 6 Programs: D4-23 is open, and the blend is pure Ruby. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -12,6 +12,22 @@ P4-07 merged; the heat pumps interview (family 3), which decides whether the edi
 ## Owns
 
 Family 3 as data, section and view: a Heat Pump kind with `percent_coverage`, a variant and its cooling parameters; the `heat_pump_ids` Serves slot (cardinality many); a section adding each pump to its served Rooms through `add_heat_pump_system` (D4-01); the family view.
+
+## Noted 2026-11-22
+
+The text above predates the wireframe review and is replaced when the full document is written.
+Three things the full document takes from the review after Programs:
+
+- **The Building Segment (D4-23, open).** PHX writes one Variant per Building Segment, so "one
+  blended heat pump for the building" (D4-15) needs a scope. The recommendation is one blend per
+  exported Segment, over the outdoor equipment whose indoor units serve that Segment's Zones.
+- **Where the blend is computed (F35).** In pure Ruby over plain records, read by the preflight
+  for its findings and carried to the Python section as values, as Programs' export plan is.
+- **Requires Climate.** The feature gains `requires: ["ph_composer.climate"]` here, for the
+  monthly means and the two design temperatures.
+
+Mechanical cooling on the Building Segment is [P4-08b](p4-08b-segment-mechanical-settings.md),
+which follows this stage.
 
 ## Reuses
 

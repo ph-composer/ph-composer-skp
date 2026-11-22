@@ -1,8 +1,9 @@
 # Equipment
 
 Author the mechanical and electrical equipment a Phius model needs and say which Zones each item
-serves. Seven families, one packet, interviewed and delivered one family at a time. New work:
-the predecessor held this as two discovery briefs, Q1 and B4.
+serves. Six families, one packet, interviewed and delivered one family at a time; the seventh,
+appliances, was built in Phase 6 as Programs' Equipment Sets. New work: the predecessor held this
+as two discovery briefs, Q1 and B4.
 
 ## Read order
 
@@ -27,22 +28,24 @@ for the equipment interview; this reference authorizes no implementation or prod
 | 4 | Electric heaters | `PhHeatingDirectElectric` | |
 | 5 | Pumps | `PhSupportiveDevice` types 4, 6, 7 | |
 | 6 | Fans | An exhaust ventilator, plus a linked `PhSupportiveDevice` type 10 when the electric block is filled (Q6) | |
-| 7 | Appliances | `PhEquipment` family as Process loads on the Room (Q12); the Zone loads packet owns the other Room loads | |
+| 7 | Appliances | Superseded: Programs' Equipment Sets ([Phase 6](../../../archive/phase-06-program/README.md)) | |
 
 The order is a proposal. Families 1 and 2 go first because two other packets wait on them.
 
 ## What this packet needs from elsewhere
 
-- Nothing from Phase 3b. Equipment has no edges; it can be planned and started before thermal
-  bridges; Ventilators and hot water are interviewed.
-- [metr-export](../../unscheduled/metr-export/README.md) for every METr claim: PHX is not in the
-  pinned runtime, so acceptance here is HBJSON reloaded in the pinned stack.
+- Nothing from Phase 3b. Equipment has no edges; Ventilators and hot water are interviewed.
+- [metr-export](../../unscheduled/metr-export/README.md) for every METr claim. PHX is not shipped;
+  since Climate it is installed for tests, and whether this packet's export stages add PHX round
+  trips is D4-25 in the [phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 - [units](../../cross-phase/units/STATUS.md) Q3 for litres, kBtu/h capacity and W/cfm.
+- From Phase 6 Programs: the Building Segment settings seam, the per-Zone airflow mode and the
+  per-Zone assignment pattern (the phase DECISIONS, Part 4).
 
 ## Scope
 
-In: a record per equipment item, assignment to Zones, an Equipment subtab under Systems with one
-family view at a time, validation, export to HBJSON.
+In: a record per equipment item, assignment to Zones, the Mechanical tab with a subtab per system
+(D4-13), validation, export to HBJSON.
 
 Out: data sheet hosting, specification status, procurement tracking, equipment sizing, load
 calculations, schedules, METr conversion.

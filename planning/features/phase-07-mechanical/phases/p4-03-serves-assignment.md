@@ -1,7 +1,7 @@
 # P4-03: Serves, the assignment record and target
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: the left-out Zone code, the metadata step. D4-21, open, would replace steps 1, 2 and 5. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -17,6 +17,13 @@ Behaviors. Names: [CONTRACTS](../CONTRACTS.md) sections 2 to 4. Pattern: Windows
 `units/zone_copy.rb`; `tests/support/zone_child_fixture.rb`; the Assembly delete with replacement.
 
 Paths are relative to `src/ph_composer/`.
+
+Open, D4-21: Programs shipped its per-Zone assignment as a structured extension on the Zone
+record (`features/programs/assignments.rb`, staged through `ph_composer.zones.stage_extension`).
+If Ed answers as recommended, step 1 becomes the payload and its validator, step 2 goes (the
+payload declares its references), step 5 goes (the payload travels with a copied Zone), and steps
+3, 4 and 6 keep their behavior over the staged payload. The steps below are the first draft and
+this stage is not started until D4-21 is answered.
 
 ## Steps
 
@@ -41,10 +48,15 @@ Paths are relative to `src/ph_composer/`.
    the identity allocator in the Zone's own proposal and changes nothing else.
 6. **Reads and findings.** `serves.all` (query and snapshot section, bounded `list` beside it):
    every Zone occurrence with its record, resolved item names, and `equipment.zone_unventilated`
-   (V5, non-blocking); `ventilators.all` rows gain the Zones each serves and
+   (V5, non-blocking). The rows come from one `ph_composer.zones.all` read per snapshot and add no
+   second walk: Phase 6 recorded the repeated Zones reads as a follow-up to fix, not to copy; `ventilators.all` rows gain the Zones each serves and
    `equipment.item_unserved`. `codes.rb` gains the three codes. API minor bump and change row;
    the agent guide recipe gains assign and clear with their explicit-reference shapes.
-7. **Walkthrough.** Extend `ventilators_walkthrough.rb` to assign, replace, clear and delete with
+7. **Metadata (F36).** Under the first draft the Serves record keeps a `user_data` map through
+   `Records::Metadata`, with one owner `update_metadata` action and a row in `docs/USER_DATA.md`.
+   Under D4-21's recommendation it has none of its own: it is a payload on the Zone, whose map
+   is Zones'.
+8. **Walkthrough.** Extend `ventilators_walkthrough.rb` to assign, replace, clear and delete with
    replacement, inside a nested Zone and a copied Zone.
 
 ## Source
@@ -69,8 +81,9 @@ Paths are relative to `src/ph_composer/`.
    Undo restores all; with null the slots clear and emptied records go.
 6. The Zone-copy contributor re-issues the `eqa_` id and keeps the slots; `identity.conflict` on a
    colliding allocation refuses.
-7. `serves.all` and `ventilators.all` carry the findings and the resolved names; a Zone omitted
-   from export reads `equipment.zone_omitted` (shape only; the export consequence is P4-04's).
+7. `serves.all` and `ventilators.all` carry the findings and the resolved names; a served Zone in
+   no Building Segment reads `equipment.zone_left_out` and no unserved-Zone finding (shape only;
+   the export consequence is P4-04's).
 8. A test-only second feature's record on the same Zone Group (P4-01's fixture) is untouched by
    every Serves write.
 

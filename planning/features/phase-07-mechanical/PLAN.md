@@ -1,7 +1,7 @@
 # Phase 4 delivery plan: mechanical
 
 DATE: 2026-10-21
-STATUS: Scoped. Stages P4-01 to P4-15 planned from the equipment shared-shape, Ventilators and hot water interviews of 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; none authorized.
+STATUS: Scoped. Stages P4-01 to P4-15 planned from the equipment shared-shape, Ventilators and hot water interviews of 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; none authorized. Reviewed 2026-11-22 after Phase 6 Programs: the Phase 3b gates are met, the supply table is re-read at `8c710412`, stage P4-08b is added, and D4-21 to D4-27 are open.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -15,10 +15,12 @@ stack and read back each Room's `properties.ph_hvac`: one `PhVentilationSystem` 
 identifiers on every Room an item serves. That closes the HBJSON half of the predecessor's B4
 proof (two Zones, two ventilators, distinct) that the roadmap's 4.1 names.
 
-In this plan: roadmap 4.1 to 4.6, the seven equipment families, planned in detail for the shared
-shape and families 1 and 2 (interviewed 2026-10-21, the [equipment PRD](equipment/PRD.md) is the
-record) and as gate stubs for families 3 to 7; and roadmap 4.2 and 4.4, ERV ducting and hot water
-piping, as gate stubs until Phase 3b lands the edge stages they reuse and their own interviews run.
+In this plan: roadmap 4.1 to 4.6, six equipment families (the seventh, appliances, went to Phase 6
+as Equipment Sets), planned in detail for the shared shape and families 1 and 2 (interviewed
+2026-10-21, the [equipment PRD](equipment/PRD.md) is the record) and as gate stubs for families 3
+to 6; roadmap 4.2 and 4.4, ERV ducting and hot water piping, as gate stubs until their own
+interviews run (Phase 3b's edge stages, which they reuse, merged on 2026-10-26); and the Building
+Segment's mechanical settings that Phase 6 handed over (P4-08b).
 The findings, decisions, bindings and register are this folder's [DECISIONS](DECISIONS.md),
 [CONTRACTS](CONTRACTS.md) and [ACCEPTANCE](ACCEPTANCE.md).
 
@@ -32,29 +34,35 @@ SketchUp 2023 and Windows host proof, public distribution.
 ## What earlier phases supply
 
 Paths are relative to `src/ph_composer/`. Planning baseline `main` at `420c783a`, read 2026-10-21.
+Re-read on 2026-11-22 at `8c710412`, after Phase 3b, Climate, Shading and Programs:
+[DECISIONS, Part 4](DECISIONS.md#part-4-review-after-programs-2026-11-22) holds what changed, and
+the rows below are corrected to it.
 
 | Existing | Reused by Phase 4 as | Still required |
 | --- | --- | --- |
 | `core/records/` `RecordKind`, `Catalog`, `DictionaryStore`, `EntityStore`, `ReferenceTarget`, `Fields.common`; `request.retarget_references` and `propose_delete` (Assemblies' delete with replacement) | The Ventilator and Hot Water System kinds; the Serves record on the Zone Group; delete in use | Nothing in the engine |
 | Zones' Zone reference target with `locate:` (`features/zones/declarations/zone.rb`), `ph_composer.zones.all` rows (`zone_id`, `zone_path`, `building_segment`, `level`), the `occurrence_independent` transition and `transition_contributor` (Windows `units/zone_copy.rb`, Spaces `zone_copy.rb`, `tests/support/zone_child_fixture.rb`) | Resolving the Zone Group a Serves record sits on; listing Zones to serve; what a copied Zone keeps | Nothing in Zones; P4-01 confirms a second feature's dictionary on the Zone Group by test |
-| Spaces' `ph_composer.spaces.all` Zone rows: supply, extract and transfer sums over user-specified Spaces, null while any inherits, `imbalanced` at 10 percent of the larger | The balance by ventilator on the Ventilator's row (Q11, V6) | Nothing in Spaces |
+| Spaces' `ph_composer.spaces.all` Zone rows: `airflow_mode` (`by_program` or `detailed`), supply, extract and transfer sums for a detailed Zone, null while By Program, `imbalanced` at 10 percent of the larger (F24) | The balance by ventilator on the Ventilator's row (Q11, V6) | Nothing in Spaces. What a By Program Zone shows is D4-24 |
+| Programs' per-Zone assignment: a structured extension on the Zone record, staged through `ph_composer.zones.stage_extension`, exported by an `entity_projections` claim (F26). `ph_composer.programs.zones` rows give each Zone's ventilation in m³/h with its source | The shipped pattern for a feature's per-Zone assignment; the flow of a By Program Zone | D4-21 decides whether Serves follows it; D4-24 whether the balance reads the flow |
+| Building Segment settings: `segmentSettingsSection`, a namespace on the Segment record, an `entity_projections` claim and the `SEGMENT` attachment host (`context/EXTENSIBILITY.md`, "Building Segment settings") | Mechanical cooling, the mechanical room temperature and summer ventilation (P4-08b, F30) | Nothing in Zones |
+| Climate's reads `ph_composer.climate.climate.get` and `ph_composer.climate.design_temperatures.get` | The blended heat pump's monthly means and design temperatures (D4-15, F20) | The feature requires `ph_composer.climate` from P4-08 |
 | `colour_by/` modes with `entity_kind: "zone"` (`features/zones/colour_modes.rb`) | `By ventilator` and `By hot water system` | Nothing |
-| `export/` contributors, preflight, `Export::Privacy`; Python `Section`, `Attachment(ROOM)` with Spaces as its first user (`space_sections.py`), `result_fields`, `conformance` | One contributor and one Room-attaching section per family | `honeybee_phhvac` in `stack.PACKAGES` (CONTRACTS, A1); one object per (item, Zone) pair (D4-01) |
-| The pinned wheel `honeybee_ph-1.33.65` ships `honeybee_phhvac` and `honeybee_energy_ph` | Every mechanical class the sections build | Nothing in the vendor manifest |
-| `html/` inventory, in-place drafts, `subtabs.js`, `record_form.js`, `unit_field.js`, column menus, `table_contributions.js`; the reserved disabled Systems button in `html/index.html` | The Systems tab, the Equipment subtab and the family views | The pane; the button becomes live (CONTRACTS, A2) |
-| Ruby units `airflow`, `volume`, `heat_loss_rate`, `length`; panel: 18 quantities | Airflow sums, W/K standby losses | Electric efficiency Wh/m³ to W/cfm (V4), litres to US gallons, temperature where absent (CONTRACTS, A3; units Q3) |
+| `export/` contributors, preflight, `Export::Privacy`; Python `Section`, `Attachment` at `MODEL`, `SEGMENT`, `ROOM` or `FACE` (F29), `result_fields`, `conformance`; the left-out Zone rule (F28); Programs' one pure export plan read by the preflight (F35) | One contributor and one Room-attaching section per family | `honeybee_phhvac` in `stack.PACKAGES` (CONTRACTS, A1); one object per (item, Zone) pair (D4-01) |
+| The pinned wheel `honeybee_ph-1.33.68` ships `honeybee_phhvac` and `honeybee_energy_ph`; PHX 1.59.4 is the optional `phx` test group, not shipped (F23) | Every mechanical class the sections build; PHX round trips if D4-25 is answered as recommended | Nothing in the vendor manifest |
+| `html/` inventory, in-place drafts, `subtabs.js`, `record_form.js`, `unit_field.js`, column menus, `table_contributions.js`; the reserved disabled Systems button in `html/index.html`, last in the shipped row (F32) | The Mechanical tab, its system subtabs and tables (D4-13) | The pane; the button becomes live (CONTRACTS, A2); its place in the row is D4-27 |
+| Ruby and panel units `airflow`, `volume`, `heat_loss_rate`, `length`, `temperature`, `power` (F31) | Airflow sums, W/K standby losses, temperatures | Electric efficiency Wh/m³ to W/cfm (V4) and litres to US gallons (CONTRACTS, A3; units Q3) |
 | The registry's agent-facing keywords, `API::CHANGES`, `docs/AGENT_GUIDE.md`, bounded `list` reads | Every operation this packet registers | One API minor bump and one guide recipe per stage that adds a name |
-| Phase 3b's edge stages P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08, scoped and not authorized; the snapshot's `edge` entries (G-02) exist | Piping and ducting | Those stages merged, then the piping and ducting interviews |
+| Phase 3b's edge stages P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08, merged 2026-10-26 (F21); the snapshot's `edge` entries (G-02) | Piping and ducting | The piping and ducting interviews; the run builder's move to `core/` (P4-13) |
 
 ## Stages
 
-Fifteen stages. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
-steps, source, tests to write first, the host gate and the done condition. P4-08 to P4-14 are gate
-stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
+Sixteen stages, one of them superseded. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
+steps, source, tests to write first, the host gate and the done condition. P4-08 to P4-14 and
+P4-08b are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
-| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | CONTRACTS confirmed by test; `honeybee_phhvac` through the stack seam in Pyodide; citation lint for `P4-`, `M` ids; the architecture review | Ed's go; P3b-01 merged (the shared lint line) | shared | `honeybee_phhvac` imports in the installed runtime |
+| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | CONTRACTS confirmed by test; `honeybee_phhvac` through the stack seam in Pyodide; citation lint for `P4-`, `M` ids, the lettered `P4-08b` included; the architecture review | Ed's go; D4-21 and D4-22 answered | shared | `honeybee_phhvac` imports in the installed runtime |
 | [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The feature; the Ventilator kind, operations and reads, panel closed | P4-01 | equipment | Panel-closed script, Undo/Redo, reopen |
 | [P4-03](phases/p4-03-serves-assignment.md) | The Serves record on the Zone Group, its target, assign and clear, one per Zone, delete with replacement, the Zone-copy contributor, the unserved-Zone finding | P4-02 | equipment, (zones: none) | Assign in nested and copied Zones, Undo/Redo, reopen |
 | [P4-04](phases/p4-04-ventilator-export.md) | The contributor, preflight, Python section, conformance; the B4 HBJSON proof | P4-03 | export, equipment | Normal RBZ exports; exact HBJSON reloads with both Rooms' systems |
@@ -62,19 +70,20 @@ stubs: entry gates, what the stage owns and reuses, and the interview that prece
 | [P4-06](phases/p4-06-hot-water-records-and-export.md) | The Hot Water System kind with tank and heater children, operations, the system values, its section with tank slotting | P4-03 | equipment, export | Panel-closed script; exact HBJSON reloads with slots and heaters |
 | [P4-07](phases/p4-07-hot-water-view.md) | The Hot water family view: system rows, tank and heater child rows, `By hot water system`, litres | P4-05, P4-06 | equipment, UI | Panel gestures with Ed |
 | [P4-08](phases/p4-08-heat-pumps.md) | Family 3: records, section, view | P4-07; the heat pumps interview | equipment | Stub |
+| [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation as a Building Segment settings section with its `SEGMENT` export (Phase 6 handoff, F30) | P4-02, P4-08; D4-26; the summer ventilation interview | equipment, export | Stub |
 | [P4-09](phases/p4-09-electric-heaters.md) | Family 4 | P4-07; its interview | equipment | Stub |
 | [P4-10](phases/p4-10-pumps.md) | Family 5 | P4-07; its interview | equipment | Stub |
 | [P4-11](phases/p4-11-fans.md) | Family 6: exhaust ventilator plus linked supportive device (Q6) | P4-10; its interview | equipment | Stub |
 | [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../../archive/phase-06-program/README.md) owns appliances (Q4a-03) | equipment | Superseded |
-| [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4, planned in detail after its interview | P4-06; P3b-03, P3b-04, P3b-06, P3b-07, P3b-08 merged; the piping interview | piping | Stub |
-| [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; P3b-03, P3b-06, P3b-07, P3b-08 merged; the ducting interview | ducting | Stub |
+| [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4, planned in detail after its interview | P4-06; the piping interview (Phase 3b's edge stages are merged) | piping | Stub |
+| [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; the ducting interview | ducting | Stub |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Register closed; context, docs, the metr-export handoff; Phase 4 close is the MVP (D1) | all stages above | integration | Fresh-process integrated run |
 
 ```
 P4-01 ── P4-02 ── P4-03 ─┬─ P4-04 ═ MS1 ── P4-05 ─┐
-                         └─ P4-06 ────────────────┴─ P4-07 ═ MS2 ─┬─ P4-08 … P4-12 ─┐
-                                                                  ├─ P4-13 ── P4-14 ─┼─ P4-15 ═ MS3
-                                            (P3b-03 … P3b-08) ────┘                  │
+                         └─ P4-06 ────────────────┴─ P4-07 ═ MS2 ─┬─ P4-08 ── P4-08b ─┐
+                                                                  ├─ P4-09 … P4-11 ───┤
+                                                                  └─ P4-13 ── P4-14 ──┴─ P4-15 ═ MS3
 ```
 
 ## Milestones
@@ -82,33 +91,33 @@ P4-01 ── P4-02 ── P4-03 ─┬─ P4-04 ═ MS1 ── P4-05 ─┐
 - **MS1, after P4-04.** Ventilators complete as data and exported: the B4 HBJSON proof on the
   reference model, panel closed.
 - **MS2, after P4-07.** Families 1 and 2 on screen. The two drawn packets have what they export
-  into, and may be planned in detail once Phase 3b's edge stages have merged.
+  into, and may be planned in detail once their interviews have run.
 - **MS3, after P4-14.** Everything a METr model needs before its first run is authored and in
   HBJSON. P4-15 closes the phase, which is the MVP Ed set in D1.
 
 ## Order and parallel work
 
-The default is one branch at a time in stage order. Phase 3b is being implemented beside this
-packet from 2026-10-21 (its P3b-01 is in progress on `feature/thermal-bridges-p3b-01`), and it is
-the current owner of several shared files. The rule is coordination, not ordering: no two open
-branches touch one of these files at once, whichever lands second rebases, and the `FEATURES`
-order in each packet's CONTRACTS is corrected on landing. The one true ordering gate is the
-`Makefile` line both packets' first stages edit: P3b-01's lands before P4-01's.
+The default is one branch at a time in stage order. Phase 3b, which was being implemented beside
+this packet when it was planned and owned several of these files, closed on 2026-10-26, and no
+other phase is in progress on 2026-11-22. The rule that remains is between this phase's own
+parallel stages and any later packet: no two open branches touch one of these files at once, and
+whichever lands second rebases.
 
-| File | Phase 4 stage | Other current owner |
-| --- | --- | --- |
-| `extension.rb` (`FEATURES`, order `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Equipment]`) | P4-02 | P3b-02 |
-| `Makefile` (`PLANNING_IDS`) | P4-01 | P3b-01 |
-| `python/ph_composer_translation/stack.py`, `tests/python/test_imports.py` | P4-01 | none |
-| `html/index.html` (the two reserved buttons) and the generated script list | P4-05 | P3b-05 |
-| `shell/api.rb` (`API::MINOR`, `API::CHANGES`), `docs/AGENT_GUIDE.md` | every stage that adds an operation | every 3b stage that does |
-| `python/ph_composer_translation/composition.py`, `assembly.py` | P4-04 | P3b-08 (H18) |
-| `core/units.rb`, `html/unit_tables.js` | P4-05, P4-07 | none |
-| `tools/runtime/vendor.py` footprint keys | P4-15 | P3b-09 |
+| File | Phase 4 stage |
+| --- | --- |
+| `extension.rb` (`FEATURES`, order `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs, Equipment]`) | P4-02 |
+| `Makefile` (`PLANNING_IDS`) | P4-01 |
+| `python/ph_composer_translation/stack.py`, `tests/python/test_imports.py` | P4-01 |
+| `html/index.html` (the reserved button) and the generated script list | P4-05 |
+| `shell/api.rb` (`API::MINOR`, `API::CHANGES`), `docs/AGENT_GUIDE.md` | every stage that adds an operation |
+| `python/ph_composer_translation/composition.py` | P4-04, P4-06, every later export stage |
+| `core/units.rb`, `html/unit_tables.js` | P4-05, P4-07 |
+| `tools/runtime/vendor.py` footprint keys | P4-01 (measured), P4-15 |
 
 Within this track, P4-06 can proceed beside P4-04 and P4-05 after P4-03, since it shares only
-`composition.py` with P4-04 (serialise those two). Families 3 to 7 are independent of one another
-after P4-07 and may run in any order their interviews allow. P4-13 and P4-14 wait on Phase 3b.
+`composition.py` with P4-04 (serialise those two). Families 3 to 6 are independent of one another
+after P4-07 and may run in any order their interviews allow. P4-13 and P4-14 wait on their
+interviews.
 
 Each stage is one pull request against `main`, with `Refs` the Phase 4 issue once it exists. A
 stage that grows past one coherent review splits along the slices its document names; it does not
@@ -119,6 +128,9 @@ merge half a gate.
 `ph_composer.equipment` is one feature (D4-02) with a layer 1 part, the family kinds under
 `features/equipment/<family>/`, and a layer 3 part, the Serves record and its reads under
 `features/equipment/serves/`, which requires `ph_composer.zones` and `ph_composer.spaces` (D4-10).
+The feature's name is open (D4-22), as is how Serves is stored (D4-21); the layering here holds
+under either answer. Every value the export derives, the tank slots and the blended heat pump
+among them, is worked out in pure Ruby and carried to Python as a value (F35).
 A test holds the line from P4-02: nothing under a family folder names Zones, Spaces, the Zone
 Group or `serves/`. Nothing under `features/zones/`, `features/spaces/`, `features/windows/`,
 `features/assemblies/` or `features/thermal_bridges/` names equipment. Zones gains no read: the
@@ -135,7 +147,9 @@ During a stage run focused tests. At its gate run `make ci` on both offline Rubi
 3.2.2), refresh the vendor manifest when shipped Python or panel assets changed
 (`uv run tools/runtime/vendor.py --refresh-manifest`), regenerate the panel script list
 (`make panel-manifest`) and fixtures only through their owning tests (`make fixtures`), and run
-the stage's host gate from a fresh process with the installed build. On the host, wait with
+the stage's host gate from a fresh process with the installed build. The installed size is the
+gate to watch: Phase 6 closed 1,171,308 bytes under the 28,000,000 byte ceiling, so P4-01 measures
+it at entry and each stage that ships Python or panel assets reads `vendor.py --check` (F37). On the host, wait with
 `host_bridge.py wait-for`, read with `host_bridge.py diagnostics`, reproduce a failure with
 `host_bridge.py fault` whose `restore` reports `restored: true`, and record each case with
 `acceptance_case.py begin` and `finish` so the ledger row is a Pass and not an observation
@@ -145,6 +159,10 @@ Review ladder, one review per coherent diff, given the architecture rubric. P4-0
 P4-06 change a record on another feature's entity, the shared translation or a slotting rule, and
 get the stronger independent pass. P4-01 gets the architecture review on its confirmed bindings.
 P4-05 and P4-07 apply the UI polish skill in their review. The rest get one diff-focused review.
+
+Phase 6 ran its offline gates stage by stage and its host cases in one batched sitting at the
+end, on Ed's authorization of the whole run. Whether this phase does the same, or keeps a host
+gate per stage as written here, is Ed's to say when he authorizes it.
 
 Add each stage's native cases to [`native-acceptance/cases.json`](../../native-acceptance/cases.json)
 when the stage is implemented, with dependency patterns for the files it adds, and record observed

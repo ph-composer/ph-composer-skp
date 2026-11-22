@@ -1,17 +1,17 @@
 # P4-13: hot water piping
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview.
+STATUS: Requested. A gate stub: written in full after its interview. Phase 3b's edge stages, an entry gate below, merged on 2026-10-26 (F21, [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 ## Entry gates
 
-P4-06 merged (the Hot Water System it exports into); Phase 3b's P3b-03 (edge records and assignment), P3b-04 (the chain rule), P3b-06 (the stroke weight), P3b-07 (the edge tool) and P3b-08 (an edge contributor and section) merged; the hot water piping interview ([its PRD](../hot-water-piping/PRD.md), Q1 to Q13); D4-09 answered.
+P4-06 merged (the Hot Water System it exports into); Phase 3b's P3b-03 (edge records and assignment), P3b-04 (the chain rule), P3b-06 (the stroke weight), P3b-07 (the edge tool) and P3b-08 (an edge contributor and section) merged, all met on 2026-10-26; the hot water piping interview ([its PRD](../hot-water-piping/PRD.md), Q1 to Q13); D4-09 answered.
 
 ## Owns
 
-Roadmap 4.4 as the piping PRD scopes it: Pipe Type records, Piping groups linked to a Hot Water System, role and type assignment on edges, the tree by connection or explicit parent, the recirculation sum, the schedule, the Colour-by mode, the section that adds trunks and recirculation elements to the required hot water objects before attach (D4-09), and the Hot-water piping subtab of Systems. Planned in full as its own run of stages (types, draw and assign, tree and schedule, export, screen) inside this packet's ledger when its interview closes.
+Roadmap 4.4 as the piping PRD scopes it: Pipe Type records, Piping groups linked to a Hot Water System, role and type assignment on edges, the tree by connection or explicit parent, the recirculation sum, the schedule, the Colour-by mode, the section that adds trunks and recirculation elements to the required hot water objects before attach (D4-09), and the Hot-water piping subtab of Systems (since D4-13 a Piping pill under Hot Water on the Mechanical tab). Planned in full as its own run of stages (types, draw and assign, tree and schedule, export, screen) inside this packet's ledger when its interview closes.
 
 ## Reuses
 

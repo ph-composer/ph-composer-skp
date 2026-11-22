@@ -70,6 +70,11 @@ tab is named Mechanical; its subtabs are by system (Ventilation, Heat Pumps, Hot
 Fans, Electric Heating); a pill row under the subtabs picks one table inside a system, with
 Ducting under Ventilation and Piping under Hot Water. Still no primary Ducting or Piping tab.
 
+As shipped on 2026-11-22 the row is Climate, Zones, Programs, Assemblies, Window Types, Thermal
+Bridges, Library, Export, then the reserved Systems button, disabled. Where the Mechanical tab
+sits in it is open as Phase 4's
+[D4-27](../features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22).
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the

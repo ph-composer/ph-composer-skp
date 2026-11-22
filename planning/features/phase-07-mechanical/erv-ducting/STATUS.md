@@ -18,7 +18,8 @@ from a ducting contribution, not from equipment naming ducting (Q9); acceptance 
 reload, METr rows go to metr-export. honeybee-ph fields re-read at the pinned 1.33.65.
 
 This packet's stage is [P4-14](../phases/p4-14-erv-ducting.md) in the
-[phase ledger](../STATUS.md), a gate stub until Phase 3b's edge stages merge and this interview runs.
+[phase ledger](../STATUS.md), a gate stub until this interview runs; Phase 3b's edge stages merged on
+2026-10-26.
 
 ## Next step
 
@@ -27,7 +28,8 @@ equipment's Ventilators family, which this packet exports into.
 
 ## Blockers
 
-- The Ventilator record in the equipment packet. Equipment is not interviewed.
+- The Ventilator record in the equipment packet. Its family was interviewed on 2026-10-21 (V1 to
+  V6); stages P4-02 to P4-04 build it.
 - None from Phase 3b: its edge stages are on `main`; see hot-water-piping's STATUS. P3b-04's chain
   rule is not needed here.
 - None from the edge identity spike: it passed on 2026-09-18 ([B4](../../../archive/phase-00-foundation/evidence/spike-edge.md));
@@ -45,3 +47,4 @@ None. Nothing is implemented.
 | 2026-10-21 | Phase 4 planned in detail; this packet's stage is a gate stub in the phase ledger. |
 | 2026-10-21 | Re-baselined against `main` at `420c783a`: foundation and remote blockers removed, Phase 3b dependencies named, metre conversion and records corrected, Q9 added. No interview, no implementation. |
 | 2026-10-26 | Phase 3b P3b-09 handoff: the edge tagging rules point at `context/TECH_STACK.md`, the edge stages are on `main`, and the edge registry question (D3b-01) is this packet's. |
+| 2026-11-22 | Phase reviewed after Phase 6 Programs: the stale Phase 3b gate wording and the "Equipment is not interviewed" blocker corrected. No interview, no implementation. |

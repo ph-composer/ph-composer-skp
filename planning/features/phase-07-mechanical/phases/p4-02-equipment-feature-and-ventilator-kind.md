@@ -1,15 +1,14 @@
 # P4-02: the equipment feature and the Ventilator kind
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: composition order, the metadata step. The feature's name is open as D4-22. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4-01, D4-02 and D4-05, and the Ventilators interview (V1 to V6). `extension.rb` is
-shared with Phase 3b's P3b-02: not open on both branches at once, and whichever lands second takes
-the order `[..., Spaces, ThermalBridges, Equipment]`. Owns the feature's folder and registration and the first family
+Requires P4-01, D4-02 and D4-05, and the Ventilators interview (V1 to V6). D4-22, open, may
+rename the feature; the names below are the first draft's. Owns the feature's folder and registration and the first family
 kind, with its operations and reads, panel closed. No Zone, no Serves, no screen.
 
 Behavior owner: the [equipment PRD](../equipment/PRD.md), "The shared shape" and "Family 1".
@@ -22,7 +21,7 @@ Paths are relative to `src/ph_composer/`.
 
 1. **Feature skeleton.** `features/equipment/install.rb` registers `ph_composer.equipment` with
    `requires: ["ph_composer.zones", "ph_composer.spaces"]`; add the `require_relative` and the
-   `FEATURES` entry in `extension.rb`, after `ThermalBridges` when it is there, else after `Spaces`. `codes.rb` declares the `equipment`
+   `FEATURES` entry in `extension.rb`, last, after `Programs` (F22). `codes.rb` declares the `equipment`
    noun's codes as each stage needs them, starting with this stage's refusals.
 2. **The kind.** `ventilators/schema.rb` builds `Records::RecordKind`
    `ph_composer.equipment.ventilator`, prefix `vnt`, `schema_version` 1, from `Fields.common` plus
@@ -42,7 +41,11 @@ Paths are relative to `src/ph_composer/`.
 5. **Layer test.** A test that nothing under `features/equipment/ventilators/` references Zones,
    Spaces, the Zone Group, `serves/` or `Sketchup::`, and that no other feature folder names
    equipment.
-6. **Generated artifacts.** Regenerate `docs/API_REFERENCE.md` and its fixture through
+6. **Metadata (F36).** The Ventilator keeps a `user_data` map through the engine, its reads
+   carry `extension_data` and `extension_status`, `ph_composer.records.update_metadata` is its
+   one write route, and `docs/USER_DATA.md` gains its row, stating that the map leaves on the
+   `Ventilator` object or stays in the Model with `export.metadata_omitted` (P4-04 decides which).
+7. **Generated artifacts.** Regenerate `docs/API_REFERENCE.md` and its fixture through
    `make fixtures`. Add the panel-closed walkthrough
    `tools/examples/authoring/ventilators_walkthrough.rb`, and an "Equipment: Ventilators" recipe
    to `docs/AGENT_GUIDE.md`.
@@ -54,7 +57,7 @@ Paths are relative to `src/ph_composer/`.
 | `features/windows/products/schema.rb`, `products/operations.rb`, `declarations/records.rb` | Pattern for kind, operations and declarations |
 | `features/spaces/declarations/operations.rb` | The newest declarations: `preconditions`, `side_effects`, bounded `response:` |
 | `core/records/authoring_fields.rb` | Reuse `Fields.common` unchanged |
-| `features/thermal_bridges/install.rb` (P3b-02) | The sibling registered just before this one |
+| `features/programs/install.rb` | The sibling registered just before this one |
 
 ## Tests (write first)
 
