@@ -1676,9 +1676,10 @@ managed Zone whose `building_segment_id` is set).
 
 The Faces section is version 2: an AttachedZone Face carries `attached_zone`, its Attached zone's `id`,
 `name` and `temperature_reduction_factor`, and translates to honeybee-ph `PhAdditionalZone` with zone type
-"Unheated space", as honeybee-ph's Grasshopper component writes it. PHX 1.59.1 merges a Segment's Rooms
+"Unheated space", as honeybee-ph's Grasshopper component writes it. PHX 1.59.3 merges a Segment's Rooms
 before it collects attached zones, so one Attached zone that two Rooms name reaches WUFI-Passive and METr as
-one attached zone, and its Faces' exterior exposure names it. WUFI XML carries its factor; METr JSON carries
+one attached zone, and its Faces' exterior exposure names it; it carries no appliance devices (PHX 1.59.2 and
+later), so a Segment's devices are counted once. WUFI XML carries its factor; METr JSON carries
 the zone with `typeZ` 2 and PHX's default `TRedUD` of 1.0, not the factor
 (`tests/python/test_segment_phx_round_trip.py`). The Attached zone's kind stays in the Model.
 
@@ -1833,7 +1834,7 @@ metadata boundary under its path's `shd_` id: its `user_data` stays in the Model
 Shades, none when there are none, so a Model with no shading writes the same HBJSON and result as before the
 section, bar its empty row in `sections`. Conformance finds the reported count of orphaned Shades, each
 detached, and per component the reported count and area. The report's Shading section lists each component
-and the totals, and is absent with none. PHX 1.59.1 writes one shading component per name in every Variant,
+and the totals, and is absent with none. PHX 1.59.3 writes one shading component per name in every Variant,
 with `InnerAttachment` and `idIC` -1 (`tests/python/test_shade_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path

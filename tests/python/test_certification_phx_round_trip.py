@@ -2,7 +2,7 @@
 Segment settings"): the canonical HBJSON of the two-Segment extraction tests/segment_certification_test.rb writes,
 House residential and ADU non-residential with no default value on either, converted by the pinned PHX of the
 optional `phx` group. WUFI XML and METr JSON each carry two Variants, and each reads back its Segment's category,
-program, use, status and type. Segment names hold no space: PHX 1.59.1 refuses one in `cleanup.merge_rooms`.
+program, use, status and type. Segment names hold no space: PHX 1.59.3 refuses one in `cleanup.merge_rooms`.
 Skipped without the group: `uv run --group phx pytest tests/python/test_certification_phx_round_trip.py`."""
 
 from __future__ import annotations
