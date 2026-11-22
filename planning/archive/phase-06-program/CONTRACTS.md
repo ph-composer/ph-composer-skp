@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3 and C4a-6 settle in their stages; P4a-06 answered C4a-4. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
+STATUS: Complete 2026-11-22: built by P4a-01 to P4a-12 and folded into `context/CONTRACTS.md` and `context/EXTENSIBILITY.md`, which are canonical ([STATUS](STATUS.md)). Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3 and C4a-6 settle in their stages; P4a-06 answered C4a-4. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -186,7 +186,7 @@ identity (Q4a-19, Q4a-22). **New here: dependencies.** Every library kind today 
 record, and the coordinator copies one record per use. A Program references Schedules, so P4a-07
 extends the coordinator to copy a record's referenced records in the same transaction, reusing a
 local copy of each from the same source (the glossary's Bookshelfing). The file layout
-is the [ph-composer-standards PRD](../unscheduled/ph-composer-standards/PRD.md).
+is the [ph-composer-standards PRD](../../features/unscheduled/ph-composer-standards/PRD.md).
 
 ## 6. Derived values (Programs, Ruby; P4a-08 and P4a-09)
 

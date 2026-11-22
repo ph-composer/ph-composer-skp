@@ -1,7 +1,7 @@
 # Building Segments: membership, management and settings
 
 DATE: 2026-11-15
-STATUS: Scoped. Interviewed 2026-11-15 (BS-1 to BS-6 answered, below); revised the same day after an independent review. Built as Phase 4a stages P4a-01 to P4a-04; the Programs-owned settings sections arrive in P4a-06, P4a-08 and P4a-10 ([PLAN](../PLAN.md)). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Complete 2026-11-22: built by P4a-01 to P4a-04 with the Programs-owned sections in P4a-06, P4a-08 and P4a-10; PG01 to PG12 pass on the host ([STATUS](../STATUS.md#host-sitting)). Scoped: interviewed 2026-11-15 (BS-1 to BS-6 answered, below); revised the same day after an independent review. Built as Phase 4a stages P4a-01 to P4a-04; the Programs-owned settings sections arrive in P4a-06, P4a-08 and P4a-10 ([PLAN](../PLAN.md)). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -100,7 +100,7 @@ Checked when the user exports; the Zone tables never flag them.
 1. **The minimum is one Zone in one Building Segment.** With less, export refuses.
 2. A Zone in no Segment is left out with its Faces, Spaces and thermal-bridge Edges. One info
    finding names those Zones and counts what went with them. Later they export as shading
-   ([zone-shading](../../unscheduled/zone-shading.md)). A Face tagged as shading inside such a Zone
+   ([zone-shading](../../../features/unscheduled/zone-shading.md)). A Face tagged as shading inside such a Zone
    still exports as a Shade (C4a-12).
 3. An empty Segment is left out, with an info line in the export report.
 4. A Surface Face whose partner Zone is left out refuses export and names the Face. A Face can
@@ -147,6 +147,6 @@ extensions staged by Zones' Save, the settings-section seam and the export proje
 
 ## Out of scope
 
-Exporting Zones in no Segment as shading ([zone-shading](../../unscheduled/zone-shading.md)), summer ventilation and mechanical settings
+Exporting Zones in no Segment as shading ([zone-shading](../../../features/unscheduled/zone-shading.md)), summer ventilation and mechanical settings
 (Phase 7), site and climate per Segment (the Climate tab sets one site for the Model; C4a-13), drag and
 drop between groups.

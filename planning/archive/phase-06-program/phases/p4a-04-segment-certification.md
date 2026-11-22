@@ -1,7 +1,7 @@
 # P4a-04: Phius certification on Building Segments
 
 DATE: 2026-11-15
-STATUS: Scoped. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#542](https://github.com/ph-composer/ph-composer-skp/pull/542), squash `5b7a7017`). PG04 passes on the host. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

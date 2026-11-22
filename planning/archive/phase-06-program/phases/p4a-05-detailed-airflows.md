@@ -1,7 +1,7 @@
 # P4a-05: Detailed airflows per Zone
 
 DATE: 2026-11-15
-STATUS: Implemented on branch 2026-11-20; PG05's host rows owed ([STATUS](../STATUS.md)). Authorized 2026-11-20 with the rest of Phase 4a.
+STATUS: Merged to main 2026-11-20 ([#543](https://github.com/ph-composer/ph-composer-skp/pull/543), squash `5db743dc`). PG05 passes on the host. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

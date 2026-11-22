@@ -1,7 +1,7 @@
 # P4a-03: Segment export rules and Attached zones
 
 DATE: 2026-11-15
-STATUS: Implemented on branch 2026-11-20 ([STATUS](../STATUS.md)); host rows owed. Authorized 2026-11-20 with the rest of Phase 4a.
+STATUS: Merged to main 2026-11-20 ([#541](https://github.com/ph-composer/ph-composer-skp/pull/541), squash `31904361`). PG03 passes on the host. Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

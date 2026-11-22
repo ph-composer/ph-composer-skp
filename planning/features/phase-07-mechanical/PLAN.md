@@ -26,7 +26,7 @@ Out of this plan: METr conversion and import ([metr-export](../unscheduled/metr-
 owns every METr row, including whether PHX writes one device or three for a shared item), the
 simplified hot water methods until [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135)
 lands (hot water H5), boilers, district heat and PV (Q7), equipment library kinds (Q8, roadmap 5.4),
-the Zone loads packet's occupancy and lighting (Q12, now [Phase 4a Programs](../phase-06-program/README.md)), equipment geometry (Q5), sizing, schedules,
+the Zone loads packet's occupancy and lighting (Q12, now [Phase 4a Programs](../../archive/phase-06-program/README.md)), equipment geometry (Q5), sizing, schedules,
 SketchUp 2023 and Windows host proof, public distribution.
 
 ## What earlier phases supply
@@ -65,7 +65,7 @@ stubs: entry gates, what the stage owns and reuses, and the interview that prece
 | [P4-09](phases/p4-09-electric-heaters.md) | Family 4 | P4-07; its interview | equipment | Stub |
 | [P4-10](phases/p4-10-pumps.md) | Family 5 | P4-07; its interview | equipment | Stub |
 | [P4-11](phases/p4-11-fans.md) | Family 6: exhaust ventilator plus linked supportive device (Q6) | P4-10; its interview | equipment | Stub |
-| [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../phase-06-program/README.md) owns appliances (Q4a-03) | equipment | Superseded |
+| [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../../archive/phase-06-program/README.md) owns appliances (Q4a-03) | equipment | Superseded |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4, planned in detail after its interview | P4-06; P3b-03, P3b-04, P3b-06, P3b-07, P3b-08 merged; the piping interview | piping | Stub |
 | [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; P3b-03, P3b-06, P3b-07, P3b-08 merged; the ducting interview | ducting | Stub |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Register closed; context, docs, the metr-export handoff; Phase 4 close is the MVP (D1) | all stages above | integration | Fresh-process integrated run |

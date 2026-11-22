@@ -1,7 +1,7 @@
 # Phase 6: Programs
 
 DATE: 2026-11-14
-STATUS: Scoped (2026-11-15): PRDs, contracts, plan, acceptance and stages P4a-01 to P4a-12 written; P4a-01 to P4a-12 authorized 2026-11-20 through the implement-loop; progress in [STATUS](STATUS.md).
+STATUS: Complete 2026-11-22, archived. Implementation: P4a-01 to P4a-12 built. Merge: PRs #539 to #552, the host sitting's record in #553 and its fixes in #554 to #557 (last `e0be139d`). Host acceptance: PG01 to PG12 pass on the host; Ed approved the host UI polish for PG02, PG09, PG11 and PG11b on 2026-11-22. Release: none. Scoped 2026-11-15 and authorized 2026-11-20 through the implement-loop; the record is in [STATUS](STATUS.md).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -12,7 +12,7 @@ schedules, assign them to Zones, and export them in canonical HBJSON so WUFI-Pas
 PHPP receive occupancy, lighting, equipment, ventilation and airtightness without hand entry.
 
 Ed proposed this on 2026-11-14 as the next chunk of work, ahead of the mechanical stages.
-It is the "Zone loads packet" that [Phase 7: Mechanical](../phase-07-mechanical/README.md) defers to: equipment
+It is the "Zone loads packet" that [Phase 7: Mechanical](../../features/phase-07-mechanical/README.md) defers to: equipment
 Q12 left occupancy, lighting and the non-appliance Room loads to it, and Spaces already shows a
 dash where a Zone's ventilation load should be inherited. Its place on the roadmap is Q4a-01.
 
@@ -82,9 +82,10 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
    honeybee-ph, the Grasshopper path, PHX and its writers (F4a-24 to F4a-29, Q4a-29 to Q4a-32).
 10. [STATUS.md](STATUS.md): the ledger.
 
-## Next
+## Outcome
 
-1. The batched host sitting: every PG row and P4a-12's integrated run, after the bridge-launch
-   diagnosis ([STATUS](STATUS.md#host-sitting)). Then the archive PR, which closes #538.
-2. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
-   with a reproducing test in each.
+Complete on 2026-11-22 and archived; the archive PR closes #538. The durable contracts live in
+`context/CONTRACTS.md` and `context/EXTENSIBILITY.md`, the user guide in `docs/PRODUCT.md`; this packet is
+the record of how they were reached. The [host sitting](STATUS.md#host-sitting) holds the final state and
+its known limits. Deferred, each with its own authorization: the honeybee-ph and PHX fix for F4a-13 (Q4a-08),
+starting with a reproducing test in each repository, and the other [follow-ups](STATUS.md#follow-ups).

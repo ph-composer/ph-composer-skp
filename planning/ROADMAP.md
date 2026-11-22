@@ -139,14 +139,14 @@ concurrent work. External-agent support and public distribution remain distinct 
 
 ## Phase 4a: programs
 
-Ed proposed [Phase 4a Programs](features/phase-06-program/README.md) on 2026-11-14 as the next
+Ed proposed [Phase 4a Programs](archive/phase-06-program/README.md) on 2026-11-14 as the next
 work, ahead of the mechanical stages: honeybee-energy ProgramTypes with their loads and schedules,
 assigned to Zones and exported to HBJSON. It is the Zone loads packet equipment Q12 defers to.
-Scoped on 2026-11-15, including the Building Segment work it stands on and the Programs tab. Its placement and name are question Q4a-01. No stage authorized.
+Scoped on 2026-11-15, including the Building Segment work it stands on and the Programs tab. Its placement and name are question Q4a-01. Every stage was authorized on 2026-11-20; the phase is complete and archived (2026-11-22).
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4a | [Programs](features/phase-06-program/README.md) | Scoped 2026-11-15: [PLAN](features/phase-06-program/PLAN.md) stages P4a-01 to P4a-12; P4a-01 to P4a-11 ready | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
+| 4a | [Programs](archive/phase-06-program/README.md) | Complete 2026-11-22, archived; [PLAN](archive/phase-06-program/PLAN.md) stages P4a-01 to P4a-12 merged (PRs #539 to #552), the host sitting's fixes in #554 to #557; PG01 to PG12 pass on the host | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
 
 ## Phase 7: mechanical (was Phase 4; items 4.1 to 4.6)
 
@@ -161,7 +161,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
 | 4.4 | [Hot water piping](features/phase-07-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
 | 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21 | |
-| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](features/phase-06-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
+| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](archive/phase-06-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
 
 ## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
 
@@ -275,3 +275,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-11-19 | Phase 5 Shading scoped: tag Faces and Groups, export as honeybee orphaned Shades, no solver. Packet written with stages P5s-01 to P5s-07; none authorized. |
 | 2026-11-19 | Ed authorized every Shading stage. P5s-01 to P5s-06 merged (PRs #527 to #532); P5s-07 implemented. Host acceptance SD01 to SD07 owed to one batched pass, then Ed's check of the WUFI-Passive and METr files. Not released. |
 | 2026-11-20 | Shading (Phase 5) P5s-01 to P5s-07 merged (PRs #527 to #533, last `906a102c`); SD01 to SD07 pass on `906a102c`, Ed's check of the WUFI-Passive and METr files included. The packet is archived at `archive/phase-05-shading/`; Ed confirmed D5s-11a and the Window Unit refusal row on 2026-11-20; three follow-ups stay in the master STATUS row. Not released. |
+| 2026-11-22 | Programs (Phase 6) P4a-01 to P4a-12 merged (PRs #539 to #552); the batched host sitting of 2026-11-21 (#553) and its fixes in #554 to #557, the last two pinning PHX 1.59.3 and 1.59.4 for PH-Tools/PHX#171 and PH-Tools/PHX#175 (last `e0be139d`); PG01 to PG12 pass on the host, and Ed approved the host UI polish for PG02, PG09, PG11 and PG11b. The packet is archived at `archive/phase-06-program/`; its deferred follow-ups stay in the master STATUS row. Not released. |

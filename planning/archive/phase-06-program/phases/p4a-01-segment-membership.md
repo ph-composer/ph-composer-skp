@@ -1,7 +1,7 @@
 # P4a-01: Building Segment membership
 
 DATE: 2026-11-20
-STATUS: Implemented on branch `feature/phase-06-program-p4a-01` (2026-11-20; authorized 2026-11-20 with P4a-02 to P4a-12). Host gate PG01 in [ACCEPTANCE](../ACCEPTANCE.md).
+STATUS: Merged to main 2026-11-20 ([#539](https://github.com/ph-composer/ph-composer-skp/pull/539), squash `49900872`). PG01 passes on the host, native Edit-menu Undo and Redo included ([ACCEPTANCE](../ACCEPTANCE.md)). Authorized 2026-11-20 with the rest of Phase 4a; packet complete 2026-11-22 ([STATUS](../STATUS.md#host-sitting)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
