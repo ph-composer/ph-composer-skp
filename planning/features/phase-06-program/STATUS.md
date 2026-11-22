@@ -83,11 +83,17 @@ view are refused as a canvas; real panel input needs full-screen control from th
 | PG07 | Pass (walkthrough, native Undo/Redo, save and reopen) | |
 | PG07b | Pass (library copy reusing Schedules, native Undo/Redo) | |
 | PG08 | Pass (assign actions, Single dwelling on/off, cross-Segment refusal, Zone copy; gestures: tags in every view, on/off, Undo/Redo) | Apartments derivations not exercised on the host |
-| PG09 | **Fail**: the house row's Equipment Set refuses "Residential default devices" while the default Set is unwritten ("eqs_PHCDEFAULT01 does not exist"), scripted and by real click | Product fix; host UI polish verdict (Ed) |
+| PG09 | **Fail** in the sitting: the house row's Equipment Set refused "Residential default devices" while the default Set was unwritten ("eqs_PHCDEFAULT01 does not exist"). Fixed in [#554](https://github.com/ph-composer/ph-composer-skp/pull/554) (a Segment's settings may name an unwritten default; API 1.86); the bridge rerun on its head passes | The house-row gesture rerun on the fixed build; host UI polish verdict (Ed) |
 | PG10 | **Fail**: after PHX 1.59.1 the Apartments Segment has no interior lighting device (PHX takes Lighting from a Segment's first Room only); Comfort and Locate pass | PHX fix, or order a lighting-rule Room first |
 | PG11 | Pass (gestures: cards by pointer and keyboard, fixed value with Return, New Program in place, Undo/Redo) | Host UI polish verdict (Ed) |
 | PG11b | Pass (gestures: ventilation total amber and Escape, Add device, Undo/Redo) | Host UI polish verdict (Ed) |
 | PG12 | **Fail**: the PG10 lighting fault, and PHX copies the House's 9 devices onto the Attached zone (18); the panel walk passes | PHX fixes |
+
+**Reruns on #554's head (`09d417f9`, RBZ `6a4863b4`).** The fix touches paths PG01, PG02, PG06, PG09 and PG12
+depend on, so their bridge rows were rerun on the PR head (`evidence/<case>-rerun-pr554-20261121.md`): PG01, PG02,
+PG06 and PG09 pass; PG12 fails on the same two PHX device rows. Three PG02 rows use the development example
+namespace, so that run is synthetic composition despite its label. The gesture rows of PG02, PG06, PG09 and PG12
+on the fixed build wait on one full-screen hold (the approval card timed out with Ed away).
 
 The PHX faults reproduce in the pinned wheels on the HBJSON PH-Composer writes (PHX `from_HBJSON/cleanup.py`
 Lighting from the first merged Room; `to_WUFI`/`create_variant.py` adds devices to every zone, attached zones
