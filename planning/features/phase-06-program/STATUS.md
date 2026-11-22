@@ -1,7 +1,7 @@
 # Phase 4a status
 
 DATE: 2026-11-21
-STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-12 merged. The batched host sitting ran 2026-11-21 ([Host sitting](#host-sitting)): eleven cases pass; PG09 fails on a product defect and PG10 and PG12 on PHX device handling; four host UI polish verdicts wait on Ed. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
+STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 to P4a-12 merged. The batched host sitting ran 2026-11-21 ([Host sitting](#host-sitting)): twelve cases pass (PG09 after its fix in #554); PG10 and PG12 fail on PHX device handling; four host UI polish verdicts wait on Ed. P4a-07 was split into P4a-07a (records) and P4a-07b (library kinds), and P4a-11 into P4a-11 (the tab and the Program editor) and P4a-11b (the Schedule and Equipment Set editors), on 2026-11-20.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -83,7 +83,7 @@ view are refused as a canvas; real panel input needs full-screen control from th
 | PG07 | Pass (walkthrough, native Undo/Redo, save and reopen) | |
 | PG07b | Pass (library copy reusing Schedules, native Undo/Redo) | |
 | PG08 | Pass (assign actions, Single dwelling on/off, cross-Segment refusal, Zone copy; gestures: tags in every view, on/off, Undo/Redo) | Apartments derivations not exercised on the host |
-| PG09 | **Fail** in the sitting: the house row's Equipment Set refused "Residential default devices" while the default Set was unwritten ("eqs_PHCDEFAULT01 does not exist"). Fixed in [#554](https://github.com/ph-composer/ph-composer-skp/pull/554) (a Segment's settings may name an unwritten default; API 1.86); the bridge rerun on its head passes | The house-row gesture rerun on the fixed build; host UI polish verdict (Ed) |
+| PG09 | **Fail** in the sitting: the house row's Equipment Set refused "Residential default devices" while the default Set was unwritten ("eqs_PHCDEFAULT01 does not exist"). Fixed in [#554](https://github.com/ph-composer/ph-composer-skp/pull/554) (a Segment's settings may name an unwritten default; API 1.86); the bridge rerun and the house-row gesture rerun on its head pass | Host UI polish verdict (Ed) |
 | PG10 | **Fail**: after PHX 1.59.1 the Apartments Segment has no interior lighting device (PHX takes Lighting from a Segment's first Room only); Comfort and Locate pass | PHX fix, or order a lighting-rule Room first |
 | PG11 | Pass (gestures: cards by pointer and keyboard, fixed value with Return, New Program in place, Undo/Redo) | Host UI polish verdict (Ed) |
 | PG11b | Pass (gestures: ventilation total amber and Escape, Add device, Undo/Redo) | Host UI polish verdict (Ed) |
@@ -93,7 +93,8 @@ view are refused as a canvas; real panel input needs full-screen control from th
 depend on, so their bridge rows were rerun on the PR head (`evidence/<case>-rerun-pr554-20261121.md`): PG01, PG02,
 PG06 and PG09 pass; PG12 fails on the same two PHX device rows. Three PG02 rows use the development example
 namespace, so that run is synthetic composition despite its label. The gesture rows of PG02, PG06, PG09 and PG12
-on the fixed build wait on one full-screen hold (the approval card timed out with Ed away).
+were rerun on the fixed build under one full-screen hold on 2026-11-22 and all pass
+([evidence](evidence/gestures-rerun-pr554-20261122.md)); PG09's house row now stores the default Set on choice.
 
 The PHX faults reproduce in the pinned wheels on the HBJSON PH-Composer writes (PHX `from_HBJSON/cleanup.py`
 Lighting from the first merged Room; `to_WUFI`/`create_variant.py` adds devices to every zone, attached zones
