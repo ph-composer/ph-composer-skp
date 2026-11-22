@@ -297,7 +297,7 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
         button.addEventListener("pointerdown", function () { renaming.leaving = true; });
       });
       renaming.root.appendChild(renaming.input); renaming.root.appendChild(apply); renaming.root.appendChild(cancel);
-      renaming.focus = true;
+      renaming.focus = true; renaming.reveal = true;
     }
     renaming.input.disabled = this.channel.busy();
     if (renaming.root.parentNode !== td) td.replaceChildren(renaming.root);
@@ -306,6 +306,14 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       renaming.input.focus();
       if (renaming.input.select) renaming.input.select();
     }
+  };
+
+  /* The new name field, once, for the screen to scroll into view after its paint; null otherwise. */
+  SegmentRows.prototype.revealRename = function () {
+    var renaming = this.renaming;
+    if (!renaming || !renaming.reveal || !renaming.root || !renaming.root.parentNode) return null;
+    renaming.reveal = false;
+    return renaming.root;
   };
 
   SegmentRows.prototype.applyRename = function () {
@@ -561,7 +569,7 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       }
       panel.repaint();
     });
-    dialog.appendChild(ui.actionRow(later, make, true));
+    dialog.appendChild(ui.actionRow(later, make));
     document.body.appendChild(dialog);
     dialog.openModal();
     make.focus();

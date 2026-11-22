@@ -288,8 +288,11 @@ function (ui, fields, loads) {
 
   /* Whether a field holds typing, or the periods a draft, the Model has not taken yet. */
   ScheduleEditor.prototype.typing = function () {
-    return Boolean(this.draft) || Object.keys(this.inputs).some(function (path) { return this.inputs[path].typed; },
-      this);
+    // Typing back to the Model's value holds nothing, as its commit sends nothing.
+    return Boolean(this.draft) || Object.keys(this.inputs).some(function (path) {
+      var input = this.inputs[path];
+      return input.typed && input.value.trim() !== input.seed;
+    }, this);
   };
 
   /* Why the page may not move on: a held draft of the periods, or typing. */

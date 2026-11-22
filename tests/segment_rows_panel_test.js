@@ -543,7 +543,10 @@ test("moving a Zone out offers to make it the Attached zone of the Faces it shar
   assert.ok(offer, "the offer opens");
   assert.strictEqual(offer.querySelector("h2").textContent, "Make Zone A an Attached zone?");
   assert.match(offer.querySelector(".phc-segment-consequence").textContent, /1 Face it shares with Zone B/);
-  click(button(offer, "Make Attached zone"));
+  var make = button(offer, "Make Attached zone");
+  assert.match(make.className, /phc-action-apply/, "making an Attached zone is the dialog's commit");
+  assert.doesNotMatch(make.className, /phc-action-delete/, "it destroys nothing, so it carries no trash icon");
+  click(make);
   var made = p.actions()[1];
   assert.strictEqual(made.payload.name, "ph_composer.zones.faces.attached_zone.create_and_assign");
   assert.deepStrictEqual(made.payload.params, { faces: SHARED, values: { name: "Zone A", kind: "other" },

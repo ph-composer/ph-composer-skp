@@ -97,6 +97,12 @@ class ProgramExportTest < PhComposerTestCase
     assert_empty rows.select { |row| row.fetch("blocks_export") }, rows.inspect
     codes = rows.map { |row| row.fetch("code") }
     assert_equal 2, codes.count("programs.set_points_disagree"), "Apartments and School"
+    apartments = rows.find do |row|
+      row.fetch("code") == "programs.set_points_disagree" && row.fetch("message").include?("Apartments")
+    end
+    assert_match(/\AThe Programs of Apartments' Zones give different set points/, apartments.fetch("message"))
+    assert_equal %w[zones], apartments.dig("locate", "params").keys,
+                 "Locate checks the Segment's Zones and opens no settings dialog"
     lab = rows.find { |row| row.fetch("code") == "programs.equipment_set_non_residential" }
     assert_equal [zone_row("Lab").fetch("reference").slice("zone_id", "zone_path")],
                  lab.dig("locate", "params", "zones")

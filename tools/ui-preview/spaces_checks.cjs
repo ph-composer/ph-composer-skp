@@ -269,9 +269,12 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     const noSpaces = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key^=\'["NoSpaces"\'] td.col-name');
     assert.equal(await noSpaces.count(), 2);
     assert.equal(await noSpaces.first().textContent(), "No Spaces");
-    assert(await noSpaces.first().evaluate(node => node.classList.contains("is-flagged")), "the row is amber");
-    assert.notEqual(await noSpaces.first().evaluate(node => getComputedStyle(node).backgroundColor),
-      "rgba(0, 0, 0, 0)", "the amber shows");
+    assert(await noSpaces.first().evaluate(node => node.parentNode.classList.contains("is-flagged")), "the row is amber");
+    // Amber across the whole row: the sticky Actions and Hierarchy cells take the Name cell's amber.
+    const backgrounds = await noSpaces.first().evaluate(node => ["col-actions", "col-hierarchy", "col-name"]
+      .map(name => getComputedStyle(node.parentNode.querySelector(`td.${name}`)).backgroundColor));
+    assert.notEqual(backgrounds[2], "rgba(0, 0, 0, 0)", "the amber shows");
+    assert.deepEqual(backgrounds, [backgrounds[2], backgrounds[2], backgrounds[2]], "the amber spans the row");
     await page.screenshot({ path: path.join(output, "spaces-no-spaces.png") });
     step("empty Model");
     // An empty Model: no rows, and the empty table says what to do first.

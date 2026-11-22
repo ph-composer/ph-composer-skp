@@ -125,6 +125,10 @@ test("the section offers Ruby's values in its order and shows the defaults on a 
   assert.deepStrictEqual([shown.basis.value, shown.value.value, shown.wind.value],
     ["n50", "", "several_sides_no_screening"]);
   assert.ok(shownText(dialog).indexOf("1/h") >= 0, "n50 shows its unit");
+  var line = shown.basis.parentNode;
+  assert.strictEqual(line.className, "phc-airtightness-result", "the test result is one line of the row");
+  assert.deepStrictEqual(line.children.map(function (node) { return node.className || node.tagName.toLowerCase(); }),
+    ["select", "input", "phc-airtightness-unit"], "basis, value, then its unit");
   assert.ok(/replacing the Program's value/.test(shownText(dialog)), "the section says what export does");
   var name = control(dialog, "input", "Name");
   name.value = "Main house"; name.listeners.input({});

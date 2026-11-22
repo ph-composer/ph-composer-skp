@@ -429,8 +429,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     if (options.actionsCell) options.actionsCell(entry.cells.actions, row);
     var selected = options.selected && options.selected(row);
     var checked = paintRowCheck(cache, entry, row);
+    // `flagged(row)`: a row that needs something from the user as a whole is amber across, its identity cells too.
+    var flagged = Boolean(options.flagged && options.flagged(row));
     entry.node.className = "tier-" + row.depth + (row.heading ? " is-heading" : "") +
-      (selected ? " host-selected" : "") + (checked ? " is-checked" : "");
+      (selected ? " host-selected" : "") + (checked ? " is-checked" : "") + (flagged ? " is-flagged" : "");
     if (row.depth < tiers(cache) && !row.heading) entry.needChevron();
     if (entry.target) entry.target.disabled = Boolean(options.disabled);
     if (entry.chevron) {
@@ -590,18 +592,34 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
 
 
-  /* A tree may open a narrow view at its first identity column. Each mount keeps the one-time
-     orientation and later manual pans; no columns are reordered or hidden. */
+  /* A narrow view (500 px or less, where Actions and Hierarchy stop sticking) opens at its first identity
+     column. A mount turns once each time the panel becomes narrow, whether it opened narrow or was narrowed
+     later, keeps any pan made while narrow, and goes back to the start once widened unless the user panned on
+     past where it turned; no columns are reordered or hidden. Callers run it after a paint and after a resize. */
+  var NARROW_SHOWN = 40; // How much of the first identity column a kept pan must show.
   function orientNarrow(root) {
     var cache = root._table;
-    if (!cache || cache.initialScrollSet || !cache.empty.hidden || !root.clientWidth) return;
-    cache.initialScrollSet = true;
-    if (window.innerWidth > 500 || root.scrollLeft) return;
+    if (!cache || !cache.empty.hidden || !root.clientWidth) return;
+    if (window.innerWidth > 500) {
+      // Widened again, it goes back to the start, where Actions and Hierarchy stick again, unless the user
+      // panned on past where it turned.
+      if (cache.orientedNarrow && root.scrollLeft <= (cache.turnedTo || 0) + 1) root.scrollLeft = 0;
+      cache.orientedNarrow = false;
+      return;
+    }
+    if (cache.orientedNarrow) return;
+    cache.orientedNarrow = true;
+    cache.turnedTo = 0;
     var first = cache.columns.filter(function (column) {
       return column[0] !== "actions" && column[0] !== "hierarchy" && !cache.headers[column[0]].hidden;
     })[0];
     var header = first && cache.headers[first[0]];
-    if (header) root.scrollLeft = Math.max(0, header.getBoundingClientRect().left - root.getBoundingClientRect().left);
+    if (!header) return;
+    // A pan that already shows the column's start is kept; an unpanned table opens at the column.
+    var box = header.getBoundingClientRect(), frame = root.getBoundingClientRect();
+    if (root.scrollLeft && box.left >= frame.left && box.left + NARROW_SHOWN <= frame.right) return;
+    root.scrollLeft = Math.max(0, (root.scrollLeft || 0) + box.left - frame.left);
+    cache.turnedTo = root.scrollLeft;
   }
 
   return { table: table, orientNarrow: orientNarrow, STICKY_WIDTHS: STICKY_WIDTHS };

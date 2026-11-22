@@ -116,9 +116,16 @@ check({ name: "programs_editors", output }, async ({ newPage, step }) => {
   }
   await setPanelSize(page, 1280, 800);
 
+  step("Escape ends a typed entry, and the still-focused field lets the subtabs switch");
+  const minimum = field("Minimum fraction of design flow");
+  await minimum.fill("0.2");
+  await page.getByRole("tab", { name: "Equipment Sets" }).click();
+  assert.equal(await page.getByRole("tab", { name: "Schedules" }).getAttribute("aria-selected"), "true",
+    "a typed entry holds the switch");
+  await minimum.press("Escape");
+  assert.equal(await minimum.evaluate(node => node === document.activeElement), true, "the field keeps focus");
+
   step("the device grid: a Phius-rule device marked, a renamed device's type beside its name");
-  // A focused field holds a subtab switch (subtabs.js), so leave it first.
-  await page.evaluate(() => document.activeElement.blur());
   await page.getByRole("tab", { name: "Equipment Sets" }).click();
   await title.filter({ hasText: "Phius single-family" }).waitFor();
   const add = page.locator(`${shown} .pgm-add-device`);
@@ -212,4 +219,19 @@ check({ name: "programs_editors", output }, async ({ newPage, step }) => {
     await dialog.waitFor({ state: "hidden" });
   }
   await setPanelSize(page, 1280, 800);
+
+  step("at 1280 the grid shows the host's long device names and Phius rule lines whole");
+  await page.evaluate(() => {
+    // As long as the host's "PHIUS+ Exterior Lighting · Phius exterior lighting" with this device's type.
+    const names = { dev_PHCDEFAULT02: "PHIUS+ Exterior Lighting, north porch", dev_PHCDEFAULT08: "PHIUS+ MELS" };
+    window.previewHost.programCatalog.equipment_sets.forEach(row => (row.values.devices || []).forEach(device => {
+      if (names[device.id]) device.display_name = names[device.id];
+    }));
+    window.previewHost.snapshot();
+  });
+  await grid.filter({ hasText: "PHIUS+ MELS" }).waitFor();
+  const clipped = await grid.evaluateAll(rows => rows.flatMap(tr => ["device", "energy"].map(field =>
+    tr.querySelector(`.col-${field}`)).filter(td => td.scrollWidth > td.clientWidth).map(td => td.textContent)));
+  assert.deepEqual(clipped, [], "nothing in Device or Energy demand is cut");
+  await page.screenshot({ path: path.join(output, "equipment-set-long-names.png") });
 });

@@ -307,7 +307,11 @@ function (ui, loads) {
 
   /* Whether a field holds typing the Model has not taken yet. */
   ProgramEditor.prototype.typing = function () {
-    return Object.keys(this.inputs).some(function (key) { return this.inputs[key].typed; }, this);
+    // Typing back to the Model's value holds nothing, as its commit sends nothing.
+    return Object.keys(this.inputs).some(function (key) {
+      var input = this.inputs[key];
+      return input.typed && input.value.trim() !== input.seed;
+    }, this);
   };
 
   return ProgramEditor;

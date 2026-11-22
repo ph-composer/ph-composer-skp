@@ -71,6 +71,60 @@ test("a tree paints one row per record, open by default, with its cells", functi
   assert.strictEqual(h.root.querySelector(".phc-empty").hidden, true);
 });
 
+test("a flagged row is amber as a whole, and drops the flag once the caller does", function () {
+  var h = harness(), flagged = { a1: true };
+  paint(h, { flagged: function (given) { return Boolean(flagged[given.key]); } });
+  var row = function (key) {
+    return h.root.querySelectorAll("[data-row-key]").filter(function (tr) {
+      return tr.getAttribute("data-row-key") === key; })[0];
+  };
+  assert.ok(row("a1").classList.contains("is-flagged"));
+  assert.ok(!row("a").classList.contains("is-flagged"));
+  flagged = {};
+  paint(h, { flagged: function (given) { return Boolean(flagged[given.key]); } });
+  assert.ok(!row("a1").classList.contains("is-flagged"));
+});
+
+test("a table narrowed after it opened turns to its first identity column once, and keeps a pan made since",
+  function () {
+    var h = harness();
+    h.root.clientWidth = 340;
+    h.root.rect = { left: 0, right: 340, top: 0, bottom: 400, width: 340, height: 400 };
+    paint(h, { tree: true });
+    // The stub lays nothing out, so Name stays where an unscrolled narrow table puts it: past the frame's edge.
+    tagged(h, "col-name", "th")[0].rect = { left: 330, right: 550, top: 0, bottom: 38, width: 220, height: 38 };
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft || 0, 0, "a wide panel stays where it is");
+    h.context.innerWidth = 360;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 330, "narrowed later, it opens at Name");
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 0, "widened, it goes back to the start");
+    h.context.innerWidth = 360;
+    h.tables.orientNarrow(h.root);
+    h.root.scrollLeft = 40;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 40, "a pan made since is kept");
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    h.context.innerWidth = 420;
+    h.root.scrollLeft = 0;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 330, "narrowed again, it turns again");
+    h.root.scrollLeft = 480;
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 480, "a pan on past the turn survives widening");
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    tagged(h, "col-name", "th")[0].rect = { left: 120, right: 340, top: 0, bottom: 38, width: 220, height: 38 };
+    h.root.scrollLeft = 12;
+    h.context.innerWidth = 360;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 12, "a pan that already shows Name is kept");
+  });
+
 test("a tree marks its table for group headings, and a chevron does not repeat the row's kind", function () {
   var h = harness(), settings = options({ tree: true });
   settings.rows[2].record.name = "Box 2";

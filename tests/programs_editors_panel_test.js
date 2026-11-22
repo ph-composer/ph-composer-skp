@@ -214,6 +214,36 @@ test("Escape takes back the typing first, then the held draft", function () {
   assert.strictEqual(basic.value, "6", "then the draft goes");
 });
 
+test("Escape ends a typed entry, so its still-focused field no longer holds the subtabs", function () {
+  var p = load("Schedules");
+  open(p, "Ventilation");
+  var minimum = labelled(shown(p), "input", "Minimum fraction of design flow");
+  var tab = function (name) {
+    return p.context.document.querySelectorAll("[role='tab']").filter(function (node) {
+      return node.textContent === name; })[0];
+  };
+  type(minimum, "0.2");
+  click(tab("Programs"));
+  assert.strictEqual(tab("Schedules").getAttribute("aria-selected"), "true", "a typed entry holds the switch");
+  key(minimum, "Escape");
+  assert.strictEqual(p.context.document.activeElement, minimum, "the field keeps focus");
+  click(tab("Programs"));
+  assert.strictEqual(tab("Programs").getAttribute("aria-selected"), "true", "Escape ended the entry");
+});
+
+test("a field typed away from its value and back holds neither the page nor the subtabs", function () {
+  var p = load("Schedules");
+  open(p, "Ventilation");
+  var minimum = labelled(shown(p), "input", "Minimum fraction of design flow");
+  var programs = p.context.document.querySelectorAll("[role='tab']").filter(function (node) {
+    return node.textContent === "Programs"; })[0];
+  var stored = minimum.value;
+  type(minimum, "0.2");
+  type(minimum, stored);
+  click(programs);
+  assert.strictEqual(programs.getAttribute("aria-selected"), "true", "the restored value lets the page move on");
+});
+
 test("a fraction typed while hours are held joins the draft and goes with them", function () {
   var p = load("Schedules");
   open(p, "Ventilation");
@@ -365,7 +395,9 @@ test("Edit sends only what changed, guarded as it opened; the type is fixed", fu
   var root = dialog(p);
   assert.strictEqual(root.querySelector("h2").textContent, "Edit Kitchen dishwasher");
   assert.strictEqual(Boolean(field(root, "type")), false, "no type choice on Edit");
-  assert.match(root.querySelector(".pgm-device-type").textContent, /Dishwasher/);
+  var fixed = root.querySelector(".pgm-device-type");
+  assert.strictEqual(fixed.children[0].textContent, "Dishwasher", "the type on its own line");
+  assert.strictEqual(fixed.children[1].className, "pgm-device-help", "how to change it on a muted line beneath");
   type(field(root, "quantity"), "2");
   root.querySelector("form").listeners.submit({ preventDefault: function () {} });
   assert.deepStrictEqual(plain([last(p).name, last(p).params]), [PREFIX + ".equipment_sets.update_device",

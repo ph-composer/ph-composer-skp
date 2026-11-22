@@ -190,7 +190,7 @@ function (panel, ui, units, preferences, fields, tableViews, occupancy, ZoneCell
   var VIEW = {
     id: ID, label: "Programs", order: 30, sections: [SECTION], zoneFields: [],
     placeholder: "Zone, Program or Dwelling",
-    widths: { program: 188, dwelling: 120, bedrooms: 84, occupants: 92, equipment_set: 168, floor_area_m2: 104,
+    widths: { program: 172, dwelling: 120, bedrooms: 84, occupants: 92, equipment_set: 228, floor_area_m2: 104,
       icfa_m2: 88, people: 72, lighting_w: 96, ventilation_m3h: 128 },
     sorted: ["floor_area_m2", "icfa_m2", "people", "lighting_w", "ventilation_m3h"],
     sortValue: function (vs, record, field) {

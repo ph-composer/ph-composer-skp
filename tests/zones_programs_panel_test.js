@@ -240,6 +240,23 @@ test("the house row takes the bedrooms, in amber until entered, through the Segm
     ["bsg_house", true, "bsg_house"]);
 });
 
+test("a heading that stops being a single dwelling gives its house inputs back to its sums", function () {
+  var p = load();
+  assert.ok(labelled(heading(p, "House"), "input", "Bedrooms in House"), "the house row's bedrooms, while single");
+  var next = snapshot({}), house = next.sections["ph_composer.programs.occupancy"].value.building_segments[0];
+  // Ruby's single dwelling is on and residential, so switching it off and turning the Segment non-residential read
+  // the same here.
+  house.single_dwelling = false; house.settings.single_dwelling = false; house.dwelling = null;
+  next.revision = REVISION + 1;
+  p.panel.receive({ type: "panel.snapshot", payload: next });
+  ["bedrooms", "occupants", "equipment_set"].forEach(function (field) {
+    var td = cell(heading(p, "House"), field);
+    assert.strictEqual(td.querySelectorAll("input").length + td.querySelectorAll("select").length, 0,
+      field + " holds no house input");
+    assert.ok(!/phc-editable-cell/.test(td.className), field + " is no longer an editable cell");
+  });
+});
+
 test("an unknown value is an amber question mark naming why, on the row and on the heading", function () {
   var p = load();
   var missing = cell(rowNamed(p, "Living"), "people").querySelector(".phc-programs-missing");

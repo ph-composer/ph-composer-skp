@@ -798,7 +798,8 @@ Zone's by id. A legacy Zone names no Segment record, so its BldgSegment keeps ho
 
 **Findings** (`programs.export_preflight`, the same rows the export notes or stops on; each row's `locate` runs
 the view command `programs.locate`, which opens the Zones tab on the Zones / Programs view with the row's Zones
-checked, or a single dwelling's Building Segment settings):
+checked and scrolled into view, and opens nothing else; a row with no Zones to check, a single dwelling's or a
+Segment-level occupancy finding, opens that Building Segment's settings instead):
 
 | Code | Blocks | When |
 | --- | --- | --- |
