@@ -7,6 +7,7 @@ without the group: `uv run --group phx pytest tests/python/test_program_phx_roun
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -124,6 +125,21 @@ def test_the_five_journeys_read_back_occupancy_devices_ventilation_and_set_point
     house = next(row for row in records(value, "program_types") if row["name"].startswith("Residential default (House"))
     for power in tags(wufi["House"], "InstalledLightingPower"):
         assert float(power) == pytest.approx(house["lighting"]["watts_per_area"])
+
+
+def test_the_interior_lighting_device_survives_whichever_room_comes_first() -> None:
+    # PHX merges a Segment's Rooms; before 1.59.2 the merged Room kept only its first Room's Lighting, so the
+    # Apartments lost the interior lighting device when a Room on a Program without the lighting rule came first
+    # (PH-Tools/PHX#171). Reversing the Rooms puts the Laundry, on a Program with no lighting rule, first.
+    result = run(extraction())
+    model = json.loads(result["canonical_model"]["hbjson"])
+    for rooms in (model["rooms"], list(reversed(model["rooms"]))):
+        hbjson = json.dumps({**model, "rooms": rooms})
+        reordered = dict(result, canonical_model=dict(result["canonical_model"], hbjson=hbjson))
+        xml, _metr = convert(reordered)
+        block = wufi_variants(xml)["Apartments"]
+        devices = re.findall(r"<Device index=\"\d+\">(.*?)</Device>", block, re.S)
+        assert len(devices) == 11, [room["display_name"] for room in rooms]
 
 
 def test_utilization_patterns_read_back_the_schedule_forms() -> None:

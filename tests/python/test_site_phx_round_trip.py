@@ -23,7 +23,7 @@ WUFI_CASES = ("Heating1", "Heating2", "Cooling", "Cooling2")
 
 
 def phx_document(record: dict[str, Any] | None = None, annex: bool = False) -> dict[str, Any]:
-    """The reference extraction with its Building Segments named without a space: PHX 1.59.1 names the Room it
+    """The reference extraction with its Building Segments named without a space: PHX 1.59.3 names the Room it
     merges each segment into after the segment's display name (`cleanup.merge_rooms`), and a Room identifier may
     not hold a space, so a Segment named "Main Building" fails the conversion. A PHX follow-up."""
     value = document(record, annex)

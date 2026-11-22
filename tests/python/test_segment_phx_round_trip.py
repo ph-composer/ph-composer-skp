@@ -58,6 +58,10 @@ def test_the_left_out_adu_reaches_wufi_xml_and_metr_json_once_as_the_attached_zo
     ]
     adu = zones[1]
     assert adu["TemperatureReductionFactorUserDefined"] == "0.95"
+    # The House's appliances stay on the House: before 1.59.2 PHX copied every device onto each attached zone too
+    # (PH-Tools/PHX#171).
+    blocks = re.findall(r"<Zone index=\"\d+\">(.*?)</Zone>", xml, re.S)
+    assert [len(re.findall(r"<Device index=", block)) for block in blocks] == [9, 0]
     exposed = [row for row in wufi_components(xml) if row["OuterAttachment"] == adu["IdentNr"]]
     assert [row["InnerAttachment"] for row in exposed] == ["1"]
 
