@@ -594,20 +594,22 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
 
   /* A narrow view (500 px or less, where Actions and Hierarchy stop sticking) opens at its first identity
      column. A mount turns once each time the panel becomes narrow, whether it opened narrow or was narrowed
-     later, keeps any pan made while narrow, and goes back to the start once widened; no columns are reordered
-     or hidden. Callers run it after a paint and after a resize. */
+     later, keeps any pan made while narrow, and goes back to the start once widened unless the user panned on
+     past where it turned; no columns are reordered or hidden. Callers run it after a paint and after a resize. */
   var NARROW_SHOWN = 40; // How much of the first identity column a kept pan must show.
   function orientNarrow(root) {
     var cache = root._table;
     if (!cache || !cache.empty.hidden || !root.clientWidth) return;
     if (window.innerWidth > 500) {
-      // Widened again, it goes back to the start, where Actions and Hierarchy stick again.
-      if (cache.orientedNarrow) root.scrollLeft = 0;
+      // Widened again, it goes back to the start, where Actions and Hierarchy stick again, unless the user
+      // panned on past where it turned.
+      if (cache.orientedNarrow && root.scrollLeft <= (cache.turnedTo || 0) + 1) root.scrollLeft = 0;
       cache.orientedNarrow = false;
       return;
     }
     if (cache.orientedNarrow) return;
     cache.orientedNarrow = true;
+    cache.turnedTo = 0;
     var first = cache.columns.filter(function (column) {
       return column[0] !== "actions" && column[0] !== "hierarchy" && !cache.headers[column[0]].hidden;
     })[0];
@@ -617,6 +619,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     var box = header.getBoundingClientRect(), frame = root.getBoundingClientRect();
     if (root.scrollLeft && box.left >= frame.left && box.left + NARROW_SHOWN <= frame.right) return;
     root.scrollLeft = Math.max(0, (root.scrollLeft || 0) + box.left - frame.left);
+    cache.turnedTo = root.scrollLeft;
   }
 
   return { table: table, orientNarrow: orientNarrow, STICKY_WIDTHS: STICKY_WIDTHS };

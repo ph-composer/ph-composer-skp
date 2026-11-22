@@ -112,6 +112,10 @@ test("a table narrowed after it opened turns to its first identity column once, 
     h.root.scrollLeft = 0;
     h.tables.orientNarrow(h.root);
     assert.strictEqual(h.root.scrollLeft, 330, "narrowed again, it turns again");
+    h.root.scrollLeft = 480;
+    h.context.innerWidth = 1280;
+    h.tables.orientNarrow(h.root);
+    assert.strictEqual(h.root.scrollLeft, 480, "a pan on past the turn survives widening");
     h.context.innerWidth = 1280;
     h.tables.orientNarrow(h.root);
     tagged(h, "col-name", "th")[0].rect = { left: 120, right: 340, top: 0, bottom: 38, width: 220, height: 38 };

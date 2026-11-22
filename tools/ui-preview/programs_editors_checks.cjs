@@ -222,7 +222,8 @@ check({ name: "programs_editors", output }, async ({ newPage, step }) => {
 
   step("at 1280 the grid shows the host's long device names and Phius rule lines whole");
   await page.evaluate(() => {
-    const names = { dev_PHCDEFAULT02: "PHIUS+ Exterior Lighting · exterior", dev_PHCDEFAULT08: "PHIUS+ MELS" };
+    // As long as the host's "PHIUS+ Exterior Lighting · Phius exterior lighting" with this device's type.
+    const names = { dev_PHCDEFAULT02: "PHIUS+ Exterior Lighting, north porch", dev_PHCDEFAULT08: "PHIUS+ MELS" };
     window.previewHost.programCatalog.equipment_sets.forEach(row => (row.values.devices || []).forEach(device => {
       if (names[device.id]) device.display_name = names[device.id];
     }));

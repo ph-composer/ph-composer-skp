@@ -188,7 +188,7 @@
     "html/features/programs/equipment_set_editor.js": {
       "bytes": 9794,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "c5f1578c22484b1d5c137bd95511f4216cf0350bdbc9e94c1b2d256a9900e48c"
+      "sha256": "9e95d9bfdf40f72b5e94d577ccb791c07678903250dd44d6d6a39c0c349eb21a"
     },
     "html/features/programs/library_programs.js": {
       "bytes": 5264,
@@ -701,9 +701,9 @@
       "sha256": "67b3aae962e07aad51941da947e82e10afe2fe3907c1cb1043a0cb35cba903db"
     },
     "html/table.js": {
-      "bytes": 36087,
+      "bytes": 36301,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1d904a7ecc89ee6e3e7ee3b3d5c23f91a9a42ed0b575bbdc2c8a49ea00ed2fb2"
+      "sha256": "896a264c8194fcbe669ffb4ade89ace78315ab6c2767c83470b4217f4e8b819f"
     },
     "html/table_contributions.js": {
       "bytes": 3017,

@@ -17,7 +17,7 @@ function (ui, tables, requests, DeviceDialog) {
   var COLUMNS = [["actions", "Actions"], ["device", "Device"], ["quantity", "Quantity"], ["energy", "Energy demand"],
     ["inside", "In conditioned space"], ["reference", "Reference quantity"]];
   // Sized for the residential default's names and Phius rule lines at the panel's usual width.
-  var WIDTHS = { device: 320, quantity: 80, energy: 220, inside: 130, reference: 160 };
+  var WIDTHS = { device: 370, quantity: 76, energy: 214, inside: 116, reference: 150 };
 
   function SetEditor(host) {
     var self = this;
