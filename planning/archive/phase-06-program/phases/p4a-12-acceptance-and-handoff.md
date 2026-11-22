@@ -66,3 +66,9 @@ later, when the sitting passes every owed PG row and PG12 or records an accepted
 ## Open
 
 Nothing beyond the stages' own contract questions.
+
+## Closed 2026-11-22
+
+Merged as #552. The sitting ran step 2: PG12 passes after the PHX 1.59.3 pin (#556), and every PG case passes on
+the host. The archive PR moved the packet and closes #538; the final state is in
+[STATUS](../STATUS.md#host-sitting).
