@@ -22,7 +22,14 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     assert.equal(await control.isVisible(), false, "the segment center has no insertion control");
     assert.equal(await line.isVisible(), false);
-    const normalHover = await wool.evaluate(node => getComputedStyle(node).backgroundColor);
+    // The wash waits 120 ms and fades in over 100 ms (assembly.css), so poll rather than read once.
+    const hoverWash = () => wool.evaluate(node => getComputedStyle(node).backgroundColor);
+    const washDeadline = Date.now() + 2000;
+    let normalHover = await hoverWash();
+    while (normalHover === "rgba(0, 0, 0, 0)" && Date.now() < washDeadline) {
+      await page.waitForTimeout(50);
+      normalHover = await hoverWash();
+    }
     assert.notEqual(normalHover, "rgba(0, 0, 0, 0)", "the center has the normal segment hover wash");
     await wool.click();
     assert.equal(await wool.getAttribute("aria-pressed"), "true");
@@ -57,18 +64,44 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
     // unselected neighbor inherit the generic button's teal hover/focus outline.
     const neighbor = drawing.locator(".assembly-hit-target[data-segment-id='seg_stud_0']");
     const offsets = [-22, -18, -12, -2, 0, 2, 6, 10, 12, 16, 20];
+    // At rest the outline is a transparent 2 px solid so its colour can fade in after the hover delay and
+    // out again; between those states it is the normal red at partial alpha, never the generic teal.
+    const neighborState = () => neighbor.evaluate(node => ({ hovered: node.matches(":hover"),
+      edge: node.getAttribute("data-hover-edge"), outline: getComputedStyle(node).outlineStyle,
+      color: getComputedStyle(node).outlineColor }));
+    const transparent = "rgba(0, 0, 0, 0)";
+    const redOrClear = color => color === transparent || /^rgba?\(191, 85, 96[,)]/.test(color);
     for (const offset of offsets.concat(offsets.slice().reverse())) {
       await page.mouse.move(box.x + box.width + offset, box.y + box.height / 2 - 20);
-      const state = await neighbor.evaluate(node => ({ hovered: node.matches(":hover"),
-        edge: node.getAttribute("data-hover-edge"), outline: getComputedStyle(node).outlineStyle,
-        color: getComputedStyle(node).outlineColor }));
+      let state = await neighborState();
       if (state.hovered) {
-        if (state.edge) assert.equal(state.outline, "none", "neighbor edge shows only the insertion cue");
-        else assert.equal(state.color, "rgb(191, 85, 96)", "neighbor body uses normal red hover");
+        assert(redOrClear(state.color), `neighbor hover uses normal red, never teal (${state.color})`);
+        // A body hover that outlived the delay fades out on edge entry; the edge must settle invisible.
+        const edgeDeadline = Date.now() + 1000;
+        while (state.edge && state.outline !== "none" && state.color !== transparent && Date.now() < edgeDeadline) {
+          await page.waitForTimeout(25);
+          state = await neighborState();
+          assert(redOrClear(state.color), `neighbor edge fades the normal red, never teal (${state.color})`);
+        }
+        if (state.edge) assert(state.outline === "none" || state.color === transparent,
+          `neighbor edge shows only the insertion cue (${state.outline} ${state.color})`);
       }
       assert.equal(await neighbor.getAttribute("aria-pressed"), "false");
       assert.equal(await wool.getAttribute("aria-pressed"), "true", "crossing never moves selection");
     }
+    // The sweep can leave the body before its delay ends, so hold the neighbour's center through the delay
+    // and fade: it passes through transparent and partial red only, and settles on the normal red.
+    const neighborBox = await neighbor.boundingBox();
+    await page.mouse.move(neighborBox.x + neighborBox.width / 2, neighborBox.y + neighborBox.height / 2);
+    const bodyDeadline = Date.now() + 1000;
+    let body = await neighborState();
+    while (body.color !== "rgb(191, 85, 96)" && Date.now() < bodyDeadline) {
+      assert(redOrClear(body.color), `held neighbor body fades in the normal red, never teal (${body.color})`);
+      await page.waitForTimeout(25);
+      body = await neighborState();
+    }
+    assert(body.hovered && !body.edge, "the held pointer is on the neighbor's body");
+    assert.equal(body.color, "rgb(191, 85, 96)", "neighbor body settles on the normal red hover");
     step("edge sweeps");
     for (const edge of ["left", "right", "top", "bottom"]) {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
