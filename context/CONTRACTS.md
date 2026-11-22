@@ -1647,9 +1647,9 @@ action and refuses without that action's active proposal
 ## Building Segments at export
 
 Export writes only Zones in a Building Segment (`Zones::Schema.exported?`: every legacy Zone, and every
-managed Zone whose `building_segment_id` is set). A Segment's name reaches WUFI-Passive and METr as written,
-spaces and punctuation included: PHX 1.59.4 names each Variant and its Zone from it
-(`tests/python/test_site_phx_round_trip.py`).
+managed Zone whose `building_segment_id` is set). A Segment's name with spaces and punctuation reaches
+WUFI-Passive and METr as written: converted by PHX 1.59.4, each Variant and its Zone take it
+(`tests/python/test_site_phx_round_trip.py`). A name holding control characters is not covered.
 
 - With Zones in the Model and none in a Segment, the Zones preflight and section refuse `zone.no_segment`.
 - A Zone in no Building Segment is left out with everything that hangs on it. The Zones section leaves its
