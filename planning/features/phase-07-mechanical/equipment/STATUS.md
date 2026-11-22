@@ -1,7 +1,7 @@
 # Equipment: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape, Ventilators and hot water interviewed 2026-10-21; families 3 to 7 not interviewed; stages tracked in the phase ledger; nothing authorized. Wireframes reviewed 2026-11-15: heat pumps settled (D4-14 to D4-16); Pumps, Fans and Electric Heating have their table shape and columns, their interviews otherwise open. Reviewed 2026-11-22 after Phase 6 Programs: the phase DECISIONS Part 4 holds the findings and the open decisions D4-21 to D4-27.
+STATUS: Scoped. Shared shape, Ventilators and hot water interviewed 2026-10-21; families 3 to 7 not interviewed; stages tracked in the phase ledger; nothing authorized. Wireframes reviewed 2026-11-15: heat pumps settled (D4-14 to D4-16); Pumps, Fans and Electric Heating have their table shape and columns, their interviews otherwise open. Reviewed 2026-11-22 after Phase 6 Programs: the phase DECISIONS Part 4 holds the findings and the decisions D4-21 to D4-27, answered the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -40,8 +40,7 @@ the interview state only.
 
 ## Next step
 
-Ed answers D4-21 to D4-27 in the [phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)
-(D4-01 to D4-20 are answered). Pumps, fans and electric heaters are interviewed each before its
+D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Pumps, fans and electric heaters are interviewed each before its
 stage (P4-09 to P4-11); heat pumps were settled on 2026-11-15, and appliances are Programs'.
 
 ## Blockers
@@ -52,15 +51,16 @@ stage (P4-09 to P4-11); heat pumps were settled on 2026-11-15, and appliances ar
   record engine, inventory table, Zone views and the Room-attaching export section all exist
   (see the PRD's table).
 - Two foundation touches: the reserved Systems button in `html/index.html` becomes the Mechanical
-  tab (D4-13; its place in the shipped row is D4-27), and `honeybee_phhvac` is added to the
+  tab, after Thermal Bridges (D4-13, D4-27), and `honeybee_phhvac` is added to the
   translation's `stack.PACKAGES`, which still lacks it on 2026-11-22.
 - B4's proof, re-scoped: two Zones with two different ventilators, distinct on two Rooms when the
   exact HBJSON reloads in the pinned stack. One honeybee Room per Zone already holds, so the case
-  is simpler than B4 feared. The PHX-to-METr half waits with
-  [metr-export](../../unscheduled/metr-export/README.md).
+  is simpler than B4 feared. Since D4-25 the PHX half is a round trip in P4-04; the METr file and
+  its import wait with [metr-export](../../unscheduled/metr-export/README.md).
 - The attachment shape for an item serving several Zones (PRD, "Export"): settled at planning, not
   at the interview.
-- For [metr-export](../../unscheduled/metr-export/README.md), not this packet: PHX reads exhaust
+- First noted for [metr-export](../../unscheduled/metr-export/README.md); since D4-25 proved by
+  round trip in the pumps and fans stages: PHX reads exhaust
   ventilators and supportive devices through a Room's Spaces, so a Zone with no Space loses them
   in METr (PRD, family 6).
 
@@ -80,4 +80,5 @@ None. Nothing is implemented. The fan and appliance routes were read in source (
 | 2026-10-21 | Hot water interviewed: H1 to H7, as recommended except H3 (free tank list, slotted at export). H5 found honeybee-ph has no calculation-method field; upstream issue to file. No implementation. |
 | 2026-10-21 | H5 upstream issue filed: [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135). |
 | 2026-10-21 | Phase 4 planned in detail; stages, decisions and acceptance moved to the [phase ledger](../STATUS.md). |
-| 2026-11-22 | Reviewed after Phase 6 Programs, which built family 7 as Equipment Sets: findings F21 to F39 and open decisions D4-21 to D4-27 in the phase DECISIONS, Part 4. No implementation. |
+| 2026-11-22 | Reviewed after Phase 6 Programs, which built family 7 as Equipment Sets: findings F21 to F39 and decisions D4-21 to D4-27 in the phase DECISIONS, Part 4. No implementation. |
+| 2026-11-22 | Ed answered D4-21 to D4-27 as recommended: Serves is a payload on the Zone record, the feature is `ph_composer.mechanical`, and each export stage adds a PHX round trip. This PRD keeps "equipment" as the word for the records. |

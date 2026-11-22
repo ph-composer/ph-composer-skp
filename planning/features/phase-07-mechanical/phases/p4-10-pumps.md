@@ -1,7 +1,7 @@
 # P4-10: pumps
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview. Table shape and columns settled 2026-11-15 (D4-13, D4-20); the interview is otherwise open. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Requested. A gate stub: written in full after its interview. Table shape and columns settled 2026-11-15 (D4-13, D4-20); the interview is otherwise open. Since D4-25 (2026-11-22) the PHX readings noted below are proved here by round trip, not left to metr-export. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

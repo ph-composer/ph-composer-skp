@@ -1,7 +1,7 @@
 # Equipment
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7. Reviewed 2026-11-22 after Phase 6 Programs: the table of what `main` supplies is dated, and [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22) holds what changed and the open decisions D4-21 to D4-27.
+STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7. Reviewed 2026-11-22 after Phase 6 Programs: the table of what `main` supplies is dated, and [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22) holds what changed and the decisions D4-21 to D4-27, answered the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -32,7 +32,11 @@ after Phase 3b, Climate, Shading and Programs, these rows have moved ([DECISIONS
 - **Display units.** `temperature` and `power` exist in both registries; litres and W/cfm do not
   (F31).
 - **A feature's per-Zone assignment.** Programs ships one as a structured extension on the Zone
-  record (F26), which is what D4-21 weighs against the Serves record below.
+  record (F26). D4-21, answered 2026-11-22, stores Serves the same way: where "Records" below
+  sketches `ph_composer.equipment_assignment` on the Zone Group, the phase's CONTRACTS binds a
+  `ph_composer.mechanical.zone_serves` payload on the Zone record. The behavior is unchanged.
+- **The feature's name.** `ph_composer.mechanical` (D4-22). "Equipment" in this PRD is the word
+  for its records together.
 - **Building Segment settings.** A shipped seam; mechanical cooling, the mechanical room
   temperature and summer ventilation use it (F30, stage P4-08b).
 
@@ -119,7 +123,8 @@ a Space inherits it. Appliances are the exception, see family 7.
 - Owns the airflow balance by ventilator, shown on the Ventilator's row (Q11): the served
   Zones' supply and extract sums from `ph_composer.spaces.all`, the same 10 percent marker, a
   dash while any served Space inherits. Since Phase 6 "inherits" is the Zone's By Program airflow
-  mode; whether such a Zone shows a dash or its Program's flow is D4-24. The assignment half of this feature therefore requires
+  mode, and such a Zone counts its Program's flow as both supply and extract (D4-24); the dash
+  shows only while Programs gives no flow. The assignment half of this feature therefore requires
   `ph_composer.spaces` as well as `ph_composer.zones`; the definitions never do.
 
 ### Export
@@ -258,8 +263,7 @@ ventilator, so a kitchen hood with a known draw is two honeybee-ph objects from 
 Superseded 2026-11-14 and built in Phase 6: appliances and the Phius default set are Programs'
 Equipment Sets (`context/CONTRACTS.md`, "Programs, Schedules and Equipment Sets" and "Program
 export"), with Dwellings holding the bedroom and unit counts. The text below is the record of
-what was first scoped here. "Equipment" in this packet no longer includes them; the name is
-D4-22.
+what was first scoped here. "Equipment" in this packet no longer includes them.
 
 `PhEquipment` subclasses in `honeybee_energy_ph/load/ph_equipment.py`: dishwasher, clothes
 washer, clothes dryer, refrigerator, freezer, fridge-freezer, cooktop, Phius MEL, Phius interior,

@@ -1,7 +1,7 @@
 # P4-15: acceptance and handoff
 
 DATE: 2026-10-21
-STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families; then D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -30,17 +30,19 @@ Behavior owner: the three PRDs' "Acceptance shape". Register: [ACCEPTANCE](../AC
 3. **Register.** Consolidate M01 to M14 and M16 with their evidence links (M12 is superseded); mark each row Pass with its
    provenance, or record why not.
 4. **Context.** Confirm `context/UBIQUITOUS_LANGUAGE.md` (its "Systems terminology for planned
-   features" table: Equipment, each family, Serves, Piping, Ducting, and the Space-level
+   features" table: Equipment as the word for the records of the `ph_composer.mechanical` feature
+   (D4-22), each family, Serves, Piping, Ducting, and the Space-level
    "Ventilation assignment" row, which F25 makes a Zone relation), `docs/USER_DATA.md` (a row per
    new entity, F36), `CONTRACTS.md`, `TECH_STACK.md`, `EXTENSIBILITY.md` (the
-   Serves record as the third Zone-occurrence child; sections that add to a required object) and
+   Serves as the second feature payload on a Zone record, after Programs' assignment; sections that add to a required object) and
    `AGENT_INTERFACE.md` say what was built.
-5. **Product docs.** `docs/PRODUCT.md` describes equipment, piping and ducting as built; the
+5. **Product docs.** `docs/PRODUCT.md` describes the Mechanical tab, its equipment, piping and
+   ducting as built; the
    generated API reference, its "API changes" rows and the `docs/AGENT_GUIDE.md` recipes are
    current.
-6. **Handoff.** Every METr row named in this packet (one device or three for a shared item, the
-   Spaces walk for exhaust and supportive devices, `lassVU`, the diameter enum, the recirculation
-   coefficient) is in metr-export with its owner; honeybee_ph#135's state is recorded; the units
+6. **Handoff.** The `phx` group's round trips for this phase are green and listed (D4-25). Every
+   METr file and import row named in this packet (`lassVU`, the diameter enum, the recirculation
+   coefficient, what METr shows for a shared item) is in metr-export with its owner; honeybee_ph#135's state is recorded; the units
    packet's Q2 and Q3 rows are closed or carried.
 7. **Tracking.** Update [STATUS](../STATUS.md), `planning/STATUS.md` and the roadmap's Phase 4
    table; the roadmap records Phase 4 closing as the MVP boundary D1 set.

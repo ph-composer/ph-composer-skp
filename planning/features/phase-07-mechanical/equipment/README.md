@@ -36,8 +36,8 @@ The order is a proposal. Families 1 and 2 go first because two other packets wai
 
 - Nothing from Phase 3b. Equipment has no edges; Ventilators and hot water are interviewed.
 - [metr-export](../../unscheduled/metr-export/README.md) for every METr claim. PHX is not shipped;
-  since Climate it is installed for tests, and whether this packet's export stages add PHX round
-  trips is D4-25 in the [phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+  since Climate it is installed for tests, and each of this packet's export stages adds a PHX
+  round trip (D4-25, the [phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)).
 - [units](../../cross-phase/units/STATUS.md) Q3 for litres, kBtu/h capacity and W/cfm.
 - From Phase 6 Programs: the Building Segment settings seam, the per-Zone airflow mode and the
   per-Zone assignment pattern (the phase DECISIONS, Part 4).

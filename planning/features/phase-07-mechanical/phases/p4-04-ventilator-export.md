@@ -1,7 +1,7 @@
 # P4-04: Ventilator export
 
 DATE: 2026-10-21
-STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: the left-out Zone rule, the pinned wheel. D4-25, open, would add a PHX round trip. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: the left-out Zone rule, the pinned wheel. A PHX round trip added the same day (D4-25). See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -20,17 +20,20 @@ Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
-1. **Contributor.** `features/equipment/export.rb`: `feature.export_contributor` for
-   `ph_composer.equipment.export.ventilation`, `requires: ["ph_composer.zones.export.zones"]`,
-   projecting one row per (Ventilator, served Zone) pair from the snapshot and the Serves records,
+1. **Contributor.** `features/mechanical/export.rb`: `feature.export_contributor` for
+   `ph_composer.mechanical.export.ventilation`, `requires: ["ph_composer.zones.export.zones"]`,
+   and `entity_projections` claiming `ph_composer.mechanical.zone_serves` on the Zone record
+   (D4-21, as Programs claims its assignment); the same change moves that extension from
+   `local_only` to `required`, so no commit holds a required namespace without its claim, projecting one row per (Ventilator, served Zone)
+   pair from the Ventilator records and the claimed Serves payloads,
    leaving out unserved items and Zones in no Building Segment (the Zones projection's
    `exported`, F28), each with its own finding. The rows are one pure plan the preflight also
    reads (F35). Declare
    the `result` fields through `Export::Privacy` and the report callback.
-2. **Preflight.** `equipment.preflight` query: every finding of CONTRACTS section 6 this stage
+2. **Preflight.** `mechanical.preflight` query: every finding of CONTRACTS section 6 this stage
    raises, with where it is and its repair.
-3. **Section.** `python/ph_composer_translation/equipment_sections.py` and
-   `contract/equipment_records.py`: `VentilationSection`, `requires` the Zone section,
+3. **Section.** `python/ph_composer_translation/mechanical_sections.py` and
+   `contract/mechanical_records.py`: `VentilationSection`, `requires` the Zone section,
    `attaches = Attachment(ROOM, key: zone_id)`, `required_for_export = True` (D4-06). `translate`
    builds a `PhVentilationSystem` with `sys_type` 1 holding a `Ventilator` with the record's
    values, identifiers derived from the item id so every served Room carries the same (D4-01);
@@ -38,8 +41,8 @@ Paths are relative to `src/ph_composer/`.
    (D4-09). `attach` calls `set_ventilation_system`. `result_fields`: one row per pair.
    `conformance`: each reloaded Room's `ph_hvac.ventilation_system.ventilation_unit` matches its
    row and one item carries one identifier across Rooms. Add the section to `composition.py`.
-4. **Fixture.** `tests/fixtures/equipment/` pins the extraction contract both sides read.
-5. **Report.** The Export report gains an "Equipment: Ventilators" table: item, served Zones,
+4. **Fixture.** `tests/fixtures/mechanical/` pins the extraction contract both sides read.
+5. **Report.** The Export report gains a "Mechanical: Ventilators" table: item, served Zones,
    quantity, efficiencies; unserved items listed in one line.
 6. **Agent guide.** The recipe gains the export read-back.
 
@@ -63,8 +66,9 @@ Paths are relative to `src/ph_composer/`.
    and blocks the pair (D4-06).
 5. The privacy allowlist admits only the declared result fields; the metadata guard passes.
 6. The report renders the table and the unserved line.
-7. If D4-25 is answered as recommended: a PHX round trip in the `phx` group, the base case
-   giving two ventilation devices and the shared case one.
+7. A PHX round trip in the `phx` group, `tests/python/test_ventilation_phx_round_trip.py`,
+   skipped without it (D4-25): the base case gives two ventilation devices and the shared case
+   one.
 
 ## Host gate
 

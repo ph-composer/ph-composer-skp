@@ -158,16 +158,17 @@ Reviewed on 2026-11-22 after Phase 6 Programs
 ([DECISIONS, Part 4](features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22)):
 the packet is corrected to the code as built, stage P4-08b and register row M16 carry the Building
 Segment's mechanical cooling, mechanical room temperature and summer ventilation that Phase 6 handed
-over, and seven decisions, D4-21 to D4-27, are open. Phase 3b's stages, which several rows below
-name as needs, all merged by 2026-10-26.
+over, and seven decisions, D4-21 to D4-27, were answered the same day as recommended and bound
+into the packet. Phase 3b's stages, which several rows below name as needs, all merged by
+2026-10-26.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4.1 | [Equipment](features/phase-07-mechanical/equipment/README.md): shared shape and Ventilators | Scoped: shared shape, Ventilators and hot water interviewed 2026-10-21 | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is metr-export's unless D4-25 brings it here as a round trip. Owns the balance by ventilator (Spaces shows balance by Zone only); what it shows for a By Program Zone is D4-24. No Phase 3b dependency |
+| 4.1 | [Equipment](features/phase-07-mechanical/equipment/README.md): shared shape and Ventilators | Scoped: shared shape, Ventilators and hot water interviewed 2026-10-21 | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is a round trip here (D4-25), and the METr file and its import are metr-export's. Owns the balance by ventilator (Spaces shows balance by Zone only), which counts a By Program Zone at its Program's flow (D4-24). The feature is `ph_composer.mechanical` (D4-22). No Phase 3b dependency |
 | 4.2 | [ERV ducting](features/phase-07-mechanical/erv-ducting/README.md) | Requested; gate stub P4-14 | Needs 4.1 and its interview; Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08 are merged; a Ducting pill under Ventilation on the Mechanical tab (D4-13) |
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
 | 4.4 | [Hot water piping](features/phase-07-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and its interview; Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 are merged; a Piping pill under Hot Water on the Mechanical tab (D4-13) |
-| 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21; heat pumps settled at the wireframe review of 2026-11-15 (D4-14 to D4-16) | Whether the blended heat pump is one per Building Segment is D4-23. Stage P4-08b adds the Building Segment's mechanical settings from the Phase 6 handoff |
+| 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21; heat pumps settled at the wireframe review of 2026-11-15 (D4-14 to D4-16) | The blended heat pump is one per Building Segment (D4-23). Stage P4-08b adds the Building Segment's mechanical settings from the Phase 6 handoff |
 | 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](archive/phase-06-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
 
 ## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
@@ -284,3 +285,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-11-20 | Shading (Phase 5) P5s-01 to P5s-07 merged (PRs #527 to #533, last `906a102c`); SD01 to SD07 pass on `906a102c`, Ed's check of the WUFI-Passive and METr files included. The packet is archived at `archive/phase-05-shading/`; Ed confirmed D5s-11a and the Window Unit refusal row on 2026-11-20; three follow-ups stay in the master STATUS row. Not released. |
 | 2026-11-22 | Programs (Phase 6) P4a-01 to P4a-12 merged (PRs #539 to #552); the batched host sitting of 2026-11-21 (#553) and its fixes in #554 to #557, the last two pinning PHX 1.59.3 and 1.59.4 for PH-Tools/PHX#171 and PH-Tools/PHX#175 (last `e0be139d`); PG01 to PG12 pass on the host, and Ed approved the host UI polish for PG02, PG09, PG11 and PG11b. The packet is archived at `archive/phase-06-program/`; its deferred follow-ups stay in the master STATUS row. Not released. |
 | 2026-11-22 | Phase 7 Mechanical reviewed against `main` at `8c710412` after Programs was archived: the packet's stale Phase 3b gates, pins, composition order, Spaces read names, units and export rules corrected; stage P4-08b and register row M16 added for the Building Segment's mechanical settings; decisions D4-21 to D4-27 opened and unanswered. Planning only; nothing authorized. |
+| 2026-11-22 | Ed answered Phase 7's D4-21 to D4-27, all as recommended; the packet's CONTRACTS, ACCEPTANCE, PLAN and stage documents are re-bound to them. The feature is `ph_composer.mechanical`, Serves is a payload on the Zone record, and each export stage adds a PHX round trip. Planning only; nothing authorized. |

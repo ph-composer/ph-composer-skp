@@ -20,7 +20,7 @@ Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
-1. **The view.** `html/features/equipment/hot_water.js`: system rows with name, tap points,
+1. **The view.** `html/features/mechanical/hot_water.js`: system rows with name, tap points,
    recirculation temperature and hours, the calculation method (D4-12, with its finding shown
    while the wheel lacks the field), the Serves chips and the balance-free columns; tank and
    heater rows beneath each system opened by its chevron, each editable in place; Add tank and
@@ -28,7 +28,7 @@ Paths are relative to `src/ph_composer/`.
    from the row; a heater's variant choosing which cells are live.
 2. **Units (A3, D4-11).** `volume_l` in both registries with vectors. `temperature` exists (F31).
 3. **Colour-by.** `by_hot_water_system`, `entity_kind: "zone"`, as `by_ventilator`.
-4. **Preview and checks.** Extend the preview fixture and `equipment_checks.cjs`; regenerate the
+4. **Preview and checks.** Extend the preview fixture and `mechanical_checks.cjs`; regenerate the
    manifests.
 
 ## Source
@@ -36,7 +36,7 @@ Paths are relative to `src/ph_composer/`.
 | PH-Composer file | Disposition |
 | --- | --- |
 | `html/features/spaces/view.js`, `cells.js` | Pattern for child rows and nested in-place cells |
-| `html/features/equipment/ventilators.js` (P4-05) | The sibling view |
+| `html/features/mechanical/ventilators.js` (P4-05) | The sibling view |
 
 ## Tests (write first)
 

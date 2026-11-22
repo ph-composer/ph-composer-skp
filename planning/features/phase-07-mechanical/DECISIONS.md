@@ -1,7 +1,7 @@
 # Phase 4, mechanical: findings from source, and the decisions that follow
 
 DATE: 2026-10-21
-STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, all open.
+STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -166,8 +166,9 @@ F20 and decisions from D4-20.
 
 Two kinds of result. Where the code settles a fact, the packet's documents are corrected in the
 same change and the finding says where. Where the code would reverse or extend an answer Ed gave,
-the row is an open decision with a recommendation: it binds nothing, and the earlier answer stands
-in CONTRACTS and the stage documents until Ed answers.
+the row was put to Ed as a decision with a recommendation. He answered all seven on 2026-11-22
+("Ed's answers, 2026-11-22", below), and CONTRACTS, ACCEPTANCE, PLAN and the stage documents were
+re-bound to them in the same change.
 
 "Run" means run on 2026-11-22 against the pinned wheels in this repository's virtual environment.
 "Read" means read in source and not reproduced.
@@ -196,9 +197,9 @@ in CONTRACTS and the stage documents until Ed answers.
 | F38 | Every Phase 6 export stage added a PHX round trip under `tests/python/test_*_phx_round_trip.py`, run in the `phx` group and skipped without it. This packet sends every PHX claim to metr-export, on the 2026-10-21 fact that PHX was not installed | D4-25 |
 | F39 | Phase 6 shipped the Zones / Programs view: assignment per Zone on the Zones tab, over checked rows, under Building Segment heading rows, with the rows of a single dwelling locked | No change. Q10 keeps a Zone view of equipment for later, and D4-20 puts Serves on each table. P4-05's Zone picker lists Zones under their Building Segment headings as that view does, Zones in no Segment included, and offers a whole Segment at once |
 
-### Decisions open
+### Decisions
 
-None is answered. Each names what it would revise.
+As put to Ed. Each names what it revises. The answers follow the table.
 
 | ID | Kind | Question | Recommendation | Would revise | Blocks |
 | --- | --- | --- | --- | --- | --- |
@@ -209,6 +210,36 @@ None is answered. Each names what it would revise.
 | D4-25 | Scope | PHX is installed for tests (F38). Do this phase's export stages prove what PHX builds from the HBJSON? | Yes. Each export stage adds a PHX round trip in the `phx` group, as Phase 6's did: one device for an item on several Rooms, tanks and heaters once, exhaust and supportive devices through a Room's Spaces. Opening the file in METr and every METr field claim stay metr-export's | The split in PLAN, ACCEPTANCE and CONTRACTS section 7 that sends every PHX claim to metr-export | P4-04, P4-06 and every later export stage |
 | D4-26 | Code, UI | Is mechanical cooling entered on the Building Segment or derived from the heat pumps that serve it (F30)? | Entered, as honeybee-ph's Grasshopper component has it: a switch in a Mechanical section of the Segment settings, off by default, beside the mechanical room temperature at 20 °C. A non-blocking finding when the switch and the blended heat pump's cooling disagree. Summer ventilation has eleven fields and gets its own interview | | P4-08b |
 | D4-27 | UI | Where does the Mechanical tab sit in the row as shipped (F32)? | After Thermal Bridges: Climate, Zones, Programs, Assemblies, Window Types, Thermal Bridges, Mechanical, Library, Export | The order noted on 2026-11-17 | P4-05 |
+
+### Ed's answers, 2026-11-22
+
+Ed approved D4-21 to D4-27 together on 2026-11-22, every one as recommended. A row here
+supersedes the recommendation above; none differs. Each also supersedes the earlier answer it
+names, which stays in Parts 2 and 3 as the record of what was first decided.
+
+| ID | Answer | Supersedes | Date |
+| --- | --- | --- | --- |
+| D4-21 | As recommended: Serves is a structured extension on the Zone record, written through `ph_composer.zones.stage_extension`, with no id, target or Zone-copy contributor of its own | The mechanism of D4-03 and D4-04. Their outcome stands: one set of slots per Zone, and a copied Zone keeps what serves it | 2026-11-22 |
+| D4-22 | As recommended: the feature is `ph_composer.mechanical`, its code noun `mechanical`, its folders `features/mechanical/` and `html/features/mechanical/`. "Equipment" stays the glossary word for the records together, so the `equipment/` feature packet and the stage file names keep it | The name in D4-02. One feature stands | 2026-11-22 |
+| D4-23 | As recommended: the blended heat pump and the hot water pooling note are per Building Segment; an item may serve Zones in two Segments, with a non-blocking finding | Makes D4-15 and D4-17 exact | 2026-11-22 |
+| D4-24 | As recommended: a By Program Zone counts its Program's flow as both supply and extract in the balance; the feature requires Programs | Extends Q11 and D4-10 | 2026-11-22 |
+| D4-25 | As recommended: each export stage adds a PHX round trip in the `phx` test group; the METr file and its import stay metr-export's | The 2026-10-21 split that sent every PHX claim to metr-export | 2026-11-22 |
+| D4-26 | As recommended: mechanical cooling is entered on the Building Segment, off by default, beside the mechanical room temperature at 20 °C, with a non-blocking finding when it disagrees with the blended heat pump's cooling. Summer ventilation is interviewed on its own | | 2026-11-22 |
+| D4-27 | As recommended: the Mechanical tab sits after Thermal Bridges and before Library | The order noted on 2026-11-17 | 2026-11-22 |
+
+What the answers leave to the stages, none of it a new question for Ed:
+
+- D4-21: no shipped payload holds a `many` reference (F26). P4-01 proves the in-use scan, the
+  replacement move and the Zone copy over one before P4-03 builds on it.
+- D4-21: the feature's actions stage a whole payload and never remove one, so "served by
+  nothing" has two stored forms, no payload and a payload with every slot empty. The reads treat
+  them as one.
+- D4-21: the payload is `local_only` in P4-03 and becomes `required` in P4-04 with the export
+  claim, since a `required` namespace with no claim blocks every export (Programs did the same
+  between its P4a-08 and P4a-10).
+- D4-24: the balance adds a `ph_composer.programs.zones` read to the Ventilators snapshot, a read
+  whose cost Phase 6 logged as a follow-up. P4-05 takes it once per snapshot.
+- D4-26: the eleven summer ventilation fields wait for their interview, which gates P4-08b.
 
 ### Part 3's open items, restated
 
@@ -223,3 +254,4 @@ Items 2 and 6 are closed by F34 and F33. Items 1, 3, 4 and 5 stay open as writte
 | 2026-11-15 | Wireframe review with Ed: findings F15 to F19, decisions D4-13 to D4-20 (Part 3). D4-08 and the interview answers Q4 (heat pumps), Q9, H1, H4 and H7 are revised. Bindings and stages not yet re-planned. |
 | 2026-11-17 | F20 recorded (what the estimator reads from climate) and the tab row's order noted, both from the [Climate packet](../../archive/phase-04-climate/PRD.md), which is now Phase 4 and precedes this phase. |
 | 2026-11-22 | Reviewed against `main` at `8c710412` after Phase 6 was archived (Part 4): findings F21 to F39, the settled ones applied to the packet; decisions D4-21 to D4-27 opened, none answered. Part 3's open items 2 and 6 closed. |
+| 2026-11-22 | Ed answered D4-21 to D4-27, all as recommended. CONTRACTS, ACCEPTANCE, PLAN and the stage documents re-bound to them: Serves as a payload on the Zone record, the feature renamed `ph_composer.mechanical`, the Building Segment as the scope of the blend, the balance reading Programs' flow, PHX round trips in the export stages, mechanical cooling entered, the tab after Thermal Bridges. |

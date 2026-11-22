@@ -1,7 +1,7 @@
 # Phase 7: mechanical
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; no stage authorized. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning. Reviewed 2026-11-22 after Phase 6 Programs: the packet is corrected to the code as built, stage P4-08b is added, and D4-21 to D4-27 are open in DECISIONS Part 4.
+STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; no stage authorized. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning. Reviewed 2026-11-22 after Phase 6 Programs: the packet is corrected to the code as built, stage P4-08b is added, and D4-21 to D4-27 are answered as recommended (DECISIONS Part 4) and bound.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -13,7 +13,7 @@ hand entry before its first run. Phase 4 closing is the complete MVP Ed set in D
 
 This directory is the phase's coordinating packet (`planning/.instructions.md`). The three feature
 packets inside it hold the behavior and the interview records; the coordinating files hold the
-stages, the bindings, the open decisions and the one ledger.
+stages, the bindings, the decisions and the one ledger.
 
 ## Read order
 
@@ -28,9 +28,10 @@ stages, the bindings, the open decisions and the one ledger.
    the twelve plan decisions D4-01 to D4-12, answered as recommended on 2026-10-21. Part 3 holds
    the wireframe review of 2026-11-15 (F15 to F19, D4-13 to D4-20), which revises D4-08 and five
    interview answers; the [wireframes](mockups/README.md) illustrate it. Part 4 holds the review of
-   2026-11-22 after Phase 6 Programs (F21 to F39) and its seven open decisions, D4-21 to D4-27.
+   2026-11-22 after Phase 6 Programs (F21 to F39) and its seven decisions, D4-21 to D4-27, answered
+   the same day.
 4. [PLAN.md](PLAN.md): the stages, their order, owners, gates and the shared files.
-5. [CONTRACTS.md](CONTRACTS.md): feature id, records, operations, seams, foundation additions A1
+5. [CONTRACTS.md](CONTRACTS.md): feature id (`ph_composer.mechanical`, D4-22), records, operations, seams, foundation additions A1
    to A5, findings and the export sections. Proposed until P4-01 confirms them against code.
 6. [ACCEPTANCE.md](ACCEPTANCE.md): M01 to M16 and the synthetic reference model with its expected
    HBJSON.
@@ -44,7 +45,7 @@ stages, the bindings, the open decisions and the one ledger.
 | --- | --- |
 | [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Contracts confirmed against code; `honeybee_phhvac` through the Pyodide seam; citation lint |
 | [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The feature and the Ventilator kind with its operations, panel closed |
-| [P4-03](phases/p4-03-serves-assignment.md) | The Serves record on the Zone Group, its target, assign and clear, the Zone-copy contributor |
+| [P4-03](phases/p4-03-serves-assignment.md) | The Serves payload on the Zone record, staged through Zones (D4-21): assign and clear, delete in use |
 | [P4-04](phases/p4-04-ventilator-export.md) | The ventilation contributor and section; the B4 HBJSON proof |
 | [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Systems tab, the Equipment subtab, the Ventilators view with Serves and balance, `By ventilator` |
 | [P4-06](phases/p4-06-hot-water-records-and-export.md) | The Hot Water System kind with tanks and heaters, and its section |
@@ -60,11 +61,11 @@ stages, the bindings, the open decisions and the one ledger.
   and edge contributor are on `main` for P4-13 and P4-14.
 - From [Phase 6: Programs](../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical),
   complete 2026-11-22: the Building Segment settings seam and the `SEGMENT` export host that
-  P4-08b uses, the per-Zone airflow mode the balance reads, and the per-Zone assignment pattern
-  D4-21 weighs for Serves.
+  P4-08b uses, the per-Zone airflow mode and Program flow the balance reads (D4-24), and the per-Zone
+  assignment pattern Serves follows (D4-21).
 - Climate's two reads for the blended heat pump (the entry gate in STATUS, met 2026-11-18).
 - [metr-export](../unscheduled/metr-export/README.md) for every METr claim; acceptance here is
-  HBJSON reloaded in the pinned stack. D4-25, open, would add PHX round trips here.
+  HBJSON reloaded in the pinned stack, plus a PHX round trip per export stage (D4-25).
 - [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) for the simplified hot
   water methods.
 - [units](../cross-phase/units/STATUS.md) Q2 and Q3 for the new quantity rows.

@@ -1,7 +1,7 @@
 # P4-06: Hot Water System records and export
 
 DATE: 2026-10-21
-STATUS: Scoped. To be re-planned against D4-17 to D4-19 (2026-11-15): Systems, Heaters and Tanks are three kinds, and recirculation temperature and hours are read from piping. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Corrected 2026-11-22 after Phase 6 Programs: the pinned wheel, the metadata step; D4-23 and D4-25 are open. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: Scoped. To be re-planned against D4-17 to D4-19 (2026-11-15): Systems, Heaters and Tanks are three kinds, and recirculation temperature and hours are read from piping. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15). Corrected 2026-11-22 after Phase 6 Programs: the pinned wheel, the metadata step; then D4-23 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -21,7 +21,7 @@ Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
-1. **The kind.** `hot_water/schema.rb`, `tanks.rb`, `heaters.rb`: `ph_composer.equipment.hot_water_system`,
+1. **The kind.** `hot_water/schema.rb`, `tanks.rb`, `heaters.rb`: `ph_composer.mechanical.hot_water_system`,
    prefix `hws`, `schema_version` 1, `Fields.common` plus `number_tap_points`, `recirc_temp_c`,
    `recirc_hours`, `piping_calc_method` (nullable, D4-12), `tanks` (TANK with `tnk_` ids, `role`,
    `tank_type` and the fields CONTRACTS lists) and `heaters` (HEATER with `htr_` ids and
@@ -29,20 +29,21 @@ Paths are relative to `src/ph_composer/`.
    units of `solar_losses` and `storage_loss_rate` against honeybee-ph's docstrings and correct
    CONTRACTS.
 2. **Slotting (D4-07).** `hot_water/slotting.rb`, pure: tanks to `tank_1`, `tank_2`,
-   `tank_buffer`, `tank_solar` by role and list order; the rest `equipment.tank_unslotted`. One
+   `tank_buffer`, `tank_solar` by role and list order; the rest `mechanical.tank_unslotted`. One
    function for the read, the preflight and the section's extraction.
 3. **Operations and declarations.** `create`, `update` (whole nested arrays, as Assembly layers),
    `duplicate` (regenerating `tnk_` and `htr_` ids through `propose_duplicate`'s block), `delete`
    with replacement and clear (D4-05); `hot_water_systems.all` and the snapshot section, rows
-   carrying each tank's slot. The Serves record gains `hot_water_system_id` (one line; hot water
-   H6 applies the V1 and V5 rules: `equipment.slot_filled`, `equipment.zone_no_hot_water`). API
+   carrying each tank's slot. The Serves payload gains `hot_water_system_id` (one line in `serves/payload.rb`, and its schema
+   version moves, F34; hot water
+   H6 applies the V1 and V5 rules: `mechanical.slot_filled`, `mechanical.zone_no_hot_water`). API
    minor bump and change row; agent guide recipe.
-4. **Section.** `HotWaterSection` in `equipment_sections.py`: one `PhHotWaterSystem` per (system,
+4. **Section.** `HotWaterSection` in `mechanical_sections.py`: one `PhHotWaterSystem` per (system,
    served Zone) pair (D4-01), tanks set on their slots as `PhHvacHotWaterTank`, heaters through
    `add_heater` by variant class, `number_tap_points`, `recirc_temp`, `recirc_hours`;
    `piping_calc_method` written only when the loaded class accepts it, otherwise
-   `equipment.method_not_exported` (D4-12); `required_for_export = True`; `attach` calls
-   `set_hot_water_system`. Findings: `equipment.recirc_disagrees` when two exported systems
+   `mechanical.method_not_exported` (D4-12); `required_for_export = True`; `attach` calls
+   `set_hot_water_system`. Findings: `mechanical.recirc_disagrees` when two exported systems
    differ (hot water H4). `result_fields` and `conformance` per CONTRACTS section 6. Contributor,
    preflight rows, fixture and report table as P4-04 built them.
 
@@ -53,15 +54,18 @@ Paths are relative to `src/ph_composer/`.
 
 Run at 1.33.68 on 2026-11-22: `recirc_temp` and `recirc_hours` have no setter and the class has
 no calculation-method attribute (F23), so D4-18 and D4-12 stand. PHX pools a Building Segment's
-systems, not the Model's (F28); the wording of the pooling note and an item across Segments are
-D4-23.
+systems, not the Model's (F28): the pooling note of D4-17 names the Systems serving one Segment,
+and a System serving Zones in two Segments is written to both with
+`mechanical.item_across_segments`, non-blocking (D4-23). The stage adds a PHX round trip in the
+`phx` group, `tests/python/test_hot_water_phx_round_trip.py` (D4-25): two Rooms of one Segment
+served by one System give its tanks and heaters once.
 
 ## Source
 
 | PH-Composer file | Disposition |
 | --- | --- |
 | `features/assemblies/assembly/schema.rb`, `assembly/operations.rb` | Pattern for nested children with regenerated ids |
-| `features/equipment/ventilators/`, `export.rb`, `equipment_sections.py` (P4-02, P4-04) | The sibling family's shape |
+| `features/mechanical/ventilators/`, `export.rb`, `mechanical_sections.py` (P4-02, P4-04) | The sibling family's shape |
 | honeybee-ph `honeybee_phhvac/hot_water_system.py`, `hot_water_devices.py` (pinned 1.33.68) | The carrier; `PhHvacHotWaterHeaterBuilder` for the variant classes |
 
 ## Tests (write first)
@@ -75,7 +79,7 @@ D4-23.
    conformance reads back capacity and identifier per slot.
 5. `piping_calc_method` set: no field in the dict on the pinned wheel and the finding; a stub class with
    the attribute receives it.
-6. Two exported systems with different `recirc_temp_c` raise `equipment.recirc_disagrees`; an
+6. Two exported systems with different `recirc_temp_c` raise `mechanical.recirc_disagrees`; an
    unserved system raises nothing.
 7. The Serves slot: assign, replace, clear, delete with replacement for a Hot Water System.
 

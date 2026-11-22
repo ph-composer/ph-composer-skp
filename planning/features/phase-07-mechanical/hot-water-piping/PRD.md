@@ -25,7 +25,9 @@ Phase 3b closed on 2026-10-26, so every row marked "3b" is on `main`. The pinned
 read from the recirculation pipes, not stored on the System (D4-18). Sections now attach at
 `MODEL`, `SEGMENT`, `ROOM` or `FACE`; the open plan item under "Export mapping" is unchanged,
 since none of the four is a hot water system (D4-09). "The Hot-water piping subtab of Systems"
-is, since D4-13, a Piping pill under Hot Water on the Mechanical tab.
+is, since D4-13, a Piping pill under Hot Water on the Mechanical tab. PHX is installed for tests,
+and since D4-25 this packet's export stage proves what PHX builds from its HBJSON by round trip;
+the METr file's own rows stay metr-export's.
 
 | Need | State | Where |
 | --- | --- | --- |
