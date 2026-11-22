@@ -22,16 +22,6 @@ CASES = ("heat_1", "heat_2", "cool_1", "cool_2")
 WUFI_CASES = ("Heating1", "Heating2", "Cooling", "Cooling2")
 
 
-def phx_document(record: dict[str, Any] | None = None, annex: bool = False) -> dict[str, Any]:
-    """The reference extraction with its Building Segments named without a space: PHX 1.59.3 names the Room it
-    merges each segment into after the segment's display name (`cleanup.merge_rooms`), and a Room identifier may
-    not hold a space, so a Segment named "Main Building" fails the conversion. A PHX follow-up."""
-    value = document(record, annex)
-    for zone in value["sections"]["ph_composer.zones.export.zones"]["records"]:
-        zone["building_segment"] = zone["building_segment"].replace(" ", "_")
-    return value
-
-
 def convert(result: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     stack.load("honeybee_energy._extend_honeybee")
     stack.load("honeybee_ph")
@@ -66,7 +56,15 @@ def wufi_items(xml: str, tag: str) -> list[float]:
 def test_board_18_reads_back_in_wufi_xml_and_metr_json() -> None:
     record = site_record()
     climate = record["climate"]
-    xml, metr = convert(run(phx_document(annex=True)))
+    xml, metr = convert(run(document(annex=True)))
+
+    # The Segments keep their names, spaces included: before 1.59.4 PHX used the name as the merged Room's
+    # identifier, which may not hold a space (PH-Tools/PHX#175).
+    assert sorted(re.findall(r"<Variant index=\"\d+\">\s*<IdentNr>\d+</IdentNr>\s*<Name>([^<]*)</Name>", xml)) == [
+        "Annex",
+        "Main Building",
+    ]
+    assert sorted(variant["n"] for variant in metr["lVariant"]) == ["Annex", "Main Building"]
 
     # Each Building Segment is its own PHX variant, and each carries the same site.
     assert wufi(xml, "Latitude") == ["40.0"] * 2 and wufi(xml, "Longitude") == ["-100.0"] * 2
@@ -98,7 +96,7 @@ def test_a_site_alone_reads_back_its_location_over_the_default_climate() -> None
     record = site_record()
     record.update(climate=None, provenance=None)
     record["location"]["hours_from_utc"] = -6
-    xml, metr = convert(run(phx_document(record)))
+    xml, metr = convert(run(document(record)))
 
     assert wufi(xml, "Latitude") == ["40.0"] and wufi(xml, "dUTC") == ["-6"]
     site = cli_loc(metr)

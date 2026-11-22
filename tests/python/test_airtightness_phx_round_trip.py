@@ -6,7 +6,7 @@ WUFI XML and METr JSON carry q50 alone (`EnvelopeAirtightnessCoefficient`, `tigh
 each file's q50 is read back, and the n50 PHX reports is its own Variant's: q50 times the merged Room's gross
 envelope area over its net volume. House's envelope tells PHX's area rules apart (an interior Surface pair it
 drops; a Surface pair to the ADU, an Adiabatic wall and Ground floors it keeps), so a Ruby area that differed
-from PHX's would move n50. Segment names hold no space: PHX 1.59.3 refuses one in `cleanup.merge_rooms`.
+from PHX's would move n50.
 Skipped without the group:
 `uv run --group phx pytest tests/python/test_airtightness_phx_round_trip.py`."""
 

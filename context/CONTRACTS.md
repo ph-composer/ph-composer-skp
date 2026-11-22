@@ -1647,7 +1647,9 @@ action and refuses without that action's active proposal
 ## Building Segments at export
 
 Export writes only Zones in a Building Segment (`Zones::Schema.exported?`: every legacy Zone, and every
-managed Zone whose `building_segment_id` is set).
+managed Zone whose `building_segment_id` is set). A Segment's name reaches WUFI-Passive and METr as written,
+spaces and punctuation included: PHX 1.59.4 names each Variant and its Zone from it
+(`tests/python/test_site_phx_round_trip.py`).
 
 - With Zones in the Model and none in a Segment, the Zones preflight and section refuse `zone.no_segment`.
 - A Zone in no Building Segment is left out with everything that hangs on it. The Zones section leaves its
@@ -1676,7 +1678,7 @@ managed Zone whose `building_segment_id` is set).
 
 The Faces section is version 2: an AttachedZone Face carries `attached_zone`, its Attached zone's `id`,
 `name` and `temperature_reduction_factor`, and translates to honeybee-ph `PhAdditionalZone` with zone type
-"Unheated space", as honeybee-ph's Grasshopper component writes it. PHX 1.59.3 merges a Segment's Rooms
+"Unheated space", as honeybee-ph's Grasshopper component writes it. PHX 1.59.4 merges a Segment's Rooms
 before it collects attached zones, so one Attached zone that two Rooms name reaches WUFI-Passive and METr as
 one attached zone, and its Faces' exterior exposure names it; it carries no appliance devices (PHX 1.59.2 and
 later), so a Segment's devices are counted once. WUFI XML carries its factor; METr JSON carries
@@ -1834,7 +1836,7 @@ metadata boundary under its path's `shd_` id: its `user_data` stays in the Model
 Shades, none when there are none, so a Model with no shading writes the same HBJSON and result as before the
 section, bar its empty row in `sections`. Conformance finds the reported count of orphaned Shades, each
 detached, and per component the reported count and area. The report's Shading section lists each component
-and the totals, and is absent with none. PHX 1.59.3 writes one shading component per name in every Variant,
+and the totals, and is absent with none. PHX 1.59.4 writes one shading component per name in every Variant,
 with `InnerAttachment` and `idIC` -1 (`tests/python/test_shade_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path

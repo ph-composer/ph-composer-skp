@@ -1,6 +1,6 @@
 """The PHX round trip of the Zone airflow mode (context/CONTRACTS.md, "Translation sections and artifacts"), on
-the two-Segment reference tests/segment_export_rules_test.rb writes (its Segment name holds no space, which PHX's
-room merge refuses): Living uses detailed airflows (one Space with a supply, one blank), Kitchen is By Program.
+the two-Segment reference tests/segment_export_rules_test.rb writes: Living uses detailed airflows (one Space with
+a supply, one blank), Kitchen is By Program.
 Each Room is given a Program ventilation load here, as Programs' export will, so the round trip shows the two
 modes apart: a blank Space of a detailed Zone gets 0 in PHX, never a Program share, and so is not among
 WUFI-Passive's and METr's ventilation rooms; the By Program Zone's Space takes its floor share of the Room's load.
