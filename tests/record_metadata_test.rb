@@ -17,6 +17,7 @@ class RecordMetadataTest < PhComposerTestCase
   WINDOW_TYPE = PhComposer::Windows::TYPE_KIND
   EMPTY = { "user_data" => {}, "extension_data" => {} }.freeze
   REVIEW = "probe.records.review"
+  LINK = "probe.records.link"
 
   # An installed extension whose payload is valid when its status is draft or checked.
   module Review
@@ -31,6 +32,11 @@ class RecordMetadataTest < PhComposerTestCase
       feature.extension(PhComposer::Records::Extension.new(
         :namespace => REVIEW, :schema_version => 1, :export_relevance => "local_only",
         :validate => ->(payload) { %w[draft checked].include?(payload["status"]) ? [] : ["status is unknown"] }
+      ))
+      feature.extension(PhComposer::Records::Extension.new(
+        :namespace => LINK, :schema_version => 1, :export_relevance => "local_only",
+        :references => [{ "path" => "$.material_id", "target_kind" => MATERIAL, "cardinality" => "one" }],
+        :validate => ->(payload) { payload["material_id"].is_a?(String) ? [] : ["material_id is missing"] }
       ))
     end
   end
@@ -169,6 +175,21 @@ class RecordMetadataTest < PhComposerTestCase
     assert_equal "params.invalid", error.code
     assert proposal.empty?
     assert proposal.refusal, "a refused metadata proposal is refused whole"
+  end
+
+  def test_a_payload_may_name_a_record_staged_earlier_in_the_same_proposal
+    engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+    proposal = PhComposer::Operations::Proposal.new
+    created = engine.propose_create(MATERIAL, proposal, :values => { "name" => "Fibre" })
+    update = entry(MATERIAL, @material, {}).merge("extension_payloads" => { LINK => { "material_id" => created } })
+    engine.propose_metadata_update(MATERIAL, @material, proposal, update)
+    assert_equal created, proposal.find(MATERIAL, @material).after.dig("extension_data", LINK, "payload", "material_id")
+
+    missing = update.merge("extension_payloads" => { LINK => { "material_id" => "mat_000000000000" } })
+    error = assert_raises(PhComposer::CodedError) do
+      engine.propose_metadata_update(MATERIAL, @material, PhComposer::Operations::Proposal.new, missing)
+    end
+    assert_equal "reference.invalid", error.code
   end
 
   def test_unicode_null_false_zero_and_empty_containers_round_trip

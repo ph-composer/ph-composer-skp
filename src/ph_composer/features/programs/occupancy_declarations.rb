@@ -119,6 +119,7 @@ module PhComposer
         assign_equipment_set(feature)
         reads(feature)
         SingleDwelling.install(feature)
+        SegmentDefaults.install(feature)
         feature.reference_retargeter("#{PREFIX}.dwellings.retarget_equipment_set",
                                      :target_kind => EQUIPMENT_SET_KIND) do |request, proposal, from:, to:|
           retarget_dwellings(request, proposal, :from => from, :to => to)

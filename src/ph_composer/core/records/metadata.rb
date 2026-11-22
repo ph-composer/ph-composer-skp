@@ -124,16 +124,17 @@ module PhComposer
       # One target's record after its update: the pre-image checked against `stored`, what the caller
       # read; the maps written onto `record`, the record as the proposal already leaves it (an owner
       # repair staged earlier in the same action may have changed it); and every record a written
-      # payload names resolved, through `reference_plan` when the proposal changes identities. Equal to
-      # `record` when the update writes what is already there.
-      def planned(engine, catalog, record, update, label, stored: record, reference_plan: nil)
+      # payload names resolved, through `reference_plan` when the proposal changes identities, and in
+      # `change_set` when the caller holds the raw engine (a record staged earlier in the same proposal
+      # counts). Equal to `record` when the update writes what is already there.
+      def planned(engine, catalog, record, update, label, stored: record, reference_plan: nil, change_set: nil)
         check_expected!(stored, update.fetch("expected_metadata"), label)
         payloads = update.fetch("extension_payloads", {})
         after = updated(record, catalog, :user_data => update["user_data"], :extension_payloads => payloads)
         payloads.each_key do |namespace|
           envelope = after.fetch("extension_data").fetch(namespace)
           Extension.referenced_ids(envelope.fetch("payload"), envelope.fetch("references", [])).each do |kind, id|
-            engine.resolve_reference(kind, id, :reference_plan => reference_plan)
+            engine.resolve_reference(kind, id, :reference_plan => reference_plan, :change_set => change_set)
           end
         end
         after
