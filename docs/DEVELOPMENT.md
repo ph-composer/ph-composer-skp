@@ -35,6 +35,10 @@ suite. Deletions, renames and paths outside the allowlist also use the full suit
 reports the result of the selected checks. Use `make ci-docs` locally to check citations, home paths,
 the help page and generated fixtures.
 
+From a clean checkout, run `uv run python tools/ci_scope.py HEAD^1` to preview the latest commit's
+route. For a change spanning several commits, pass its base commit. On GitHub, the **Select CI
+checks** job logs the selected route.
+
 Use `make lint` and `make test` for focused work. Ruby tests run in shards and print their seeds.
 Set `RUBY_TEST_JOBS=1` or use `ruby -Itests tests/all_tests.rb` to investigate order-dependent
 failures. Run `make coverage` when the owning phase requires it. The Makefile defines the thresholds.
