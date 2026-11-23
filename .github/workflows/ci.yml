@@ -5,14 +5,46 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 # A newer push to the same pull request supersedes the run in progress; pushes to main always finish.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  scope:
+    name: Select CI checks
+    runs-on: ubuntu-24.04
+    outputs:
+      route: ${{ steps.scope.outputs.route }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Classify the diff and check docs
+        id: scope
+        shell: bash
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          base="$PUSH_BEFORE"
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            base=HEAD^1
+          fi
+          route=$(python3 tools/ci_scope.py "$base")
+          if [[ "$route" == docs ]]; then
+            make lint-paths
+          fi
+          echo "Selected CI route: $route"
+          echo "route=$route" >> "$GITHUB_OUTPUT"
+
   offline:
     name: make ci (Ruby ${{ matrix.ruby-version }})
+    needs: scope
+    if: needs.scope.outputs.route == 'full'
     # Pinned: ruby-builder publishes only the latest patch of each series for newer images, so
     # ubuntu-26.04 has no 2.7.2 or 3.2.2 and the exact SketchUp patches would 404.
     runs-on: ubuntu-24.04
@@ -24,6 +56,8 @@ jobs:
         ruby-version: ["2.7.2", "3.2.2"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
         with:
@@ -50,3 +84,26 @@ jobs:
 
       - name: make ci
         run: make ci RUBY=$(which ruby)
+
+  gate:
+    name: CI gate
+    needs: [scope, offline]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require the selected checks to pass
+        shell: bash
+        env:
+          ROUTE: ${{ needs.scope.outputs.route }}
+          SCOPE_RESULT: ${{ needs.scope.result }}
+          OFFLINE_RESULT: ${{ needs.offline.result }}
+          DEPENDENCY_FAILED: ${{ failure() || cancelled() }}
+        run: |
+          echo "route=$ROUTE scope=$SCOPE_RESULT offline=$OFFLINE_RESULT"
+          if [[ "$DEPENDENCY_FAILED" != false || "$SCOPE_RESULT" != success ]]; then
+            exit 1
+          fi
+          case "$ROUTE:$OFFLINE_RESULT" in
+            docs:skipped|full:success) exit 0 ;;
+            *) exit 1 ;;
+          esac

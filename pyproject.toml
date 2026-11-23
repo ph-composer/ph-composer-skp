@@ -62,8 +62,8 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 
 # ty, Astral's type checker, pinned exactly while it is in beta. It does not require annotations, so
 # ruff's ANN rules above hold every function to typed parameters and returns.
-# `root` (where first-party imports resolve) and `include` (what is checked) list the same directories;
-# change both together.
+# Keep the directory entries in `root` (where first-party imports resolve) and `include` (what is checked)
+# aligned. Standalone scripts with only standard-library imports can be included by filename.
 [tool.ty.environment]
 python-version = "3.11"
 root = [
@@ -74,7 +74,7 @@ root = [
 [tool.ty.src]
 include = [
     "src/ph_composer/python", "tools/examples/foundation", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tools/map_data", "tests/python",
-    "tools/githooks",
+    "tools/githooks", "tools/ci_scope.py",
 ]
 
 # A suppression that no longer suppresses anything fails the check, so none outlives its reason.
