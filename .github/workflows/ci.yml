@@ -83,7 +83,7 @@ jobs:
           enable-cache: true
 
       - name: make ci
-        run: make ci RUBY=$(which ruby)
+        run: make ci RUBY="$(command -v ruby)"
 
   gate:
     name: CI gate
@@ -91,16 +91,19 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:
+      - name: Reject failed or cancelled dependencies
+        if: ${{ failure() || cancelled() }}
+        run: exit 1
       - name: Require the selected checks to pass
+        if: ${{ !failure() && !cancelled() }}
         shell: bash
         env:
           ROUTE: ${{ needs.scope.outputs.route }}
           SCOPE_RESULT: ${{ needs.scope.result }}
           OFFLINE_RESULT: ${{ needs.offline.result }}
-          DEPENDENCY_FAILED: ${{ failure() || cancelled() }}
         run: |
           echo "route=$ROUTE scope=$SCOPE_RESULT offline=$OFFLINE_RESULT"
-          if [[ "$DEPENDENCY_FAILED" != false || "$SCOPE_RESULT" != success ]]; then
+          if [[ "$SCOPE_RESULT" != success ]]; then
             exit 1
           fi
           case "$ROUTE:$OFFLINE_RESULT" in
