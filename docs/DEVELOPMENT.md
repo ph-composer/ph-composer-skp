@@ -20,16 +20,20 @@ make ci
 make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby
 ```
 
-GitHub Actions runs the full offline gate on Ruby 3.2.2 and 2.7.2. The gate checks Ruby syntax,
+For substantive changes, GitHub Actions runs `make ci` on Ruby 3.2.2 and 2.7.2. The suite checks Ruby syntax,
 lint, Ruby/JavaScript/Python tests, generated fixtures, panel and help pages, runtime pins,
 host tools, Python types and the RBZ contents. Ruby tests use a SketchUp stub. JavaScript tests
 use a DOM double. See [test support](../tests/support/.index.md) for what each stub models.
 
 `make ci` holds a machine-wide lock, so a second gate started elsewhere waits until the first finishes.
 In a linked worktree it lints with the main checkout's RuboCop and ESLint and fails if either is missing.
-For a commit that changes only `docs/`, `context/` or `planning/`, `make ci-docs` runs the checks such a
-commit can break: citations, home paths, the help page and the generated fixtures. GitHub Actions still runs
-the full gate on the push.
+On pull requests and pushes to `main`, [CI selects checks from the Git diff](../tools/ci_scope.py).
+Edits and additions to prose and skill instructions use the fast path. It checks home paths, new
+inline relative links to files, and skill entry points or symlinks when touched. Changes to Help, the
+Agent Guide, the generated API reference, core contracts or the native acceptance ledger use the full
+suite. Deletions, renames and paths outside the allowlist also use the full suite. The required `CI gate`
+reports the result of the selected checks. Use `make ci-docs` locally to check citations, home paths,
+the help page and generated fixtures.
 
 Use `make lint` and `make test` for focused work. Ruby tests run in shards and print their seeds.
 Set `RUBY_TEST_JOBS=1` or use `ruby -Itests tests/all_tests.rb` to investigate order-dependent

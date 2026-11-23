@@ -53,8 +53,8 @@ ci:
 ci-run: hooks-auto syntax lint test fixtures-check panel-manifest-check help-check runtime-check runtime-pin-check \
     hostkit-test python-check rbz rbz-check
 
-# The local gate for a commit that touches only docs/, context/ or planning/: what such a commit can break.
-# CI still runs the full gate on the push.
+# The local docs check includes the generated Help, Agent Guide and API reference.
+# GitHub Actions checks simple prose and skill files without generating or testing the extension.
 ci-docs: hooks-auto lint-citations lint-paths help-check fixtures-check
 
 syntax:
