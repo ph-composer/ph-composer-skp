@@ -132,6 +132,9 @@ mechanical fragmentation or a golden update.
 Comments explain intent, domain assumptions, units and non-obvious behavior. Avoid comments that
 only restate the line below them.
 
+Use the [comment review skill](../.agents/skills/ph-composer-comment-review/SKILL.md) to audit
+stale guidance, workarounds and rules that belong in code or checks.
+
 **Code never cites planning.** Shipped code (`src/`) and tests cite no `planning/` path and no
 planning identifier (a PRD question number, a phase or stage name, a decision or acceptance id).
 Planning documents are provisional and move when archived; a citation into them breaks, and an

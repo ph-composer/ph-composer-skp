@@ -1,0 +1,4 @@
+interface:
+  display_name: "PH-Composer comment review"
+  short_description: "Find stale comments and enforceable rules"
+  default_prompt: "Use $ph-composer-comment-review to audit the affected source and recommend the smallest changes that preserve contributor guidance."
