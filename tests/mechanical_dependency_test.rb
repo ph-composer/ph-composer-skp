@@ -8,8 +8,9 @@ require_relative "test_helper"
 class MechanicalDependencyTest < PhComposerTestCase
   FEATURES = File.join(SOURCE_ROOT, "ph_composer", "features")
   MECHANICAL = File.join(FEATURES, "mechanical")
-  # The feature's own layer-3 and registration folders; every other folder is an equipment family.
-  NOT_FAMILIES = %w[serves declarations].freeze
+  # The feature's own layer-3 and registration folders; every other folder is an equipment family. `segment` is the
+  # Building Segment's mechanical settings, an extension on Zones' Segment record, so it names Zones' Segment kind.
+  NOT_FAMILIES = %w[serves declarations segment].freeze
   UPWARD = %r{\b(Zones|Spaces|Programs|Serves)\b|ph_composer\.(zones|spaces|programs)\b|(zones|spaces|programs)/|
               REFERENCE_KIND|ZONE_KIND|zone_id|serves/|Sketchup::}x
   # Mechanical's module, ids or folder, from anywhere else.

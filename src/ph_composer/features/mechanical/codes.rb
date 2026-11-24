@@ -20,6 +20,7 @@ module PhComposer
       HP_UNIT_UNPAIRED = "mechanical.hp_unit_unpaired"
       HP_EQUIPMENT_INCOMPLETE = "mechanical.hp_equipment_incomplete"
       HP_COOLING_OVER_200KW = "mechanical.hp_cooling_over_200kw"
+      SEGMENT_COOLING_MISMATCH = "mechanical.segment_cooling_mismatch"
 
       DESCRIPTIONS = {
         SLOT_FILLED => "The Zone's slot already names another item; assign with replace to use the new one.",
@@ -43,7 +44,9 @@ module PhComposer
         HP_EQUIPMENT_INCOMPLETE => "A heat pump outdoor model lacks a value the blend needs, or a Building " \
                                    "Segment's models blend to no heating COP, so the blend leaves them out.",
         HP_COOLING_OVER_200KW => "A Building Segment's blended cooling is over 200 kW (682 kBtu/h); PH-Composer " \
-                                 "exports it as one system and PHX splits it for WUFI-Passive."
+                                 "exports it as one system and PHX splits it for WUFI-Passive.",
+        SEGMENT_COOLING_MISMATCH => "A Building Segment's mechanical cooling switch disagrees with its blended heat " \
+                                    "pump: on with no heat pump cooling in its export, or off with a blend that cools."
       }.freeze
 
       module_function

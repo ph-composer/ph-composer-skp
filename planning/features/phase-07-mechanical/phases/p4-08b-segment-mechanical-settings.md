@@ -1,7 +1,7 @@
 # P4-08b: Building Segment mechanical settings
 
 DATE: 2026-11-22
-STATUS: Planned in full 2026-11-24 from the stub of 2026-11-22, F30, D4-25, D4-26, D4-32 and the [Phase 6 handoff](../../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) (C4a-5). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-08b`; offline evidence in [p4-08b-segment-mechanical-settings](../evidence/p4-08b-segment-mechanical-settings.md), host case `M16` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-11-22, F30, D4-25, D4-26, D4-32 and the [Phase 6 handoff](../../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) (C4a-5). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

@@ -100,3 +100,9 @@
 .phc-workspace .mech-blend-table th, .phc-workspace .mech-blend-table td { white-space: nowrap; text-align: left; }
 .phc-workspace .mech-blend-table .is-number { text-align: right; font-variant-numeric: tabular-nums; }
 .mech-copy-buffer { position: fixed; top: 0; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+/* The Building Segment settings' Mechanical section: a number and its unit on one line, as Airtightness's result. */
+.mech-segment-value { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.phc-form-dialog .mech-segment-value input:not([type=checkbox]):not([type=color]) { flex: 1 1 0; width: auto;
+  min-width: 0; max-width: 140px; text-align: right; font-variant-numeric: tabular-nums; }
+.mech-segment-unit { flex: 0 0 auto; color: var(--muted-strong); white-space: nowrap; }

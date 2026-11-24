@@ -23666,7 +23666,7 @@ Example params:
 
 ### `ph_composer.mechanical.preflight`
 
-Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot, Hot Water Systems pooled in one Building Segment, and the heat pump blend's: a climate it cannot read, an unpaired unit, an incomplete outdoor model and cooling over 200 kW. Owner: `ph_composer.mechanical`.
+Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot, Hot Water Systems pooled in one Building Segment, and the heat pump blend's: a climate it cannot read, an unpaired unit, an incomplete outdoor model and cooling over 200 kW; and a Building Segment whose mechanical cooling switch disagrees with its blended heat pump. Owner: `ph_composer.mechanical`.
 
 Refuses: only the `query` common set.
 
@@ -23784,6 +23784,123 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.mechanical.segment.get`
+
+One Building Segment's mechanical settings (mechanical cooling, the mechanical room temperature and summer ventilation), with the defaults where it has none. Owner: `ph_composer.mechanical`.
+
+Refuses: `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "stored",
+    "extension_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mechanical_cooling",
+        "mech_room_temp_c",
+        "summer_bypass_mode",
+        "ventilation_system_ach",
+        "daytime_window_ach",
+        "nighttime_window_ach"
+      ],
+      "properties": {
+        "mechanical_cooling": {
+          "type": "boolean",
+          "description": "Whether the Segment has mechanical cooling."
+        },
+        "mech_room_temp_c": {
+          "type": "number",
+          "description": "The mechanical room temperature, in C."
+        },
+        "summer_bypass_mode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "temperature_controlled",
+            "enthalpy_controlled",
+            "always"
+          ],
+          "description": "The ventilation heat exchanger's summer bypass."
+        },
+        "ventilation_system_ach": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "The ventilation system's summer air changes per hour; null for none entered."
+        },
+        "daytime_window_ach": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Daytime window ventilation air changes per hour."
+        },
+        "nighttime_window_ach": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Nighttime window ventilation air changes per hour."
+        }
+      },
+      "description": "The six settings: the stored payload when it is understood, else the defaults."
+    },
+    "stored": {
+      "type": "boolean",
+      "description": "Whether the values are a stored payload."
+    },
+    "extension_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stored envelope's status, as a record read reports it; null when the Segment has none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "bsg_Ab12Cd34Ef56"
+}
 ```
 
 ### `ph_composer.mechanical.serves.all`
@@ -114042,6 +114159,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `mechanical.item_missing` | A Zone's slot, or a heat pump unit, names an item that is not in the Model; reassign or clear it. |
 | `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
 | `mechanical.method_not_exported` | A Hot Water System's piping calculation method is set, and the pinned honeybee-ph has no field for it, so the export leaves it out. |
+| `mechanical.segment_cooling_mismatch` | A Building Segment's mechanical cooling switch disagrees with its blended heat pump: on with no heat pump cooling in its export, or off with a blend that cools. |
 | `mechanical.slot_filled` | The Zone's slot already names another item; assign with replace to use the new one. |
 | `mechanical.tank_unslotted` | A Hot Water Tank has no free slot of its role on its System, so the export leaves it out. |
 | `mechanical.zone_left_out` | A served Zone is in no Building Segment, so the export leaves its Room out. |
@@ -114351,3 +114469,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.91 | 2026-11-24 | ph_composer.mechanical.hot_water_systems, hot_water_heaters and hot_water_tanks are new, each with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 2 with the hot_water_system_id slot, and serves rows gain mechanical.zone_no_hot_water. The export section ph_composer.mechanical.export.hot_water is new, and ph_composer.mechanical.preflight adds its rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings. |
 | 1.92 | 2026-11-24 | ph_composer.mechanical.locate takes hot_water_system_ids, hot_water_heater_ids and hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's hot water item rows carry it; Hot Water System rows add mechanical.method_not_exported while a piping calculation method is set; the colour mode ph_composer.mechanical.by_hot_water_system is new. |
 | 1.93 | 2026-11-24 | ph_composer.mechanical.heat_pumps.outdoor_equipment, indoor_equipment, outdoor_units and indoor_units are new, each with list, all, a snapshot section, create, update, duplicate and delete; ph_composer.mechanical.heat_pumps.blended and its snapshot section heat_pumps_blended are new. ph_composer.mechanical requires ph_composer.climate. ph_composer.mechanical.zone_serves moves to schema 3 with the hp_indoor_unit_ids list slot, and serves.clear takes item_id to take one item out of a slot. The export section ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, hp_outdoor_unit_ids and hp_indoor_unit_ids. |
+| 1.94 | 2026-11-24 | The Building Segment extension ph_composer.mechanical.segment is new (mechanical_cooling, mech_room_temp_c, summer_bypass_mode, ventilation_system_ach, daytime_window_ach and nighttime_window_ach), saved through ph_composer.zones.save_segment_settings and read by the new ph_composer.mechanical.segment.get. The export section ph_composer.mechanical.export.segments is new, and ph_composer.mechanical.preflight adds its rows: mechanical.segment_cooling_mismatch. |

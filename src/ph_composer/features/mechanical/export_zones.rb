@@ -6,9 +6,10 @@ module PhComposer
     # values, so the export contributor and the preflight build the same Zones, the first from the export reader
     # and the second from the live Serves read, and get the same pairs and findings.
     module ExportZones
-      # One Zone, once per Zone id: `segment` names its Building Segment (nil when it is in none), `exported` says
-      # whether the export writes its Room, and `values` are its Serves slots.
-      Zone = Struct.new(:id, :name, :segment, :exported, :values, keyword_init: true) do
+      # One Zone, once per Zone id: `segment` names its Building Segment (nil when it is in none) and `segment_id` is
+      # that Segment's record (nil for a legacy Zone, which names no record), `exported` says whether the export
+      # writes its Room, and `values` are its Serves slots.
+      Zone = Struct.new(:id, :name, :segment, :segment_id, :exported, :values, keyword_init: true) do
         def label
           name || id
         end
@@ -35,7 +36,7 @@ module PhComposer
           exported = row.fetch("exported")
           values = exported ? payloads.fetch(id) { Serves::EMPTY.dup } : left_out_values(reader, id)
           Zone.new(:id => id, :name => row.fetch("name"), :segment => row.fetch("building_segment"),
-                   :exported => exported, :values => values)
+                   :segment_id => row.fetch("building_segment_id"), :exported => exported, :values => values)
         end
       end
 
@@ -49,8 +50,8 @@ module PhComposer
       # The same Zones from the live Serves read (Serves::State), each once, the first occurrence by path.
       def live(serves_zones)
         serves_zones.sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id).map do |zone|
-          Zone.new(:id => zone.id, :name => zone.name, :segment => zone.segment, :exported => !zone.left_out,
-                   :values => zone.values)
+          Zone.new(:id => zone.id, :name => zone.name, :segment => zone.segment, :segment_id => zone.segment_id,
+                   :exported => !zone.left_out, :values => zone.values)
         end
       end
 

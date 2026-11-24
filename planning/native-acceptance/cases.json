@@ -5553,6 +5553,32 @@
         "src/ph_composer/vendor/manifest.json"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "M16",
+      "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/features/mechanical/segment_settings.js",
+        "src/ph_composer/html/features/mechanical/mechanical.css",
+        "src/ph_composer/html/features/zones/*",
+        "src/ph_composer/html/panel.js",
+        "src/ph_composer/features/mechanical/segment/*",
+        "src/ph_composer/features/mechanical/segment_export.rb",
+        "src/ph_composer/features/mechanical/declarations/segment.rb",
+        "src/ph_composer/features/mechanical/heat_pump_export.rb",
+        "src/ph_composer/features/mechanical/heat_pump_plan.rb",
+        "src/ph_composer/features/mechanical/preflight.rb",
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/zones/*",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/mechanical_segment_sections.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/vendor/manifest.json"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -161,9 +161,12 @@ first.
    optional Level in the Level column, whose menu manages the Levels and their colours.
 3. In each Segment's settings, set its **Occupancy** (Single dwelling, and the house's counts), its
    **Phius certification** (building category, program, use, status and type), its **Airtightness**
-   (the blower-door result as n50 or q50, and the wind exposure) and read its **Comfort** set points,
-   which come from its Zones' Programs. Save writes every section in one Undo step. With no
-   blower-door result, the Zones keep their Program's infiltration.
+   (the blower-door result as n50 or q50, and the wind exposure), read its **Comfort** set points,
+   which come from its Zones' Programs, and set its **Mechanical** settings (whether the building has
+   mechanical cooling, the mechanical room temperature, and the summer bypass and summer air changes).
+   Save writes every section in one Undo step. With no blower-door result, the Zones keep their
+   Program's infiltration. The export checks warn when mechanical cooling is switched on and no heat
+   pump serving the Segment cools, or off while its heat pumps cool.
 4. Set Face Type, Face Boundary and Face Assembly from the context menu. To paint a value onto
    several Faces, use the paint icon beside it in the column menu. An Attached zone, such as
    a garage or attic, defines a boundary with a temperature reduction factor.

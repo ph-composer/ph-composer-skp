@@ -117,6 +117,44 @@
       "records": [],
       "version": 1
     },
+    "ph_composer.mechanical.export.segments": {
+      "records": [
+        {
+          "daytime_window_ach": 0.0,
+          "export_identifier": "bseg_35807ac1baf4cf21",
+          "id": "bsg_FIXED0000001",
+          "mech_room_temp_c": 20.0,
+          "mechanical_cooling": false,
+          "name": "Apartments",
+          "nighttime_window_ach": 0.0,
+          "summer_bypass_mode": "always",
+          "ventilation_system_ach": null
+        },
+        {
+          "daytime_window_ach": 0.0,
+          "export_identifier": "bseg_2526c620c18174be",
+          "id": "bsg_FIXED0000002",
+          "mech_room_temp_c": 20.0,
+          "mechanical_cooling": false,
+          "name": "House",
+          "nighttime_window_ach": 0.0,
+          "summer_bypass_mode": "always",
+          "ventilation_system_ach": null
+        },
+        {
+          "daytime_window_ach": 0.0,
+          "export_identifier": "bseg_6cd2e331855da821",
+          "id": "bsg_FIXED0000003",
+          "mech_room_temp_c": 20.0,
+          "mechanical_cooling": false,
+          "name": "School",
+          "nighttime_window_ach": 0.0,
+          "summer_bypass_mode": "always",
+          "ventilation_system_ach": null
+        }
+      ],
+      "version": 1
+    },
     "ph_composer.mechanical.export.ventilation": {
       "records": [],
       "version": 1
