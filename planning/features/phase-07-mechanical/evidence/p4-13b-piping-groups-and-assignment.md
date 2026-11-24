@@ -87,3 +87,11 @@ exercised by lowering it, as thermal bridges do); reopen is a host step (H1).
   id, as thermal bridges' clear does, since the engine has no batch removal check (a core follow-up); metadata reads
   and a guarded metadata update for groups and pipes are not in the stage doc's operations (a follow-up for Ed,
   `docs/USER_DATA.md` says "Not yet").
+- Cycle 2, gpt-6.2-sol on `30ec21f0`: 1 P1, 5 P2. Fixed in the next commit, which merges unreviewed after the
+  two-cycle cap: clear checks incoming references on a pipe whose metadata map is malformed, read as the scan reads
+  it, so a record naming it refuses the clear; `pipe_types.delete` rewrites from the record as stored and strands an
+  invalid one (`reference.in_use`, with its path) rather than rolling back at apply; the engine's `reference.in_use`
+  message names a referrer with no id by its occurrence key rather than raising (`core/records/reference_resolution.rb`,
+  one line); the selection gives a record of another schema version a `validation.failed` write refusal; tests for a
+  mixed and an over-limit clear refusing whole, the malformed-map referrer and a group with no id. Declined again: one
+  engine check per cleared id (core follow-up).

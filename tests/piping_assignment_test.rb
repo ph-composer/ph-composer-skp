@@ -134,6 +134,31 @@ class PipingAssignmentTest < PhComposerTestCase
     assert_equal "validation.failed", row.dig("write_refusal", "code")
   end
 
+  def test_clear_refuses_a_mixed_or_over_limit_batch_whole_and_a_referenced_pipe_with_a_malformed_map
+    assign(@edges.map { |entity| target(entity) }, @pex, "twig")
+    [[target(@edges.first), reference([620, 621, 622])],
+     [target(@edges.first), reference([600, 999])]].each do |targets|
+      assert_equal "none", invoke("#{PREFIX}.pipes.clear", "targets" => targets)["effect"]
+    end
+    P::Assignment.gesture_edge_limit = 2
+    assert_equal "gesture.too_large", invoke("#{PREFIX}.pipes.clear", "targets" => @edges.map { |entity|
+      target(entity)
+    })
+      .fetch("code")
+    assert(@edges.all? { |entity| STORE.read(entity) })
+
+    named = STORE.read(@edges[1]).fetch("id")
+    STORE.write(@edges[1], STORE.read(@edges[1]).merge("extension_data" => nil))
+    envelope = { "schema_version" => 1, "payload" => { "pipe" => named }, "export_relevance" => "local_only",
+                 "references" => [{ "path" => "$.pipe", "target_kind" => P::PIPE_KIND, "cardinality" => "one" }] }
+    STORE.write(@edges[2], STORE.read(@edges[2]).merge("extension_data" => { "other.tool" => envelope }))
+    cleared = invoke("#{PREFIX}.pipes.clear", "targets" => [target(@edges[1])])
+    assert_equal %w[refused reference.in_use], cleared.values_at("status", "code")
+    assert_match(/still refers to #{P::PIPE_KIND} #{named}/, cleared["message"])
+    assert_equal %w[refused reference.in_use], invoke("#{PREFIX}.pipe_types.delete",
+                                                      "id" => @pex, "replacement_id" => nil).values_at("status", "code")
+  end
+
   def test_clear_removes_the_record_and_a_split_edge_reads_two_pipes_with_one_id
     assign([target(@edges.first)], @pex, "twig")
     split = edge(604)

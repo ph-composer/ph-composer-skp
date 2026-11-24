@@ -108,6 +108,15 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal @hws1, system_of(550)
   end
 
+  def test_a_group_record_with_no_id_still_refuses_the_system_delete_by_its_path
+    group = Sketchup::Group.new(560, Sketchup::Entities.new([]))
+    STORE.write(group, "schema_version" => 1, "hot_water_system_id" => @hws1)
+    @model.entities << group
+    refusal = invoke("#{SYSTEMS}.delete", "id" => @hws1)
+    assert_equal %w[refused reference.in_use], refusal.values_at("status", "code")
+    assert_match(/\[560\] still refers/, refusal["message"])
+  end
+
   private
 
   def piping_group(persistent_id, id, system_id, children = [])

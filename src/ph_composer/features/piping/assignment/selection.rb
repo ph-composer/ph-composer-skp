@@ -66,7 +66,7 @@ module PhComposer
           end
 
           group_record, group_problem = Group.read(group)
-          stored = unreadable(group_problem) || unreadable(problem)
+          stored = unreadable(group_problem) || unreadable(problem) || newer(record)
           invalid = group_record && Group::RECORD_KIND.problems(group_record).first
           stored ||= { "code" => "validation.failed", "message" => "The Piping group's #{invalid}" } if invalid
           group_record = nil if group_problem || invalid
@@ -75,6 +75,14 @@ module PhComposer
                      "group" => group_record && { "group_id" => group_record["id"], "group_path" => path[0...-1],
                                                   "hot_water_system_id" => group_record["hot_water_system_id"] },
                      "reason" => nil, "write_refusal" => refusal(parent, zone, stored))
+        end
+
+        # What assign refuses on a record of another schema version, which this version cannot rewrite.
+        def newer(record)
+          return nil unless record && record["schema_version"] != 1
+
+          { "code" => "validation.failed",
+            "message" => "The Edge's pipe assignment is schema version #{record['schema_version'].inspect}." }
         end
 
         def unreadable(problem)

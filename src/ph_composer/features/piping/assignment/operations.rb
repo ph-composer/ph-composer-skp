@@ -73,11 +73,11 @@ module PhComposer
           Target.entries(request.model).each do |entry|
             next unless entry.record["pipe_type_id"] == from
 
-            before = Assignment.validate!(entry.record)
             reference = { "group_path" => entry.key[0...-1], "entity_path" => entry.key,
-                          "entity_id" => before.fetch("id") }
+                          "entity_id" => entry.record["id"] }
             begin
-              request.locate(PIPE_KIND, reference, :index => index)
+              # The scan found it; the rewrite starts from the record as stored, which must be valid.
+              before = Assignment.validate!(STORE.read(request.locate(PIPE_KIND, reference, :index => index).entity))
               updates << update(reference, before, Assignment.validate!(before.merge("pipe_type_id" => to)))
             rescue CodedError => error
               stranded << { "path" => entry.key, "reason" => error.code }
@@ -91,8 +91,8 @@ module PhComposer
 
         def refuse_stranded(from, stranded)
           message = "#{stranded.length} pipe(s) use Pipe Type #{from} where the delete cannot rewrite them " \
-                    "(outside a Piping group, in a nested one, locked or shared); move, unlock or make them " \
-                    "unique, then delete again."
+                    "(outside a Piping group, in a nested one, locked, shared or invalid); move, unlock, make " \
+                    "them unique or clear them, then delete again."
           raise CodedError.new("reference.in_use", message, "target_kind" => PIPE_TYPE_KIND, "id" => from,
                                                             "edges" => stranded.first(STRANDED_DETAIL),
                                                             "stranded" => stranded.length)
@@ -136,9 +136,11 @@ module PhComposer
         end
 
         # Refuses reference.in_use when a record still names an assignment id these updates remove and no other Edge
-        # keeps (a copy keeps it alive).
+        # keeps (a copy keeps it alive). Each record is checked as the reference scan reads it (Group.scannable), so
+        # one whose metadata map is malformed is still checked; one invalid otherwise can be no reference target.
         def check_removals!(request, proposal, updates)
-          removed = updates.select { |row| RECORD_KIND.problems(row.fetch("before")).empty? }
+          removed = updates.map { |row| row.merge("before" => Group.scannable(row.fetch("before"))) }
+                           .select { |row| RECORD_KIND.problems(row.fetch("before")).empty? }
           return if removed.empty?
 
           gone = removed.map { |row| row.dig("reference", "entity_path") }
