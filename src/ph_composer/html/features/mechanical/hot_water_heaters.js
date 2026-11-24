@@ -2,7 +2,8 @@
    each names (chosen in place), its Type, its coverage and whether it sits in conditioned space, then the efficiency
    values, of which only those its Type takes are live: an annual heat pump its performance ratio, a monthly one
    two COPs at two rating temperatures, one inside the envelope its energy factor, an electric heater none
-   (context/CONTRACTS.md, "Mechanical equipment"). The others read as a dash and take no edit, typed or pasted.
+   (context/CONTRACTS.md, "Mechanical equipment"). The others read as a dash and are read only, so a typed edit or a
+   paste across them is refused whole. Coverage is stored as a fraction and shown and entered as a percentage.
 
    A Type is changed in the shared form dialog, since the new Type needs its own values and the old Type's values
    go: the dialog asks for the new ones, names what goes, and sends one guarded update with both, one Undo step. */
@@ -36,7 +37,8 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     heat_pump_inside: ["annual_energy_factor"] };
   var EFFICIENCY_FIELDS = Object.keys(EFFICIENCY);
   var POSITIVE = ["total_system_perf_ratio", "cop_1", "cop_2", "annual_energy_factor"];
-  var columns = [["hot_water_system_id", "System"], ["variant", "Type"], ["percent_coverage", "Coverage"],
+  var COVERAGE = fields.with(FRACTION, { label: "Coverage" });
+  var columns = [["hot_water_system_id", "System"], ["variant", "Type"], ["percent_coverage", "Coverage %"],
     ["in_conditioned_space", "In conditioned space"]].concat(EFFICIENCY_FIELDS.map(function (field) {
     return [field, EFFICIENCY[field].label];
   }));
@@ -46,6 +48,25 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     return type ? type.label : value;
   }
   function present(value) { return value !== null && value !== undefined; }
+  /* Whether a Heater takes `field`: a value of another Type is read only. */
+  function inactive(record, field) {
+    return Boolean(EFFICIENCY[field]) && (TYPE_FIELDS[record.values.variant] || []).indexOf(field) < 0;
+  }
+  /* Coverage as the cell shows it: the stored fraction as a percentage, rounded clear of binary noise. */
+  function percent(fraction) { return present(fraction) ? Math.round(fraction * 1e8) / 1e6 : null; }
+  /* A cell's update, coverage sent as the fraction it is stored as and guarded by the stored value the cell showed. */
+  function cellChange(cell, value, shown) {
+    var held = cell.row.record.values, values = {}, expected = {};
+    var stored = present(held[cell.field]) ? held[cell.field] : null;
+    if (cell.field === "percent_coverage") {
+      values[cell.field] = value / 100;
+      expected[cell.field] = percent(stored) === shown ? stored : shown / 100;
+    } else {
+      values[cell.field] = value;
+      expected[cell.field] = shown === undefined ? null : shown;
+    }
+    return { id: cell.row.record.id, values: values, expected_values: expected };
+  }
   /* The one update a Type change sends: the new Type and its values, a null for each value of the old Type, each
      guarded by what the row showed. */
   function typeChange(record, variant, entered) {
@@ -156,7 +177,7 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
       columns: columns, editable: ["percent_coverage", "in_conditioned_space"].concat(EFFICIENCY_FIELDS),
       forms: [this.typeForm],
       inventory: {
-        quantities: Object.assign({ percent_coverage: FRACTION }, EFFICIENCY_FIELDS.reduce(function (all, field) {
+        quantities: Object.assign({ percent_coverage: COVERAGE }, EFFICIENCY_FIELDS.reduce(function (all, field) {
           all[field] = EFFICIENCY[field].field; return all;
         }, {})),
         selectFields: { in_conditioned_space: equipment.YES_NO },
@@ -164,14 +185,23 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
           return field === "in_conditioned_space" ? equipment.yesNo(text) : undefined;
         },
         validate: function (field, entered) {
-          if (field === "percent_coverage" && (entered < 0 || entered > 1)) return "Enter a fraction from 0 to 1.";
+          if (field === "percent_coverage" && (entered < 0 || entered > 100)) {
+            return "Enter a percentage from 0 to 100.";
+          }
           if (POSITIVE.indexOf(field) >= 0 && !(entered > 0)) return "Enter a number above 0.";
           return "";
         },
         rawValue: function (row, field) {
           if (field === "in_conditioned_space") return row.record.values[field] !== false;
+          if (field === "percent_coverage") return percent(row.record.values[field]);
           return equipment.stored(row.record, field);
         },
+        readOnly: function (cell) { return inactive(cell.row.record, cell.field); },
+        send: function (cell) {
+          return { action: SECTION + ".update", params: cellChange(cell, cell.submitted, cell.baseline) };
+        },
+        changeFor: function (cell, value) { return cellChange(cell, value, cell.current); },
+        afterCell: function (td, row, field) { self.inactiveCell(td, row.record, field); },
         defaultWidths: { hot_water_system_id: 150, variant: 170, percent_coverage: 104, in_conditioned_space: 160,
           total_system_perf_ratio: 140, cop_1: 84, ambient_temp_1_c: 168, cop_2: 84, ambient_temp_2_c: 168,
           annual_energy_factor: 120 },
@@ -201,14 +231,15 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
         } });
       return true;
     }
-    if (!EFFICIENCY[field]) return false;
-    var inactive = (TYPE_FIELDS[record.values.variant] || []).indexOf(field) < 0;
-    td.classList.toggle("mech-inactive", inactive);
-    if (!inactive) { ui.tooltip(td, ""); return false; }
-    td.classList.remove("phc-editable-cell", "has-cell-error");
-    td.textContent = "—";
-    ui.tooltip(td, typeLabel(record.values.variant) + " takes no " + EFFICIENCY[field].label + ".");
-    return true;
+    return false;
+  };
+  /* An efficiency value the Type does not take: the cell stays drawn, read only and empty (its dash), muted, with
+     the reason as its tooltip; a draft it held when the Type changed elsewhere can still be cancelled. */
+  Heaters.prototype.inactiveCell = function (td, record, field) {
+    if (!EFFICIENCY[field]) return;
+    var off = inactive(record, field);
+    td.classList.toggle("mech-inactive", off);
+    ui.tooltip(td, off ? typeLabel(record.values.variant) + " takes no " + EFFICIENCY[field].label + "." : "");
   };
   Heaters.prototype.render = function (state, shown) { this.state = state; this.table.render(state, shown); };
   Heaters.prototype.guard = function () { return this.table.guard(); };

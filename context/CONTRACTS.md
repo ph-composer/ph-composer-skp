@@ -940,8 +940,9 @@ the same mode over the `hot_water_system_id` slot.
 **Locate.** A `ph_composer.mechanical.preflight` row about a stored item or a Zone carries `locate`, naming the view
 command `ph_composer.mechanical.locate` (`features/mechanical/locate.rb`), which maps each item kind's id prefix to its
 param: a Ventilator's `ventilator_ids`, a Hot Water System's `hot_water_system_ids`, a Heater's
-`hot_water_heater_ids` and a Tank's `hot_water_tank_ids` open the Mechanical tab on that table, narrowed to them; a
-Zone's `zones` open the Zones tab with them checked. Rows for an unreadable record, a metadata problem and a refused
+`hot_water_heater_ids` and a Tank's `hot_water_tank_ids` open the Mechanical tab on that table, narrowed to them, one
+kind per request (two refuse `params.invalid`, since one table shows at a time); a Zone's `zones` open the Zones tab
+with them checked. Rows for an unreadable record, a metadata problem and a refused
 read carry none. The panel table that shows a kind accepts its param.
 
 **The Mechanical tab** (`html/features/mechanical/`). One page header over a subtab per system and a pill row
@@ -965,8 +966,10 @@ chips, tap points, the Tags of the Heaters and Tanks naming it, its `recirculati
 beneath the table each Building Segment's `mechanical.hot_water_pooled` note once. A System's delete offers clearing
 only while no Heater or Tank names it (`ReplacementForm`'s `allowClear` as a function of the record). A Heater's
 System is chosen in place, one guarded update; its Type is changed in the shared form dialog, which asks for the new
-Type's efficiency values and sends one update with them, nulls for the old Type's and both guarded; only the shown
-Type's efficiency cells take an edit, typed or pasted. A Tank's export slot is the row's `slot`, read only, amber with
+Type's efficiency values and sends one update with them, nulls for the old Type's and both guarded; the other
+efficiency cells stay drawn but read only (the kit `Inventory`'s `readOnly`), so a typed edit or a paste across them
+is refused whole. Coverage is stored as a fraction and shown and entered as a percentage, sent and guarded as the
+stored fraction. A Tank's export slot is the row's `slot`, read only, amber with
 the `mechanical.tank_unslotted` finding when null. A Tank's capacity is the `volume_l` quantity, litres stored and US
 gallons under IP, in both unit registries. `HotWater::Systems::METHOD_EXPORTED` is the Ruby mirror of whether the
 pinned honeybee-ph writes a calculation method; `tests/fixtures/mechanical/hot_water_method.json` holds it equal to

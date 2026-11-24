@@ -220,8 +220,13 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
   const heaterRow = id => heaters.locator(`[data-row-key='${id}']`);
   const HPWH1 = "hwh_Aa11Bb22Cc33";
   await heaterRow(HPWH1).waitFor();
-  assert.equal(await heaterRow(HPWH1).locator(".col-cop_1").textContent(), "—");
+  const inactive = heaterRow(HPWH1).locator("[data-record-field='cop_1']");
+  assert.equal(await inactive.inputValue(), "");
+  assert.equal(await inactive.getAttribute("placeholder"), "—");
+  assert.equal(await inactive.evaluate(node => node.readOnly), true, "a value its Type does not take is read only");
   assert.equal(await heaterRow(HPWH1).locator("[data-record-field='annual_energy_factor']").inputValue(), "3.75");
+  assert.equal(await heaterRow(HPWH1).locator("[data-record-field='percent_coverage']").inputValue(), "85",
+    "coverage reads as a percentage");
   await page.screenshot({ path: path.join(output, "hot-water-heaters.png") });
   await heaterRow(HPWH1).locator(".col-variant select").selectOption("heat_pump_annual");
   const typeDialog = page.getByRole("dialog", { name: "Change HPWH-1 to Heat pump · annual" });
@@ -234,7 +239,7 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
   assert.equal(changed.variant, "heat_pump_annual");
   assert.equal(changed.total_system_perf_ratio, 2.8);
   assert.equal(changed.annual_energy_factor, undefined, "the old Type's value went with it");
-  assert.equal(await heaterRow(HPWH1).locator(".col-annual_energy_factor").textContent(), "—");
+  assert.match(await heaterRow(HPWH1).locator(".col-annual_energy_factor").getAttribute("class"), /mech-inactive/);
 
   step("Hot Water › Tanks: litres in US gallons under IP, the export slot from Role, New Tank with its System");
   await pills.getByRole("button", { name: "Tanks" }).click();

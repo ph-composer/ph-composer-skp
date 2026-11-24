@@ -32,8 +32,8 @@ module PhComposer
         feature.view_command(NAME, :description => "Open where a Mechanical finding is fixed: the Mechanical tab " \
                                                    "on the table of the items named (ventilator_ids, " \
                                                    "hot_water_system_ids, hot_water_heater_ids or " \
-                                                   "hot_water_tank_ids), narrowed to them, or, with none, the " \
-                                                   "Zones tab with zones checked.",
+                                                   "hot_water_tank_ids; one kind per request), narrowed to " \
+                                                   "them, or, with none, the Zones tab with zones checked.",
                                    :refuses => %w[session.inactive], :params => PARAMS,
                                    :side_effects => "Opens or raises the panel on the Mechanical or the Zones tab.",
                                    :result => Shapes.object({ "opened" => { "type" => "boolean" } }),
@@ -47,6 +47,11 @@ module PhComposer
 
       def call(request)
         items = request.params.slice(*ITEMS.values).reject { |_param, ids| ids.empty? }
+        # The panel shows one table at a time, so a request naming two kinds would open one and drop the other.
+        if items.length > 1
+          raise CodedError.new("params.invalid", "Name items of one kind: #{items.keys.join(' or ')}, not both.")
+        end
+
         if items.empty?
           request.session.open_in_panel("ph_composer.zones", "zones" => request.params.fetch("zones", []))
         else

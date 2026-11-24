@@ -348,8 +348,9 @@ Hot water flow stays in L/h per m².
    System in a row's **System** cell.
 6. A Heater's **Type** decides which efficiency values it takes: a performance ratio for an annual heat
    pump, two COPs at two rating temperatures for a monthly one, an energy factor for one inside the
-   envelope, and none for an electric heater. The others read as a dash. Changing the Type opens a form
-   for the new Type's values and names the values that go.
+   envelope, and none for an electric heater. The others read as a dash and cannot be typed or pasted
+   into. Changing the Type opens a form for the new Type's values and names the values that go.
+   **Coverage** is the share of the System's hot water the Heater makes, in percent.
 7. A Tank's **Role** (Storage, Buffer or Solar) and Tag decide its **Export slot**: storage Tanks fill
    Tank 1 and Tank 2 in Tag order, a buffer Tank the buffer slot, a solar Tank the solar slot. A Tank with
    no slot left is amber and the export leaves it out. **Capacity** reads in litres, or US gallons in IP.

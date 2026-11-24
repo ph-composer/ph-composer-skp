@@ -176,9 +176,9 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/mechanical/equipment_table.js": {
-      "bytes": 16904,
+      "bytes": 17480,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "7c489ff87a5dbc69ccba8b493349638be45f4cde2886dc180b056204395d6660"
+      "sha256": "cbd7882d596fc25ab39b70382298b14f9e8c6d48d9c8625b35cc45c7ff65db50"
     },
     "html/features/mechanical/hot_water.js": {
       "bytes": 13002,
@@ -186,9 +186,9 @@
       "sha256": "a7354781bb575e4e92ca499d5248ad20fbf1d98857e45e17777abf8782fadcd3"
     },
     "html/features/mechanical/hot_water_heaters.js": {
-      "bytes": 12987,
+      "bytes": 14908,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "373dfa145bdd762f3d9602aa0438d20c874180bc0ea5ceac81db6c6bbe83b7b9"
+      "sha256": "67a85b5b34b138afce4968de1aa25ee54528f8fd95d62fa8fd23f69bd1d091a4"
     },
     "html/features/mechanical/hot_water_tanks.js": {
       "bytes": 7005,
@@ -536,9 +536,9 @@
       "sha256": "3140751e0661ddf2321847ed8f7610dcf953e1f7569e6d788635b54a25babeed"
     },
     "html/inventory.js": {
-      "bytes": 15384,
+      "bytes": 15568,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6e7af5d18ba90e442b63355c5bca713e9b92dbc05fb11f74b4810440e0297f76"
+      "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
       "bytes": 23252,

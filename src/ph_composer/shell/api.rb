@@ -562,7 +562,8 @@ module PhComposer
                     "rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings." },
       { "minor" => 92, "date" => "2026-11-24",
         "change" => "ph_composer.mechanical.locate takes hot_water_system_ids, hot_water_heater_ids and " \
-                    "hot_water_tank_ids, and the preflight's hot water item rows carry it; Hot Water System rows " \
+                    "hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's " \
+                    "hot water item rows carry it; Hot Water System rows " \
                     "add mechanical.method_not_exported while a piping calculation method is set; the colour mode " \
                     "ph_composer.mechanical.by_hot_water_system is new." }
     ].freeze

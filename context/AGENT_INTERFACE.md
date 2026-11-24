@@ -898,8 +898,8 @@ with `list`, `all`, a snapshot section, `create`, `update`, `duplicate` and `del
 System, a System serves Zones through the Serves slot `hot_water_system_id`, and its delete takes `replacement_id`
 for the Zones, Heaters and Tanks naming it. The export writes each served Zone's Room a hot water system, and the one
 `ph_composer.mechanical.preflight` lists both exports' findings. Since API 1.92 `ph_composer.mechanical.locate` also
-takes `hot_water_system_ids`, `hot_water_heater_ids` and `hot_water_tank_ids`, which a preflight row about a hot water
-item carries; a System row notes `mechanical.method_not_exported` while it sets a piping calculation method the pinned
+takes `hot_water_system_ids`, `hot_water_heater_ids` and `hot_water_tank_ids`, one kind per request (two refuse
+`params.invalid`), which a preflight row about a hot water item carries; a System row notes `mechanical.method_not_exported` while it sets a piping calculation method the pinned
 honeybee-ph cannot carry; and `ph_composer.mechanical.by_hot_water_system` colours each Zone by its System. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",

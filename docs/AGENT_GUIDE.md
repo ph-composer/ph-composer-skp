@@ -1009,7 +1009,8 @@ once.
    `mechanical.hot_water_pooled` two Systems in one Building Segment. None of these blocks. A row
    about a Zone carries `locate` to the Zones tab; a row about a System, Heater or Tank carries
    `locate` with `hot_water_system_ids`, `hot_water_heater_ids` or `hot_water_tank_ids`, which opens
-   that table on the Mechanical tab narrowed to it.
+   that table on the Mechanical tab narrowed to it. Name one item kind per Locate; two are refused as
+   `params.invalid`.
 2. Export, then read back. The result gives `hot_water`, one row per (System, Zone) pair:
    `system_identifier`, `number_tap_points`, `heater_identifiers`, each slot's tank identifier and
    capacity in litres, and `digest`. In the HBJSON each of those Rooms has

@@ -99,20 +99,21 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     if (waiting || hinted || !this.error.textContent) this.error.textContent = waiting;
     this.error.classList.toggle("phc-form-hint", Boolean(waiting));
   };
-  /* The parent choices, from the parent's section as the snapshot has it, the current choice kept. */
-  TagForm.prototype.paintParents = function () {
+  /* The parent choices, from the parent's section as the snapshot has it. The current choice is kept while it is
+     there and cleared when it goes; only a form just opened takes the sole choice for the user. */
+  TagForm.prototype.paintParents = function (fresh) {
     if (!this.parent) return;
     var chosen = this.parent.value;
     this.parent.replaceChildren(ui.option("", "Choose a " + this.options.parent.label));
     this.parents.forEach(function (record) { this.parent.appendChild(ui.option(record.id, record.values.name)); },
       this);
     this.parent.value = this.parents.some(function (record) { return record.id === chosen; }) ? chosen :
-      this.parents.length === 1 ? this.parents[0].id : "";
+      fresh && this.parents.length === 1 ? this.parents[0].id : "";
   };
   TagForm.prototype.open = function () {
     if (!this.enabled) return;
     this.name.value = ""; this.error.textContent = "";
-    if (this.parent) { this.parent.value = ""; this.paintParents(); }
+    if (this.parent) { this.parent.value = ""; this.paintParents(true); }
     this.updateButton();
     this.show(); this.name.focus();
   };
@@ -135,19 +136,29 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
   };
   TagForm.prototype.dispose = function () { this.enabled = false; this.withdraw(); };
 
-  /* A choice applied at once, drawn as the tables' enum pill: `choices` are { value, label }, `value` the Model's. */
+  /* A choice applied at once, drawn as the tables' enum pill: `choices` are { value, label }, `value` the Model's.
+     The select is kept across repaints, so focus a dialog returns to it (a Heater's Type change) finds it. */
   function choiceCell(td, options) {
-    var select = ui.element("select", "phc-enum-cell");
-    options.choices.forEach(function (choice) { select.appendChild(ui.option(choice.value, choice.label)); });
+    var select = td.mechChoice;
+    if (!select) {
+      select = td.mechChoice = ui.element("select", "phc-enum-cell");
+      select.addEventListener("change", function () {
+        var current = select.mechOptions, chosen = select.value;
+        select.value = current.value;
+        if (chosen !== current.value) current.choose(chosen, select);
+      });
+    }
+    select.mechOptions = options;
+    var listed = JSON.stringify(options.choices);
+    if (select.mechListed !== listed) {
+      select.mechListed = listed;
+      select.replaceChildren();
+      options.choices.forEach(function (choice) { select.appendChild(ui.option(choice.value, choice.label)); });
+    }
     select.value = options.value;
     select.disabled = Boolean(options.disabled);
     select.setAttribute("aria-label", options.label);
-    select.addEventListener("change", function () {
-      var chosen = select.value;
-      select.value = options.value;
-      if (chosen !== options.value) options.choose(chosen, select);
-    });
-    td.replaceChildren(select);
+    if (select.parentNode !== td) td.replaceChildren(select);
     td.classList.add("phc-editable-cell");
     return select;
   }

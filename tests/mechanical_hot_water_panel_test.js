@@ -103,9 +103,14 @@ test("a System, a Heater and a Tank cell edit each sends its own update with its
     assert.deepStrictEqual(clone(named(o, SYSTEMS + ".update")[1].payload.params.values), { piping_calc_method: null });
 
     var p = setup(HEATERS), coverage = cell(p, HEATERS, fixtures.HE.id + ":percent_coverage");
-    type(coverage.input, "0.4"); key(coverage.input, "Enter");
+    assert.strictEqual(coverage.input.value, "30", "coverage reads as a percentage");
+    type(coverage.input, "45"); key(coverage.input, "Enter");
     assert.deepStrictEqual(clone(named(p, HEATERS + ".update")[0].payload.params), { id: fixtures.HE.id,
-      values: { percent_coverage: 0.4 }, expected_values: { percent_coverage: 0.3 } });
+      values: { percent_coverage: 0.45 }, expected_values: { percent_coverage: 0.3 } },
+    "sent and guarded as the stored fraction");
+    var over = cell(p, HEATERS, fixtures.HHP.id + ":percent_coverage");
+    type(over.input, "120"); key(over.input, "Enter");
+    assert.match(over.message, /percentage from 0 to 100/);
 
     var q = setup(TANKS), quantity = cell(q, TANKS, fixtures.T1.id + ":quantity");
     type(quantity.input, "2"); key(quantity.input, "Enter");
@@ -129,7 +134,8 @@ test("a Heater's Type change asks for the new Type's values and sends one update
   assert.deepStrictEqual(liveFields(fixtures.HE.id), [], "an electric heater takes no efficiency value");
   assert.deepStrictEqual(liveFields(fixtures.HHP.id), ["total_system_perf_ratio"]);
   var dash = row(o, fixtures.HE.id).querySelector(".col-cop_1");
-  assert.strictEqual(dash.textContent, "—");
+  assert.deepStrictEqual([dash.querySelector("input").value, dash.querySelector("input").placeholder,
+    dash.querySelector("input").readOnly], ["", "—", true], "an empty, read-only cell reading as a dash");
   assert.match(dash.getAttribute("data-tooltip"), /Electric takes no COP 1/);
 
   var select = row(o, fixtures.HHP.id).querySelector(".col-variant").querySelector("select");
@@ -196,7 +202,7 @@ test("a paste over an efficiency value its Type does not take sends nothing", fu
   inventory.grid.select(cell(o, HEATERS, fixtures.HE.id + ":in_conditioned_space"), false);
   inventory.grid.paste([["No", "3.1"]]);
   assert.strictEqual(named(o, HEATERS + ".update").length, 0);
-  assert.match(o.notices[o.notices.length - 1].message, /can't be edited here/);
+  assert.match(o.notices[o.notices.length - 1].message, /read-only cells/);
   inventory.grid.select(cell(o, HEATERS, fixtures.HHP.id + ":in_conditioned_space"), false);
   inventory.grid.paste([["Yes", "3.1"]]);
   answer(o, named(o, HEATERS + ".update")[0], { status: "completed", value: {} });
@@ -208,6 +214,53 @@ test("a paste over an efficiency value its Type does not take sends nothing", fu
     expected_values: { total_system_perf_ratio: 2.5 } }],
   "a live cell takes the paste");
 });
+
+test("a paste down a column refuses whole when an electric Heater lies between two heat pumps", function () {
+  var o = setup(HEATERS), heaters = records(o, HEATERS);
+  heaters.push(JSON.parse(JSON.stringify(heaters[1])));
+  heaters[2].id = "hwh_CCCCCCCCCCCC"; heaters[2].values.name = "H-Z";
+  heaters[0].values.name = "H-M";
+  o.paint();
+  var inventory = o.view(HEATERS).inventory;
+  inventory.grid.refresh();
+  // Rows in Tag order: H-HP (annual), H-M (electric), H-Z (annual).
+  inventory.grid.select(cell(o, HEATERS, fixtures.HHP.id + ":total_system_perf_ratio"), false);
+  inventory.grid.paste([["3.1"], ["3.2"], ["3.3"]]);
+  assert.strictEqual(named(o, HEATERS + ".update").length, 0, "no value lands on the wrong Heater");
+  assert.match(o.notices[o.notices.length - 1].message, /read-only cells/);
+  var inactive = cell(o, HEATERS, fixtures.HE.id + ":total_system_perf_ratio");
+  assert.ok(inactive.input.readOnly, "drawn, but closed to typing");
+  assert.ok(row(o, fixtures.HE.id).querySelector(".col-total_system_perf_ratio").classList.contains("mech-inactive"));
+});
+
+test("a draft on a value its Type stops taking, changed elsewhere, can still be cancelled", function () {
+  var o = setup(HEATERS), ratio = cell(o, HEATERS, fixtures.HHP.id + ":total_system_perf_ratio");
+  type(ratio.input, "3.0");
+  var heater = records(o, HEATERS)[1].values;
+  heater.variant = "electric"; delete heater.total_system_perf_ratio;
+  o.paint();
+  assert.ok(o.root._view.guard(), "the draft holds the tab");
+  assert.strictEqual(row(o, fixtures.HHP.id).querySelector(".col-total_system_perf_ratio").querySelector("input"),
+    ratio.input, "its field is still on screen");
+  key(ratio.input, "Escape");
+  assert.strictEqual(o.root._view.guard(), null, "Escape lets it go");
+});
+
+test("the Type pill is kept across repaints, and a New form's chosen System that goes is cleared, never replaced",
+  function () {
+    var o = setup(HEATERS), before = row(o, fixtures.HE.id).querySelector(".col-variant").querySelector("select");
+    o.paint();
+    assert.strictEqual(row(o, fixtures.HE.id).querySelector(".col-variant").querySelector("select"), before);
+    var form = o.view(HEATERS).table.newRecord;
+    press(o.root._view.header.root.querySelector(".primary"));
+    type(form.name, "H-2");
+    form.parent.value = fixtures.HWS2.id; form.parent.listeners.change({});
+    var systems = records(o, SYSTEMS);
+    systems.splice(1, 1);
+    o.paint();
+    assert.strictEqual(form.parent.value, "", "the sole System left is not chosen for the user");
+    assert.strictEqual(form.submitButton.disabled, true);
+  });
 
 test("capacity shows litres under SI and US gallons under IP, and a draft keeps its unit through a switch",
   function () {

@@ -137,6 +137,10 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     end
     assert_equal [["ph_composer.mechanical", { "hot_water_system_ids" => [two] }],
                   ["ph_composer.mechanical", { "hot_water_heater_ids" => [heater] }]], opened
+    mixed = API.view(:context => @context, :name => M::Locate::NAME,
+                     :params => { "hot_water_system_ids" => [two], "hot_water_tank_ids" => [@ids.fetch("T1")] })
+    assert_equal %w[refused params.invalid], mixed.values_at("status", "code"), "one table opens at a time"
+    assert_equal 2, opened.length, "nothing opened for the mixed request"
   end
 
   def test_a_served_zone_in_no_building_segment_is_left_out_and_a_zone_with_no_system_is_the_preflights_alone
