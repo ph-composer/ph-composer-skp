@@ -1,7 +1,7 @@
 # Hot water piping
 
 DATE: 2026-10-21
-STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged, and the tab and hosts have moved (see the note under "What main and Phase 3b supply").
+STATUS: Scoped. Interviewed 2026-11-23, all as recommended (D4-36); planned 2026-11-24 as P4-13a to P4-13e, whose documents bind its names. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged, and the tab and hosts have moved (see the note under "What main and Phase 3b supply").
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

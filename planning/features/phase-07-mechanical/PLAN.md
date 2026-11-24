@@ -53,13 +53,13 @@ the rows below are corrected to it.
 | `html/` inventory, in-place drafts, `subtabs.js`, `record_form.js`, `unit_field.js`, column menus, `table_contributions.js`; the reserved disabled Systems button in `html/index.html`, last in the shipped row (F32) | The Mechanical tab, its system subtabs and tables (D4-13) | The pane; the button becomes live and moves to sit after Thermal Bridges (CONTRACTS, A2; D4-27) |
 | Ruby and panel units `airflow`, `volume`, `heat_loss_rate`, `length`, `temperature`, `power` (F31) | Airflow sums, W/K standby losses, temperatures | Electric efficiency Wh/m³ to W/cfm (V4) and litres to US gallons (CONTRACTS, A3; units Q3) |
 | The registry's agent-facing keywords, `API::CHANGES`, `docs/AGENT_GUIDE.md`, bounded `list` reads | Every operation this packet registers | One API minor bump and one guide recipe per stage that adds a name |
-| Phase 3b's edge stages P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08, merged 2026-10-26 (F21); the snapshot's `edge` entries (G-02) | Piping and ducting | The piping and ducting interviews; the run builder's move to `core/` (P4-13) |
+| Phase 3b's edge stages P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08, merged 2026-10-26 (F21); the snapshot's `edge` entries (G-02) | Piping and ducting | The ducting interview's full plan; the run builder's move to `core/` (P4-13c) |
 
 ## Stages
 
 Sixteen stages, one of them superseded. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
 steps, source, tests to write first, the host gate and the done condition; P4-08, P4-08b, P4-09, P4-10 and P4-11 were
-written in full before their runs (2026-11-23, 2026-11-24). P4-13 and P4-14 are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
+written in full before their runs (2026-11-23, 2026-11-24), and P4-13 as five sub-stages, P4-13a to P4-13e, each one pull request, under the parent index [P4-13](phases/p4-13-hot-water-piping.md) (2026-11-24). P4-14 is a gate stub: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
@@ -76,7 +76,7 @@ written in full before their runs (2026-11-23, 2026-11-24). P4-13 and P4-14 are 
 | [P4-10](phases/p4-10-pumps.md) | Family 5: the Pump kind, the `pump_ids` list slot, the `PhSupportiveDevice` export with its PHX round trip and the no-Spaces finding, the Pumps subtab | P4-07; its interview (D4-34) | mechanical, export, UI | Batched in MS3 |
 | [P4-11](phases/p4-11-fans.md) | Family 6: the Fan kind, the `fan_ids` list slot, the exhaust ventilator export with a linked type 10 `PhSupportiveDevice` when Power is filled and its PHX round trip, the no-Spaces finding, the Fans subtab | P4-10; its interview (D4-35) | mechanical, export, UI | Batched in MS3 |
 | [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../../archive/phase-06-program/README.md) owns appliances (Q4a-03) | mechanical | Superseded |
-| [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4, planned in detail after its interview | P4-06; the piping interview (Phase 3b's edge stages are merged) | piping | Stub |
+| [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4 as five sub-stages: P4-13a Pipe Types, P4-13b Piping groups and assignment, P4-13c the chain rule in `core/` with the tree and schedule, P4-13d the export into the Hot Water System (D4-09) with its PHX round trip, P4-13e the Piping pills, Colour-by and the pipe tool | P4-06; the piping interview (D4-36, met) | piping, core (P4-13c), export | Batched in MS3 (`M13a` to `M13e`) |
 | [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; the ducting interview | ducting | Stub |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Register closed; context, docs, the metr-export handoff; Phase 4 close is the MVP (D1) | all stages above | integration | Fresh-process integrated run |
 
@@ -117,8 +117,8 @@ whichever lands second rebases.
 
 Within this track, P4-06 can proceed beside P4-04 and P4-05 after P4-03, since it shares only
 `composition.py` with P4-04 (serialise those two). Families 3 to 6 are independent of one another
-after P4-07 and may run in any order their interviews allow. P4-13 and P4-14 wait on their
-interviews.
+after P4-07 and may run in any order their interviews allow. P4-13's sub-stages run in order,
+P4-13a to P4-13e; P4-14 follows them.
 
 Each stage is one pull request against `main`, with `Refs` the Phase 4 issue once it exists. A
 stage that grows past one coherent review splits along the slices its document names; it does not
@@ -160,7 +160,8 @@ it at entry and each stage that ships Python or panel assets reads `vendor.py --
 
 Review ladder, one review per coherent diff, given the architecture rubric. P4-03, P4-04 and
 P4-06 change a payload on another feature's record, the shared translation or a slotting rule, and
-get the stronger independent pass. P4-01 gets the architecture review on its confirmed bindings.
+get the stronger independent pass, as do P4-13c (the chain rule moved into `core/`) and P4-13d (the
+first section adding to another section's objects before attach, D4-09). P4-01 gets the architecture review on its confirmed bindings.
 P4-05 and P4-07 apply the UI polish skill in their review. The rest get one diff-focused review.
 
 Ed decided on 2026-11-23 (D4-31) to batch SketchUp host gates by milestone (`MS1` after P4-04, `MS2` after P4-07, `MS3` after P4-14/P4-15), while running full offline `make ci` (both Rubies, browser checks) and PHX round trips on every stage PR.
