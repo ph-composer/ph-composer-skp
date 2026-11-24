@@ -106,7 +106,12 @@ stored Zones, so a Zone an earlier step of the same proposal had assigned anothe
 write; `Serves::State` now keeps each payload it stages, with Zones' reference entry, on the request, reads a staged
 Zone as staged, and the delete's plan projects every Zone the proposal rewrote.
 `test_a_delete_after_an_assign_in_one_proposal_builds_from_the_staged_payload` composes the two operations in one
-proposal; reading the stored payload instead fails it.
+proposal; reading the stored payload instead fails it. `make ci` on `2ae4a023`, Ruby 2.7.2 and 3.2.2: 3,327 runs,
+44,241 assertions, 0 failures, 1 skip; Python 364 passed, 1 skipped; RBZ 26,902,464 bytes installed.
+
+Codex gpt-6-astra, cycle 2 on `2ae4a023`: no findings, verdict approve. Its residual note: no test drives an
+invalid or unsupported stored payload through assign, clear and the replacement delete (Zones' participant refuses
+the unsupported and outdated ones; the declined Sonnet finding above covers the invalid one).
 
 ## Native case
 
