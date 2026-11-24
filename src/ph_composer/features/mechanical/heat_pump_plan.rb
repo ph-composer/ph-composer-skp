@@ -32,6 +32,7 @@ module PhComposer
         found = zone_findings(exported, indoor_units, unreadable) + unit_findings(exported, left_out, outdoor_units,
                                                                                   indoor_units)
         segments = segments(exported, outdoor_units, indoor_units)
+        found.concat(parents_missing(exported, outdoor_equipment, outdoor_units, indoor_units, unreadable))
         found.concat(incomplete(segments, outdoor_equipment))
         if segments.empty?
           blends = []
@@ -184,6 +185,34 @@ module PhComposer
           ExportZones.across_segments(id, name, served, "outdoor unit")
         end
         indoor + outdoor
+      end
+
+      # A served indoor unit naming an outdoor unit that is not stored, or a served outdoor unit naming an outdoor
+      # model that is not: the engine refuses both, so only a record written outside it can carry one. It blocks, as
+      # a Zone naming a missing item does, since the export cannot say what serves those Zones.
+      def parents_missing(exported, outdoor_equipment, outdoor_units, indoor_units, unreadable)
+        served = exported.flat_map { |zone| zone.slot(SLOT) }.uniq.sort.select { |id| indoor_units.key?(id) }
+        missing = ->(id) { !id.nil? && !unreadable.include?(id) }
+        indoor = served.filter_map do |id|
+          unit = indoor_units.fetch(id)
+          parent = unit.fetch("outdoor_unit_id")
+          next unless missing.call(parent) && !outdoor_units.key?(parent)
+
+          broken(id, "#{unit.fetch('name')} names outdoor unit #{parent}, which is not in the Model.")
+        end
+        outdoor = served.map { |id| indoor_units.fetch(id).fetch("outdoor_unit_id") }.uniq.sort.filter_map do |id|
+          unit = outdoor_units[id]
+          parent = unit && unit.fetch("outdoor_equipment_id")
+          next unless unit && missing.call(parent) && !outdoor_equipment.key?(parent)
+
+          broken(id, "#{unit.fetch('name')} names outdoor equipment #{parent}, which is not in the Model.")
+        end
+        indoor + outdoor
+      end
+
+      def broken(id, message)
+        Finding.new(:code => Codes::ITEM_MISSING, :record_id => id, :blocks => true,
+                    :message => "#{message} Choose another, so the Zones it serves have a heat pump.")
       end
 
       def unpaired(id, message)

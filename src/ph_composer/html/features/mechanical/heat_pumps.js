@@ -17,8 +17,10 @@ function (panel, snapshot, ui, fields, systems, equipment) {
     outdoorUnits: PREFIX + "outdoor_units", indoorUnits: PREFIX + "indoor_units",
     blended: FEATURE + ".heat_pumps_blended" };
   var SECTION = SECTIONS.outdoorEquipment, LABEL = "Heat Pump Outdoor Equipment";
-  var CAPACITY = fields.CAPACITY_KW;
-  function rating(label) { return fields.with(fields.FRACTION, { label: label }); }
+  /* Every capacity and rating may be emptied: a blank stores null, and the model is incomplete again until it is
+     entered. */
+  function capacity(label) { return fields.with(fields.CAPACITY_KW, { label: label, allowBlank: true }); }
+  function rating(label) { return fields.with(fields.FRACTION, { label: label, allowBlank: true }); }
   /* Each heating and cooling choice: the stored mode and version it writes. */
   var HEATING = [{ value: "cop_pair", label: "COPs", mode: "cop_pair", version: null },
     { value: "hspf", label: "HSPF", mode: "hspf", version: "hspf" },
@@ -32,6 +34,8 @@ function (panel, snapshot, ui, fields, systems, equipment) {
   var COOLING_INPUTS = { eer_seer: ["eer", "seer"], ieer: ["ieer"] };
   var RATINGS = ["cop_17f", "cop_47f", "hspf_value", "eer", "seer", "ieer"];
   var CAPACITIES = ["heating_cap_17f_kw", "heating_cap_47f_kw", "cooling_cap_95f_kw"];
+  var CAPACITY_LABELS = { heating_cap_17f_kw: "Heating 17 °F", heating_cap_47f_kw: "Heating 47 °F",
+    cooling_cap_95f_kw: "Cooling 95 °F" };
   var LABELS = { cop_17f: "COP 17 °F", cop_47f: "COP 47 °F", hspf_value: "HSPF", eer: "EER", seer: "SEER",
     ieer: "IEER" };
   var columns = [["paired_indoor_equipment_id", "Paired indoor"], ["heating_cap_17f_kw", "Heating 17 °F"],
@@ -95,9 +99,11 @@ function (panel, snapshot, ui, fields, systems, equipment) {
       columns: columns, editable: CAPACITIES.concat(RATINGS),
       inventory: {
         quantities: CAPACITIES.concat(RATINGS).reduce(function (all, field) {
-          all[field] = RATINGS.indexOf(field) >= 0 ? rating(LABELS[field]) : CAPACITY; return all;
+          all[field] = RATINGS.indexOf(field) >= 0 ? rating(LABELS[field]) : capacity(CAPACITY_LABELS[field]);
+          return all;
         }, {}),
         validate: function (field, entered) {
+          if (entered === null) return "";
           if (RATINGS.indexOf(field) >= 0 && !(entered > 0)) return "Enter a number above 0.";
           if (CAPACITIES.indexOf(field) >= 0 && entered < 0) return "Enter 0 or more.";
           return "";

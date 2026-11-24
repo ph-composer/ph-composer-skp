@@ -1071,7 +1071,7 @@ Every Room of one Segment carries the same identifier, so PHX makes one device p
 
 1. Before exporting, read `ph_composer.mechanical.preflight`; its heat pump rows name the heat pump
    export as their `section`. `mechanical.item_missing` blocks: a Zone names an indoor unit that is
-   not in the Model. `mechanical.hp_climate_missing` leaves every blend out until the climate is
+   not in the Model, or a served unit names an outdoor unit or outdoor model that is not. `mechanical.hp_climate_missing` leaves every blend out until the climate is
    complete, `mechanical.hp_unit_unpaired` names an indoor unit serving no Zone or an outdoor unit
    with no indoor unit serving one, `mechanical.hp_equipment_incomplete` an outdoor model lacking a
    value or an HSPF model with no cooling share, which the estimator weights an HSPF by, so it adds no

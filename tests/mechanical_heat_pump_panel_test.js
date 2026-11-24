@@ -140,6 +140,16 @@ test("a rating mode is one guarded choice; the other mode's values are read only
     choose(row(o, ODU_A.id).querySelector(".col-cooling_data"), "");
     assert.deepStrictEqual(clone(named(o, OUTDOOR + ".update")[1].payload.params.values),
       { cooling_rating_mode: null });
+    var second = named(o, OUTDOOR + ".update")[1];
+    o.state.ui.actionResult = { request_id: second.payload.request_id, session: "session",
+      outcome: { status: "completed", value: {} } };
+    o.paint();
+    var capacityCell = o.view(OUTDOOR).inventory.edits.cells[ODU_A.id + ":heating_cap_17f_kw"];
+    capacityCell.input.value = ""; capacityCell.input.listeners.input({});
+    capacityCell.input.listeners.keydown({ key: "Enter", preventDefault: function () {},
+      stopImmediatePropagation: function () {} });
+    assert.deepStrictEqual(clone(named(o, OUTDOOR + ".update").pop().payload.params.values),
+      { heating_cap_17f_kw: null }, "a blank empties a capacity");
     var b = row(o, ODU_B.id);
     assert.ok(b.querySelector(".col-cop_17f").classList.contains("mech-inactive"), "an HSPF model reads no COP");
     assert.ok(b.querySelector(".col-heating_cap_17f_kw").classList.contains("mech-missing"));

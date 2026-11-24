@@ -25,7 +25,8 @@ module PhComposer
         SLOT_FILLED => "The Zone's slot already names another item; assign with replace to use the new one.",
         ZONE_UNVENTILATED => "A Zone in a Building Segment has no Ventilator.",
         ITEM_UNSERVED => "An item serves no Zone, so nothing exports it.",
-        ITEM_MISSING => "A Zone's slot names an item that is not in the Model; reassign or clear it.",
+        ITEM_MISSING => "A Zone's slot, or a heat pump unit, names an item that is not in the Model; reassign or " \
+                        "clear it.",
         ZONE_LEFT_OUT => "A served Zone is in no Building Segment, so the export leaves its Room out.",
         ITEM_ACROSS_SEGMENTS => "An item serves Zones in more than one Building Segment; each Segment's model " \
                                 "carries the whole item.",

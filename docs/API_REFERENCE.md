@@ -114039,7 +114039,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `mechanical.hp_equipment_incomplete` | A heat pump outdoor model lacks a value the blend needs, or a Building Segment's models blend to no heating COP, so the blend leaves them out. |
 | `mechanical.hp_unit_unpaired` | A heat pump indoor unit serves no Zone, or an outdoor unit has no indoor unit serving one, so the blend leaves it out. |
 | `mechanical.item_across_segments` | An item serves Zones in more than one Building Segment; each Segment's model carries the whole item. |
-| `mechanical.item_missing` | A Zone's slot names an item that is not in the Model; reassign or clear it. |
+| `mechanical.item_missing` | A Zone's slot, or a heat pump unit, names an item that is not in the Model; reassign or clear it. |
 | `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
 | `mechanical.method_not_exported` | A Hot Water System's piping calculation method is set, and the pinned honeybee-ph has no field for it, so the export leaves it out. |
 | `mechanical.slot_filled` | The Zone's slot already names another item; assign with replace to use the new one. |

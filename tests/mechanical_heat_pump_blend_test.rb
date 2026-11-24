@@ -211,6 +211,17 @@ class MechanicalHeatPumpBlendTest < Minitest::Test
     assert_equal "z1", missing.record_id
   end
 
+  def test_a_served_unit_naming_a_missing_parent_blocks
+    lost_unit = plan([zone("z1", "A", ["hiu_1"])], :indoor_units => records(hiu_1: { "outdoor_unit_id" => "hou_9" }))
+    assert_equal [["hiu_1", true]], lost_unit.findings.select { |finding| finding.code == CODES::ITEM_MISSING }
+                                             .map { |finding| [finding.record_id, finding.blocks] }
+    lost_model = plan([zone("z1", "A", ["hiu_1"])],
+                      :outdoor_units => records(hou_1: { "outdoor_equipment_id" => "hpo_9", "quantity" => 1 }))
+    assert_equal [["hou_1", true]], lost_model.findings.select { |finding| finding.code == CODES::ITEM_MISSING }
+                                              .map { |finding| [finding.record_id, finding.blocks] }
+    assert_empty lost_model.pairs
+  end
+
   def test_a_zone_left_out_gives_no_pair_and_a_note
     found = plan([zone("z1", nil, ["hiu_1"], :exported => false)])
     assert_empty found.pairs

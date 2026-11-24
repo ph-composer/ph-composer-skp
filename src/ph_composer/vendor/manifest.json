@@ -191,9 +191,9 @@
       "sha256": "784b7f2a708e156bdaa18735015b96aa8d2716e11ba332ae2b189cdbead40149"
     },
     "html/features/mechanical/heat_pumps.js": {
-      "bytes": 12465,
+      "bytes": 12907,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "77f603ecd1da9fe029c47116a8860596904d7a50e75e3ee747b3e79654300a96"
+      "sha256": "88f08ea33ec03f9ec28b25590e56ee71b9d42efe66ed27c2ca53710ff9cc4c0e"
     },
     "html/features/mechanical/hot_water.js": {
       "bytes": 13002,
