@@ -1593,6 +1593,261 @@ Values:
 }
 ```
 
+### `ph_composer.mechanical.ventilator`
+
+Ventilator, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "quantity",
+    "sensible_heat_recovery",
+    "latent_heat_recovery",
+    "electric_efficiency_wh_m3",
+    "frost_protection_reqd",
+    "temperature_below_defrost_used_c",
+    "in_conditioned_space"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical units this record stands for."
+            },
+            "sensible_heat_recovery": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "Sensible heat recovery, 0 to 1."
+            },
+            "latent_heat_recovery": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "Latent heat recovery, 0 to 1."
+            },
+            "electric_efficiency_wh_m3": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "Wh/m3",
+              "description": "Fan electricity per volume of air moved."
+            },
+            "frost_protection_reqd": {
+              "type": "boolean",
+              "description": "Whether frost protection is required."
+            },
+            "temperature_below_defrost_used_c": {
+              "type": "number",
+              "x-unit": "C",
+              "description": "The outdoor temperature below which defrost runs."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the unit sits inside the thermal envelope."
+            },
+            "subsoil_heat_exchange_efficiency": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+            },
+            "preheated_intake_temperature_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C",
+              "description": "The intake air temperature after a preheater; absent for none."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical units this record stands for."
+    },
+    "sensible_heat_recovery": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "Sensible heat recovery, 0 to 1."
+    },
+    "latent_heat_recovery": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "Latent heat recovery, 0 to 1."
+    },
+    "electric_efficiency_wh_m3": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "Wh/m3",
+      "description": "Fan electricity per volume of air moved."
+    },
+    "frost_protection_reqd": {
+      "type": "boolean",
+      "description": "Whether frost protection is required."
+    },
+    "temperature_below_defrost_used_c": {
+      "type": "number",
+      "x-unit": "C",
+      "description": "The outdoor temperature below which defrost runs."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the unit sits inside the thermal envelope."
+    },
+    "subsoil_heat_exchange_efficiency": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+    },
+    "preheated_intake_temperature_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "C",
+      "description": "The intake air temperature after a preheater; absent for none."
+    }
+  }
+}
+```
+
 ### `ph_composer.model.metadata`
 
 Model metadata, a entity kind owned by `ph_composer.model`, schema version nil.
@@ -15837,6 +16092,783 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.mechanical.ventilators.all`
+
+Every Ventilator with its values and export readiness, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.ventilators.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "quantity",
+              "sensible_heat_recovery",
+              "latent_heat_recovery",
+              "electric_efficiency_wh_m3",
+              "frost_protection_reqd",
+              "temperature_below_defrost_used_c",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "sensible_heat_recovery": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "Sensible heat recovery, 0 to 1."
+                      },
+                      "latent_heat_recovery": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "Latent heat recovery, 0 to 1."
+                      },
+                      "electric_efficiency_wh_m3": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "Wh/m3",
+                        "description": "Fan electricity per volume of air moved."
+                      },
+                      "frost_protection_reqd": {
+                        "type": "boolean",
+                        "description": "Whether frost protection is required."
+                      },
+                      "temperature_below_defrost_used_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The outdoor temperature below which defrost runs."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      },
+                      "subsoil_heat_exchange_efficiency": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+                      },
+                      "preheated_intake_temperature_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "The intake air temperature after a preheater; absent for none."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "sensible_heat_recovery": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "Sensible heat recovery, 0 to 1."
+              },
+              "latent_heat_recovery": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "Latent heat recovery, 0 to 1."
+              },
+              "electric_efficiency_wh_m3": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "Wh/m3",
+                "description": "Fan electricity per volume of air moved."
+              },
+              "frost_protection_reqd": {
+                "type": "boolean",
+                "description": "Whether frost protection is required."
+              },
+              "temperature_below_defrost_used_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The outdoor temperature below which defrost runs."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              },
+              "subsoil_heat_exchange_efficiency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+              },
+              "preheated_intake_temperature_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "The intake air temperature after a preheater; absent for none."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.ventilators.list`
+
+One bounded page of Ventilators in id order, with export readiness. Owner: `ph_composer.mechanical`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "quantity",
+              "sensible_heat_recovery",
+              "latent_heat_recovery",
+              "electric_efficiency_wh_m3",
+              "frost_protection_reqd",
+              "temperature_below_defrost_used_c",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "sensible_heat_recovery": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "Sensible heat recovery, 0 to 1."
+                      },
+                      "latent_heat_recovery": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "Latent heat recovery, 0 to 1."
+                      },
+                      "electric_efficiency_wh_m3": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "Wh/m3",
+                        "description": "Fan electricity per volume of air moved."
+                      },
+                      "frost_protection_reqd": {
+                        "type": "boolean",
+                        "description": "Whether frost protection is required."
+                      },
+                      "temperature_below_defrost_used_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The outdoor temperature below which defrost runs."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      },
+                      "subsoil_heat_exchange_efficiency": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+                      },
+                      "preheated_intake_temperature_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "The intake air temperature after a preheater; absent for none."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "sensible_heat_recovery": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "Sensible heat recovery, 0 to 1."
+              },
+              "latent_heat_recovery": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "Latent heat recovery, 0 to 1."
+              },
+              "electric_efficiency_wh_m3": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "Wh/m3",
+                "description": "Fan electricity per volume of air moved."
+              },
+              "frost_protection_reqd": {
+                "type": "boolean",
+                "description": "Whether frost protection is required."
+              },
+              "temperature_below_defrost_used_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The outdoor temperature below which defrost runs."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              },
+              "subsoil_heat_exchange_efficiency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+              },
+              "preheated_intake_temperature_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "The intake air temperature after a preheater; absent for none."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
 ```
 
 ### `ph_composer.model.detail`
@@ -57934,6 +58966,1185 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.ventilators.create`
+
+Create one Ventilator. Unless values give them, its unit values take honeybee-ph's defaults: quantity 1, no heat recovery, 0.55 Wh/m3, frost protection on below -5 C, in conditioned space, and the subsoil heat exchanger and preheated intake temperature absent. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Ventilator. Creates one Model-owned definition.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "sensible_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Sensible heat recovery, 0 to 1."
+                },
+                "latent_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Latent heat recovery, 0 to 1."
+                },
+                "electric_efficiency_wh_m3": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "Wh/m3",
+                  "description": "Fan electricity per volume of air moved."
+                },
+                "frost_protection_reqd": {
+                  "type": "boolean",
+                  "description": "Whether frost protection is required."
+                },
+                "temperature_below_defrost_used_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The outdoor temperature below which defrost runs."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                },
+                "subsoil_heat_exchange_efficiency": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+                },
+                "preheated_intake_temperature_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "The intake air temperature after a preheater; absent for none."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "sensible_heat_recovery": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Sensible heat recovery, 0 to 1."
+        },
+        "latent_heat_recovery": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Latent heat recovery, 0 to 1."
+        },
+        "electric_efficiency_wh_m3": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "Wh/m3",
+          "description": "Fan electricity per volume of air moved."
+        },
+        "frost_protection_reqd": {
+          "type": "boolean",
+          "description": "Whether frost protection is required."
+        },
+        "temperature_below_defrost_used_c": {
+          "type": "number",
+          "x-unit": "C",
+          "description": "The outdoor temperature below which defrost runs."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the unit sits inside the thermal envelope."
+        },
+        "subsoil_heat_exchange_efficiency": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+        },
+        "preheated_intake_temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The intake air temperature after a preheater; absent for none."
+        }
+      },
+      "description": "The new Ventilator's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "ERV-1",
+    "sensible_heat_recovery": 0.85,
+    "latent_heat_recovery": 0.6,
+    "electric_efficiency_wh_m3": 0.45
+  }
+}
+```
+
+### `ph_composer.mechanical.ventilators.delete`
+
+Delete one Ventilator; one still in use refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Ventilator. Deletes one definition and its metadata; Undo restores both.
+
+Before calling: The Ventilator exists and is readable.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "sensible_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Sensible heat recovery, 0 to 1."
+                },
+                "latent_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Latent heat recovery, 0 to 1."
+                },
+                "electric_efficiency_wh_m3": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "Wh/m3",
+                  "description": "Fan electricity per volume of air moved."
+                },
+                "frost_protection_reqd": {
+                  "type": "boolean",
+                  "description": "Whether frost protection is required."
+                },
+                "temperature_below_defrost_used_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The outdoor temperature below which defrost runs."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                },
+                "subsoil_heat_exchange_efficiency": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+                },
+                "preheated_intake_temperature_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "The intake air temperature after a preheater; absent for none."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "sensible_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Sensible heat recovery, 0 to 1."
+        },
+        "latent_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Latent heat recovery, 0 to 1."
+        },
+        "electric_efficiency_wh_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "Wh/m3",
+          "description": "Fan electricity per volume of air moved."
+        },
+        "frost_protection_reqd": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether frost protection is required."
+        },
+        "temperature_below_defrost_used_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The outdoor temperature below which defrost runs."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        },
+        "subsoil_heat_exchange_efficiency": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+        },
+        "preheated_intake_temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The intake air temperature after a preheater; absent for none."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.ventilators.duplicate`
+
+Duplicate one Ventilator with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Ventilator. Creates one definition; user_data is copied.
+
+Before calling: The Ventilator exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.ventilators.update`
+
+Edit guarded values of one Ventilator; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Ventilator. Updates one definition and preserves its metadata.
+
+Before calling: The Ventilator exists and is readable.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "sensible_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Sensible heat recovery, 0 to 1."
+        },
+        "latent_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Latent heat recovery, 0 to 1."
+        },
+        "electric_efficiency_wh_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "Wh/m3",
+          "description": "Fan electricity per volume of air moved."
+        },
+        "frost_protection_reqd": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether frost protection is required."
+        },
+        "temperature_below_defrost_used_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The outdoor temperature below which defrost runs."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        },
+        "subsoil_heat_exchange_efficiency": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+        },
+        "preheated_intake_temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The intake air temperature after a preheater; absent for none."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "sensible_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Sensible heat recovery, 0 to 1."
+                },
+                "latent_heat_recovery": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Latent heat recovery, 0 to 1."
+                },
+                "electric_efficiency_wh_m3": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "Wh/m3",
+                  "description": "Fan electricity per volume of air moved."
+                },
+                "frost_protection_reqd": {
+                  "type": "boolean",
+                  "description": "Whether frost protection is required."
+                },
+                "temperature_below_defrost_used_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The outdoor temperature below which defrost runs."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                },
+                "subsoil_heat_exchange_efficiency": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+                },
+                "preheated_intake_temperature_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "The intake air temperature after a preheater; absent for none."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "sensible_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Sensible heat recovery, 0 to 1."
+        },
+        "latent_heat_recovery": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Latent heat recovery, 0 to 1."
+        },
+        "electric_efficiency_wh_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "Wh/m3",
+          "description": "Fan electricity per volume of air moved."
+        },
+        "frost_protection_reqd": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether frost protection is required."
+        },
+        "temperature_below_defrost_used_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The outdoor temperature below which defrost runs."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        },
+        "subsoil_heat_exchange_efficiency": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "A subsoil heat exchanger's efficiency, 0 to 1; absent for none."
+        },
+        "preheated_intake_temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The intake air temperature after a preheater; absent for none."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "vnt_Ab12Cd34Ef56",
+  "values": {
+    "quantity": 2
+  },
+  "expected_values": {
+    "quantity": 1
+  }
+}
+```
+
 ### `ph_composer.model.update_metadata`
 
 Replace the Model's own user_data, installed extension payloads or both, guarded by the metadata last read, in one Undo step; writing what is stored adds none. Feature settings are not touched. Owner: `ph_composer.model`.
@@ -95457,3 +97668,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.84 | 2026-11-20 | The Programs tab's reads and a delete with a replacement. programs.delete and equipment_sets.delete with a replacement_id move every Zone assignment and Building Segment setting naming the record to the replacement, through ph_composer.zones.stage_extension, in the same Undo step, and refuse as a Zone write does (target.locked, target.shared_definition). The snapshot sections ph_composer.programs.programs, schedules and equipment_sets carry each collection's all read. A programs.list and programs.all row adds missing: each value its ProgramType would lack, by load and field, as the export preflight reports it. |
 | 1.85 | 2026-11-21 | A Schedule's profile (programs.schedules.profile and each schedules row's profile) adds weekdays, the days its operating day applies on, Monday first. An equipment_sets.device_types field adds applies_when where it means something only under another field's values: a clothes dryer's gas_consumption and gas_efficiency_factor, under dryer_type gas_exhaust_air. |
 | 1.86 | 2026-11-21 | ph_composer.zones.save_segment_settings also emits ph_composer.zones.segment_settings_saving, before it stages the payloads, with building_segment_id and extension_payloads; a Segment's occupancy settings naming an unwritten default Program or Equipment Set store it in the same step. |
+| 1.87 | 2026-11-23 | The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with the reads ventilators.list and ventilators.all, whose rows carry export_ready and export_blockers, and the snapshot section ph_composer.mechanical.ventilators. |

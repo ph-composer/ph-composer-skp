@@ -1,7 +1,7 @@
 # P4-02: the Mechanical feature and the Ventilator kind
 
 DATE: 2026-10-21
-STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: composition order, the metadata step. Renamed the same day to `ph_composer.mechanical` (D4-22). See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: In review on `feat/phase-07-mechanical-p4-02` (2026-11-23); host case owed to MS1. Corrected 2026-11-22 after Phase 6 Programs: composition order, the metadata step. Renamed the same day to `ph_composer.mechanical` (D4-22). See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

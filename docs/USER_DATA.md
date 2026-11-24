@@ -26,12 +26,12 @@ and export.
 - An edit that sends a definition's parts, such as a Window Type's whole `elements` array, keeps each
   surviving part's map by its id whether or not it sends it. A new part starts without one, and a map
   that differs from the stored one refuses `params.invalid`: write it with the core action.
-- Deleting a Material, Assembly, Frame, Glazing, Psi-Install Type, Window Type, Thermal Bridge Type or
-  Attached zone returns `removed_user_data`: the record, then each part by `part_ids`, whose map was not
-  empty, with its top-level keys. The report fits one reply: the first 50 maps, each with its key total,
-  and as many of their first 50 keys as fit in 8 KiB, with `removed_user_data_total` and
-  `removed_user_data_truncated`, true when a map or a key was left out. Merges report the same way. A
-  replacement keeps its own map, and Undo restores the removed ones.
+- Deleting a Material, Assembly, Frame, Glazing, Psi-Install Type, Window Type, Thermal Bridge Type,
+  Ventilator or Attached zone returns `removed_user_data`: the record, then each part by `part_ids`,
+  whose map was not empty, with its top-level keys. The report fits one reply: the first 50 maps, each
+  with its key total, and as many of their first 50 keys as fit in 8 KiB, with
+  `removed_user_data_total` and `removed_user_data_truncated`, true when a map or a key was left out.
+  Merges report the same way. A replacement keeps its own map, and Undo restores the removed ones.
 - An older Model with no stored map reads `{}` and is not rewritten by the read.
 - Over the API, params that are not plain JSON (`NaN`, `Infinity`, a key that is not a string)
   refuse `request.malformed` before any operation runs, and the sequence stays free for the
@@ -75,6 +75,7 @@ from the record down. "Omitted" means the map stays in the Model and the export 
 | Equipment Set, device | `{kind: "ph_composer.programs.equipment_set", id}`; a device adds `part_ids: [device id]` | `ph_composer.programs.equipment_sets.all`, `ph_composer.records.list` | Core action, with `part_ids` for a device | Duplicate copies the Set's map and gives each device a new id with its map | Omitted: each device is written as a honeybee-ph device on a Room, once per Dwelling, and its map stays in the Model | Not in the wire row; replace keeps each matching device's map |
 | Dwelling | `{kind: "ph_composer.programs.dwelling", id}` | `ph_composer.programs.dwellings.all`, `ph_composer.records.list` | Core action | Duplicate copies the map; a Dwelling deleted when its last Zone leaves lists it in `removed_user_data` | Omitted: a Dwelling is written as the shared dwelling on its Rooms' People, which holds no map | Not a library kind |
 | Climate | `{kind: "ph_composer.climate.climate", id: "clm_AAAAAAAAAAAA"}`, one per Model | `ph_composer.records.detail`, `ph_composer.records.list` | Core action | Editing and restoring the values keep it, and so does replacing the station; Clear deletes it with the climate, and Undo brings it back | Omitted: the climate is written as the Building Segments' `Site`, and its map stays in the Model | Not a library kind |
+| Ventilator | `{kind: "ph_composer.mechanical.ventilator", id}` | `ph_composer.mechanical.ventilators.list`, `ph_composer.mechanical.ventilators.all`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Not exported yet: the map stays in the Model. The Ventilator export will either carry it to honeybee-ph's `Ventilator` object or leave it out with `export.metadata_omitted` | Not a library kind |
 
 Definitions and Attached zones are records stored in the Model. Zones, Faces, Window Units, Spaces,
 Thermal Bridge Edge assignments and shading marks are stored on their SketchUp entities, so a copy made in

@@ -5389,6 +5389,23 @@
         "src/ph_composer/vendor/manifest.json"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "M02",
+      "label": "The Ventilator catalog with the panel closed, from a fresh process: the walkthrough (tools/examples/authoring/ventilators_walkthrough.rb) creates two Ventilators, edits one, duplicates one and deletes one through registered actions only; native Undo and Redo of each of the five steps; save, fresh-process reopen and the same catalog, user_data included, read back through ventilators.all",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/mechanical/ventilators/*",
+        "src/ph_composer/features/mechanical/declarations/*",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/dictionary_store.rb",
+        "src/ph_composer/core/records/authoring_fields.rb",
+        "tools/examples/authoring/ventilators_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

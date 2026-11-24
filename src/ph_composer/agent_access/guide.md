@@ -865,6 +865,26 @@ for a site written with those unset, `climate.outside_phius_limits` and `climate
 Model with no climate gives none, with or without a site. The report's Climate section names the dataset
 and station, never a folder.
 
+### Mechanical: Ventilators
+
+A Ventilator is one heat recovery ventilation unit, kept in the Model as a definition. Read
+`ph_composer.mechanical.ventilators.list` first, a bounded page at a time; names are unique. Create one
+with `ph_composer.mechanical.ventilators.create`, giving at least `name` (shown as Tag). Every other value
+takes its default: `quantity` 1, `sensible_heat_recovery` and `latent_heat_recovery` 0 (fractions from 0
+to 1), `electric_efficiency_wh_m3` 0.55 Wh/m³, `frost_protection_reqd` true,
+`temperature_below_defrost_used_c` -5 °C and `in_conditioned_space` true. `manufacturer`, `model`,
+`subsoil_heat_exchange_efficiency` and `preheated_intake_temperature_c` stay absent until you give them.
+A recovery fraction outside 0 to 1, a negative efficiency or a `quantity` below 1 is refused and nothing
+is written.
+
+Edit with `ph_composer.mechanical.ventilators.update`, copying `expected_values` from the values you
+read; null removes an optional value. `ph_composer.mechanical.ventilators.duplicate` makes a copy with
+its own id, a `source` of `derived` and the original's `user_data`.
+`ph_composer.mechanical.ventilators.delete` removes one; once Zones can name a Ventilator, it refuses
+one still in use. Each action is one Undo step. Rows carry `export_ready` and `export_blockers`; a
+Ventilator on its own blocks nothing. Its `user_data` and extension payloads are written with
+`ph_composer.records.update_metadata`.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

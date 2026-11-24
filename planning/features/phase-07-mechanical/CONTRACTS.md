@@ -43,7 +43,7 @@ Proposed layout, following `features/windows/install.rb` and `features/spaces/in
 ```
 features/mechanical/
   install.rb  codes.rb  refuses.rb  snapshot.rb  export.rb  colour_modes.rb
-  ventilators/   schema.rb  operations.rb
+  ventilators/   schema.rb  operations.rb  reads.rb
   hot_water/     systems.rb  heaters.rb  tanks.rb  operations.rb  slotting.rb  (three flat kinds, D4-17; slotting pure, D4-07)
   heat_pumps/    outdoor_equipment.rb  indoor_equipment.rb  outdoor_units.rb  indoor_units.rb  operations.rb  blend.rb  (four flat kinds, D4-14; blend pure, D4-15, F35)
   serves/        payload.rb  operations.rb  reads.rb  balance.rb               (payload: the extension and its validator, D4-21)
@@ -86,12 +86,12 @@ its system, the heaters, the tanks and the heat pump classes carry one (section 
 | `name`, `notes`, `datasheet_links`, `source` | `Fields.common` (exists) | `name` | `name` is displayed as `Tag` (D4-20); `source` defaults to `{"kind": "manual"}` |
 | `manufacturer`, `model` | string or null | no | D4-20 identity columns on every Mechanical table, hideable in the UI |
 | `quantity` | integer, minimum 1 | yes, default 1 | Q4; honeybee-ph `Ventilator.quantity` |
-| `sensible_heat_recovery`, `latent_heat_recovery` | number 0 to 1 | yes, defaults 0.0 | Unitless fractions (V4) |
+| `sensible_heat_recovery`, `latent_heat_recovery` | number 0 to 1, `x-unit` `fraction` | yes, defaults 0.0 | Unitless fractions (V4); `fraction` as a Glazing's `g_value` declares it (P4-02) |
 | `electric_efficiency_wh_m3` | number, minimum 0, `x-unit` `Wh/m3` | yes, default 0.55 | Shown W/cfm under IP (V4, A3) |
 | `frost_protection_reqd` | boolean | yes, default true | |
 | `temperature_below_defrost_used_c` | number, `x-unit` `C` | yes, default -5 | |
 | `in_conditioned_space` | boolean | yes, default true | |
-| `subsoil_heat_exchange_efficiency` | number 0 to 1 or null | no | Disclosed, blank by default (V3) |
+| `subsoil_heat_exchange_efficiency` | number 0 to 1 or null, `x-unit` `fraction` | no | Disclosed, blank by default (V3) |
 | `preheated_intake_temperature_c` | number or null, `x-unit` `C` | no | Disclosed, blank by default (V3) |
 
 `schema_version` 1 with this field set; later additions bump `schema_version` and rewrite fixtures (F34). No timestamps. `sys_type` is not a field: the section writes 1 (V2). No rated flow (V6).
@@ -190,6 +190,7 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | Name | Verb | Stage | Purpose |
 | --- | --- | --- | --- |
 | `ventilators.all` | query | P4-02 | Every Ventilator with its values, `export_ready` and `export_blockers`; from P4-03 the Zones it serves and, from P4-05, its balance |
+| `ventilators.list` | query | P4-02 | One bounded page of the same rows in id order, with `ids` and `fields`. Added by P4-02: the registry requires an `all` read's `response:` to name a bounded query it prefers |
 | `ventilators` | snapshot section | P4-02 | The same projection for the panel |
 | `ventilators.create`, `.update`, `.duplicate` | action | P4-02 | Values with `expected_values`; `user_data` |
 | `ventilators.delete` | action | P4-02; replacement from P4-03 | Guarded delete, refused `reference.in_use` while a Zone names it; `replacement_id` moves every Serves slot naming it; explicit null clears them, one Undo step |
@@ -206,7 +207,8 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | `preflight` | query | P4-04 | The export preflight rows, passed to `export_contributor(preflight:)` |
 
 Codes are declared once with `feature.code` in `features/mechanical/codes.rb` under the noun
-`mechanical`. Refusals that Zones owns keep Zones' `target.*` codes, and a delete in use keeps the
+`mechanical`. P4-02 raises none of its own (its refusals are the foundation's), so the file arrives with the first,
+`mechanical.slot_filled` in P4-03. Refusals that Zones owns keep Zones' `target.*` codes, and a delete in use keeps the
 foundation's `reference.in_use`.
 
 Every registration is an agent-facing surface. A stage that adds a name declares `response:` and
