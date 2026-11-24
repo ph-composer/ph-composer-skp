@@ -16094,6 +16094,128 @@ Example params:
 {}
 ```
 
+### `ph_composer.mechanical.preflight`
+
+Mechanical export checks: a Zone naming a Ventilator that is not in the Model (blocking), a Zone with no Ventilator, a Ventilator serving no Zone, a served Zone in no Building Segment and a Ventilator serving Zones in two Building Segments. Owner: `ph_composer.mechanical`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.mechanical.serves.all`
 
 Every Zone occurrence with what serves each, the items' names and the findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
@@ -98224,6 +98346,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `mechanical.item_across_segments` | An item serves Zones in more than one Building Segment; each Segment's model carries the whole item. |
 | `mechanical.item_missing` | A Zone's slot names an item that is not in the Model; reassign or clear it. |
 | `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
 | `mechanical.slot_filled` | The Zone's slot already names another item; assign with replace to use the new one. |
@@ -98528,3 +98651,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.86 | 2026-11-21 | ph_composer.zones.save_segment_settings also emits ph_composer.zones.segment_settings_saving, before it stages the payloads, with building_segment_id and extension_payloads; a Segment's occupancy settings naming an unwritten default Program or Equipment Set store it in the same step. |
 | 1.87 | 2026-11-23 | The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with the reads ventilators.list and ventilators.all, whose rows carry export_ready and export_blockers, and the snapshot section ph_composer.mechanical.ventilators. |
 | 1.88 | 2026-11-23 | What serves each Zone: the extension ph_composer.mechanical.zone_serves on the Zone record, ph_composer.mechanical.serves.assign and serves.clear, the reads serves.list and serves.all with the snapshot section ph_composer.mechanical.serves, and the codes mechanical.slot_filled, zone_unventilated, item_unserved, item_missing and zone_left_out. ventilators.list and ventilators.all rows carry zones and findings; ventilators.delete takes replacement_id, an id or null, and refuses reference.in_use naming the Zones without one. |
+| 1.89 | 2026-11-24 | The Ventilator export: the section ph_composer.mechanical.export.ventilation writes one ventilation system per served Zone and claims ph_composer.mechanical.zone_serves, now required for export. ph_composer.mechanical.preflight is new; mechanical.item_missing blocks export and mechanical.item_across_segments is a new code. |

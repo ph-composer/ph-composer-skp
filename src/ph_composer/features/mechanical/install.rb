@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One feature owns the mechanical equipment a Zone's Room carries in the energy model: the equipment families'
-# catalogs, which Zones each item serves, and later their export. It requires Zones and Spaces; no file of
+# catalogs, which Zones each item serves, and their export. It requires Zones and Spaces; no file of
 # theirs, nor any other feature's, names it (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
 # Each family is a folder of definitions that names no Zone, Space, Program or assignment, so a family reads
@@ -12,6 +12,8 @@
 #                   Zone half of an item's delete, and the reads with their findings
 #   codes.rb        the `mechanical` noun's codes
 #   declarations/   what the feature registers: the shapes every family shares, Serves, then one file per family
+#   ventilation_plan.rb  the Ventilator export worked out in pure Ruby: its pairs and findings
+#   export.rb            the Ventilator export section, the preflight that reads the same plan, and the report
 require_relative "ventilators/schema"
 require_relative "ventilators/operations"
 require_relative "ventilators/reads"
@@ -23,6 +25,8 @@ require_relative "serves/reads"
 require_relative "declarations/shapes"
 require_relative "declarations/serves"
 require_relative "declarations/ventilators"
+require_relative "ventilation_plan"
+require_relative "export"
 
 module PhComposer
   module Mechanical
@@ -33,6 +37,7 @@ module PhComposer
                                              :requires => ["ph_composer.zones", "ph_composer.spaces"])
       ServesRegistration.install(feature)
       VentilatorRegistration.install(feature)
+      VentilationExport.install(feature)
     end
   end
 end

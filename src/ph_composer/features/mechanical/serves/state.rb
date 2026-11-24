@@ -18,8 +18,9 @@ module PhComposer
         REFUSES = %w[geometry.invalid record.unreadable target.wrong_kind validation.failed].freeze
 
         # `values` are the slots, empty where the Zone stores none or one this version does not understand;
-        # `status` is the stored payload's status, nil for none.
-        Zone = Struct.new(:id, :reference, :name, :segment_id, :left_out, :values, :status, keyword_init: true) do
+        # `status` is the stored payload's status, nil for none. `segment` is its Building Segment's name.
+        Zone = Struct.new(:id, :reference, :name, :segment_id, :segment, :left_out, :values, :status,
+                          keyword_init: true) do
           def key
             [id, reference.fetch("zone_path")]
           end
@@ -31,10 +32,11 @@ module PhComposer
           catalog = request.registry.catalog
           payloads = staged(request).fetch(:payloads)
           request.query(ZONES).fetch("zones").map do |row|
-            values, status = Payload.read(row.fetch("extension_data", {}), catalog)
+            values, status = Payload.read(row.fetch("extension_data", {}), catalog.extension(NAMESPACE))
             stored = row.fetch("values")
             zone = Zone.new(:id => row.fetch("id"), :reference => row.fetch("reference"), :name => stored["name"],
                             :segment_id => stored["building_segment_id"],
+                            :segment => row.dig("display", "building_segment") || stored["building_segment"],
                             :left_out => stored["building_segment_id"].nil? && stored["building_segment"].nil?,
                             :values => values, :status => status)
             if (payload = payloads[zone.key])

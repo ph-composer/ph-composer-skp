@@ -1,0 +1,20 @@
+{
+  "ventilation": [
+    "id",
+    "item_id",
+    "zone_id",
+    "zone_name",
+    "display_name",
+    "system_identifier",
+    "unit_identifier",
+    "quantity",
+    "sensible_heat_recovery",
+    "latent_heat_recovery",
+    "electric_efficiency_wh_m3",
+    "frost_protection_reqd",
+    "temperature_below_defrost_used_c",
+    "in_conditioned_space",
+    "subsoil_heat_exchange_efficiency",
+    "preheated_intake_temperature_c"
+  ]
+}

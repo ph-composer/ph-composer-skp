@@ -771,9 +771,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1599,
+      "bytes": 1677,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "687814557b91ffe4755b17290521dfdf7b32916e37dc63e8483b0a113ae1e32c"
+      "sha256": "d5877afe6dcbf428baeadbe885006a0e867ed1ecfcf8c4464fce221b5daa149d"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -794,6 +794,11 @@
       "bytes": 8013,
       "mime": "text/plain; charset=utf-8",
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
+    },
+    "python/ph_composer_translation/contract/mechanical_records.py": {
+      "bytes": 3805,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "d7b68aeab48f32683cde1a7498bfbe58657fc6fd8ee0c3f4a888f00e7201f7af"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -834,6 +839,11 @@
       "bytes": 1356,
       "mime": "text/plain; charset=utf-8",
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
+    },
+    "python/ph_composer_translation/mechanical_sections.py": {
+      "bytes": 7682,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "36f97f4c26608fe926d4944e9f0d38e1898ea8f7bccf1b8ab853db96025d0dce"
     },
     "python/ph_composer_translation/model_metadata.py": {
       "bytes": 1484,
@@ -1097,6 +1107,7 @@
     "python/ph_composer_translation/constructions.py",
     "python/ph_composer_translation/contract/__init__.py",
     "python/ph_composer_translation/contract/assembly_records.py",
+    "python/ph_composer_translation/contract/mechanical_records.py",
     "python/ph_composer_translation/contract/shade_records.py",
     "python/ph_composer_translation/contract/space_records.py",
     "python/ph_composer_translation/contract/thermal_bridge_records.py",
@@ -1105,6 +1116,7 @@
     "python/ph_composer_translation/entry.py",
     "python/ph_composer_translation/exporters.py",
     "python/ph_composer_translation/material_sources.py",
+    "python/ph_composer_translation/mechanical_sections.py",
     "python/ph_composer_translation/model_metadata.py",
     "python/ph_composer_translation/model_sections.py",
     "python/ph_composer_translation/program_sections.py",

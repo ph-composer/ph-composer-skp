@@ -1,0 +1,1818 @@
+{
+  "run_id": "mechanical-export",
+  "schema_version": 1,
+  "sections": {
+    "ph_composer.assemblies.export.constructions": {
+      "records": [
+        {
+          "id": "asm_Single000001",
+          "layers": [
+            {
+              "id": "lyr_000000000001",
+              "segments": [
+                {
+                  "id": "seg_000000000010",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 100
+            },
+            {
+              "id": "lyr_000000000002",
+              "segments": [
+                {
+                  "id": "seg_000000000020",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 50
+            }
+          ],
+          "materials": [
+            {
+              "category": "insulation",
+              "color": "#88aa44",
+              "conductivity_w_mk": 0.04,
+              "density_kg_m3": 40,
+              "emissivity": 0.9,
+              "id": "mat_Wool00000001",
+              "name": "Synthetic wool",
+              "specific_heat_j_kgk": 1400
+            }
+          ],
+          "name": "Two wool thicknesses",
+          "orientation": "first_layer_outside"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.assemblies.export.material_sources": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.certification.export.segments": {
+      "records": [
+        {
+          "category": "residential",
+          "export_identifier": "bseg_eb814be3ca3b78c0",
+          "id": "bsg_FIXED0000001",
+          "program": "phius_2021_core",
+          "status": "in_planning",
+          "type": "new_construction",
+          "use": "residential"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.climate.export.site": {
+      "records": [
+        {
+          "climate": null,
+          "climate_left_out": null,
+          "id": "Site",
+          "location": null,
+          "provenance": null,
+          "report": {
+            "climate": null,
+            "design_temperature_source": null,
+            "design_temperatures": {
+              "cooling_1_c": null,
+              "heating_99_c": null
+            },
+            "edited_cells": [],
+            "limit_check": null,
+            "missing_values": 0
+          }
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.mechanical.export.ventilation": {
+      "records": [
+        {
+          "display_name": "ERV-1",
+          "electric_efficiency_wh_m3": 0.45,
+          "frost_protection_reqd": true,
+          "id": "vnt_FIXED0000001_zon_AAAAAAAAAAAA",
+          "in_conditioned_space": true,
+          "item_id": "vnt_FIXED0000001",
+          "latent_heat_recovery": 0.6,
+          "preheated_intake_temperature_c": null,
+          "quantity": 1,
+          "sensible_heat_recovery": 0.85,
+          "subsoil_heat_exchange_efficiency": null,
+          "system_identifier": "vnt_FIXED0000001",
+          "temperature_below_defrost_used_c": -5.0,
+          "unit_identifier": "vnt_FIXED0000001_unit",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "display_name": "ERV-2",
+          "electric_efficiency_wh_m3": 0.35,
+          "frost_protection_reqd": false,
+          "id": "vnt_FIXED0000002_zon_BBBBBBBBBBBB",
+          "in_conditioned_space": false,
+          "item_id": "vnt_FIXED0000002",
+          "latent_heat_recovery": 0.0,
+          "preheated_intake_temperature_c": null,
+          "quantity": 1,
+          "sensible_heat_recovery": 0.75,
+          "subsoil_heat_exchange_efficiency": 0.2,
+          "system_identifier": "vnt_FIXED0000002",
+          "temperature_below_defrost_used_c": -5.0,
+          "unit_identifier": "vnt_FIXED0000002_unit",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.model.export.model": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.programs.export.airtightness": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.programs.export.program_types": {
+      "records": [
+        {
+          "electric_equipment": {
+            "latent_fraction": 0.0,
+            "lost_fraction": 0.0,
+            "radiant_fraction": 0.0,
+            "schedule_id": "sch_PHCDEFAULT05",
+            "watts_per_area": 0.0
+          },
+          "gas_equipment": {
+            "latent_fraction": 0.0,
+            "lost_fraction": 0.0,
+            "radiant_fraction": 0.0,
+            "schedule_id": "sch_PHCDEFAULT05",
+            "watts_per_area": 0.0
+          },
+          "id": "pgm_PHCDEFAULT01-bsg_FIXED0000001",
+          "infiltration": {
+            "flow_per_exterior_area": 0.0003,
+            "schedule_id": "sch_PHCDEFAULT05"
+          },
+          "lighting": {
+            "device": {
+              "attributes": {
+                "comment": "",
+                "display_name": "PHIUS+ Interior Lighting",
+                "frac_high_efficiency": 1.0,
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_quantity": 6
+              },
+              "class": "PhPhiusLightingInterior",
+              "identifier": "pgm_PHCDEFAULT01-bsg_FIXED0000001-lighting_interior"
+            },
+            "radiant_fraction": 0.32,
+            "return_air_fraction": 0.0,
+            "schedule_id": "sch_PHCDEFAULT03",
+            "visible_fraction": 0.25,
+            "watts_per_area": 19.385428521155287
+          },
+          "name": "Residential default (Main)",
+          "people": {
+            "activity_schedule_id": "sch_PHCDEFAULT02",
+            "latent_fraction": null,
+            "occupancy_schedule_id": "sch_PHCDEFAULT01",
+            "people_per_area": 0.0,
+            "radiant_fraction": 0.3
+          },
+          "program_id": "pgm_PHCDEFAULT01",
+          "service_hot_water": {
+            "flow_per_area": 0.15163553454194445,
+            "latent_fraction": 0.05,
+            "schedule_id": "sch_PHCDEFAULT04",
+            "sensible_fraction": 0.2,
+            "target_temperature_c": 43.3
+          },
+          "setpoint": {
+            "cooling_schedule_id": "pgm_PHCDEFAULT01-cooling_setpoint",
+            "dehumidify_rh": 60.0,
+            "heating_schedule_id": "pgm_PHCDEFAULT01-heating_setpoint",
+            "humidify_rh": null
+          },
+          "ventilation": {
+            "air_changes_per_hour": 0.4,
+            "flow_per_area": 0.0,
+            "flow_per_person": 0.0,
+            "flow_per_zone": 0.0,
+            "schedule_id": "sch_PHCDEFAULT06"
+          }
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.programs.export.rooms": {
+      "records": [
+        {
+          "devices": [
+            {
+              "attributes": {
+                "comment": "",
+                "display_name": "Kitchen fridge/freeze combo",
+                "energy_demand": 1.22,
+                "energy_demand_per_use": 0.0,
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_energy_norm": 1,
+                "reference_quantity": 4
+              },
+              "bedrooms": 0.0,
+              "class": "PhFridgeFreezer",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT01",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT01"
+            },
+            {
+              "attributes": {
+                "capacity": 12.0,
+                "capacity_type": 1,
+                "comment": "",
+                "display_name": "Kitchen dishwasher",
+                "energy_demand": 269.0,
+                "energy_demand_per_use": 0.0,
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_energy_norm": 2,
+                "reference_quantity": 1,
+                "water_connection": "2-COLD WATER CONNECTION"
+              },
+              "bedrooms": 0.0,
+              "class": "PhDishwasher",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT02",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT02"
+            },
+            {
+              "attributes": {
+                "capacity": 0.1274,
+                "comment": "",
+                "display_name": "Laundry - washer",
+                "energy_demand": 120.0,
+                "energy_demand_per_use": 0.0,
+                "in_conditioned_space": true,
+                "modified_energy_factor": 2.7,
+                "quantity": 1,
+                "reference_energy_norm": 2,
+                "reference_quantity": 1,
+                "utilization_factor": 1.0,
+                "water_connection": "2-COLD WATER CONNECTION"
+              },
+              "bedrooms": 0.0,
+              "class": "PhClothesWasher",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT03",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT03"
+            },
+            {
+              "attributes": {
+                "combined_energy_factor": 3.93,
+                "comment": "",
+                "display_name": "Laundry - dryer",
+                "dryer_type": "5-ELECTRIC EXHAUST AIR DRYER",
+                "energy_demand_per_use": 0.0,
+                "field_utilization_factor": 1.18,
+                "field_utilization_factor_type": 1,
+                "gas_consumption": 0.0,
+                "gas_efficiency_factor": 2.67,
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_energy_norm": 2,
+                "reference_quantity": 1
+              },
+              "bedrooms": 0.0,
+              "class": "PhClothesDryer",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT04",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT04"
+            },
+            {
+              "attributes": {
+                "comment": "",
+                "cooktop_type": "1-ELECTRICITY",
+                "display_name": "Kitchen cooking",
+                "energy_demand": 0.2,
+                "energy_demand_per_use": 0.0,
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_energy_norm": 1,
+                "reference_quantity": 1
+              },
+              "bedrooms": 0.0,
+              "class": "PhCooktop",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT05",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT05"
+            },
+            {
+              "attributes": {
+                "comment": "",
+                "display_name": "PHIUS+ Exterior Lighting",
+                "frac_high_efficiency": 1.0,
+                "in_conditioned_space": false,
+                "quantity": 1,
+                "reference_quantity": 6
+              },
+              "bedrooms": 0.0,
+              "class": "PhPhiusLightingExterior",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT06",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT06"
+            },
+            {
+              "attributes": {
+                "comment": "",
+                "display_name": "PHIUS+ Garage Lighting",
+                "frac_high_efficiency": 1.0,
+                "in_conditioned_space": false,
+                "quantity": 1,
+                "reference_quantity": 2
+              },
+              "bedrooms": 0.0,
+              "class": "PhPhiusLightingGarage",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT07",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT07"
+            },
+            {
+              "attributes": {
+                "comment": "",
+                "display_name": "PHIUS+ MELS",
+                "in_conditioned_space": true,
+                "quantity": 1,
+                "reference_quantity": 3
+              },
+              "bedrooms": 0.0,
+              "class": "PhPhiusMEL",
+              "floor_area_ft2": 387.50077500155,
+              "identifier": "eqs_PHCDEFAULT01-dev_PHCDEFAULT08",
+              "occupants": 0.0,
+              "process_id": "zon_AAAAAAAAAAAA-eqs_PHCDEFAULT01-dev_PHCDEFAULT08"
+            }
+          ],
+          "dwelling": {
+            "identifier": "bsg_FIXED0000001",
+            "num_dwellings": 1
+          },
+          "id": "zon_AAAAAAAAAAAA",
+          "number_bedrooms": 0.0,
+          "number_people": 0.0,
+          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000001"
+        },
+        {
+          "devices": [],
+          "dwelling": {
+            "identifier": "bsg_FIXED0000001",
+            "num_dwellings": 1
+          },
+          "id": "zon_BBBBBBBBBBBB",
+          "number_bedrooms": 0.0,
+          "number_people": 0.0,
+          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000001"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.programs.export.schedules": {
+      "records": [
+        {
+          "days_per_week": 7,
+          "id": "pgm_PHCDEFAULT01-cooling_setpoint",
+          "name": "Residential default cooling set point",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Temperature",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "pgm_PHCDEFAULT01-heating_setpoint",
+          "name": "Residential default heating set point",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Temperature",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT01",
+          "name": "Residential occupancy",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333,
+            0.7208333333333333
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Fractional",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT02",
+          "name": "Residential activity",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194,
+            112.53934481000194
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Activity Level",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT03",
+          "name": "Residential lighting",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664,
+            0.041666666666666664
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Fractional",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT04",
+          "name": "Residential hot water",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625,
+            0.041625
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Fractional",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT05",
+          "name": "Always on",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "operating_periods": [],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Fractional",
+          "weeks_per_year": 52
+        },
+        {
+          "days_per_week": 7,
+          "id": "sch_PHCDEFAULT06",
+          "name": "Constant ventilation",
+          "off_day": null,
+          "operating_dates": [
+            [
+              [
+                1,
+                1
+              ],
+              [
+                12,
+                31
+              ]
+            ]
+          ],
+          "operating_day": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "operating_periods": [
+            {
+              "end_hour": 0,
+              "fraction": 1.0,
+              "name": "high",
+              "start_hour": 0
+            },
+            {
+              "end_hour": 24,
+              "fraction": 1.0,
+              "name": "standard",
+              "start_hour": 0
+            },
+            {
+              "end_hour": 24,
+              "fraction": 0.5,
+              "name": "basic",
+              "start_hour": 24
+            },
+            {
+              "end_hour": 24,
+              "fraction": 0.3,
+              "name": "minimum",
+              "start_hour": 24
+            }
+          ],
+          "operating_weekdays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "type_limit": "Fractional",
+          "weeks_per_year": 52
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.programs.export.set_points": {
+      "records": [
+        {
+          "agree": true,
+          "dwellings": [
+            {
+              "bedrooms": null,
+              "name": "Main",
+              "occupants": null,
+              "units": 1
+            }
+          ],
+          "export_identifier": "bseg_eb814be3ca3b78c0",
+          "id": "bsg_FIXED0000001",
+          "name": "Main",
+          "summer_c": 25.0,
+          "winter_c": 20.0
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.shading.export.shades": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.spaces.export.spaces": {
+      "records": [
+        {
+          "airflow_mode": "detailed",
+          "id": "spc_AAAAAAAAAAAA",
+          "name": "Zone A",
+          "number": "1",
+          "offset_from_zone": false,
+          "v_eta_m3h": 50.0,
+          "v_sup_m3h": 60.0,
+          "v_tran_m3h": 0.0,
+          "volumes": [
+            {
+              "avg_ceiling_height_m": 2.5,
+              "display_name": "",
+              "floor_id": "flr_AAAAAAAAAAAA",
+              "floor_segments": [
+                {
+                  "display_name": "",
+                  "id": "fsg_AAAAAAAAAAAA",
+                  "loops_m": [
+                    [
+                      [
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        0.0,
+                        0.0
+                      ]
+                    ]
+                  ],
+                  "net_area_factor": 1.0,
+                  "weighting_factor": 1.0
+                }
+              ],
+              "geometry": [
+                [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ]
+                ]
+              ],
+              "id": "vol_AAAAAAAAAAAA"
+            }
+          ],
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "airflow_mode": "detailed",
+          "id": "spc_BBBBBBBBBBBB",
+          "name": "Zone B",
+          "number": "1",
+          "offset_from_zone": false,
+          "v_eta_m3h": 40.0,
+          "v_sup_m3h": 40.0,
+          "v_tran_m3h": 0.0,
+          "volumes": [
+            {
+              "avg_ceiling_height_m": 2.5,
+              "display_name": "",
+              "floor_id": "flr_BBBBBBBBBBBB",
+              "floor_segments": [
+                {
+                  "display_name": "",
+                  "id": "fsg_BBBBBBBBBBBB",
+                  "loops_m": [
+                    [
+                      [
+                        6.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        6.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        10.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        10.0,
+                        0.0,
+                        0.0
+                      ]
+                    ]
+                  ],
+                  "net_area_factor": 1.0,
+                  "weighting_factor": 1.0
+                }
+              ],
+              "geometry": [
+                [
+                  [
+                    6.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    6.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    6.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    6.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    10.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    10.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    6.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    6.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    6.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    6.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    6.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    6.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    10.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    10.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    10.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    10.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    6.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    6.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    10.0,
+                    0.0,
+                    2.5
+                  ]
+                ]
+              ],
+              "id": "vol_BBBBBBBBBBBB"
+            }
+          ],
+          "zone_id": "zon_BBBBBBBBBBBB"
+        }
+      ],
+      "version": 2
+    },
+    "ph_composer.thermal_bridges.export.thermal_bridges": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.windows.export.apertures": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.windows.export.window_constructions": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.zones.export.zones": {
+      "records": [
+        {
+          "building_segment": "Main",
+          "building_segment_export_identifier": "bseg_eb814be3ca3b78c0",
+          "building_segment_id": "bsg_FIXED0000001",
+          "face_ids": [
+            "fac_A00000000001",
+            "fac_A00000000002",
+            "fac_A00000000003",
+            "fac_A00000000004",
+            "fac_A00000000005",
+            "fac_A00000000006"
+          ],
+          "id": "zon_AAAAAAAAAAAA",
+          "level": "L1",
+          "name": "Zone A"
+        },
+        {
+          "building_segment": "Main",
+          "building_segment_export_identifier": "bseg_eb814be3ca3b78c0",
+          "building_segment_id": "bsg_FIXED0000001",
+          "face_ids": [
+            "fac_B00000000001",
+            "fac_B00000000002",
+            "fac_B00000000003",
+            "fac_B00000000004",
+            "fac_B00000000005",
+            "fac_B00000000006"
+          ],
+          "id": "zon_BBBBBBBBBBBB",
+          "level": "L1",
+          "name": "Zone B"
+        }
+      ],
+      "version": 2
+    },
+    "ph_composer.zones.faces.export.faces": {
+      "records": [
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:5f37e16acc1185591dbaa2058c76ed186893282618d53ae1930c3081977d07fb",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000001",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:17b65ff3930b50bf11ad9f5866c15f9808164db83b1235db04a1c2ed8a017b6e",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_A00000000002",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:b50a8e75059a7bdca15dc293eade2da6e66acea50807bfd65772389d53d6e77c",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000003",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:8b82bb2ae5a5277caa03e3f9b58417f5af27a4efe3b4e9e832d05f06ab00ff44",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 5.0
+          },
+          "id": "fac_A00000000004",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:05e7494817c073be6271865c11274c2eb18cdb5290f3548d0784c45a1a03681a",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000005",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:82e2fd0d84e8191ac271277959d3fc0b4473b7bb27b47ffa913ed64d8d164333",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 4.0
+          },
+          "id": "fac_A00000000006",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 16.0,
+            "digest": "sha256:10bf8a77e04572e382384d47152f796defb2260d53be9e96c5e1f5aedbc52c1b",
+            "loops_m": [
+              [
+                [
+                  6.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  6.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_B00000000001",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 16.0,
+            "digest": "sha256:0dcdbb8f568737d08b851c1d1c3da60ede7b6d869837f6c5e669e120cc92c08d",
+            "loops_m": [
+              [
+                [
+                  6.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  10.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  6.0,
+                  4.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_B00000000002",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:81f16a871927dd26dc6c3194c69866fddb27b466b53d7a03ab3613af13ff971b",
+            "loops_m": [
+              [
+                [
+                  6.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  6.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  6.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  6.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": -6.0
+          },
+          "id": "fac_B00000000003",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:8ce01a8d8ead7f28f91dca7f4971ca774ef26b28775e22e9902c03b0e0808a7b",
+            "loops_m": [
+              [
+                [
+                  10.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  10.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 10.0
+          },
+          "id": "fac_B00000000004",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:7f1725940836ccb81ca8e5f7639a4f445b120c554080175e89fe6257054ad766",
+            "loops_m": [
+              [
+                [
+                  6.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  10.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  6.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_B00000000005",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:d3504d99d25c0e605d345e8cd78c3c521f378443529b73d07266366ce7701ae1",
+            "loops_m": [
+              [
+                [
+                  6.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  6.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  10.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 4.0
+          },
+          "id": "fac_B00000000006",
+          "zone_id": "zon_BBBBBBBBBBBB"
+        }
+      ],
+      "version": 2
+    }
+  }
+}

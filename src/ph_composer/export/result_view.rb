@@ -28,6 +28,12 @@ module PhComposer
         @result.fetch(name, {})
       end
 
+      # The findings the run reported against this contributor's section, its notes among them, as the result
+      # lists them.
+      def findings
+        @result.fetch("findings", []).select { |finding| finding["section"] == @contributor.name }
+      end
+
       private
 
       def own

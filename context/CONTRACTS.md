@@ -850,16 +850,15 @@ unique; `update` is guarded by `expected_values` and a null removes an optional 
 the source `derived` and a copy of the `user_data`; `delete` is the engine's guarded delete. `ventilators.list` and
 `ventilators.all` (also the snapshot section `ph_composer.mechanical.ventilators`) answer each record's view with
 `export_ready` and `export_blockers`, empty for a Ventilator. Its `user_data` and extension payloads are written with
-`ph_composer.records.update_metadata`; nothing exports yet.
+`ph_composer.records.update_metadata`; the export carries the `user_data` to the honeybee-ph `Ventilator`.
 
 **Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 1)
 on the Zone record, as Programs keeps a Zone's assignment ("Occupancy"): no record, id or reference target of its
 own. Its payload holds one slot per family, `ventilator_id` (a `vnt_` id or null, a declared `one` reference to the
 Ventilator kind); a later family adds its slot (a `many` slot is a list holding each id once) and moves the version.
 The validator takes a whole payload: every slot present, each id of its slot's kind or null, no other key. It is
-`local_only` until the Ventilator export claims it and moves it to `required` in the same change, since a `required`
-namespace no contributor claims blocks every export of a Zone that carries it. A Zone served by nothing stores no
-payload or one whose every slot is empty; the reads answer both alike.
+`required`: the Ventilator export claims it (below), so a payload this version does not understand blocks the export.
+A Zone served by nothing stores no payload or one whose every slot is empty; the reads answer both alike.
 
 `ph_composer.mechanical.serves.assign` (targets `{reference, expected_values}`, `slot`, `item_id`, `replace`) and
 `serves.clear` (targets and a `slot`, or every slot) read the Zones once through `ph_composer.zones.all`, check every
@@ -888,6 +887,31 @@ outside the engine, such as one pasted from another Model, can carry; an error t
 `ventilators.all` and `ventilators.list` rows gain `zones`, each Zone occurrence the item serves, and `findings`:
 `mechanical.item_unserved` (a warning) and `mechanical.zone_left_out`. Each of these reads reads the Zones once
 through `ph_composer.zones.all`.
+
+**Ventilator export.** `ph_composer.mechanical.export.ventilation` (section version 1, `features/mechanical/export.rb`)
+requires the Zones section and claims `ph_composer.mechanical.zone_serves` on the Zone record (`entity_projections`),
+as Programs claims its assignment. `VentilationPlan` (`features/mechanical/ventilation_plan.rb`) works the export out
+in pure Ruby over each Zone once (its first occurrence by path) and the stored Ventilators: one record per
+(Ventilator, exported Zone) pair, with id `<vnt id>_<zon id>`, the Ventilator's values and `user_data`, and the
+identifiers derived from its id, `system_identifier` the Ventilator id and `unit_identifier` that id with `_unit`, so
+every pair of one Ventilator carries equal values. The Python section
+(`python/ph_composer_translation/mechanical_sections.py`, required for export) builds each pair's own
+`PhVentilationSystem`, `sys_type` 1 and no ducts, holding a `Ventilator` with the record's values and `user_data`, and
+attaches it to the Zone's Room with `set_ventilation_system`; honeybee-ph reloads one system for the shared
+identifiers and PHX keys one device. Its result rows (`ventilation`: the pair's ids, the Zone's name and the unit's
+values) are what `conformance` reads back: each row's Room holds its system with those identifiers, `sys_type` 1 and
+the unit's values, one Ventilator carries one identifier on every Room, and no Room holds a system the run did not
+report. A record value out of range is a `RecordError`, so `object.unavailable` blocks the pair. The same plan answers
+`ph_composer.mechanical.preflight`, after a blocking row for each unreadable Ventilator (`record.unreadable`) and each
+exported Zone whose Serves payload this version does not understand (the claim's `extension.*` code), each finding
+with the code and object the export uses:
+`mechanical.item_missing` blocks (the export refuses with it), `mechanical.item_unserved` and
+`mechanical.zone_left_out` name a Ventilator the export leaves out or a Room it leaves out with its Zone,
+`mechanical.item_across_segments` a Ventilator written to Zones in two Building Segments, each Segment's model
+carrying the whole item, and `mechanical.zone_unventilated` a Zone written with no system. The export notes all but
+the last, which the preflight alone reports and the run carries into the result. The report's
+"Mechanical: Ventilators" section lists each exported Ventilator with the Zones it serves, its quantity and
+efficiencies, from the Python result, and one line of the `mechanical.item_unserved` findings.
 
 ## This computer's settings file
 
@@ -1921,7 +1945,8 @@ in `requires:`; registration refuses a section that is not registered, or whose 
 the contributor's feature nor one that feature requires, with `registration.missing_dependency`.
 It reads that section's registered `projection` with `reader.section(id)` while collecting, and its
 result fields with `result.section(id)` in its report, which receives an `Export::ResultView`; an
-undeclared read is an internal error. The Zones section projects each Zone occurrence's id, path, name,
+undeclared read is an internal error. `result.findings` gives the findings the run reported against the
+contributor's own section, its notes among them. The Zones section projects each Zone occurrence's id, path, name,
 Building-Segment and `exported`; the Faces section each Zone Face's path, record, Zone and `left_out`; the
 Apertures section each placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
 them, with `reader.note(code, object_id, message)`: a non-blocking finding that joins the result's findings
