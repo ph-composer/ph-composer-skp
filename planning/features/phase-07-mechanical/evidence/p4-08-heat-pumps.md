@@ -85,8 +85,8 @@ once in WUFI XML with `MaxRecirculationAirCoolingPower`.
 
 Browser checks: `make ui-checks UI_CHECKS=tools/ui-preview/mechanical_checks.cjs` passes on both heads (a local Chrome
 run, not Chromium 88 or HtmlDialog evidence); the heat pump steps run at 1280 x 800, 420 x 732 and 360 x 520 with no
-sideways scroll. The other 38 browser scripts were not run on this head: the stage changes only the Mechanical tab
-and a new `capacity` quantity. Screenshots: [Equipment · Outdoor](p4-08/heat-pumps-outdoor.png),
+sideways scroll. The whole browser suite, `make ui-checks` (39 scripts, node capped at 4 GB and the run time-limited),
+on `1bda97ad`: 39 of 39 pass, exit 0, none skipped. Screenshots: [Equipment · Outdoor](p4-08/heat-pumps-outdoor.png),
 [under IP](p4-08/heat-pumps-outdoor-ip.png), [Units · Indoor](p4-08/heat-pumps-units-indoor.png),
 [at 420 px](p4-08/heat-pumps-units-indoor-420x732.png), [Blended result](p4-08/heat-pumps-blended.png),
 [at 360 x 520](p4-08/heat-pumps-blended-result-360x520.png).
