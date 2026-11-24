@@ -153,7 +153,7 @@ Scoped on 2026-11-15, including the Building Segment work it stands on and the P
 The [Phase 4 coordinating packet](features/phase-07-mechanical/README.md) was planned in detail on
 2026-10-21: stages P4-01 to P4-15, decisions D4-01 to D4-12 answered as recommended, register M01 to M15. Families 3
 to 7, piping and ducting were gate stubs until their interviews. Ed authorized every stage on 2026-11-23, run through
-the pr-loop with merge on green and host gates batched by milestone; P4-01 merged (#564); P4-02 and P4-03 are in review.
+the pr-loop with merge on green and host gates batched by milestone; P4-01 (#564) and P4-02 (#565) merged; P4-03 is in review.
 
 Reviewed on 2026-11-22 after Phase 6 Programs
 ([DECISIONS, Part 4](features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22)):

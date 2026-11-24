@@ -2,8 +2,8 @@
 
 DATE: 2026-11-23
 Register row: [M03](../ACCEPTANCE.md). Stage: [P4-03](../phases/p4-03-serves-assignment.md).
-Base: `feat/phase-07-mechanical-p4-02` at `603bf5e5` (PR #565, auto-merge armed, not merged when this stage
-branched). Branch `feat/phase-07-mechanical-p4-03`.
+Base: `feat/phase-07-mechanical-p4-02` at `603bf5e5` (PR #565); after #565 merged as `3929afc8` (identical tree),
+rebased onto `main`. Branch `feat/phase-07-mechanical-p4-03`.
 
 Offline evidence only. No SketchUp process was started. The host case `M03` (fresh process on the reference model
 with Zone B under a rotated wrapper; the walkthrough's `serve`; native Undo and Redo of the delete; a native copy of
