@@ -400,6 +400,11 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     zones: [{ reference: window.previewHost.zones.filter(z => z.id === "zon_apt2")[0].reference,
       expected_values: { heater_ids: [] } }], slot: "heater_ids", item_id: "${EH3}" } }).code`);
   assert.equal(stale, "target.changed", "a stale heater list refuses");
+  const staleOther = await host(`window.previewHost.mechanicalAction({ name: "${PREFIX}serves.assign", params: {
+    zones: [{ reference: window.previewHost.zones.filter(z => z.id === "zon_apt2")[0].reference,
+      expected_values: { heater_ids: ["${EH1}"], ventilator_id: "vnt_Gg77Hh88Ii99" } }], slot: "heater_ids",
+    item_id: "${EH3}" } }).code`);
+  assert.equal(staleOther, "target.changed", "a stale guard on another slot refuses too");
   assert.deepEqual((await electric("serves")).zon_apt2, [EH1], "and writes nothing");
   await pane.getByRole("button", { name: "+ New Electric Heater", exact: true }).click();
   const newHeater = page.getByRole("dialog", { name: "New Electric Heater" });

@@ -80,7 +80,11 @@ function (panel, fields, systems, serves, equipment) {
       this.picker.held.bubble.trigger = this.triggers[this.picker.held.record.id];
     }
   };
-  Heaters.prototype.render = function (state, shown) { this.table.render(state, shown); };
+  /* Each repaint draws the Serves cells again, so the map holds only the rows on screen. */
+  Heaters.prototype.render = function (state, shown) {
+    this.triggers = Object.create(null);
+    this.table.render(state, shown);
+  };
   Heaters.prototype.guard = function () { return this.table.guard(); };
   Heaters.prototype.accepts = function (intent) { return this.table.accepts(intent); };
   Heaters.prototype.navigate = function (intent) { this.table.navigate(intent); };

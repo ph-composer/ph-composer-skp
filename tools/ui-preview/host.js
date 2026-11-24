@@ -862,10 +862,14 @@
       if (chosen.some(function (zone) { return !zone; })) {
         return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
       }
-      // A list read before another write refuses the whole command, as the host's guard does.
+      // Any slot read before another write refuses the whole command, as the host's guard does.
       if (params.zones.some(function (row, index) {
-        var expected = (row.expected_values || {})[params.slot];
-        return expected !== undefined && JSON.stringify(expected) !== JSON.stringify(lists[chosen[index].id] || []);
+        var zone = chosen[index].id, expected = row.expected_values || {};
+        var current = { ventilator_id: data.serves[zone] || null, hot_water_system_id: hotWater.serves[zone] || null,
+          hp_indoor_unit_ids: heatPumps.serves[zone] || [], heater_ids: data.electricHeaters.serves[zone] || [] };
+        return Object.keys(expected).some(function (slot) {
+          return JSON.stringify(expected[slot]) !== JSON.stringify(current[slot]);
+        });
       })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
       chosen.forEach(function (zone) {
         var list = (lists[zone.id] || []).filter(function (id) {

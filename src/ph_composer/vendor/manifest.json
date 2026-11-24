@@ -176,9 +176,9 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/mechanical/electric_heaters.js": {
-      "bytes": 5263,
+      "bytes": 5403,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "110723f9136a8c90e478080b2868390e3c4b8cb4f7b1be70b90fe7b6eee684e3"
+      "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
     },
     "html/features/mechanical/equipment_table.js": {
       "bytes": 18100,

@@ -78,7 +78,8 @@ the list slots in "what serves each Zone"), `docs/PRODUCT.md` ("Add electric hea
 
 ## Gate
 
-`make ci` on Ruby 3.2.2 (on the tree at `6182e297`, identical to the rebased `478507ec`) and on 2.7.2 (`make ci
+`make ci` on Ruby 3.2.2 and 2.7.2 on `a97eeba7` (the cycle 1 fixes): 3420 runs, 47714 assertions, 1 skip each, RBZ
+27358352 bytes installed. First, on Ruby 3.2.2 (on the tree at `6182e297`, identical to the rebased `478507ec`) and on 2.7.2 (`make ci
 RUBY=$(rbenv prefix 2.7.2)/bin/ruby`, at `478507ec`), each: "Ruby suite, 10 processes: 3420 runs, 47714 assertions,
 0 failures, 0 errors, 1 skips"; JS 1202 pass, 0 fail; Python "426 passed, 1 skipped"; hostkit "48 runs, 268
 assertions, 0 failures"; "RBZ verified: 774 files, 8890845 bytes, 27357935 bytes installed" (2.7.2: 27357929),
@@ -108,4 +109,16 @@ refusals (the panel validates before sending, and the heat pump branches share t
 the Python contract (the sibling records share it); the 100%/100% export case is covered by 60%/100% beside the
 CRUD test's two heaters at 100%.
 
-Codex gpt-6.2-sol: CODEX_PLACEHOLDER
+Codex gpt-6.2-sol: cycle 1 on `4c0f8d8c` ([review](https://github.com/ph-composer/ph-composer-skp/pull/573#pullrequestreview-6041237031)):
+5 P2, 2 P3; 5 fixed in `a97eeba7`, 2 declined. Fixed: conformance now checks only direct electric heating systems,
+so another section's boiler on a Room passes (Python test); the preview host refuses a stale list-slot guard (browser
+assertion); case `M09` exports before the delete and uncheck steps and undoes them; the guides say a missing heater
+blocks on an exported Zone and that PHX makes one device per heater per Building Segment. Declined: focus after a
+Serves save (the shared picker and table flow, the same on Ventilators and Units · Indoor; a follow-up for its own
+change) and 100.00000001% rounding to 100% (the stored 1.0 is in range; the shared percent parser).
+
+Codex gpt-6.2-sol cycle 2 on `a97eeba7` ([review](https://github.com/ph-composer/ph-composer-skp/pull/573#pullrequestreview-6041572759)):
+3 P2, 1 P3; 3 fixed in the next commit, which merges after the two-cycle cap unreviewed, 1 declined. Fixed: the
+preview host checks every supplied slot guard (browser assertion with a stale guard on another slot); `M09` cancels
+the refused 120% draft and clears the Locate filter before the delete; the Heaters view keeps Serves buttons only for
+the rows on screen. Declined again: the rounding above 100%, for the same reason.
