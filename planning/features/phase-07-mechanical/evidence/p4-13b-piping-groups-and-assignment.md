@@ -73,3 +73,17 @@ System, a same-role reassign, a stale pipe, an unknown type, nested and Zone-hel
 Declined: an unreadable record is invisible to the reference scan (thermal bridges' rule, no repair route this
 stage); shared path helpers stay in `Group::Target` (the pipe target composes them); 251 real Edges (the limit is
 exercised by lowering it, as thermal bridges do); reopen is a host step (H1).
+
+## Codex review
+
+- Cycle 1, gpt-6.2-sol on `2b6b8753`: 3 P1, 4 P2, 2 P3. Fixed in the next commit: a Piping group under a component
+  now refuses `target.wrong_hierarchy` in the shared write check, so reads, preview and both retargeters refuse it
+  before a write's Group-only scope does; a pipe or group record whose `user_data` or `extension_data` is not a JSON
+  object enters the reference scan without that map rather than failing every delete; a pipe record of another
+  schema version refuses `validation.failed` on assign rather than being downgraded; a malformed group record reads as
+  a selection row with no group and a `validation.failed` refusal, and refuses a pipe write; both write steps resolve
+  through one child index at apply; `pipe_types.delete` names the pipe rewrite in its side effects; the assign
+  schema says when a role's values are kept. Declined: clearing many distinct ids runs one engine reference check per
+  id, as thermal bridges' clear does, since the engine has no batch removal check (a core follow-up); metadata reads
+  and a guarded metadata update for groups and pipes are not in the stage doc's operations (a follow-up for Ed,
+  `docs/USER_DATA.md` says "Not yet").

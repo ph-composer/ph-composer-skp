@@ -27,8 +27,9 @@ module PhComposer
 
         # Resolve and check every Edge before writing any: an Edge that changed since planning aborts the command.
         def apply(model, _slots)
+          index = Zones::ChildLookup.new
           resolved = @updates.map do |update|
-            edge = Target.locate(model, update.fetch("reference"), :mutable => true).entity
+            edge = Target.locate(model, update.fetch("reference"), :mutable => true, :index => index).entity
             unless STORE.read(edge) == update.fetch("before")
               raise CodedError.new("target.changed", "An Edge changed after the command was planned.")
             end

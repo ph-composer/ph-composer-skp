@@ -112,7 +112,8 @@ module PhComposer
                        :refuses => DELETE, :params => DELETE_PARAMS,
                        :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{KIND.label}", :preconditions => EXISTS,
-                       :side_effects => "Deletes one definition and its metadata; Undo restores both.",
+                       :side_effects => "Deletes one definition and its metadata and, with replacement_id or null, " \
+                                        "rewrites every pipe assignment naming it; Undo restores all of them.",
                        :examples => [{ "id" => Shapes.example_id(KIND) },
                                      { "id" => Shapes.example_id(KIND),
                                        "replacement_id" => "ppt_Zy98Xw76Vu54" }]) do |request, proposal|

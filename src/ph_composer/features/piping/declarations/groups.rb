@@ -7,7 +7,7 @@ module PhComposer
     module GroupRegistration
       PREFIX = "#{FEATURE_ID}.groups".freeze
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
-                  target.shared_definition target.wrong_kind validation.failed].freeze
+                  target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
       CREATE = %w[target.not_found validation.failed].freeze
       LINK = (LOCATE + %w[gesture.too_large piping.group_in_zone piping.group_nested]).freeze
       READ = %w[record.unreadable validation.failed].freeze

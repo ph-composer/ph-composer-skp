@@ -25,6 +25,7 @@ module PhComposer
           found = []
           each_group(model) do |group, path|
             record, = Group.read(group)
+            record &&= Group.scannable(record)
             found << Records::ReferenceEntry.new(:kind => GROUP_KIND, :key => path, :record => record) if record
           end
           found
@@ -71,9 +72,14 @@ module PhComposer
           end
         end
 
-        # What a write through these containers meets, as `{ code, message }`, or nil: a locked step, or storage
-        # another placement draws (a pasted Group not yet made unique, a component placed twice).
+        # What a write through these containers meets, as `{ code, message }`, or nil: a component on the path (a
+        # Piping group sits at the root or in plain Groups, and a write's scope is a Group path), a locked step, or
+        # storage another placement draws (a pasted Group not yet made unique).
         def write_refusal(containers)
+          unless containers.all? { |entity| entity.is_a?(Sketchup::Group) }
+            return { "code" => "target.wrong_hierarchy",
+                     "message" => "A Piping group sits at the Model root or in plain Groups, not in a component." }
+          end
           if containers.any? { |entity| entity.respond_to?(:locked?) && entity.locked? }
             return { "code" => "target.locked", "message" => "A Group on the path is locked; unlock it first." }
           end

@@ -28,6 +28,7 @@ module PhComposer
           found = []
           each_tagged(model) do |edge, path|
             record, = Group.read(edge, STORE)
+            record &&= Group.scannable(record)
             found << Records::ReferenceEntry.new(:kind => PIPE_KIND, :key => path, :record => record) if record
           end
           found
@@ -67,8 +68,10 @@ module PhComposer
             raise CodedError.new("target.wrong_hierarchy", "The Edge is not in the Piping group the reference names.")
           end
 
-          _group, problem = Group.read(containers.last)
+          group_record, problem = Group.read(containers.last)
           raise CodedError.new("record.unreadable", "The Piping group's #{problem}") if problem
+
+          Group.validate!(group_record)
 
           Group::Target.raise_refusal(Group::Target.nested_refusal(containers[0...-1]))
           Group::Target.raise_refusal(Group::Target.write_refusal(containers)) if mutable

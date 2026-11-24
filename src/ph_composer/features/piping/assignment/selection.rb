@@ -66,16 +66,24 @@ module PhComposer
           end
 
           group_record, group_problem = Group.read(group)
+          stored = unreadable(group_problem) || unreadable(problem)
+          invalid = group_record && Group::RECORD_KIND.problems(group_record).first
+          stored ||= { "code" => "validation.failed", "message" => "The Piping group's #{invalid}" } if invalid
+          group_record = nil if group_problem || invalid
           base.merge("reference" => { "group_path" => path[0...-1], "entity_path" => path,
                                       "entity_id" => Assignment.identity(record) },
                      "group" => group_record && { "group_id" => group_record["id"], "group_path" => path[0...-1],
                                                   "hot_water_system_id" => group_record["hot_water_system_id"] },
-                     "reason" => nil, "write_refusal" => refusal(parent, zone, group_problem || problem))
+                     "reason" => nil, "write_refusal" => refusal(parent, zone, stored))
+        end
+
+        def unreadable(problem)
+          problem && { "code" => "record.unreadable", "message" => problem }
         end
 
         # What a write to an Edge in the open Piping group meets: the group nested in another or held by a Zone, a
-        # locked or shared step, or text on the group or the Edge that is not a JSON object.
-        def refusal(parent, zone, problem)
+        # component, locked or shared step, or a stored record a write cannot take.
+        def refusal(parent, zone, stored)
           nested = Group::Target.nested_refusal(parent[0...-1])
           return nested if nested
           if zone
@@ -83,7 +91,7 @@ module PhComposer
                                                                   "#{zone.fetch('name')}; move it out first." }
           end
 
-          Group::Target.write_refusal(parent) || (problem && { "code" => "record.unreadable", "message" => problem })
+          Group::Target.write_refusal(parent) || stored
         end
 
         def assignable?(row)

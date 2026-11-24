@@ -23,6 +23,12 @@ module PhComposer
           request.engine.find(PIPE_TYPE_KIND, pipe_type_id)
           allocate = Records::Identity.allocator(request, request.params)
           updates = resolve(request, targets).filter_map do |reference, before|
+            if before && before["schema_version"] != 1
+              raise CodedError.new("validation.failed", "An Edge's pipe assignment is schema version " \
+                                                        "#{before['schema_version'].inspect}, which this version " \
+                                                        "cannot rewrite.")
+            end
+
             after = (before || {}).slice("id", "user_data", "extension_data")
             after["id"] = allocate.call("ppe") unless Assignment.identity(after)
             kept = before && before["role"] == role ? before.slice(*ROLE_VALUES.fetch(role).keys) : {}

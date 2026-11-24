@@ -85096,7 +85096,7 @@ Undo step: Link Piping Group. Rewrites each group's hot_water_system_id.
 
 Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Piping group. Each target carries the reference and values groups.all last read.
 
-Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -85206,7 +85206,7 @@ Undo step: Unlink Piping Group. Sets each group's hot_water_system_id to null.
 
 Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Piping group. Each target carries the reference and values groups.all last read.
 
-Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -85563,7 +85563,7 @@ Example params:
 
 Delete one Pipe Type. A type a pipe still uses refuses as reference.in_use unless replacement_id names another type to take its place, or is null to clear it. Owner: `ph_composer.piping`.
 
-Undo step: Delete Pipe Type. Deletes one definition and its metadata; Undo restores both.
+Undo step: Delete Pipe Type. Deletes one definition and its metadata and, with replacement_id or null, rewrites every pipe assignment naming it; Undo restores all of them.
 
 Before calling: The Pipe Type exists and is readable.
 
@@ -86440,7 +86440,7 @@ Params:
         "twig",
         "recirculation"
       ],
-      "description": "trunk, branch, twig or recirculation. A role's values not given take their defaults; values of another role refuse as params.invalid."
+      "description": "trunk, branch, twig or recirculation. A role's values not given keep the Edge's own when it already has this role, else take their defaults; values of another role refuse as params.invalid."
     },
     "multiplier": {
       "type": "integer",

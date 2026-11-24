@@ -49,6 +49,12 @@ module PhComposer
           "extension_data" => {} }
       end
 
+      # `record` as the engine's reference scan reads it: a metadata map that is not a JSON object holds no extension
+      # envelope and so names nothing, and is left out rather than failing every delete in the Model.
+      def scannable(record)
+        record.reject { |key, value| %w[user_data extension_data].include?(key) && !value.is_a?(Hash) }
+      end
+
       def piping_group?(entity)
         entity.is_a?(Sketchup::Group) && STORE.marks?(entity)
       end

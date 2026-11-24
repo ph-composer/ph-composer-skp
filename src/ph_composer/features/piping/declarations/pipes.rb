@@ -7,7 +7,7 @@ module PhComposer
     module PipeRegistration
       PREFIX = "#{FEATURE_ID}.pipes".freeze
       ASSIGN = (GroupRegistration::LOCATE + %w[gesture.too_large piping.group_in_zone piping.group_nested
-                                               piping.outside_group target.wrong_hierarchy]).freeze
+                                               piping.outside_group]).freeze
       CLEAR = (ASSIGN + %w[copy.rule_missing reference.in_use]).freeze
       SELECTION = %w[gesture.too_large record.unreadable validation.failed].freeze
       SELECTION_PAGE = (SELECTION + %w[query.cursor_expired query.limit_invalid]).freeze
@@ -29,8 +29,9 @@ module PhComposer
         "targets" => TARGETS,
         "pipe_type_id" => Shapes.id(PipeType::KIND.id_prefix, "The Pipe Type every Edge gets."),
         "role" => { "type" => "string", "enum" => Assignment::ROLES,
-                    "description" => "trunk, branch, twig or recirculation. A role's values not given take their " \
-                                     "defaults; values of another role refuse as params.invalid." }
+                    "description" => "trunk, branch, twig or recirculation. A role's values not given keep the " \
+                                     "Edge's own when it already has this role, else take their defaults; values " \
+                                     "of another role refuse as params.invalid." }
       }.merge(Assignment::ROLE_SCHEMAS), :optional => ROLE_KEYS).freeze
       REFUSAL = GroupRegistration::REFUSAL
       ROW = Shapes.object({

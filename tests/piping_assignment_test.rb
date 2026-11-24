@@ -108,6 +108,32 @@ class PipingAssignmentTest < PhComposerTestCase
                  assign([reference([660, 661])], @pex, "twig").values_at("status", "code")
   end
 
+  def test_a_component_wrapper_a_newer_record_or_malformed_metadata_refuses_or_reads_without_breaking_other_writes
+    definition = Sketchup::ComponentDefinition.new(
+      Sketchup::Entities.new([piping_group(671, "ppg_HHHHHHHHHHHH", [edge(672)])])
+    )
+    @model.entities << Sketchup::ComponentInstance.new(670, definition)
+    assert_equal %w[refused target.wrong_hierarchy none],
+                 assign([reference([670, 671, 672])], @pex, "twig").values_at("status", "code", "effect")
+
+    STORE.write(@edges.first, "id" => "ppe_NEWERNEWERNE", "schema_version" => 2, "pipe_type_id" => @pex,
+                              "role" => "twig", "future" => true)
+    assert_equal %w[refused validation.failed], assign([target(@edges.first)], @copper, "twig")
+      .values_at("status", "code")
+    assert_equal 2, STORE.read(@edges.first).fetch("schema_version")
+
+    STORE.write(@edges[1], "id" => "ppe_NULLMAPNULLM", "schema_version" => 1, "pipe_type_id" => @pex,
+                           "role" => "twig", "extension_data" => nil)
+    spare = invoke("ph_composer.mechanical.hot_water_systems.create", "values" => { "name" => "Spare" })
+    assert_equal "committed", invoke("ph_composer.mechanical.hot_water_systems.delete",
+                                     "id" => spare.dig("value", "id"))["effect"]
+
+    P::Group::STORE.write(@group, "schema_version" => 1, "hot_water_system_id" => @hws)
+    row = select(@edges[2]).fetch("edges").first
+    assert_nil row.fetch("group")
+    assert_equal "validation.failed", row.dig("write_refusal", "code")
+  end
+
   def test_clear_removes_the_record_and_a_split_edge_reads_two_pipes_with_one_id
     assign([target(@edges.first)], @pex, "twig")
     split = edge(604)

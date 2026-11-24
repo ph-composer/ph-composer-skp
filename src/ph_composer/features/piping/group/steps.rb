@@ -49,8 +49,9 @@ module PhComposer
         end
 
         def apply(model, _slots)
+          index = Zones::ChildLookup.new
           resolved = @updates.map do |update|
-            group = Target.locate(model, update.fetch("reference"), :mutable => true).entity
+            group = Target.locate(model, update.fetch("reference"), :mutable => true, :index => index).entity
             unless STORE.read(group) == update.fetch("before")
               raise CodedError.new("target.changed", "A Piping group changed after the command was planned.")
             end
