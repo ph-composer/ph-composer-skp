@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 90
+    MINOR = 91
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -552,7 +552,14 @@ module PhComposer
                     "ph_composer.mechanical.serves rows gain building_segment, the Segment's name. " \
                     "ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. " \
                     "ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a " \
-                    "Ventilator or a Zone carry locate." }
+                    "Ventilator or a Zone carry locate." },
+      { "minor" => 91, "date" => "2026-11-24",
+        "change" => "ph_composer.mechanical.hot_water_systems, hot_water_heaters and hot_water_tanks are new, each " \
+                    "with list, all, a snapshot section, create, update, duplicate and delete. " \
+                    "ph_composer.mechanical.zone_serves moves to schema 2 with the hot_water_system_id slot, and " \
+                    "serves rows gain mechanical.zone_no_hot_water. The export section " \
+                    "ph_composer.mechanical.export.hot_water is new, and ph_composer.mechanical.preflight adds its " \
+                    "rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

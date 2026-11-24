@@ -899,7 +899,8 @@ Ventilators are read either way.
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
 `ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
-(`ventilator_id`, null for none), the `items` the slots name with their names, and `findings`.
+(`ventilator_id` and `hot_water_system_id`, null for none), the `items` the slots name with their
+names, and `findings`.
 A Zone served by nothing reads the same whether it stores no payload or an emptied one.
 
 Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
@@ -915,7 +916,7 @@ and leaves other features' data on the Zone, such as its Program, as it was. A c
 what serves it.
 
 Findings: `mechanical.zone_unventilated` on a Zone in a Building Segment with no Ventilator,
-`mechanical.zone_left_out` on a served Zone in no Building Segment, whose Room the export leaves out,
+`mechanical.zone_no_hot_water` on one with no Hot Water System, `mechanical.zone_left_out` on a served Zone in no Building Segment, whose Room the export leaves out,
 and `mechanical.item_missing` on a slot naming a Ventilator that is not in the Model, which only a
 Zone written outside these actions can carry; it is the one that blocks export. Assign with
 `replace: true`, or clear, to repair it.
@@ -945,6 +946,72 @@ reloads one system for them and PHX makes one device.
    `ventilation_unit` with the unit identifier and the Ventilator's values. The report's
    "Mechanical: Ventilators" section lists each Ventilator with the Zones it serves, its electric
    efficiency in Wh/m³, or W/cfm when the report is in IP units.
+
+### Mechanical: hot water
+
+Hot water is three catalogs: Hot Water Systems, and the Heaters and Tanks that each name one System by
+`hot_water_system_id`. A System serves Zones as a Ventilator does; its Heaters and Tanks reach a Room
+through it. Read `ph_composer.mechanical.hot_water_systems.list`, `ph_composer.mechanical.hot_water_heaters.list`
+and `ph_composer.mechanical.hot_water_tanks.list`, a bounded page at a time; names are unique within
+each. Create a System first with `ph_composer.mechanical.hot_water_systems.create`, giving `name` and,
+if you know it, `number_tap_points` (1 or more; leave it out to let the piping count them). Then create its Tanks and Heaters with
+`ph_composer.mechanical.hot_water_tanks.create` and `ph_composer.mechanical.hot_water_heaters.create`,
+each giving `name` and `hot_water_system_id`; a System that does not exist is refused as
+`reference.invalid`.
+
+A Tank's `role` is `storage`, `buffer` or `solar`, and decides the slot it fills at export: storage
+Tanks fill `tank_1` then `tank_2`, in name order ignoring case; a buffer Tank `tank_buffer`; a solar Tank
+`tank_solar`. A Tank with no free slot of its role reads `slot` null and
+`mechanical.tank_unslotted`, and the export leaves it out. Its other values take honeybee-ph's
+defaults unless you give them: `tank_type` `2-DHW ONLY`, 300 L, standby losses 4.0 W/K at a
+fraction of 0.3, 20 °C room and 60 °C water.
+
+A Heater's `variant` is `electric`, `heat_pump_annual`, `heat_pump_monthly` or `heat_pump_inside`,
+and picks its efficiency values: `total_system_perf_ratio` for an annual heat pump, `cop_1`,
+`ambient_temp_1_c`, `cop_2` and `ambient_temp_2_c` for a monthly one, `annual_energy_factor` for one
+inside the envelope, none for electric. Each is required for its variant and refused on any other,
+so to change the variant give the new values and null the old in the same update. A new Heater is
+electric, covering all the hot water (`percent_coverage` 1.0), in conditioned space; a monthly heat
+pump takes COP 2.5 at -8.333 °C and at 8.333 °C unless you give them.
+
+Edit any of them with its `update`, copying `expected_values` from what you read; duplicate and
+delete work as for Ventilators. Assign a System to Zones with `ph_composer.mechanical.serves.assign`,
+`slot` `hot_water_system_id`: a Zone has one, and another is refused as `mechanical.slot_filled`
+until you send `replace: true`. `ph_composer.mechanical.hot_water_systems.delete` is refused as
+`reference.in_use` while a Zone, Heater or Tank names the System. Give `replacement_id` to move all
+of them to another System in one Undo step; `replacement_id: null` empties the Zones but still
+refuses while a Heater or Tank names it, so move or delete those first.
+
+System rows carry the Zones each serves, `heater_count`, `tank_count`, and `recirculation`
+(`temperature_c`, `hours`), read-only: honeybee-ph works them out from recirculation piping, and
+gives 60 °C and 24 h while there is none, which is what the export carries. Their `findings` add
+`mechanical.hot_water_pooled`, info, when two served Systems share a Building Segment: WUFI-Passive
+and METr pool their tanks and heaters and keep one tap point count. A System's `user_data` is not
+exported, since honeybee-ph's hot water system has none; a Tank's and a Heater's ride on their
+objects.
+
+### Mechanical: the hot water export
+
+The export writes each served Zone's Room a hot water system with the System's id as its identifier,
+its tap points, its Tanks in their slots and its Heaters, each under its own record's id, so the
+HBJSON carries the same system on every Room the System serves and PHX makes each tank and heater
+once.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`; its hot water rows name the hot water
+   export as their `section`. `mechanical.item_missing` blocks: a Zone names a
+   System that is not in the Model. `mechanical.zone_no_hot_water` names a Zone written with no
+   System, `mechanical.item_unserved` a System that serves no Zone, `mechanical.zone_left_out` a
+   served Zone in no Building Segment, `mechanical.item_across_segments` a System on Zones in two
+   Building Segments, `mechanical.tank_unslotted` a Tank left out and
+   `mechanical.hot_water_pooled` two Systems in one Building Segment. None of these blocks. A row
+   about a Zone carries `locate` to the Zones tab.
+2. Export, then read back. The result gives `hot_water`, one row per (System, Zone) pair:
+   `system_identifier`, `number_tap_points`, `heater_identifiers`, each slot's tank identifier and
+   capacity in litres, and `digest`. In the HBJSON each of those Rooms has
+   `properties.ph_hvac.hot_water_system` with that identifier, the Tanks in `tank_1`, `tank_2`,
+   `tank_buffer` and `tank_solar`, and the Heaters under `heaters`. A System's
+   `piping_calc_method` is not written while the pinned honeybee-ph has no field for it; the run
+   then notes `mechanical.method_not_exported`.
 
 ### Library records
 

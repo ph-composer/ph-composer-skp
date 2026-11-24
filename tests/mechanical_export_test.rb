@@ -154,7 +154,7 @@ class MechanicalExportTest < PhComposerTestCase
     reference
     group = box_group("Zone B")
     record = PhComposer::Zones::ZONE_STORE.read(group)
-    envelope = record.dig("extension_data", M::Serves::NAMESPACE).merge("schema_version" => 2)
+    envelope = record.dig("extension_data", M::Serves::NAMESPACE).merge("schema_version" => 99)
     PhComposer::Zones::ZONE_STORE.write(group, record.merge("extension_data" => { M::Serves::NAMESPACE => envelope }))
     assert_equal "extension.schema_unsupported", assert_raises(PhComposer::Export::Blocked) { extract }.code
     assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
@@ -187,7 +187,7 @@ class MechanicalExportTest < PhComposerTestCase
     reference
     group = box_group("Zone B")
     record = PhComposer::Zones::ZONE_STORE.read(group)
-    envelope = M::Serves::Payload::EXTENSION.envelope("ventilator_id" => "vnt_ZZZZZZZZZZZZ")
+    envelope = M::Serves::Payload::EXTENSION.envelope(M::Serves::EMPTY.merge("ventilator_id" => "vnt_ZZZZZZZZZZZZ"))
     PhComposer::Zones::ZONE_STORE.write(group, record.merge("extension_data" => { M::Serves::NAMESPACE => envelope }))
     error = assert_raises(PhComposer::Export::Blocked) { extract }
     assert_equal "mechanical.item_missing", error.code
@@ -334,8 +334,10 @@ class MechanicalExportTest < PhComposerTestCase
               .map { |row| row.values_at("code", "object_id") }
   end
 
+  # The Ventilator export's rows of the mechanical preflight; the hot water rows are the hot water export test's.
   def preflight_rows
-    completed(API.query(:context => @context, :name => X::PREFLIGHT, :params => {})).fetch("findings")
+    rows = completed(API.query(:context => @context, :name => M::Preflight::NAME, :params => {})).fetch("findings")
+    rows.select { |row| row.fetch("section") == X::SECTION }
   end
 
   # The document with the ids each run mints renumbered: Building Segments and Ventilators by name, so the golden

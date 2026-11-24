@@ -76,6 +76,8 @@ from the record down. "Omitted" means the map stays in the Model and the export 
 | Dwelling | `{kind: "ph_composer.programs.dwelling", id}` | `ph_composer.programs.dwellings.all`, `ph_composer.records.list` | Core action | Duplicate copies the map; a Dwelling deleted when its last Zone leaves lists it in `removed_user_data` | Omitted: a Dwelling is written as the shared dwelling on its Rooms' People, which holds no map | Not a library kind |
 | Climate | `{kind: "ph_composer.climate.climate", id: "clm_AAAAAAAAAAAA"}`, one per Model | `ph_composer.records.detail`, `ph_composer.records.list` | Core action | Editing and restoring the values keep it, and so does replacing the station; Clear deletes it with the climate, and Undo brings it back | Omitted: the climate is written as the Building Segments' `Site`, and its map stays in the Model | Not a library kind |
 | Ventilator | `{kind: "ph_composer.mechanical.ventilator", id}` | `ph_composer.mechanical.ventilators.list`, `ph_composer.mechanical.ventilators.all`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map; what serves a Zone is stored on the Zone and keeps no map of its own | Its `Ventilator` object, inside the ventilation system of every Room it serves. A Ventilator that serves no exported Zone is not written, and its map stays in the Model | Not a library kind |
+| Hot Water System | `{kind: "ph_composer.mechanical.hot_water_system", id}` | `ph_composer.mechanical.hot_water_systems.list`, `ph_composer.mechanical.hot_water_systems.all`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted: honeybee-ph's hot water system holds no map, so the export notes `export.metadata_omitted` and the map stays in the Model | Not a library kind |
+| Hot Water Heater, Hot Water Tank | `{kind: "ph_composer.mechanical.hot_water_heater", id}`, `hot_water_tank` | `ph_composer.mechanical.hot_water_heaters.list`, `ph_composer.mechanical.hot_water_tanks.list`, their `all` reads, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map; a System's delete with a replacement moves them and keeps their maps | Its heater or tank object, inside the hot water system of every Room its System serves. One whose System serves no exported Zone, or a Tank with no free slot, is not written, and its map stays in the Model | Not a library kind |
 
 Definitions and Attached zones are records stored in the Model. Zones, Faces, Window Units, Spaces,
 Thermal Bridge Edge assignments and shading marks are stored on their SketchUp entities, so a copy made in
@@ -103,7 +105,7 @@ membership stamps on Faces, Zone option settings, the Windows, Spaces and Zones 
 Window definitions and panes PH-Composer generates, thermal-bridge runs (calculated from Edges),
 the site and design temperatures (Model settings), the Programs settings stored on Zones and
 Building Segments (assignments, Single dwelling, Phius certification and airtightness), what serves
-each Zone (its Ventilator, stored on the Zone, whose map is the Zone's own), the export snapshot, and
+each Zone (its Ventilator and Hot Water System, stored on the Zone, whose map is the Zone's own), the export snapshot, and
 library provider, connection and agent-access state.
 
 The climate data folders are kept on this computer, not in a Model: in PH-Composer's settings file,

@@ -9,16 +9,27 @@
 # and validates on its own. Serves sits above the families and names them:
 #
 #   ventilators/    the Ventilator kind, its operations and its reads
+#   hot_water/      the Hot Water System, Heater and Tank kinds, their operations and reads, and the pure tank slotting
 #   serves/         what serves each Zone: a payload on the Zone record that Zones stages, Assign and Clear, the
 #                   Zone half of an item's delete, the reads with their findings and the airflow balance
 #   codes.rb        the `mechanical` noun's codes
 #   declarations/   what the feature registers: the shapes every family shares, Serves, then one file per family
+#   export_zones.rb      the Zones every export plan works over, each with its slots, and the item findings they share
 #   ventilation_plan.rb  the Ventilator export worked out in pure Ruby: its pairs and findings
-#   export.rb            the Ventilator export section, the preflight that reads the same plan, and the report
+#   export.rb            the Ventilator export section, which claims the Serves payload for the feature, and its report
+#   hot_water_plan.rb    the hot water export worked out in pure Ruby: its pairs, tank slots and findings
+#   hot_water_export.rb  the hot water export section
+#   preflight.rb         the one preflight query, each family's rows from its own plan
 #   colour_modes.rb      By ventilator: each served Zone in its item's colour
 require_relative "ventilators/schema"
 require_relative "ventilators/operations"
 require_relative "ventilators/reads"
+require_relative "hot_water/systems"
+require_relative "hot_water/heaters"
+require_relative "hot_water/tanks"
+require_relative "hot_water/slotting"
+require_relative "hot_water/operations"
+require_relative "hot_water/reads"
 require_relative "codes"
 require_relative "serves/payload"
 require_relative "serves/state"
@@ -28,8 +39,13 @@ require_relative "serves/reads"
 require_relative "declarations/shapes"
 require_relative "declarations/serves"
 require_relative "declarations/ventilators"
+require_relative "declarations/hot_water"
+require_relative "export_zones"
 require_relative "ventilation_plan"
 require_relative "export"
+require_relative "hot_water_plan"
+require_relative "hot_water_export"
+require_relative "preflight"
 require_relative "colour_modes"
 
 module PhComposer
@@ -42,7 +58,10 @@ module PhComposer
                                                              ph_composer.programs])
       ServesRegistration.install(feature)
       VentilatorRegistration.install(feature)
+      HotWaterRegistration.install(feature)
       VentilationExport.install(feature)
+      HotWaterExport.install(feature)
+      Preflight.install(feature)
       ColourModes.install(feature)
     end
   end

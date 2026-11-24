@@ -16,37 +16,26 @@ module PhComposer
                        subsoil_heat_exchange_efficiency preheated_intake_temperature_c].freeze
       UNIT_SUFFIX = "_unit"
 
-      # One Zone, once per Zone id: `segment` names its Building Segment (nil when it is in none), `exported`
-      # says whether the export writes its Room, and `values` are its Serves slots.
-      Zone = Struct.new(:id, :name, :segment, :exported, :values, keyword_init: true) do
-        def label
-          name || id
-        end
-
-        def ventilator_id
-          values.fetch("ventilator_id")
-        end
-      end
-      # `record_id` is the row's object: a Zone for a Zone's finding, a Ventilator for an item's.
-      Finding = Struct.new(:code, :record_id, :message, :blocks, keyword_init: true)
+      SLOT = "ventilator_id"
+      Finding = ExportZones::Finding
       Plan = Struct.new(:pairs, :findings, keyword_init: true)
 
       module_function
 
-      # `zones` are Zone values, one per Zone id; `ventilators` maps each stored Ventilator's id to its values,
-      # with its `name` and, where the caller passes it through, its `user_data`. `unreadable` are the ids of stored
-      # Ventilators that cannot be read, which the caller reports itself: a Zone naming one is not missing one.
+      # `zones` are ExportZones::Zone values, one per Zone id; `ventilators` maps each stored Ventilator's id to its
+      # values, with its `name` and, where the caller passes it through, its `user_data`. `unreadable` are the ids of
+      # stored Ventilators that cannot be read, which the caller reports itself: a Zone naming one is not missing one.
       def call(zones:, ventilators:, unreadable: [])
         exported, left_out = zones.sort_by(&:id).partition(&:exported)
         Plan.new(:pairs => pairs(exported, ventilators),
                  :findings => zone_findings(exported, ventilators, unreadable) +
-                              item_findings(exported, left_out, ventilators))
+                              ExportZones.item_findings(exported, left_out, ventilators, SLOT, "Ventilator"))
       end
 
       def pairs(zones, ventilators)
         zones.filter_map do |zone|
-          item = ventilators[zone.ventilator_id]
-          item && pair(zone.ventilator_id, item, zone)
+          item = ventilators[zone.slot(SLOT)]
+          item && pair(zone.slot(SLOT), item, zone)
         end.sort_by { |row| row.fetch("id") }
       end
 
@@ -61,7 +50,7 @@ module PhComposer
       # An exported Zone with no Ventilator, or one naming a Ventilator that is not stored.
       def zone_findings(zones, ventilators, unreadable)
         zones.filter_map do |zone|
-          id = zone.ventilator_id
+          id = zone.slot(SLOT)
           if id.nil?
             Finding.new(:code => Codes::ZONE_UNVENTILATED, :record_id => zone.id, :blocks => false,
                         :message => "Zone #{zone.label} has no Ventilator.")
@@ -70,39 +59,6 @@ module PhComposer
                         :message => "ventilator_id on Zone #{zone.label} names #{id}, which is not in the Model.")
           end
         end
-      end
-
-      # Per Ventilator: serving no Zone, each served Zone the export leaves out, and Zones in more than one
-      # Building Segment.
-      def item_findings(exported, left_out, ventilators)
-        ventilators.keys.sort.flat_map do |id|
-          name = ventilators.fetch(id).fetch("name")
-          served = exported.select { |zone| zone.ventilator_id == id }
-          gone = left_out.select { |zone| zone.ventilator_id == id }
-          next [unserved(id, name)] if served.empty? && gone.empty?
-
-          gone.map { |zone| left_out(id, name, zone) } + across_segments(id, name, served)
-        end
-      end
-
-      def unserved(id, name)
-        Finding.new(:code => Codes::ITEM_UNSERVED, :record_id => id, :blocks => false,
-                    :message => "#{name} serves no Zone, so nothing exports it.")
-      end
-
-      def left_out(id, name, zone)
-        Finding.new(:code => Codes::ZONE_LEFT_OUT, :record_id => id, :blocks => false,
-                    :message => "#{name} serves Zone #{zone.label}, which is in no Building Segment, so the export " \
-                                "leaves that Room out.")
-      end
-
-      def across_segments(id, name, served)
-        segments = served.map(&:segment).uniq.sort
-        return [] if segments.length < 2
-
-        [Finding.new(:code => Codes::ITEM_ACROSS_SEGMENTS, :record_id => id, :blocks => false,
-                     :message => "#{name} serves Zones in #{segments.length} Building Segments " \
-                                 "(#{segments.join(', ')}); each Segment's model carries the whole Ventilator.")]
       end
     end
   end

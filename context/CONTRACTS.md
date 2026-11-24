@@ -852,10 +852,38 @@ the source `derived` and a copy of the `user_data`; `delete` is the engine's gua
 `export_ready` and `export_blockers`, empty for a Ventilator. Its `user_data` and extension payloads are written with
 `ph_composer.records.update_metadata`; the export carries the `user_data` to the honeybee-ph `Ventilator`.
 
-**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 1)
+- **Hot water** is three flat kinds (`features/mechanical/hot_water/`), each with the shared name, notes, datasheet
+  links and source, `manufacturer` and `model`, `schema_version` 1. A **Hot Water System**
+  (`ph_composer.mechanical.hot_water_system`, `hws_`) adds `number_tap_points` (integer, at least 1, or absent: honeybee-ph reads 0 as unset and counts the piping instead) and
+  `piping_calc_method` (1 to 4, or absent); it stores no recirculation temperature or hours, which honeybee-ph works
+  out from recirculation piping. A **Hot Water Heater** (`hot_water_heater`, `hwh_`) and a **Hot Water Tank**
+  (`hot_water_tank`, `hwt_`) each name their System in `hot_water_system_id`, a required declared `one` reference.
+  A Heater adds `variant` (`electric` by default, `heat_pump_annual`, `heat_pump_monthly`, `heat_pump_inside`),
+  `percent_coverage` (0 to 1, default 1.0), `in_conditioned_space` (default true) and its variant's efficiency
+  values, each required for its variant and absent for every other: `total_system_perf_ratio`; `cop_1`,
+  `ambient_temp_1_c`, `cop_2`, `ambient_temp_2_c` (a new monthly heat pump takes honeybee-ph's 2.5 at -8.333 °C and
+  8.333 °C); `annual_energy_factor`. A Tank adds `role` (`storage` by default, `buffer`, `solar`) and honeybee-ph's
+  tank values under their units and defaults: `tank_type` (`2-DHW ONLY`), `quantity` 1, `in_conditioned_space`
+  true, `solar_connection` false, `solar_losses_w` 0, `storage_loss_rate_w_k` 0, `storage_capacity_l` 300,
+  `standby_losses_w_k` 4.0, `standby_fraction` 0.3, `room_temp_c` 20 and `water_temp_c` 60.
+
+Each hot water kind has `ph_composer.mechanical.hot_water_systems`, `hot_water_heaters` or `hot_water_tanks`
+`.list`, `.all` (also its snapshot section), `create`, `update`, `duplicate` and `delete`, one Undo step each, with
+the Ventilator's rules for names, guards and copies. **Tank slots** are worked out by the pure `HotWater::Slotting`
+over one System's Tanks: storage Tanks fill `tank_1` then `tank_2`, a buffer Tank `tank_buffer`, a solar Tank
+`tank_solar`, each role's Tanks taken by name ignoring case, then id; a Tank with no free slot of its role is unslotted. A Tank
+row carries its `slot` (null when unslotted, with `mechanical.tank_unslotted`); a System row carries the Zones it
+serves, `heater_count`, `tank_count`, read-only `recirculation` (`temperature_c` 60 and `hours` 24, honeybee-ph's
+values with no recirculation piping, `from_piping` false) and `findings`: `mechanical.item_unserved`,
+`mechanical.zone_left_out` and `mechanical.hot_water_pooled` (info, two served Systems in one Building Segment).
+`hot_water_systems.delete` without `replacement_id` refuses `reference.in_use` while a Zone, Heater or Tank names the
+System; with an id, the Zones' slots move through Serves and each Heater and Tank is a guarded edit to the
+replacement, in one proposal; with null the Zones' slots empty, and a Heater or Tank still naming the System refuses.
+
+**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 2)
 on the Zone record, as Programs keeps a Zone's assignment ("Occupancy"): no record, id or reference target of its
 own. Its payload holds one slot per family, `ventilator_id` (a `vnt_` id or null, a declared `one` reference to the
-Ventilator kind); a later family adds its slot (a `many` slot is a list holding each id once) and moves the version.
+Ventilator kind) and, since schema version 2, `hot_water_system_id` (an `hws_` id or null, `one`); a later family adds its slot (a `many` slot is a list holding each id once) and moves the version.
 The validator takes a whole payload: every slot present, each id of its slot's kind or null, no other key. It is
 `required`: the Ventilator export claims it (below), so a payload this version does not understand blocks the export.
 A Zone served by nothing stores no payload or one whose every slot is empty; the reads answer both alike.
@@ -881,7 +909,7 @@ routes included, refuses a slot naming no stored item as `reference.invalid`.
 `serves.all` (the snapshot section `ph_composer.mechanical.serves`) and the bounded `serves.list` answer each Zone
 occurrence with its `slots`, the `items` they name with their names, the stored payload's status and `findings`
 (`{code, severity, message, blocks_export}`): `mechanical.zone_unventilated` (a Zone in a Building Segment with no
-Ventilator, a warning), `mechanical.zone_left_out` (a served Zone in no Building Segment, info; such a Zone is never
+Ventilator, a warning), `mechanical.zone_no_hot_water` (one with no Hot Water System, a warning), `mechanical.zone_left_out` (a served Zone in no Building Segment, info; such a Zone is never
 unventilated) and `mechanical.item_missing` (a slot naming an item not in the Model, which only a Zone record written
 outside the engine, such as one pasted from another Model, can carry; an error that blocks export).
 `ventilators.all` and `ventilators.list` rows gain `zones`, each Zone occurrence the item serves, and `findings`:
@@ -926,7 +954,9 @@ in its display units.
 
 **Ventilator export.** `ph_composer.mechanical.export.ventilation` (section version 1, `features/mechanical/export.rb`)
 requires the Zones section and claims `ph_composer.mechanical.zone_serves` on the Zone record (`entity_projections`),
-as Programs claims its assignment. `VentilationPlan` (`features/mechanical/ventilation_plan.rb`) works the export out
+as Programs claims its assignment. A payload is claimed once, so this section claims it for the whole feature: its
+`projection` is every Zone once with its slots (`ExportZones`, `features/mechanical/export_zones.rb`), which each
+other mechanical section requires this one to read. `VentilationPlan` (`features/mechanical/ventilation_plan.rb`) works the export out
 in pure Ruby over each Zone once (its first occurrence by path) and the stored Ventilators: one record per
 (Ventilator, exported Zone) pair, with id `<vnt id>_<zon id>`, the Ventilator's values and `user_data`, and the
 identifiers derived from its id, `system_identifier` the Ventilator id and `unit_identifier` that id with `_unit`, so
@@ -949,6 +979,35 @@ carrying the whole item, and `mechanical.zone_unventilated` a Zone written with 
 the last, which the preflight alone reports and the run carries into the result. The report's
 "Mechanical: Ventilators" section lists each exported Ventilator with the Zones it serves, its quantity and
 efficiencies, from the Python result, and one line of the `mechanical.item_unserved` findings.
+
+**Hot water export.** `ph_composer.mechanical.export.hot_water` (section version 1,
+`features/mechanical/hot_water_export.rb`) requires the Zones section and the Ventilator export, whose projection
+gives the Zones. `HotWaterPlan` (`features/mechanical/hot_water_plan.rb`) works it out in pure Ruby: one record per
+(Hot Water System, exported Zone) pair, id `<hws id>_<zon id>`, with `system_identifier` the System id, its name, tap
+points and `piping_calc_method`, each slot's Tank (or null) and the System's Heaters in name order, each Tank and
+Heater under its own record's id with its values and `user_data`. A System's `user_data` is read without passing it
+through, so the reader notes `export.metadata_omitted`. The Python section (`HotWaterSection`, required for export)
+builds each pair's own `PhHotWaterSystem` with fresh tanks and heaters (the heater class by variant), sets
+`number_tap_points`, writes no piping, and attaches it with `set_hot_water_system`; a
+`piping_calc_method` counts as written only when the loaded class has the attribute and its `to_dict()` then carries
+the value, and otherwise the section reports
+`mechanical.method_not_exported` once per System, not blocking. Its result rows (`hot_water`) carry the pair's
+ids, the Zone's name, the identifier, tap points as stored, the heater identifiers, each slot's tank identifier
+and capacity, and `digest`, the SHA-256 of the system's `to_dict()` as translated, keys sorted. `conformance`
+compares each reloaded Room's system with its own row, digest included, since honeybee-ph reloads two systems
+sharing an identifier as the last one and would hide a difference; and no Room may hold a hot water system the run
+did not report.
+
+`ph_composer.mechanical.preflight` (`features/mechanical/preflight.rb`) is the one preflight the Ventilator export
+names for the feature. It reads the Zones once and gives a blocking row for each exported Zone whose Serves payload
+this version does not understand, then each family's rows from its own plan, under that family's `section`: for hot
+water, a blocking row per unreadable System, Heater or Tank and per metadata problem extraction refuses (Heaters' and
+Tanks' `user_data` passed through), then `mechanical.item_missing` (blocks), `mechanical.zone_no_hot_water`
+(preflight only), `mechanical.item_unserved`, `mechanical.zone_left_out`, `mechanical.item_across_segments`,
+`mechanical.tank_unslotted` and `mechanical.hot_water_pooled`, each once per System and Segment, its message naming
+at most five Systems. A family's own read that refuses gives one blocking row under its section and leaves the
+other family's rows. A Zone's row carries the Zones tab's `locate`; hot water items have none until their tables
+ship.
 
 ## This computer's settings file
 

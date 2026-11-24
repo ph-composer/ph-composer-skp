@@ -210,7 +210,10 @@ terms are at the end, marked planned.
 | Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation now; Heat Pumps, Hot Water, Pumps, Fans and Electric Heating as each lands) and, beneath it, a pill row picking one table of that system (Ventilators; Ducting later) |
 | Serves | Which Zones an equipment item serves. Shown as Zone chips on the item's row; the Zone picker chooses them, grouped by Building Segment |
 | Tag | An equipment item's name, as its tables show it |
-| Hot Water System | The planned record that groups heaters and tanks and serves Zones. Heaters and tanks are their own rows and each names its System |
+| Hot Water System | The hot water record that serves Zones, one per Zone, with its tap points. Exported as one honeybee-ph hot water system per served Room, all under the System's id |
+| Hot Water Heater, Hot Water Tank | Their own rows, each naming its Hot Water System. A Heater's variant (electric, or an annual, monthly or inside heat pump) picks its efficiency values; a Tank's role (storage, buffer, solar) picks its tank slot |
+| Tank slot | One of honeybee-ph's four places for a System's tanks: `tank_1` and `tank_2` for storage Tanks in name order, `tank_buffer`, `tank_solar`. A Tank with no free slot of its role is unslotted and left out of the export |
+| Pooled hot water | Two or more served Hot Water Systems in one Building Segment. WUFI-Passive and METr add their tanks and heaters together and keep one tap point count; a note, not an error |
 | Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
 

@@ -1,0 +1,21 @@
+{
+  "hot_water": [
+    "id",
+    "item_id",
+    "zone_id",
+    "zone_name",
+    "display_name",
+    "system_identifier",
+    "number_tap_points",
+    "heater_identifiers",
+    "tank_1_identifier",
+    "tank_1_capacity_l",
+    "tank_2_identifier",
+    "tank_2_capacity_l",
+    "tank_buffer_identifier",
+    "tank_buffer_capacity_l",
+    "tank_solar_identifier",
+    "tank_solar_capacity_l",
+    "digest"
+  ]
+}

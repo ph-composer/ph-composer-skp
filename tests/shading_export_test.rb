@@ -38,7 +38,8 @@ class ShadingExportTest < PhComposerTestCase
      PhComposer::Spaces::ExportProjection::SECTION, PhComposer::ThermalBridges::ExportProjection::SECTION,
      PhComposer::ModelMetadata::SECTION, PhComposer::Climate::SiteExport::SECTION,
      PhComposer::Certification::SegmentExport::SECTION, PhComposer::Programs::AirtightnessExport::SECTION,
-     *PhComposer::Programs::ProgramExport::SECTIONS, PhComposer::Mechanical::VentilationExport::SECTION, X::SECTION]
+     *PhComposer::Programs::ProgramExport::SECTIONS, PhComposer::Mechanical::VentilationExport::SECTION,
+     PhComposer::Mechanical::HotWaterExport::SECTION, X::SECTION]
   end
 
   def point(xyz)
