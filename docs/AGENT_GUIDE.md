@@ -1233,6 +1233,36 @@ ventilator's quantity; it copies the supportive device's.
    each of those Rooms has an entry in `properties.ph_hvac.exhaust_vent_devices` with that identifier,
    and, with power, one in `properties.ph_hvac.supportive_devices`.
 
+### Hot water piping
+
+Hot water piping is its own feature beside Mechanical, its operations named `ph_composer.piping.*`.
+Pipes are lines drawn in SketchUp, each given a Pipe Type and a role; today only the Pipe Types exist.
+
+A Pipe Type is one pipe specification kept in the Model. Read `ph_composer.piping.pipe_types.list`, a
+bounded page at a time; names are unique. Create one with `ph_composer.piping.pipe_types.create`,
+giving at least `name` (shown as Tag). Unless you give them, it is a Copper L pipe (`material` 2) of
+`diameter_mm` 12.7 (1/2 in) with `insulation_thickness_mm` 12.7 of reflective insulation
+(`insulation_reflective` true) at `insulation_conductivity_w_mk` 0.04 W/mK and `insulation_quality` 1.
+`material` is 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE or 8 PEX
+CTS SDR. `diameter_mm` must be one of the eight nominal sizes (3/8 in to 2 in), sent as one of these
+decimals exactly: 9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1 or 50.8. Do not compute it from the
+inch size: `0.375 * 25.4` is not exactly 9.525 and is refused. `insulation_quality` is 1 None,
+2 Moderate or 3 Good. A value outside its range, or a diameter off the list, is refused as
+`params.invalid` and nothing is written. The role a pipe plays, its water temperature and its hours are
+not on the type.
+
+Setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then reads
+`export_ready: false` with `piping.insulation_conductivity_missing`, which blocks the export of a pipe
+using the type. A bare pipe, `insulation_thickness_mm` 0, needs no conductivity. Each row also gives
+the colour the type draws in under `display.color`; set `color` to store one, or null to return to the
+default. Edit with `ph_composer.piping.pipe_types.update`, copying `expected_values` from the values you
+read; `ph_composer.piping.pipe_types.duplicate` copies one with its `user_data`.
+`ph_composer.piping.pipe_types.delete` deletes one. Once pipes can be assigned, a type in use will
+refuse as `reference.in_use` unless `replacement_id` names another type to take its place on those
+pipes, or is null to clear them; today no pipe uses a type, and a `replacement_id` you give must still
+be another existing type or null. Each is one Undo step. Write a type's
+`user_data` with `ph_composer.records.update_metadata`.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

@@ -929,6 +929,13 @@ pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mec
 "Mechanical: pumps", "Mechanical: the Pump export", "Mechanical: fans", "Mechanical: the Fan export" and "Mechanical
 settings", is the recipe.
 
+Hot water piping is the feature `ph_composer.piping` (API 1.98), which requires Mechanical and Zones. Its Pipe Types
+are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapshot section, `create`, `update`,
+`duplicate` and `delete` (with `replacement_id`), each write one Undo step; a row's `export_blockers` names
+`piping.insulation_conductivity_missing` for an insulated type with no conductivity. The
+[Pipe Types walkthrough](../tools/examples/authoring/pipe_types_walkthrough.rb) authors with the panel closed;
+[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
+
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)
 use the same preview and invocation contract. Stored endpoint proof or an explicit retaining path

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 97
+    MINOR = 98
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -602,7 +602,11 @@ module PhComposer
                     "duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 6 with the fan_ids " \
                     "list slot. The export section ph_composer.mechanical.export.fans is new and " \
                     "ph_composer.mechanical.preflight adds its rows, mechanical.zone_without_spaces among them; " \
-                    "ph_composer.mechanical.locate takes fan_ids." }
+                    "ph_composer.mechanical.locate takes fan_ids." },
+      { "minor" => 98, "date" => "2026-11-24",
+        "change" => "ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot " \
+                    "section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, " \
+                    "with the code piping.insulation_conductivity_missing." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

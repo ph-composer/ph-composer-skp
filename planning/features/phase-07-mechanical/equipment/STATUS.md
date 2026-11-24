@@ -41,7 +41,7 @@ the interview state only.
 ## Next step
 
 D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Electric heaters, pumps and fans were interviewed on
-2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps in P4-10, and fans are built in P4-11; heat pumps were settled
+2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps in P4-10 and fans in P4-11; heat pumps were settled
 on 2026-11-15, and appliances are Programs'.
 
 ## Blockers

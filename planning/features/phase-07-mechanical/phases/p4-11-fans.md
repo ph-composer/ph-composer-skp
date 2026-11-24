@@ -1,7 +1,7 @@
 # P4-11: fans
 
 DATE: 2026-10-21
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-11` (#575); offline evidence in [p4-11-fans](../evidence/p4-11-fans.md), host case `M11` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-10-21, D4-01, D4-13, D4-20, D4-25, D4-30, D4-31, D4-34 and D4-35, and the [equipment PRD](../equipment/PRD.md), "Family 6". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-24 (#575, squash `a963b22e`); offline evidence in [p4-11-fans](../evidence/p4-11-fans.md), host case `M11` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-10-21, D4-01, D4-13, D4-20, D4-25, D4-30, D4-31, D4-34 and D4-35, and the [equipment PRD](../equipment/PRD.md), "Family 6". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

@@ -406,6 +406,21 @@ Hot water flow stays in L/h per m².
    heaters, so assigning one never replaces another; unchecking a Zone takes only this heater off it.
 4. Deleting a heater that serves Zones asks which heater takes its place on them, or clears it from them.
 
+## Hot water piping
+
+Hot water piping is traced as lines over the model, each line given a Pipe Type and a role, and exported
+into the Hot Water System it belongs to. It is being built in steps. What exists now is the Pipe Type,
+available to scripts and assistants through the [agent guide](AGENT_GUIDE.md#hot-water-piping); the
+panel's Pipe Types table, the Piping groups that hold drawn lines, assignment and the schedule follow.
+
+A **Pipe Type** is one pipe specification kept in the model: a **Material** (Copper M, L or K, CPVC CTS
+SDR, CPVC Sch 40, PEX, PE or PEX CTS SDR), a **Diameter** from the eight nominal sizes METr takes, 3/8 in
+to 2 in, and its insulation: thickness, conductivity, a reflective facing and the quality of its
+installation. A new type is a 1/2 in Copper L pipe with 12.7 mm of reflective insulation at
+0.04 W/(m K). The same type serves a trunk in one place and a twig in another, so the role is chosen when a
+line is assigned, not on the type. A type with insulation and no conductivity cannot export once a pipe
+uses it; a bare pipe, with no insulation, needs none.
+
 ## Reuse library definitions
 
 Use **Libraries** to add a file, a folder of files or a connection supplied by a hosted provider.

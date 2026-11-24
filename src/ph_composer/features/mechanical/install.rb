@@ -3,7 +3,7 @@
 # One feature owns the mechanical equipment a Zone's Room carries in the energy model: the equipment families'
 # catalogs, which Zones each item serves, and their export. It requires Zones and Spaces, Programs, whose Zone flow
 # the airflow balance counts for a By Program Zone, and Climate, whose climate the blended heat pump reads; no file of
-# theirs, nor any other feature's, names it
+# theirs names it, nor does any other feature's but one that requires Mechanical and so sits above it
 # (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
 # Each family is a folder of definitions that names no Zone, Space, Program or assignment, so a family reads

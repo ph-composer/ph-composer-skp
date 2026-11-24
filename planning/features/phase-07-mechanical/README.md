@@ -1,7 +1,7 @@
 # Phase 7: mechanical
 
 DATE: 2026-10-21
-STATUS: In progress. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning. Reviewed 2026-11-22 after Phase 6 Programs: the packet is corrected to the code as built, stage P4-08b is added, and D4-21 to D4-27 are answered as recommended (DECISIONS Part 4) and bound. Ed authorized implementation of every stage on 2026-11-23; P4-01 (#564) to P4-04 (#567) merged, which closes MS1 offline; its host sitting is owed. P4-05, the Mechanical tab, merged (#568), and P4-06, hot water records and export (#569); P4-07, the Hot Water subtab, merged (#570), which closes MS2 offline; its host sitting is owed. P4-08, heat pumps, merged (#571). P4-08b, the Building Segment's mechanical settings, merged (#572). P4-09, electric heaters, merged (#573). P4-10, pumps, merged (#574). P4-11, fans, is in review (#575).
+STATUS: In progress. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning. Reviewed 2026-11-22 after Phase 6 Programs: the packet is corrected to the code as built, stage P4-08b is added, and D4-21 to D4-27 are answered as recommended (DECISIONS Part 4) and bound. Ed authorized implementation of every stage on 2026-11-23; P4-01 (#564) to P4-04 (#567) merged, which closes MS1 offline; its host sitting is owed. P4-05, the Mechanical tab, merged (#568), and P4-06, hot water records and export (#569); P4-07, the Hot Water subtab, merged (#570), which closes MS2 offline; its host sitting is owed. P4-08, heat pumps, merged (#571). P4-08b, the Building Segment's mechanical settings, merged (#572). P4-09, electric heaters, merged (#573). P4-10, pumps, merged (#574). P4-11, fans, merged (#575). P4-13a, the piping feature and Pipe Types, is in review (#576).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -52,7 +52,8 @@ stages, the bindings, the decisions and the one ledger.
 | [P4-07](phases/p4-07-hot-water-view.md) | The Hot water view with child rows, `By hot water system` |
 | [P4-08](phases/p4-08-heat-pumps.md), [P4-09](phases/p4-09-electric-heaters.md), [P4-10](phases/p4-10-pumps.md), [P4-11](phases/p4-11-fans.md), [P4-12](phases/p4-12-appliances.md) | Families 3 to 6, each after its interview. P4-12, appliances, is superseded by Phase 6's Equipment Sets |
 | [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation on the Building Segment, handed over by Phase 6 |
-| [P4-13](phases/p4-13-hot-water-piping.md), [P4-14](phases/p4-14-erv-ducting.md) | The drawn packets, after their interviews |
+| [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping as five sub-stages, P4-13a to P4-13e: Pipe Types, Piping groups and assignment, the tree and schedule (with the chain rule moved to `core/`), the export into the Hot Water System, and the Piping pills |
+| [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting, the second drawn packet, after its plan |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Integrated acceptance, context, docs, the metr-export handoff; the phase close |
 
 ## What this packet needs from elsewhere

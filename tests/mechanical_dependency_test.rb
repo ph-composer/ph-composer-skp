@@ -4,10 +4,12 @@ require_relative "test_helper"
 
 # Mechanical's equipment families are definitions that read and validate on their own: nothing in a family folder
 # names Zones, Spaces, Programs, the Zone record, the serves/ folder or SketchUp. Nothing in another feature's
-# folder names Mechanical (context/EXTENSIBILITY.md, "Organization and dependencies").
+# folder names Mechanical, unless that feature requires it and so sits above it (context/EXTENSIBILITY.md,
+# "Organization and dependencies").
 class MechanicalDependencyTest < PhComposerTestCase
   FEATURES = File.join(SOURCE_ROOT, "ph_composer", "features")
   MECHANICAL = File.join(FEATURES, "mechanical")
+  MECHANICAL_ID = "ph_composer.mechanical"
   # The feature's own layer-3 and registration folders; every other folder is an equipment family. `segment` is the
   # Building Segment's mechanical settings, an extension on Zones' Segment record, so it names Zones' Segment kind.
   NOT_FAMILIES = %w[serves declarations segment].freeze
@@ -34,8 +36,12 @@ class MechanicalDependencyTest < PhComposerTestCase
     assert_empty offenders(files, UPWARD)
   end
 
-  def test_no_other_feature_names_mechanical
-    others = Dir[File.join(FEATURES, "*")].reject { |path| path == MECHANICAL }
+  # A feature that requires Mechanical, read from the registry, may name it; its folder is its id's last part.
+  def test_no_other_feature_below_or_beside_mechanical_names_it
+    above = PhComposer::Registry.current.features.select { |_id, feature| feature.requires.include?(MECHANICAL_ID) }
+                                .keys.map { |id| File.join(FEATURES, id.delete_prefix("ph_composer.")) }
+    refute_empty above
+    others = Dir[File.join(FEATURES, "*")].reject { |path| path == MECHANICAL || above.include?(path) }
                                           .flat_map { |folder| Dir[File.join(folder, "**", "*.rb")] }
     refute_empty others
     ["Mechanical::VENTILATOR_KIND", "require_relative \"../mechanical/install\"", "ph_composer.mechanical.ventilators"]

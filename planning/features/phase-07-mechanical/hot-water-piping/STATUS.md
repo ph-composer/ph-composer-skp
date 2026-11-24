@@ -1,7 +1,7 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); ready to be planned in full for P4-13.
+STATUS: In progress: P4-13a in review (#576). Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -9,7 +9,7 @@ ISSUE: #562
 
 PRD drafted 2026-09-18 from Ed's brief (build pipe-types, draw pipes, select edge, assign
 pipe-type), the predecessor's `planning/phases/M1_piping.md`, honeybee-ph's
-`hot_water_piping.py` and `hot_water_system.py`, and PHX's METr writer. Not interviewed.
+`hot_water_piping.py` and `hot_water_system.py`, and PHX's METr writer. Interviewed 2026-11-23 (D4-36).
 
 Re-baselined on 2026-10-21 against `main` at `420c783a`. The PRD's "What main and Phase 3b
 supply" table replaces the port disposition. Changes of substance: the snapshot's Edge entries
@@ -25,8 +25,9 @@ This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
 
 ## Next step
 
-Interview. Q1, how the trunk, branch and fixture tree is authored, decides most of the rest.
-The chain rule it reuses (P3b-04) is on `main`.
+[P4-13a](../phases/p4-13a-pipe-types.md), the piping feature and Pipe Types, is in review (#576); then P4-13b to
+P4-13e in order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
+[phase ledger](../STATUS.md).
 
 ## Blockers
 
@@ -43,12 +44,12 @@ The chain rule it reuses (P3b-04) is on `main`.
 
 | Item | Source | Disposition here |
 | --- | --- | --- |
-| A Model-level edge registry for identity-bearing assignments (B4's registry question) | D3b-01, handed over by Phase 3b P3b-09 | This packet's to decide. Not needed under Q1's by-connection recommendation; needed only if Ed chooses explicit parents |
-| Moving the run builder to `core/` | 3b STATUS, "Deferred out of this plan" | The first piping stage that computes runs moves it, with 3b's tests |
+| A Model-level edge registry for identity-bearing assignments (B4's registry question) | D3b-01, handed over by Phase 3b P3b-09 | Answered: none. Q1 chose the tree by connection (D4-36), so no assignment carries a parent; recorded in [P4-13b](../phases/p4-13b-piping-groups-and-assignment.md) |
+| Moving the run builder to `core/` | 3b STATUS, "Deferred out of this plan" | [P4-13c](../phases/p4-13c-tree-and-schedule.md), step 1: the chain rule to `core/edge_runs.rb` with 3b's chain-rule tests, the thermal-bridge goldens unchanged |
 
 ## Verification
 
-None. Nothing is implemented.
+P4-13a offline: [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md). No host evidence yet; the host cases run in MS3.
 
 ## Ledger
 
@@ -59,3 +60,6 @@ None. Nothing is implemented.
 | 2026-10-21 | Re-baselined against `main` at `420c783a`: foundation and remote blockers removed, Phase 3b dependencies named stage by stage, records and export mapping corrected, Q13 added. No interview, no implementation. |
 | 2026-10-26 | Phase 3b P3b-09 handoff: the edge tagging rules point at `context/TECH_STACK.md`, the edge stages are on `main`, and the edge registry question (D3b-01) is this packet's. |
 | 2026-11-22 | Phase reviewed after Phase 6 Programs: the stale Phase 3b gate wording removed here and in the PRD; recirculation temperature and hours noted as read from this packet's pipes (D4-18). No interview, no implementation. |
+| 2026-11-23 | Interviewed: Q1 to Q13 all as recommended (D4-36). |
+| 2026-11-24 | Planned in full as P4-13a to P4-13e in the phase packet; the registry question answered "none" and the run builder's move allocated to P4-13c. No implementation. |
+| 2026-11-24 | P4-13a implemented on `feat/phase-07-mechanical-p4-13a` and in review (#576): the `ph_composer.piping` feature and the Pipe Type kind, panel closed; host case `M13a` owed to MS3. |

@@ -5640,6 +5640,26 @@
       "native_control_required": true
     },
     {
+      "id": "M13a",
+      "label": "Pipe Types with the panel closed, from a fresh process on the installed RBZ: the walkthrough (tools/examples/authoring/pipe_types_walkthrough.rb) creates two Pipe Types, edits one's diameter, duplicates it and deletes the other through registered actions only; native Undo and Redo of each of the five steps; save, fresh-process reopen and the same catalog, user_data included, read back through pipe_types.all, each type under the id PipeTypesWalkthrough.ids recorded before the save",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/features/piping/install.rb",
+        "src/ph_composer/features/piping/codes.rb",
+        "src/ph_composer/features/piping/type/*",
+        "src/ph_composer/features/piping/declarations/*",
+        "src/ph_composer/features/mechanical/catalog_operations.rb",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/dictionary_store.rb",
+        "src/ph_composer/core/records/authoring_fields.rb",
+        "tools/examples/authoring/pipe_types_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

@@ -130,7 +130,7 @@ def citation_lint(tmp_path: Path, text: str) -> tuple[int, str]:
 
 
 # Built by joining, so this file carries none of them: the lint reads tests too.
-PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "D" + "4-01", "P3b" + "-01", "M" + "3a"]
+PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "M" + "13a", "D" + "4-01", "P3b" + "-01", "M" + "3a"]
 
 
 @pytest.mark.parametrize(
