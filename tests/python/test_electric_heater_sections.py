@@ -117,6 +117,16 @@ def test_conformance_reads_back_each_heater_and_fails_on_a_tampered_row_a_lost_h
         section.conformance(model, {"electric_heaters": fields["electric_heaters"][:2]})
 
 
+def test_another_sections_heating_system_on_a_room_is_not_this_sections_to_refuse() -> None:
+    result = run(document())
+    model = reloaded(result)
+    boiler = stack.load("honeybee_phhvac.heating").PhHeatingFossilBoiler()
+    boiler.identifier = "boiler_1"
+    room = next(room for room in model.rooms if room.identifier == ZONE_B)
+    room.properties.ph_hvac.add_heating_system(boiler)
+    ElectricHeaterSection().conformance(model, result[ELECTRIC_HEATER_SECTION_ID])
+
+
 def test_two_rooms_translated_unequal_under_one_identifier_fail_conformance_on_the_overwritten_room() -> None:
     value = document()
     records(value)[0]["percent_coverage"] = 0.4

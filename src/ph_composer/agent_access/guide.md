@@ -1130,11 +1130,11 @@ each heater serves under `zones`, and `findings`: `mechanical.item_unserved` whe
 
 The export adds to each served Zone's Room one direct electric heating system per heater serving it,
 under the heater's id, with its Tag, coverage and `user_data`, so every Room one heater serves carries
-the same system and PHX makes one device per heater.
+the same system and PHX makes one device per heater in each Building Segment it serves.
 
 1. Before exporting, read `ph_composer.mechanical.preflight`; its heater rows name the Electric Heater
-   export as their `section`. `mechanical.item_missing` blocks: a Zone names a heater that is not in the
-   Model. `mechanical.item_unserved` names a heater that serves no Zone, `mechanical.zone_left_out` a
+   export as their `section`. `mechanical.item_missing` blocks: a Zone the export writes names a heater
+   that is not in the Model. `mechanical.item_unserved` names a heater that serves no Zone, `mechanical.zone_left_out` a
    served Zone in no Building Segment, and `mechanical.item_across_segments` a heater on Zones in two
    Building Segments; none of these blocks. A row about a heater carries `locate` with
    `electric_heater_ids`.

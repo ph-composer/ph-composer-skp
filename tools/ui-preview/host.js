@@ -862,6 +862,11 @@
       if (chosen.some(function (zone) { return !zone; })) {
         return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
       }
+      // A list read before another write refuses the whole command, as the host's guard does.
+      if (params.zones.some(function (row, index) {
+        var expected = (row.expected_values || {})[params.slot];
+        return expected !== undefined && JSON.stringify(expected) !== JSON.stringify(lists[chosen[index].id] || []);
+      })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
       chosen.forEach(function (zone) {
         var list = (lists[zone.id] || []).filter(function (id) {
           return name === "serves.assign" ? id !== params.item_id : params.item_id && id !== params.item_id;

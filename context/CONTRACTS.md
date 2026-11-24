@@ -1134,8 +1134,8 @@ projection come from one plan per export.
 `features/mechanical/electric_heater_export.rb`) requires the Zones section and the Ventilator export (for the
 Zones). Its records are `ElectricHeaterPlan`'s pairs, pure Ruby: one per (Electric Heater, exported Zone) whose
 `heater_ids` names it, id `<ehr id>_<zon id>`, `identifier` the heater's id, `display_name` its Tag,
-`percent_coverage` and `user_data`; a Zone holding two heaters gives two pairs. A Zone naming a heater that is not
-stored blocks with `mechanical.item_missing`; a heater serving no Zone, a served Zone in no Building Segment and a
+`percent_coverage` and `user_data`; a Zone holding two heaters gives two pairs. An exported Zone naming a heater that
+is not stored blocks with `mechanical.item_missing`; a heater serving no Zone, a served Zone in no Building Segment and a
 heater on two Segments are notes (`mechanical.item_unserved`, `zone_left_out`, `item_across_segments`). The Python
 section (`ElectricHeaterSection`, required for export) builds each pair's own `PhHeatingDirectElectric` and adds every
 heater serving a Room with `add_heating_system`. Its result rows (`electric_heaters`) carry the pair's ids, the Zone's

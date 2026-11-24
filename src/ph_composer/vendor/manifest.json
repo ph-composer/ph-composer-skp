@@ -921,9 +921,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/mechanical_sections.py": {
-      "bytes": 28901,
+      "bytes": 29265,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "94ec2dec6954abe9097120c504813a9329e0d2b45c89cf72d35baf7eb1bb62e7"
+      "sha256": "156fedc2edf3683527d035f3b4f90ce40ed1597b513ea9a05e223269a9b50f4d"
     },
     "python/ph_composer_translation/mechanical_segment_sections.py": {
       "bytes": 6882,

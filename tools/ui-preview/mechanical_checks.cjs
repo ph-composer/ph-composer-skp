@@ -396,6 +396,11 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
   await ehPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
   await ehPicker.waitFor({ state: "hidden" });
   assert.deepEqual((await electric("serves")).zon_apt1, [EH1, "ehr_Dd44Ee55Ff66", EH3]);
+  const stale = await host(`window.previewHost.mechanicalAction({ name: "${PREFIX}serves.assign", params: {
+    zones: [{ reference: window.previewHost.zones.filter(z => z.id === "zon_apt2")[0].reference,
+      expected_values: { heater_ids: [] } }], slot: "heater_ids", item_id: "${EH3}" } }).code`);
+  assert.equal(stale, "target.changed", "a stale heater list refuses");
+  assert.deepEqual((await electric("serves")).zon_apt2, [EH1], "and writes nothing");
   await pane.getByRole("button", { name: "+ New Electric Heater", exact: true }).click();
   const newHeater = page.getByRole("dialog", { name: "New Electric Heater" });
   await newHeater.getByRole("textbox", { name: "Tag", exact: true }).fill("EH-4");

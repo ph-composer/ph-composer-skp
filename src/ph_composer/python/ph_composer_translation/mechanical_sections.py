@@ -56,6 +56,8 @@ VENTILATION_SECTION_ID = "ph_composer.mechanical.export.ventilation"
 HOT_WATER_SECTION_ID = "ph_composer.mechanical.export.hot_water"
 HEAT_PUMP_SECTION_ID = "ph_composer.mechanical.export.heat_pumps"
 ELECTRIC_HEATER_SECTION_ID = "ph_composer.mechanical.export.electric_heaters"
+#: The honeybee-ph heating type this section writes; a Room's other heating systems belong to other sections.
+DIRECT_ELECTRIC = "PhHeatingDirectElectric"
 ZONES = Requirement(ZONE_SECTION_ID, TranslatedZone)
 #: Balanced ventilation with heat recovery, the only system type PH-Composer writes.
 SYS_TYPE = 1
@@ -528,7 +530,7 @@ class TranslatedElectricHeater:
 
 def electric_heater(record: ElectricHeaterRecord) -> Any:
     """The pair's direct electric heating system, built fresh so every pair of one heater builds an equal object."""
-    heater = stack.load("honeybee_phhvac.heating").PhHeatingDirectElectric()
+    heater = getattr(stack.load("honeybee_phhvac.heating"), DIRECT_ELECTRIC)()
     heater.identifier, heater.display_name = record.identifier, record.display_name
     heater.percent_coverage = record.percent_coverage
     heater.user_data = dict(record.user_data)
@@ -564,7 +566,8 @@ class ElectricHeaterSection(Section[ElectricHeaterRecord, TranslatedElectricHeat
 
     def conformance(self, model: Any, fields: Mapping[str, JSONValue]) -> None:
         """Each reported pair's Room holds a heating system with the row's identifier, coverage and the digest its own
-        heater had as translated; and no Room holds a heating system the run did not report."""
+        heater had as translated; and no Room holds a direct electric heating system the run did not report. Another
+        section's heating systems (a boiler) are not this section's to check."""
         rooms = {room.identifier: room for room in model.rooms}
         reported = fields.get("electric_heaters")
         rows = [item for item in (reported if isinstance(reported, list) else []) if isinstance(item, dict)]
@@ -585,10 +588,14 @@ class ElectricHeaterSection(Section[ElectricHeaterRecord, TranslatedElectricHeat
         if extra := sorted(
             room.identifier
             for room in model.rooms
-            if {system.identifier for system in room.properties.ph_hvac.heating_systems}
+            if {
+                system.identifier
+                for system in room.properties.ph_hvac.heating_systems
+                if system.heating_type == DIRECT_ELECTRIC
+            }
             - named.get(room.identifier, set())
         ):
-            raise ValueError(f"Room {', '.join(extra)} holds a heating system the run did not report")
+            raise ValueError(f"Room {', '.join(extra)} holds an electric heater the run did not report")
 
 
 def electric_heater_fields(heater: Any) -> dict[str, JSONValue]:
