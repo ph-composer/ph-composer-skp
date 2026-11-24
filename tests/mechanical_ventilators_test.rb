@@ -101,6 +101,12 @@ class MechanicalVentilatorsTest < PhComposerTestCase
     assert_equal %w[refused target.changed none], outcome.values_at("status", "code", "effect"), outcome.inspect
     assert_equal revision, @session.revision
     assert_equal ["ERV-1", 1], row(id).fetch("values").values_at("name", "quantity")
+    create("name" => "ERV-2")
+    revision = @session.revision
+    taken = invoke("update", "id" => id, "values" => { "name" => "erv-2" }, "expected_values" => { "quantity" => 5 })
+    assert_equal %w[refused target.changed], taken.values_at("status", "code"), "a stale read is reported first"
+    assert_equal "validation.failed", invoke("update", "id" => id, "values" => { "name" => " erv-2 " },
+                                                       "expected_values" => { "quantity" => 1 })["code"]
     stale = invoke("delete", "id" => id, "expected_values" => { "name" => "ERV-9" })
     assert_equal %w[refused target.changed], stale.values_at("status", "code"), stale.inspect
     assert_equal revision, @session.revision
@@ -187,6 +193,9 @@ class MechanicalVentilatorsTest < PhComposerTestCase
     assert_equal [true, []], row(id).values_at("export_ready", "export_blockers")
     records = API.query(:context => @context, :name => "ph_composer.records.list", :params => { "kind" => KIND })
     assert_equal [id], records.dig("value", "records").map { |entry| entry["id"] }
+    assert_empty query("list", "ids" => ["vnt_AAAAAAAAAAAA"]).fetch("records"), "a well-formed absent id"
+    wrong = API.query(:context => @context, :name => "#{PREFIX}.list", :params => { "ids" => ["frm_AAAAAAAAAAAA"] })
+    assert_equal %w[refused params.invalid], wrong.values_at("status", "code"), "another kind's id"
     page = query("list", "limit" => 1, "fields" => ["export_ready"])
     assert_equal [[KIND, id, 1, true]], page.fetch("records").map { |r|
       r.values_at("kind", "id", "schema_version",

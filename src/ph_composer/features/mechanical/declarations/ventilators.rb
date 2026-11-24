@@ -10,14 +10,20 @@ module PhComposer
       # The codes beyond each kind's common set (context/CONTRACTS.md, "Outcomes and codes").
       PAGE = %w[query.cursor_expired query.limit_invalid].freeze
       CREATE = %w[record.unreadable validation.failed].freeze
-      EDIT = %w[record.unreadable reference.invalid target.changed target.not_found validation.failed].freeze
-      DUPLICATE = %w[copy.rule_missing extension.invalid record.unreadable reference.invalid target.not_found
-                     validation.failed].freeze
+      # An installed extension's payload may name an entity whose id two occurrences share: target.ambiguous.
+      EDIT = %w[record.unreadable reference.invalid target.ambiguous target.changed target.not_found
+                validation.failed].freeze
+      DUPLICATE = %w[copy.rule_missing extension.invalid record.unreadable reference.invalid target.ambiguous
+                     target.not_found validation.failed].freeze
       # A delete scans every record for references to it, so an unreadable record anywhere refuses it.
-      DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.changed target.not_found
-                  validation.failed].freeze
+      DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.ambiguous target.changed
+                  target.not_found validation.failed].freeze
       EXISTS = ["The Ventilator exists and is readable."].freeze
+      UNIQUE = "Its name, trimmed and in any case, is not another Ventilator's."
       ROW = Shapes.row(KIND)
+      LIST_PARAMS = DefinitionLists.params(ROW).tap do |params|
+        params["properties"]["ids"]["items"] = Shapes.id(KIND.id_prefix, "A Ventilator id.")
+      end.freeze
       CREATE_EXAMPLE = { "values" => { "name" => "ERV-1", "sensible_heat_recovery" => 0.85,
                                        "latent_heat_recovery" => 0.6, "electric_efficiency_wh_m3" => 0.45 } }.freeze
       LIST_EXAMPLES = [{}, { "limit" => 20 }, { "fields" => %w[values export_ready] }].freeze
@@ -34,7 +40,7 @@ module PhComposer
       def install_reads(feature)
         list = Ventilators::Reads::LIST
         feature.query(list, :description => "One bounded page of Ventilators in id order, with export readiness.",
-                            :refuses => PAGE, :params => DefinitionLists.params(ROW),
+                            :refuses => PAGE, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
                             :examples => LIST_EXAMPLES) { |request| Ventilators::Reads.list(request) }
         feature.query("#{PREFIX}.all", :description => "Every Ventilator with its values and export readiness, for " \
@@ -53,7 +59,8 @@ module PhComposer
                                        "protection on below -5 C, in conditioned space, and the subsoil heat " \
                                        "exchanger and preheated intake temperature absent.",
                        :refuses => CREATE, :params => Shapes.create(KIND), :result => Shapes::RESULT,
-                       :undo_name => "Create #{KIND.label}", :side_effects => "Creates one Model-owned definition.",
+                       :undo_name => "Create #{KIND.label}", :preconditions => [UNIQUE],
+                       :side_effects => "Creates one Model-owned definition.",
                        :examples => [CREATE_EXAMPLE]) do |request, proposal|
           Ventilators::Operations.create(request, proposal, :values => request.params.fetch("values"),
                                                             :user_data => request.params["user_data"])
@@ -62,7 +69,7 @@ module PhComposer
                        :description => "Edit guarded values of one #{KIND.label}; a changed expected value refuses " \
                                        "and writes nothing.",
                        :refuses => EDIT, :params => Shapes.update(KIND), :result => Shapes::RESULT,
-                       :undo_name => "Edit #{KIND.label}", :preconditions => EXISTS,
+                       :undo_name => "Edit #{KIND.label}", :preconditions => EXISTS + ["A new name: #{UNIQUE}"],
                        :side_effects => "Updates one definition and preserves its metadata.",
                        :examples => [{ "id" => Shapes.example_id(KIND), "values" => { "quantity" => 2 },
                                        "expected_values" => { "quantity" => 1 } }]) do |request, proposal|

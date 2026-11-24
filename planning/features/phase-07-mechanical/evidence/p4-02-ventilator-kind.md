@@ -91,7 +91,14 @@ controls and catches `ZONE_KIND` and `zone_id`; the list query's name has one so
 guide's delete sentence are accurate; CONTRACTS records `x-unit` `fraction`. Declined: `reference.invalid` and
 `reference.in_use` stay in the declared refusals as on the Thermal Bridge Type (the engine checks them and P4-03
 makes them reachable); the defrost temperature stays unbounded as CONTRACTS binds it; the fixed temporary save path
-follows the Programs test's precedent. Codex review follows on the PR.
+follows the Programs test's precedent.
+
+Codex gpt-6.2-sol, cycle 1 on `9b2978a4` (PR #565): 5 P2, 1 P3, all fixed in the next commit. An update checks
+`expected_values` before name uniqueness, so a stale read with a taken name refuses `target.changed`; update, duplicate
+and delete declare `target.ambiguous`; `ventilators.list` takes only `vnt_` ids (another kind's id refuses
+`params.invalid`); the walkthrough compares every stored value and the `user_data` and fails on an unreadable record,
+with an offline case for each; the layer test also catches bare module names and relative imports in both directions,
+with positive controls; create and update state the unique-name precondition.
 
 ## Native case
 

@@ -21,17 +21,15 @@ module PhComposer
           { "id" => id }
         end
 
-        # A guarded edit: a value in `expected_values` that changed since it was read refuses the whole proposal.
-        # A null removes an optional value; on a required one the engine refuses it.
+        # A guarded edit: a value in `expected_values` that changed since it was read refuses the whole proposal,
+        # before any check of the new values, so a stale caller always learns to read again. A null removes an
+        # optional value; on a required one the engine refuses it.
         def update(request, proposal, id:, values:, expected_values:)
-          request.engine.find(VENTILATOR_KIND, id)
           values = DeepCopy.call(values)
-          if values["name"]
-            values["name"] = values["name"].strip
-            Records::Names.unique!(values["name"], records(request), :except => id)
-          end
+          values["name"] = values["name"].strip if values["name"]
           request.engine.propose_update(VENTILATOR_KIND, id, proposal, :values => values,
                                                                        :expected_values => expected_values)
+          Records::Names.unique!(values["name"], records(request), :except => id) if values["name"]
           { "id" => id }
         end
 

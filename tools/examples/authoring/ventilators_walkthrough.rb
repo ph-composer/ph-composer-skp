@@ -11,11 +11,15 @@ module VentilatorsWalkthrough
   PREFIX = "ph_composer.mechanical.ventilators"
 
   USER_DATA = { "walkthrough" => { "kept" => ["original"] } }.freeze
-  # The catalog after `run`, by name: sensible and latent recovery, electric efficiency in Wh/m³, quantity,
-  # subsoil heat exchanger efficiency, source kind and user_data. The copy carries ERV-1's values and user_data.
+  # ERV-1 as `run` leaves it: every stored value, efficiency in Wh/m³ and temperatures in °C.
+  ERV_1 = { "name" => "ERV-1", "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" },
+            "quantity" => 2, "sensible_heat_recovery" => 0.85, "latent_heat_recovery" => 0.6,
+            "electric_efficiency_wh_m3" => 0.45, "frost_protection_reqd" => true,
+            "temperature_below_defrost_used_c" => -5.0, "in_conditioned_space" => true }.freeze
+  # The catalog after `run`, by name: [values, user_data]. The copy carries ERV-1's values and user_data.
   EXPECTED = {
-    "ERV-1" => [0.85, 0.6, 0.45, 2, nil, "manual", USER_DATA],
-    "ERV-1 (copy)" => [0.85, 0.6, 0.45, 2, nil, "derived", USER_DATA]
+    "ERV-1" => [ERV_1, USER_DATA],
+    "ERV-1 (copy)" => [ERV_1.merge("name" => "ERV-1 (copy)", "source" => { "kind" => "derived" }), USER_DATA]
   }.freeze
 
   module_function
@@ -40,16 +44,16 @@ module VentilatorsWalkthrough
     { "passed" => steps.all? { |row| row["passed"] }, "steps" => steps }
   end
 
-  # The catalog as ventilators.all reads it, in EXPECTED's shape.
+  # The catalog as ventilators.all reads it, in EXPECTED's shape. An unreadable Ventilator fails the read.
   def state
     result = AuthoringExample::Client.new.query("#{PREFIX}.all")
     raise "ventilators.all failed: #{result['code']}" unless result["status"] == "completed"
 
+    unreadable = result.dig("value", "unreadable")
+    raise "ventilators.all has unreadable records: #{unreadable}" unless unreadable.empty?
+
     result.dig("value", "records").to_h do |row|
-      values = row.fetch("values")
-      [values.fetch("name"),
-       values.values_at("sensible_heat_recovery", "latent_heat_recovery", "electric_efficiency_wh_m3", "quantity",
-                        "subsoil_heat_exchange_efficiency") + [values.dig("source", "kind"), row.fetch("user_data")]]
+      [row.dig("values", "name"), [row.fetch("values"), row.fetch("user_data")]]
     end
   end
 

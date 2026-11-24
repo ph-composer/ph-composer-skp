@@ -16471,7 +16471,9 @@ Params:
     "ids": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^vnt_[A-Za-z0-9]{12}$",
+        "description": "A Ventilator id."
       },
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
@@ -58972,6 +58974,8 @@ Create one Ventilator. Unless values give them, its unit values take honeybee-ph
 
 Undo step: Create Ventilator. Creates one Model-owned definition.
 
+Before calling: Its name, trimmed and in any case, is not another Ventilator's.
+
 Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
 
 Params:
@@ -59270,7 +59274,7 @@ Undo step: Delete Ventilator. Deletes one definition and its metadata; Undo rest
 
 Before calling: The Ventilator exists and is readable.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -59642,7 +59646,7 @@ Undo step: Duplicate Ventilator. Creates one definition; user_data is copied.
 
 Before calling: The Ventilator exists and is readable.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -59699,9 +59703,9 @@ Edit guarded values of one Ventilator; a changed expected value refuses and writ
 
 Undo step: Edit Ventilator. Updates one definition and preserves its metadata.
 
-Before calling: The Ventilator exists and is readable.
+Before calling: The Ventilator exists and is readable. A new name: Its name, trimmed and in any case, is not another Ventilator's.
 
-Refuses: `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 
