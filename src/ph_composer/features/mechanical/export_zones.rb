@@ -75,6 +75,22 @@ module PhComposer
         end
       end
 
+      # Per item of a family PHX reads through a Room's Spaces (supportive devices, exhaust ventilators): each
+      # exported Zone it serves that no Space names. Not blocking: the HBJSON carries the item on that Room, and PHX
+      # reads it only through another Room it serves. `spaced` holds the ids of the exported Zones with a Space;
+      # `slot` and `label` are as `item_findings` takes them.
+      def spaceless_findings(exported, items, slot, label, spaced)
+        items.keys.sort.flat_map do |id|
+          name = items.fetch(id).fetch("name")
+          exported.select { |zone| zone.names?(slot, id) && !spaced.include?(zone.id) }.map do |zone|
+            Finding.new(:code => Codes::ZONE_WITHOUT_SPACES, :record_id => id, :blocks => false,
+                        :message => "#{name} serves Zone #{zone.label}, which has no Spaces. PHX reads a " \
+                                    "#{label} through a Room's Spaces, so WUFI-Passive and METr get #{name} only " \
+                                    "through another Room it serves. Add Spaces to Zone #{zone.label}.")
+          end
+        end
+      end
+
       def unserved(id, name)
         Finding.new(:code => Codes::ITEM_UNSERVED, :record_id => id, :blocks => false,
                     :message => "#{name} serves no Zone, so nothing exports it.")

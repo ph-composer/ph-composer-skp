@@ -46,6 +46,7 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.mechanical.export.hot_water",
         "ph_composer.mechanical.export.heat_pumps",
         "ph_composer.mechanical.export.electric_heaters",
+        "ph_composer.mechanical.export.pumps",
     ]
     assert EXPORTERS == ()
     empty = {"schema_version": 1, "run_id": "run-0", "sections": {}}

@@ -14,6 +14,8 @@
 #   hot_water/      the Hot Water System, Heater and Tank kinds, their operations and reads, and the pure tank slotting
 #   heat_pumps/     the outdoor and indoor models and units, their operations and reads, and the pure blend
 #   electric_heaters/  the Electric Heater kind and its reads (its operations are the shared catalog's)
+#   pumps/          the Pump kind, the usage profile its type gives, and its reads (its operations are the shared
+#                   catalog's)
 #   serves/         what serves each Zone: a payload on the Zone record that Zones stages, Assign and Clear, the
 #                   Zone half of an item's delete, the reads with their findings and the airflow balance
 #   codes.rb        the `mechanical` noun's codes
@@ -28,6 +30,8 @@
 #   heat_pump_export.rb  the heat pump export section
 #   electric_heater_plan.rb    the Electric Heater export worked out in pure Ruby: its pairs and findings
 #   electric_heater_export.rb  the Electric Heater export section
+#   pump_plan.rb         the Pump export worked out in pure Ruby: its pairs and findings
+#   pump_export.rb       the Pump export section
 #   segment/             a Building Segment's mechanical settings: the extension on the Segment record, its
 #                        defaults and read, and whether its cooling switch agrees with its blended heat pump
 #   segment_export.rb    the Segment settings export section, and its findings
@@ -50,6 +54,8 @@ require_relative "heat_pumps/blend"
 require_relative "heat_pumps/operations"
 require_relative "electric_heaters/schema"
 require_relative "electric_heaters/reads"
+require_relative "pumps/schema"
+require_relative "pumps/reads"
 require_relative "codes"
 require_relative "serves/payload"
 require_relative "serves/state"
@@ -73,6 +79,9 @@ require_relative "heat_pump_export"
 require_relative "declarations/electric_heaters"
 require_relative "electric_heater_plan"
 require_relative "electric_heater_export"
+require_relative "declarations/pumps"
+require_relative "pump_plan"
+require_relative "pump_export"
 require_relative "segment/settings"
 require_relative "segment/cooling"
 require_relative "declarations/segment"
@@ -98,6 +107,8 @@ module PhComposer
       HeatPumpExport.install(feature)
       ElectricHeaterRegistration.install(feature)
       ElectricHeaterExport.install(feature)
+      PumpRegistration.install(feature)
+      PumpExport.install(feature)
       SegmentRegistration.install(feature)
       SegmentExport.install(feature)
       Locate.install(feature)

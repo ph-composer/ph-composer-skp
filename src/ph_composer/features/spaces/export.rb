@@ -307,12 +307,13 @@ module PhComposer
         rows.sort_by { |row| row.fetch("id") }
       end
 
-      # The section's registered projection, for a contributor that needs each exported Zone's Space totals
-      # (`reader.section(SECTION)`): one row per Zone that holds a Volume, in Zone id order, with the sums of its
+      # The section's registered projection, for a contributor that needs each exported Zone's Spaces
+      # (`reader.section(SECTION)`): one row per Zone that holds a Space, in Zone id order, with how many Spaces
+      # name it (`space_count`; PHX reads a Room's mechanical devices through its Spaces) and the sums of its
       # Volumes' floor area, weighted floor area (iCFA) and net volume as the metrics measure them (net volume is
-      # net floor area times average clear ceiling height), which is what honeybee-ph and PHX read back. What sits
-      # in a Zone in no Building Segment is left out with it, and a Volume with no height counts no volume here:
-      # the section's records refuse it.
+      # net floor area times average clear ceiling height), which is what honeybee-ph and PHX read back; zero for a
+      # Zone whose Spaces hold no Volume. What sits in a Zone in no Building Segment is left out with it, and a
+      # Volume with no height counts no volume here: the section's records refuse it.
       def zone_totals(reader)
         snapshot = reader.snapshot
         kept = lambda do |dictionary, kind|
@@ -332,7 +333,11 @@ module PhComposer
           volume = Metrics.volume(record, metrics)
           TOTALS.each { |total| totals[zone_id][total] += volume.fetch(total) || 0.0 }
         end
-        totals.sort.map { |zone_id, sums| { "zone_id" => zone_id }.merge(sums) }
+        # Space occurrences per Zone id: a Zone copied but not yet made independent counts its Spaces once a copy.
+        counts = spaces.values.filter_map { |record| record["zone_id"] }.tally
+        (counts.keys | totals.keys).sort.map do |zone_id|
+          { "zone_id" => zone_id, "space_count" => counts.fetch(zone_id, 0) }.merge(totals[zone_id])
+        end
       end
 
       # One note per Zone in no Building Segment counting the Spaces inside it that leave with it.

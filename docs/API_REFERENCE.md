@@ -3355,6 +3355,242 @@ Values:
 }
 ```
 
+### `ph_composer.mechanical.pump`
+
+Pump, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "device_type",
+    "quantity",
+    "in_conditioned_space",
+    "norm_energy_demand_w",
+    "annual_period_operation_khrs",
+    "ihg_utilization_factor"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "device_type": {
+              "type": "integer",
+              "enum": [
+                4,
+                6,
+                7,
+                10
+              ],
+              "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical pumps this record stands for."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the pump sits inside the thermal envelope."
+            },
+            "norm_energy_demand_w": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W",
+              "description": "Electrical power while it runs."
+            },
+            "annual_period_operation_khrs": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "kh",
+              "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+            },
+            "ihg_utilization_factor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+            },
+            "ihg_usage_profile": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 4,
+              "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "device_type": {
+      "type": "integer",
+      "enum": [
+        4,
+        6,
+        7,
+        10
+      ],
+      "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical pumps this record stands for."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the pump sits inside the thermal envelope."
+    },
+    "norm_energy_demand_w": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W",
+      "description": "Electrical power while it runs."
+    },
+    "annual_period_operation_khrs": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "kh",
+      "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+    },
+    "ihg_utilization_factor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+    },
+    "ihg_usage_profile": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 4,
+      "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+    }
+  }
+}
+```
+
 ### `ph_composer.mechanical.ventilator`
 
 Ventilator, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
@@ -24542,7 +24778,7 @@ Example params:
 
 ### `ph_composer.mechanical.preflight`
 
-Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot, Hot Water Systems pooled in one Building Segment, and the heat pump blend's: a climate it cannot read, an unpaired unit, an incomplete outdoor model and cooling over 200 kW; and a Building Segment whose mechanical cooling switch disagrees with its blended heat pump. Owner: `ph_composer.mechanical`.
+Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot, Hot Water Systems pooled in one Building Segment, and the heat pump blend's: a climate it cannot read, an unpaired unit, an incomplete outdoor model and cooling over 200 kW; a Pump serving a Zone with no Spaces; and a Building Segment whose mechanical cooling switch disagrees with its blended heat pump. Owner: `ph_composer.mechanical`.
 
 Refuses: only the `query` common set.
 
@@ -24660,6 +24896,915 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.mechanical.pumps.all`
+
+Every Pump with its values, the Zones it serves and its findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.pumps.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings",
+          "ihg_usage_profile_default"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "device_type",
+              "quantity",
+              "in_conditioned_space",
+              "norm_energy_demand_w",
+              "annual_period_operation_khrs",
+              "ihg_utilization_factor"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "device_type": {
+                        "type": "integer",
+                        "enum": [
+                          4,
+                          6,
+                          7,
+                          10
+                        ],
+                        "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical pumps this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the pump sits inside the thermal envelope."
+                      },
+                      "norm_energy_demand_w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W",
+                        "description": "Electrical power while it runs."
+                      },
+                      "annual_period_operation_khrs": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kh",
+                        "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+                      },
+                      "ihg_utilization_factor": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+                      },
+                      "ihg_usage_profile": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 4,
+                        "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "device_type": {
+                "type": "integer",
+                "enum": [
+                  4,
+                  6,
+                  7,
+                  10
+                ],
+                "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical pumps this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the pump sits inside the thermal envelope."
+              },
+              "norm_energy_demand_w": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W",
+                "description": "Electrical power while it runs."
+              },
+              "annual_period_operation_khrs": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kh",
+                "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+              },
+              "ihg_utilization_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+              },
+              "ihg_usage_profile": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 4,
+                "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "ihg_usage_profile_default": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "The usage profile its device_type gives, which it exports while ihg_usage_profile is absent."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.pumps.list`
+
+One bounded page of Pumps in id order, with the Zones each serves and its findings. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^pmp_[A-Za-z0-9]{12}$",
+        "description": "A Pump id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings",
+          "ihg_usage_profile_default"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "device_type",
+              "quantity",
+              "in_conditioned_space",
+              "norm_energy_demand_w",
+              "annual_period_operation_khrs",
+              "ihg_utilization_factor"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "device_type": {
+                        "type": "integer",
+                        "enum": [
+                          4,
+                          6,
+                          7,
+                          10
+                        ],
+                        "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical pumps this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the pump sits inside the thermal envelope."
+                      },
+                      "norm_energy_demand_w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W",
+                        "description": "Electrical power while it runs."
+                      },
+                      "annual_period_operation_khrs": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kh",
+                        "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+                      },
+                      "ihg_utilization_factor": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+                      },
+                      "ihg_usage_profile": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 4,
+                        "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "device_type": {
+                "type": "integer",
+                "enum": [
+                  4,
+                  6,
+                  7,
+                  10
+                ],
+                "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical pumps this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the pump sits inside the thermal envelope."
+              },
+              "norm_energy_demand_w": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W",
+                "description": "Electrical power while it runs."
+              },
+              "annual_period_operation_khrs": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kh",
+                "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+              },
+              "ihg_utilization_factor": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+              },
+              "ihg_usage_profile": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 4,
+                "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "ihg_usage_profile_default": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "The usage profile its device_type gives, which it exports while ihg_usage_profile is absent."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "zones"
+  ]
+}
 ```
 
 ### `ph_composer.mechanical.segment.get`
@@ -24874,7 +26019,8 @@ Result:
               "ventilator_id",
               "hot_water_system_id",
               "hp_indoor_unit_ids",
-              "heater_ids"
+              "heater_ids",
+              "pump_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -24910,6 +26056,15 @@ Result:
                   "description": "A Electric Heater."
                 },
                 "description": "Its Electric Heaters, empty for none."
+              },
+              "pump_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^pmp_[A-Za-z0-9]{12}$",
+                  "description": "A Pump."
+                },
+                "description": "Its Pumps, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -24938,9 +26093,10 @@ Result:
                     "ventilator_id",
                     "hot_water_system_id",
                     "hp_indoor_unit_ids",
-                    "heater_ids"
+                    "heater_ids",
+                    "pump_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids, pump_ids."
                 },
                 "id": {
                   "type": "string"
@@ -25105,7 +26261,8 @@ Result:
               "ventilator_id",
               "hot_water_system_id",
               "hp_indoor_unit_ids",
-              "heater_ids"
+              "heater_ids",
+              "pump_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -25141,6 +26298,15 @@ Result:
                   "description": "A Electric Heater."
                 },
                 "description": "Its Electric Heaters, empty for none."
+              },
+              "pump_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^pmp_[A-Za-z0-9]{12}$",
+                  "description": "A Pump."
+                },
+                "description": "Its Pumps, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -25169,9 +26335,10 @@ Result:
                     "ventilator_id",
                     "hot_water_system_id",
                     "hp_indoor_unit_ids",
-                    "heater_ids"
+                    "heater_ids",
+                    "pump_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids, pump_ids."
                 },
                 "id": {
                   "type": "string"
@@ -76930,9 +78097,1140 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.pumps.create`
+
+Create one Pump. Unless values give it, it is one hot water circulation pump (device_type 6) in conditioned space drawing 0 W for 8.76 kh a year, its whole energy an internal heat gain (ihg_utilization_factor 1.0) in the usage profile its type gives (no ihg_usage_profile), with no manufacturer or model. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Pump. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Pump's.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "device_type": {
+                  "type": "integer",
+                  "enum": [
+                    4,
+                    6,
+                    7,
+                    10
+                  ],
+                  "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical pumps this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the pump sits inside the thermal envelope."
+                },
+                "norm_energy_demand_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Electrical power while it runs."
+                },
+                "annual_period_operation_khrs": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "kh",
+                  "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+                },
+                "ihg_utilization_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+                },
+                "ihg_usage_profile": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "device_type": {
+          "type": "integer",
+          "enum": [
+            4,
+            6,
+            7,
+            10
+          ],
+          "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical pumps this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the pump sits inside the thermal envelope."
+        },
+        "norm_energy_demand_w": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Electrical power while it runs."
+        },
+        "annual_period_operation_khrs": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "kh",
+          "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+        },
+        "ihg_utilization_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+        },
+        "ihg_usage_profile": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+        }
+      },
+      "description": "The new Pump's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "P-1",
+    "device_type": 4,
+    "norm_energy_demand_w": 25.0,
+    "manufacturer": "Kaltwerk"
+  }
+}
+```
+
+### `ph_composer.mechanical.pumps.delete`
+
+Delete one Pump. While a Zone names it, name a replacement_id, which takes its place in every Zone's pump list (once, where the list already holds it), or null, which takes it out of them; without one it refuses as reference.in_use, naming the Zones. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Pump. Deletes one definition and its metadata, and rewrites the Zones that name it; Undo restores all of them.
+
+Before calling: The Pump exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pmp_[A-Za-z0-9]{12}$",
+      "description": "The Pump to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "device_type": {
+                  "type": "integer",
+                  "enum": [
+                    4,
+                    6,
+                    7,
+                    10
+                  ],
+                  "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical pumps this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the pump sits inside the thermal envelope."
+                },
+                "norm_energy_demand_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Electrical power while it runs."
+                },
+                "annual_period_operation_khrs": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "kh",
+                  "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+                },
+                "ihg_utilization_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+                },
+                "ihg_usage_profile": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "device_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            4,
+            6,
+            7,
+            10,
+            null
+          ],
+          "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical pumps this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the pump sits inside the thermal envelope."
+        },
+        "norm_energy_demand_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Electrical power while it runs."
+        },
+        "annual_period_operation_khrs": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kh",
+          "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+        },
+        "ihg_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+        },
+        "ihg_usage_profile": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^pmp_[A-Za-z0-9]{12}$",
+      "description": "The Pump that takes this one's place in every Zone's pump list, or null to take it out of them. Needed while a Zone names it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pmp_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pmp_Ab12Cd34Ef56",
+  "replacement_id": "pmp_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.pumps.duplicate`
+
+Duplicate one Pump with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Pump. Creates one definition; user_data is copied.
+
+Before calling: The Pump exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pmp_[A-Za-z0-9]{12}$",
+      "description": "The Pump to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pmp_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.pumps.update`
+
+Edit guarded values of one Pump; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Pump. Updates one definition and preserves its metadata.
+
+Before calling: The Pump exists and is readable. A new name: Its name, trimmed and in any case, is not another Pump's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pmp_[A-Za-z0-9]{12}$",
+      "description": "The Pump to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "device_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            4,
+            6,
+            7,
+            10,
+            null
+          ],
+          "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical pumps this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the pump sits inside the thermal envelope."
+        },
+        "norm_energy_demand_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Electrical power while it runs."
+        },
+        "annual_period_operation_khrs": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kh",
+          "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+        },
+        "ihg_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+        },
+        "ihg_usage_profile": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "device_type": {
+                  "type": "integer",
+                  "enum": [
+                    4,
+                    6,
+                    7,
+                    10
+                  ],
+                  "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical pumps this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the pump sits inside the thermal envelope."
+                },
+                "norm_energy_demand_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Electrical power while it runs."
+                },
+                "annual_period_operation_khrs": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "kh",
+                  "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+                },
+                "ihg_utilization_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+                },
+                "ihg_usage_profile": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "device_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            4,
+            6,
+            7,
+            10,
+            null
+          ],
+          "description": "The supportive device type: 4 heating circulation, 6 hot water circulation, 7 hot water storage load, 10 other."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical pumps this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the pump sits inside the thermal envelope."
+        },
+        "norm_energy_demand_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Electrical power while it runs."
+        },
+        "annual_period_operation_khrs": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kh",
+          "description": "Thousands of hours it runs a year; 8.76 is the whole year."
+        },
+        "ihg_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of its energy that becomes an internal heat gain, 0 to 1."
+        },
+        "ihg_usage_profile": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Where its internal heat gain lands: 1 all year, 2 winter, 3 summer, 4 none; absent to follow the device type."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pmp_Ab12Cd34Ef56",
+  "values": {
+    "norm_energy_demand_w": 40.0
+  },
+  "expected_values": {
+    "norm_energy_demand_w": 25.0
+  }
+}
+```
+
 ### `ph_composer.mechanical.serves.assign`
 
-Name an item in one slot of Zones. A single slot holds one item (a Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids or heater_ids, adds it beside the items it holds. Owner: `ph_composer.mechanical`.
+Name an item in one slot of Zones. A single slot holds one item (a Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids, heater_ids or pump_ids, adds it beside the items it holds. Owner: `ph_composer.mechanical`.
 
 Undo step: Assign Equipment. Writes each Zone's Serves payload; Programs' assignment is untouched.
 
@@ -77020,6 +79318,15 @@ Params:
                   "description": "A Electric Heater."
                 },
                 "description": "Its Electric Heaters, empty for none."
+              },
+              "pump_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^pmp_[A-Za-z0-9]{12}$",
+                  "description": "A Pump."
+                },
+                "description": "Its Pumps, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -77035,9 +79342,10 @@ Params:
         "ventilator_id",
         "hot_water_system_id",
         "hp_indoor_unit_ids",
-        "heater_ids"
+        "heater_ids",
+        "pump_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids, pump_ids."
     },
     "item_id": {
       "type": "string",
@@ -77077,9 +79385,10 @@ Result:
         "ventilator_id",
         "hot_water_system_id",
         "hp_indoor_unit_ids",
-        "heater_ids"
+        "heater_ids",
+        "pump_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids, pump_ids."
     },
     "item_id": {
       "type": "string"
@@ -77198,6 +79507,15 @@ Params:
                   "description": "A Electric Heater."
                 },
                 "description": "Its Electric Heaters, empty for none."
+              },
+              "pump_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^pmp_[A-Za-z0-9]{12}$",
+                  "description": "A Pump."
+                },
+                "description": "Its Pumps, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -77213,7 +79531,8 @@ Params:
         "ventilator_id",
         "hot_water_system_id",
         "hp_indoor_unit_ids",
-        "heater_ids"
+        "heater_ids",
+        "pump_ids"
       ],
       "description": "The slot to empty; every slot when absent."
     },
@@ -108434,7 +110753,7 @@ Example params:
 
 ### `ph_composer.mechanical.locate`
 
-Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids, hot_water_tank_ids, hp_outdoor_equipment_ids, hp_outdoor_unit_ids, hp_indoor_unit_ids or electric_heater_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
+Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids, hot_water_tank_ids, hp_outdoor_equipment_ids, hp_outdoor_unit_ids, hp_indoor_unit_ids, electric_heater_ids or pump_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
 
 Side effects: Opens or raises the panel on the Mechanical or the Zones tab.
 
@@ -108526,6 +110845,16 @@ Params:
         "description": "A Electric Heater id."
       },
       "description": "Electric Heaters to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "pump_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^pmp_[A-Za-z0-9]{12}$",
+        "description": "A Pump id."
+      },
+      "description": "Pumps to show on the Mechanical tab, their table narrowed to them.",
       "maxItems": 500
     },
     "zones": {
@@ -115896,6 +118225,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `mechanical.zone_left_out` | A served Zone is in no Building Segment, so the export leaves its Room out. |
 | `mechanical.zone_no_hot_water` | A Zone in a Building Segment has no Hot Water System. |
 | `mechanical.zone_unventilated` | A Zone in a Building Segment has no Ventilator. |
+| `mechanical.zone_without_spaces` | An item PHX reads through a Room's Spaces (a Pump) serves an exported Zone with no Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only through another Room it serves. |
 
 ### `ph_composer.programs`
 
@@ -116202,3 +118532,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.93 | 2026-11-24 | ph_composer.mechanical.heat_pumps.outdoor_equipment, indoor_equipment, outdoor_units and indoor_units are new, each with list, all, a snapshot section, create, update, duplicate and delete; ph_composer.mechanical.heat_pumps.blended and its snapshot section heat_pumps_blended are new. ph_composer.mechanical requires ph_composer.climate. ph_composer.mechanical.zone_serves moves to schema 3 with the hp_indoor_unit_ids list slot, and serves.clear takes item_id to take one item out of a slot. The export section ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, hp_outdoor_unit_ids and hp_indoor_unit_ids. |
 | 1.94 | 2026-11-24 | The Building Segment extension ph_composer.mechanical.segment is new (mechanical_cooling, mech_room_temp_c, summer_bypass_mode, ventilation_system_ach, daytime_window_ach and nighttime_window_ach), saved through ph_composer.zones.save_segment_settings and read by the new ph_composer.mechanical.segment.get. The export section ph_composer.mechanical.export.segments is new, and ph_composer.mechanical.preflight adds its rows: mechanical.segment_cooling_mismatch. |
 | 1.95 | 2026-11-24 | ph_composer.mechanical.electric_heaters is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 4 with the heater_ids list slot. The export section ph_composer.mechanical.export.electric_heaters is new and ph_composer.mechanical.preflight adds its rows; ph_composer.mechanical.locate takes electric_heater_ids. |
+| 1.96 | 2026-11-24 | ph_composer.mechanical.pumps is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 5 with the pump_ids list slot. The export section ph_composer.mechanical.export.pumps is new and ph_composer.mechanical.preflight adds its rows, with the new code mechanical.zone_without_spaces; ph_composer.mechanical.locate takes pump_ids. The Spaces export's projection gives each Zone's space_count, with a row for every Zone holding a Space. |

@@ -3,7 +3,7 @@
 Ventilation: one (Ventilator, Zone) pair with the identifiers Ruby derived from the Ventilator's id and the unit's
 values as the record stores them. Hot water: one (Hot Water System, Zone) pair with the System's values, its Tanks in
 the slots Ruby worked out and its Heaters, each Tank and Heater under its own record's id. Electric heating: one
-(Electric Heater, Zone) pair under the heater's id."""
+(Electric Heater, Zone) pair under the heater's id. Pumps: one (Pump, Zone) pair under the pump's id."""
 
 from __future__ import annotations
 
@@ -372,5 +372,59 @@ class ElectricHeaterRecord:
             as_text(raw.get("identifier"), f"{label} identifier"),
             as_text(raw.get("display_name"), f"{label} display_name"),
             fraction(raw.get("percent_coverage"), f"{label} percent_coverage"),
+            user_data(raw.get("user_data"), label),
+        )
+
+
+# -- Pumps --------------------------------------------------------------------
+
+#: honeybee-ph's supportive device types a Pump offers; Ruby's `Pumps::DEVICE_TYPES`.
+PUMP_DEVICE_TYPES = (4, 6, 7, 10)
+
+
+@dataclass(frozen=True)
+class PumpRecord:
+    """One (Pump, Zone) pair: the pump's identifier (its record id) and Tag, which every pair of one pump shares, its
+    supportive device values (W, kilohours a year) with the usage profile Ruby resolved, and its `user_data`
+    (`PumpPlan`)."""
+
+    id: str
+    item_id: str
+    zone_id: str
+    identifier: str
+    display_name: str
+    device_type: int
+    quantity: int
+    in_conditioned_space: bool
+    norm_energy_demand_w: float
+    annual_period_operation_khrs: float
+    ihg_utilization_factor: float
+    ihg_usage_profile: int
+    user_data: JSONObject
+
+    @classmethod
+    def read(cls, raw: Mapping[str, object]) -> PumpRecord:
+        identifier = as_text(raw.get("id"), "pump id")
+        label = f"pump {identifier}"
+        device_type = raw.get("device_type")
+        if isinstance(device_type, bool) or not isinstance(device_type, int) or device_type not in PUMP_DEVICE_TYPES:
+            raise RecordError(f"{label} device_type must be one of {', '.join(map(str, PUMP_DEVICE_TYPES))}")
+        quantity = optional_whole(raw.get("quantity"), f"{label} quantity", 1, None)
+        profile = optional_whole(raw.get("ihg_usage_profile"), f"{label} ihg_usage_profile", 1, 4)
+        if quantity is None or profile is None:
+            raise RecordError(f"{label} needs its quantity and its ihg_usage_profile")
+        return cls(
+            identifier,
+            as_text(raw.get("item_id"), f"{label} item_id"),
+            as_text(raw.get("zone_id"), f"{label} zone_id"),
+            as_text(raw.get("identifier"), f"{label} identifier"),
+            as_text(raw.get("display_name"), f"{label} display_name"),
+            device_type,
+            quantity,
+            flag(raw.get("in_conditioned_space"), f"{label} in_conditioned_space"),
+            non_negative(raw.get("norm_energy_demand_w"), f"{label} norm_energy_demand_w"),
+            non_negative(raw.get("annual_period_operation_khrs"), f"{label} annual_period_operation_khrs"),
+            fraction(raw.get("ihg_utilization_factor"), f"{label} ihg_utilization_factor"),
+            profile,
             user_data(raw.get("user_data"), label),
         )

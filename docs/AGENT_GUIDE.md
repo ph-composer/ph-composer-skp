@@ -921,8 +921,8 @@ Ventilators are read either way.
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
 `ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
-(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids` and `heater_ids`,
-lists, empty for none), the `items` the slots name with their names, and `findings`.
+(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids`, `heater_ids` and
+`pump_ids`, lists, empty for none), the `items` the slots name with their names, and `findings`.
 A Zone served by nothing reads the same whether it stores no payload or an emptied one.
 
 Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
@@ -931,7 +931,7 @@ Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
 already has another, the command is refused as `mechanical.slot_filled`, naming that Ventilator, and
 nothing is written; send it again with `replace: true` to replace it. Empty a slot with
 `ph_composer.mechanical.serves.clear`, giving `zones` and `slot`, or leave `slot` out to empty every
-slot. The list slots, `hp_indoor_unit_ids` and `heater_ids`, hold several items: assigning adds the item
+slot. The list slots, `hp_indoor_unit_ids`, `heater_ids` and `pump_ids`, hold several items: assigning adds the item
 beside those the Zone has, and nothing is replaced; to take one item off a Zone, clear with `slot` and
 `item_id`. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
 locked Group, in a shared component or inside another Zone is refused with Zones' own codes
@@ -1142,6 +1142,49 @@ the same system and PHX makes one device per heater in each Building Segment it 
    `identifier`, `display_name`, `percent_coverage` and `digest`. In the HBJSON each of those Rooms has
    an entry in `properties.ph_hvac.heating_systems` with that identifier and `heating_type`
    `PhHeatingDirectElectric`.
+
+### Mechanical: pumps
+
+A Pump is an auxiliary pump, kept in the Model as a definition, honeybee-ph's supportive device. Read
+`ph_composer.mechanical.pumps.list`, a bounded page at a time; names are unique. Create one with
+`ph_composer.mechanical.pumps.create`, giving at least `name` (shown as Tag). Unless you give them, it
+is one (`quantity` 1) hot water circulation pump (`device_type` 6) in conditioned space, drawing
+`norm_energy_demand_w` 0 W for `annual_period_operation_khrs` 8.76 kilohours a year. `device_type` is 4
+(heating circulation), 6 (hot water circulation), 7 (hot water storage load) or 10 (other).
+`ihg_utilization_factor`, from 0 to 1 and 1.0 unless you give it, is the share of its energy that becomes
+an internal heat gain. `ihg_usage_profile` is where that gain lands: 1 all year, 2 winter, 3 summer or 4
+none. Leave it absent to follow the type (2 for type 4, 4 for types 6 and 7, 1 for type 10); each row
+gives that profile as `ihg_usage_profile_default`, and the export writes the stored profile or else that
+one. Setting it to null returns to the type's. A value outside its range is refused as `params.invalid`
+and nothing is written.
+
+Edit with `ph_composer.mechanical.pumps.update`, copying `expected_values` from the values you read;
+`ph_composer.mechanical.pumps.duplicate` copies one with its `user_data`. Assign pumps to Zones with
+`ph_composer.mechanical.serves.assign`, `slot` `pump_ids`: a Zone may hold several. Clear one with `slot`
+and `item_id`. `ph_composer.mechanical.pumps.delete` is refused as `reference.in_use` while a Zone names
+the pump; `replacement_id` puts another in its place on every Zone (once, where the Zone already holds
+it), and `replacement_id: null` takes it off them, each one Undo step. Rows carry the Zones each pump
+serves under `zones`, and `findings`: `mechanical.item_unserved` when it serves no Zone, and
+`mechanical.zone_left_out` for each Zone it serves in no Building Segment.
+
+### Mechanical: the Pump export
+
+The export adds to each served Zone's Room one supportive device per pump serving it, under the pump's
+id, with its Tag, values, usage profile and `user_data`, so every Room one pump serves carries the same
+device. PHX reads supportive devices through each Room's Spaces and makes one device per pump in each
+Building Segment it serves; a Room with no Spaces gives it none.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`; its pump rows name the Pump export as
+   their `section`. `mechanical.item_missing` blocks: a Zone the export writes names a pump that is not
+   in the Model. `mechanical.item_unserved` names a pump that serves no Zone, `mechanical.zone_left_out`
+   a served Zone in no Building Segment, `mechanical.item_across_segments` a pump on Zones in two
+   Building Segments, and `mechanical.zone_without_spaces` a served Zone with no Spaces, whose Room
+   carries the pump in the HBJSON while PHX reads it only through another Room it serves; none of these
+   blocks. A row about a pump carries `locate` with `pump_ids`.
+2. Export, then read back. The result gives `pumps`, one row per (pump, Zone) pair: `identifier`,
+   `display_name`, the values under the record's names, the exported `ihg_usage_profile` and `digest`.
+   In the HBJSON each of those Rooms has an entry in `properties.ph_hvac.supportive_devices` with that
+   identifier.
 
 ### Library records
 

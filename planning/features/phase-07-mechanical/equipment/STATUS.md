@@ -40,12 +40,12 @@ the interview state only.
 
 ## Next step
 
-D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Pumps, fans and electric heaters are interviewed each before its
-stage (P4-09 to P4-11); heat pumps were settled on 2026-11-15, and appliances are Programs'.
+D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Electric heaters, pumps and fans were interviewed on
+2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps are built in P4-10; heat pumps were settled
+on 2026-11-15, and appliances are Programs'.
 
 ## Blockers
 
-- The remaining family interviews (pumps, fans, electric heaters), each before its stage.
 - H5: a calculation-method field on honeybee-ph's `PhHotWaterSystem`, read by PHX, before the
   simplified hot water methods can export: [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135), filed 2026-10-21, open. Nothing in the code blocks a start: the foundation,
   record engine, inventory table, Zone views and the Room-attaching export section all exist
@@ -62,7 +62,8 @@ stage (P4-09 to P4-11); heat pumps were settled on 2026-11-15, and appliances ar
 - First noted for [metr-export](../../unscheduled/metr-export/README.md); since D4-25 proved by
   round trip in the pumps and fans stages: PHX reads exhaust
   ventilators and supportive devices through a Room's Spaces, so a Zone with no Space loses them
-  in METr (PRD, family 6).
+  in METr (PRD, family 6). P4-10 proved it for supportive devices and reports a served Zone with no
+  Spaces as `mechanical.zone_without_spaces`, which Fans reuse.
 
 ## Verification
 

@@ -1,14 +1,19 @@
 /* The values an equipment row keeps behind a disclosure (a Ventilator's subsoil heat exchanger and preheated
-   intake temperature, later a Pump's or a Fan's): blank by default, so they stay off the row. The row's action
-   opens them in a bubble anchored to it, one unit field each; the action is pressed while any of them is set, and
-   its tooltip names them, so a closed row still shows they are there.
+   intake temperature, a Pump's internal heat gain values, later a Fan's), so they stay off the row. The row's action
+   opens them in a bubble anchored to it, one field each; the action is pressed while any of them is set, and its
+   tooltip names them, so a closed row still shows they are there. A value is set while it is present and, for a
+   field with a `defaultValue`, differs from it.
 
-   Each field applies on Enter or leaving, as its own guarded update (`expected_values` the value it showed), one
-   Undo step; a blank removes the value. Escape restores the field, and Escape again closes. A refusal stays in
-   the bubble beside its field until the next edit.
+   A field is a unit field (`field`, a unit descriptor) or a choice (`choices(record)`, [{ value, label }], whose
+   value "" stands for null and `parse(text)` gives the stored value). A unit field applies on Enter or leaving, a
+   choice when it changes, each as its own guarded update (`expected_values` the value it showed), one Undo step; a
+   blank removes the value. Escape restores a unit field, and Escape again closes. A refusal stays in the bubble
+   beside its field until the next edit.
 
-   new OptionalValues(session, send, { action, family, fields: [{ key, label, field }], notify })
-   with set(record), summary(record), open(record, trigger, layer), refresh(state, records), guard(), dispose(). */
+   new OptionalValues(session, send, { action, family, title, unset, fields: [{ key, label, field | choices, parse,
+   defaultValue }], notify }): `title` heads the bubble before the record's name ("Optional values"), `unset` is the
+   summary while none is set ("None set"); with set(record), summary(record), open(record, trigger, layer),
+   refresh(state, records), guard(), dispose(). */
 PhComposerUI.define("features/mechanical/optional_values", ["workspace", "unit_field", "units", "unit_preferences",
   "request", "snapshot"],
 function (ui, unitFields, units, preferences, request, snapshot) {
@@ -16,6 +21,47 @@ function (ui, unitFields, units, preferences, request, snapshot) {
 
   function present(value) { return value !== null && value !== undefined; }
   function stored(record, key) { return present(record.values[key]) ? record.values[key] : null; }
+  function isSet(record, entry) {
+    var value = record.values[entry.key];
+    return present(value) && (entry.defaultValue === undefined || value !== entry.defaultValue);
+  }
+
+  /* A choice in the bubble with what OptionalValues uses of a unit field: it applies when it changes, and nothing is
+     ever left half typed in it. */
+  function ChoiceField(entry, record, onCommit) {
+    var self = this;
+    this.entry = entry;
+    this.editing = false;
+    this.root = ui.element("span", "mech-optional-choice");
+    this.input = ui.element("select", "phc-enum-cell");
+    this.error = ui.element("small", "cell-error phc-unit-error");
+    this.error.hidden = true;
+    this.error.setAttribute("role", "alert");
+    this.root.appendChild(this.input);
+    this.root.appendChild(this.error);
+    this.paint(record);
+    this.input.addEventListener("change", function () {
+      self.error.hidden = true;
+      self.input.setAttribute("aria-invalid", "false");
+      onCommit(self.input.value === "" ? null : entry.parse(self.input.value));
+    });
+  }
+  /* Its choices for `record`, whose labels can name the record's own values ("From type (Winter)"), drawn again
+     only when they change, so a repaint leaves an open list as it is. */
+  ChoiceField.prototype.paint = function (record) {
+    var input = this.input, choices = this.entry.choices(record), listed = JSON.stringify(choices);
+    if (this.listed !== listed) {
+      this.listed = listed;
+      input.replaceChildren();
+      choices.forEach(function (choice) { input.appendChild(ui.option(choice.value, choice.label)); });
+    }
+    this.setValue(record.values[this.entry.key]);
+  };
+  ChoiceField.prototype.setValue = function (value) { this.input.value = present(value) ? String(value) : ""; };
+  ChoiceField.prototype.setDisabled = function (disabled) { this.input.disabled = Boolean(disabled); };
+  ChoiceField.prototype.commit = function () {};
+  ChoiceField.prototype.begin = function () {};
+  ChoiceField.prototype.dispose = function () {};
 
   function OptionalValues(session, send, options) {
     this.options = options;
@@ -23,16 +69,20 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     this.held = null;
   }
   OptionalValues.prototype.set = function (record) {
-    return this.options.fields.some(function (entry) { return present(record.values[entry.key]); });
+    return this.options.fields.some(function (entry) { return isSet(record, entry); });
   };
   /* "Subsoil heat exchanger 0.2; Preheated intake temperature 5 °C", or what the action offers while none is set. */
   OptionalValues.prototype.summary = function (record) {
-    var parts = this.options.fields.filter(function (entry) { return present(record.values[entry.key]); })
+    var parts = this.options.fields.filter(function (entry) { return isSet(record, entry); })
       .map(function (entry) {
-        return entry.label + " " + units.format(record.values[entry.key], entry.field,
-          units.profile(entry.field, preferences.current()));
+        var value = record.values[entry.key];
+        if (entry.choices) {
+          var chosen = entry.choices(record).filter(function (choice) { return choice.value === String(value); })[0];
+          return entry.label + " " + (chosen ? chosen.label : value);
+        }
+        return entry.label + " " + units.format(value, entry.field, units.profile(entry.field, preferences.current()));
       });
-    return parts.length ? parts.join("; ") : "None set";
+    return parts.length ? parts.join("; ") : this.options.unset || "None set";
   };
   OptionalValues.prototype.busy = function () { return this.requests.busy(); };
   OptionalValues.prototype.guard = function () {
@@ -43,7 +93,8 @@ function (ui, unitFields, units, preferences, request, snapshot) {
   OptionalValues.prototype.open = function (record, trigger, layer) {
     if (this.held && this.held.record.id === record.id) { this.close(true); return; }
     this.close(false);
-    var self = this, bubble = new ui.Bubble(trigger, "Optional values of " + record.values.name,
+    var self = this, bubble = new ui.Bubble(trigger, (this.options.title || "Optional values") + " of " +
+      record.values.name,
       { detachedTrigger: true, ownTrigger: true });
     bubble.root.classList.add("mech-optional-values");
     var originalClose = bubble.close;
@@ -58,7 +109,15 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       return closed;
     };
     var fields = this.options.fields.map(function (entry) {
-      var label = ui.element("label", "mech-optional-field"), held = { key: entry.key };
+      var label = ui.element("label", "mech-optional-field"), held = { key: entry.key, entry: entry };
+      if (entry.choices) {
+        held.unit = new ChoiceField(entry, record, function (value) { held.refused = false; self.apply(held, value); });
+        held.unit.input.setAttribute("aria-label", entry.label);
+        label.appendChild(ui.element("span", "", entry.label));
+        label.appendChild(held.unit.root);
+        held.label = label;
+        return held;
+      }
       held.unit = new unitFields.UnitField({ field: entry.field, value: record.values[entry.key], commitOnBlur: true,
         onCommit: function (value) { self.apply(held, value); },
         onCancel: function () { held.base = undefined; held.refused = false; } });
@@ -112,7 +171,8 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       // A refusal stays on its field, with what the user typed, until they edit or cancel it.
       // The value being written shows until its answer arrives.
       if (!entry.unit.editing && !entry.refused && !(self.pending === entry && self.busy())) {
-        entry.unit.setValue(held.record.values[entry.key]);
+        if (entry.entry.choices) entry.unit.paint(held.record);
+        else entry.unit.setValue(held.record.values[entry.key]);
       }
     });
   };
@@ -126,9 +186,10 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     if (outcome && outcome.status !== "completed" && pending) {
       held.closing = false;
       var unit = pending.unit, model = held.record.values[pending.key];
-      if (outcome.code === "target.changed") {
-        // The value changed meanwhile: start again from the Model's.
-        unit.setValue(model);
+      if (outcome.code === "target.changed" || pending.entry.choices) {
+        // The value changed meanwhile, or a choice holds no draft: start again from the Model's.
+        if (pending.entry.choices) unit.paint(held.record);
+        else unit.setValue(model);
       } else {
         // Anything else keeps the typed text as a draft over the Model's value, guarded by it.
         unit.editing = false; unit.baseline = present(model) ? model : null; unit.begin();

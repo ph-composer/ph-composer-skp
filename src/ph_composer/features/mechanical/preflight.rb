@@ -5,13 +5,14 @@ module PhComposer
     # `ph_composer.mechanical.preflight`: every mechanical export section's checks over the live Model, one query the
     # Ventilator export names for the whole feature (the export pane runs each contributor's named preflight once). It
     # reads the Zones once through Serves and gives each family's rows (VentilationExport, HotWaterExport,
-    # HeatPumpExport, ElectricHeaterExport, SegmentExport), each with
+    # HeatPumpExport, ElectricHeaterExport, PumpExport, SegmentExport), each with
     # the section, code and object its export notes, so a run lists a finding once. An exported Zone whose Serves
     # payload this version does not understand comes first, since the claim stops the export on it. A read that
     # refuses answers one blocking row, since the export would stop on the same cause.
     module Preflight
       NAME = "#{FEATURE_ID}.preflight"
-      FAMILIES = [VentilationExport, HotWaterExport, HeatPumpExport, ElectricHeaterExport, SegmentExport].freeze
+      FAMILIES = [VentilationExport, HotWaterExport, HeatPumpExport, ElectricHeaterExport, PumpExport,
+                  SegmentExport].freeze
 
       module_function
 
@@ -22,7 +23,8 @@ module PhComposer
                                             "serving Zones in two Building Segments, a Tank with no free slot, " \
                                             "Hot Water Systems pooled in one Building Segment, and the heat pump " \
                                             "blend's: a climate it cannot read, an unpaired unit, an incomplete " \
-                                            "outdoor model and cooling over 200 kW; and a Building Segment whose " \
+                                            "outdoor model and cooling over 200 kW; a Pump serving a Zone with no " \
+                                            "Spaces; and a Building Segment whose " \
                                             "mechanical cooling switch disagrees with its blended heat pump.",
                             :refuses => [], :params => Shapes::NONE,
                             :result => PhComposer::Export::PREFLIGHT_RESULT, :examples => [{}]) do |request|

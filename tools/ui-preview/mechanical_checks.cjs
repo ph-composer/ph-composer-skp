@@ -6,7 +6,9 @@
    five pills: capacities in kBtu/h, a rating mode chosen in place, a lacking value, the indoor units grouped by
    outdoor unit with their list Serves slot and New with two parents, and the Blended result with its copy action;
    then the Electric Heating subtab's Heaters: coverage in percent, a heater added beside a Zone's others, New and
-   the delete with clearing; each at the panel's three sizes. Browser evidence; not host acceptance. */
+   the delete with clearing; then the Pumps subtab: a type chosen in place, the internal heat gains behind the row's
+   disclosure with the profile following the type, Serves beside a Zone's others, New and the delete with clearing;
+   each at the panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -427,6 +429,75 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
       `Electric Heating does not scroll sideways at ${width} x ${height}`);
     await page.screenshot({ path: path.join(output, `electric-heaters-${width}x${height}.png`) });
+  }
+
+  step("Pumps › Pumps: a type in place, the internal heat gains, Serves beside a Zone's others, New, delete");
+  await setPanelSize(page, 1280, 800);
+  await pane.getByRole("tab", { name: "Pumps", exact: true }).click();
+  const pumpPills = pane.getByRole("group", { name: "Pumps tables", exact: true });
+  assert.deepEqual(await pumpPills.locator("button").allTextContents(), ["Pumps"]);
+  const pumpTable = pane.locator(".mech-pumps");
+  const pumpRow = id => pumpTable.locator(`[data-row-key='${id}']`);
+  const PHW = "pmp_Aa11Bb22Cc33", PHC = "pmp_Dd44Ee55Ff66", PSPARE = "pmp_Gg77Hh88Ii99";
+  const pumps = key => host(`window.previewHost.mechanical.pumps[${JSON.stringify(key)}]`);
+  const pumpValues = id => host(`window.previewHost.mechanical.pumps.pumps.filter(r => r.id === ${
+    JSON.stringify(id)})[0].values`);
+  await pumpRow(PHW).waitFor();
+  assert.equal(await pumpRow(PHC).locator("[data-record-field='norm_energy_demand_w']").inputValue(), "40");
+  await pumpRow(PHC).locator("[data-record-field='device_type']").selectOption("10");
+  await page.waitForFunction(id => window.previewHost.mechanical.pumps.pumps.filter(r => r.id === id)[0]
+    .values.device_type === 10, PHC);
+  assert.deepEqual((await sent(PREFIX + "pumps.update")).pop().payload.params,
+    { id: PHC, values: { device_type: 10 }, expected_values: { device_type: 4 } });
+  await page.screenshot({ path: path.join(output, "pumps.png") });
+  assert.equal(await pumpRow(PHW).getByRole("button", { name: /^Internal heat gains of P-HW/ })
+    .getAttribute("aria-pressed"), "false", "both at their defaults");
+  await pumpRow(PHW).hover();
+  await clickSettled(page, pumpRow(PHW).getByRole("button", { name: /^Internal heat gains of P-HW/ }));
+  const gains = page.getByRole("dialog", { name: "Internal heat gains of P-HW" });
+  const profile = gains.getByRole("combobox", { name: "Usage profile" });
+  assert.equal(await profile.inputValue(), "", "no profile chosen: it follows the type");
+  assert.equal((await profile.locator("option").allTextContents())[0], "From type (None (hot water))");
+  await profile.selectOption("1");
+  await page.waitForFunction(id => window.previewHost.mechanical.pumps.pumps.filter(r => r.id === id)[0]
+    .values.ihg_usage_profile === 1, PHW);
+  await page.screenshot({ path: path.join(output, "pumps-internal-heat-gains.png") });
+  await profile.selectOption("");
+  await page.waitForFunction(id => window.previewHost.mechanical.pumps.pumps.filter(r => r.id === id)[0]
+    .values.ihg_usage_profile === undefined, PHW);
+  assert.deepEqual((await sent(PREFIX + "pumps.update")).pop().payload.params,
+    { id: PHW, values: { ihg_usage_profile: null }, expected_values: { ihg_usage_profile: 1 } });
+  await page.keyboard.press("Escape");
+  await gains.waitFor({ state: "hidden" });
+  await clickSettled(page, pumpRow(PSPARE).locator(".mech-serves-cell"));
+  const pumpPicker = page.getByRole("dialog", { name: "Zones served by P-Spare" });
+  await pumpPicker.locator(".mech-zone-row").filter({ hasText: "Apt 1" }).locator("input").check();
+  assert.equal(await pumpPicker.getByText("will be replaced").count(), 0, "a list slot replaces nothing");
+  await pumpPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
+  await pumpPicker.waitFor({ state: "hidden" });
+  assert.deepEqual((await pumps("serves")).zon_apt1, [PHW, PHC, PSPARE]);
+  await pane.getByRole("button", { name: "+ New Pump", exact: true }).click();
+  const newPump = page.getByRole("dialog", { name: "New Pump" });
+  await newPump.getByRole("textbox", { name: "Tag", exact: true }).fill("P-4");
+  await newPump.getByRole("button", { name: "Create Pump", exact: true }).click();
+  await newPump.waitFor({ state: "hidden" });
+  const made = (await pumps("pumps")).filter(row => row.values.name === "P-4")[0].values;
+  assert.deepEqual([made.device_type, made.norm_energy_demand_w], [6, 0], "a new pump circulates hot water at 0 W");
+  await pumpTable.getByRole("button", { name: "Delete P-HW", exact: true }).click();
+  const pumpDelete = page.getByRole("dialog", { name: /P-HW$/ });
+  await pumpDelete.getByRole("combobox").selectOption("__clear__");
+  await pumpDelete.getByRole("button", { name: /delete$/i }).click();
+  await pumpDelete.waitFor({ state: "hidden" });
+  assert.equal((await sent(PREFIX + "pumps.delete")).pop().payload.params.replacement_id, null);
+  assert.deepEqual((await pumps("serves")).zon_apt1, [PHC, PSPARE], "clearing takes it off its Zones");
+  assert.equal((await pumpValues(PHC)).device_type, 10);
+
+  step("Pumps fits the panel's sizes");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+      `Pumps does not scroll sideways at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `pumps-${width}x${height}.png`) });
   }
   return `mechanical browser checks passed; screenshots: ${output}`;
 });

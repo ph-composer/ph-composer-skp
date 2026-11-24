@@ -26,12 +26,19 @@ Electric heating: one record per (Electric Heater, served Zone) pair. Each becom
 under the heater's id, with its Tag, coverage and `user_data`, so every Room one heater serves carries an equal object
 and PHX keys one device. A Room holds every heater that serves it. honeybee-ph reloads heating systems sharing an
 identifier by keeping the last, so each row records its heater's digest, as hot water does.
+
+Pumps: one record per (Pump, served Zone) pair. Each becomes its own `PhSupportiveDevice` under the pump's id, with
+its Tag, values and `user_data`, so every Room one pump serves carries an equal object and PHX keys one device. A
+Room holds every pump that serves it. honeybee-ph reloads supportive devices sharing an identifier by keeping the
+last, so each row records its pump's digest. PHX reads supportive devices through a Room's Spaces; Ruby notes a
+served Zone with none.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -45,6 +52,7 @@ from .contract.mechanical_records import (
     HeaterValues,
     HeatPumpRecord,
     HotWaterRecord,
+    PumpRecord,
     TankValues,
     VentilationRecord,
 )
@@ -56,6 +64,10 @@ VENTILATION_SECTION_ID = "ph_composer.mechanical.export.ventilation"
 HOT_WATER_SECTION_ID = "ph_composer.mechanical.export.hot_water"
 HEAT_PUMP_SECTION_ID = "ph_composer.mechanical.export.heat_pumps"
 ELECTRIC_HEATER_SECTION_ID = "ph_composer.mechanical.export.electric_heaters"
+PUMP_SECTION_ID = "ph_composer.mechanical.export.pumps"
+#: A Pump's record id, which its supportive device carries: a Room's other supportive devices (a Fan's) belong to
+#: other sections.
+PUMP_ID = re.compile(r"pmp_[A-Za-z0-9]{12}")
 #: The honeybee-ph heating type this section writes; a Room's other heating systems belong to other sections.
 DIRECT_ELECTRIC = "PhHeatingDirectElectric"
 ZONES = Requirement(ZONE_SECTION_ID, TranslatedZone)
@@ -617,4 +629,123 @@ def electric_heater_row(item: TranslatedElectricHeater) -> dict[str, JSONValue]:
         "zone_name": item.zone_name,
         "display_name": record.display_name,
         **electric_heater_fields(item.heater),
+    }
+
+
+# -- Pumps --------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class TranslatedPump:
+    source: PumpRecord
+    zone_name: str
+    device: Any
+
+    @property
+    def zone_id(self) -> str:
+        return self.source.zone_id
+
+
+def pump(record: PumpRecord) -> Any:
+    """The pair's supportive device, built fresh so every pair of one pump builds an equal object. honeybee-ph's
+    `device_type` setter re-seeds the usage profile, so the profile Ruby resolved is set after it."""
+    device = stack.load("honeybee_phhvac.supportive_device").PhSupportiveDevice()
+    device.identifier, device.display_name = record.identifier, record.display_name
+    device.device_type = record.device_type
+    device.quantity = record.quantity
+    device.in_conditioned_space = record.in_conditioned_space
+    device.norm_energy_demand_W = record.norm_energy_demand_w
+    device.annual_period_operation_khrs = record.annual_period_operation_khrs
+    device.ihg_utilization_factor = record.ihg_utilization_factor
+    device.ihg_usage_profile = record.ihg_usage_profile
+    device.user_data = dict(record.user_data)
+    return device
+
+
+class PumpSection(Section[PumpRecord, TranslatedPump]):
+    id = PUMP_SECTION_ID
+    versions = frozenset({1})
+    object_type = TranslatedPump
+    requires = (ZONES,)
+    attaches = Attachment(ROOM, lambda item: item.zone_id)
+
+    def read(self, raw: Mapping[str, object]) -> PumpRecord:
+        return PumpRecord.read(raw)
+
+    def translate(self, record: PumpRecord, inputs: Inputs) -> TranslatedPump:
+        zone = inputs.get(ZONES, record.zone_id)
+        return TranslatedPump(record, zone.source.name, pump(record))
+
+    def attach(self, host: Any, objects: Sequence[TranslatedPump]) -> None:
+        """A Room holds each pump that serves it, each once, which Ruby's list of pump ids per Zone makes
+        structural."""
+        identifiers = [item.device.identifier for item in objects]
+        if len(set(identifiers)) != len(identifiers):
+            raise RecordError(f"Room {host.identifier} holds one pump twice")
+        for item in objects:
+            host.properties.ph_hvac.add_supportive_device(item.device)
+
+    def result_fields(self, objects: Mapping[str, TranslatedPump]) -> Mapping[str, JSONValue]:
+        rows: list[JSONValue] = [pump_row(item) for _identifier, item in sorted(objects.items())]
+        return {"pumps": rows}
+
+    def conformance(self, model: Any, fields: Mapping[str, JSONValue]) -> None:
+        """Each reported pair's Room holds a supportive device with the row's identifier, values and the digest its
+        own pump had as translated; and no Room holds a Pump's device the run did not report. Supportive devices of
+        other sections (a Fan's) are not this section's to check."""
+        rooms = {room.identifier: room for room in model.rooms}
+        reported = fields.get("pumps")
+        rows = [item for item in (reported if isinstance(reported, list) else []) if isinstance(item, dict)]
+        named: dict[str, set[str]] = {}
+        for item in rows:
+            room = rooms.get(str(item.get("zone_id")))
+            if room is None:
+                raise ValueError(f"Room {item.get('zone_id')} is not in the model")
+            devices = {device.identifier: device for device in room.properties.ph_hvac.supportive_devices}
+            identifier = str(item.get("identifier"))
+            if identifier not in devices:
+                raise ValueError(f"Room {room.identifier} lost pump {identifier}")
+            found = pump_fields(devices[identifier])
+            expected = {key: item.get(key) for key in found}
+            if found != expected:
+                raise ValueError(f"Room {room.identifier} pump is {found}, the run reported {expected}")
+            named.setdefault(room.identifier, set()).add(identifier)
+        if extra := sorted(
+            room.identifier
+            for room in model.rooms
+            if {
+                device.identifier
+                for device in room.properties.ph_hvac.supportive_devices
+                if PUMP_ID.fullmatch(device.identifier)
+            }
+            - named.get(room.identifier, set())
+        ):
+            raise ValueError(f"Room {', '.join(extra)} holds a pump the run did not report")
+
+
+def pump_fields(device: Any) -> dict[str, JSONValue]:
+    """What a row reports of its pump and conformance reads back: its identifier and values under the record's names,
+    and the digest of the whole, which carries its name and `user_data`."""
+    return {
+        "identifier": device.identifier,
+        "device_type": device.device_type,
+        "quantity": device.quantity,
+        "in_conditioned_space": device.in_conditioned_space,
+        "norm_energy_demand_w": device.norm_energy_demand_W,
+        "annual_period_operation_khrs": device.annual_period_operation_khrs,
+        "ihg_utilization_factor": device.ihg_utilization_factor,
+        "ihg_usage_profile": device.ihg_usage_profile,
+        "digest": digest(device),
+    }
+
+
+def pump_row(item: TranslatedPump) -> dict[str, JSONValue]:
+    record = item.source
+    return {
+        "id": record.id,
+        "item_id": record.item_id,
+        "zone_id": record.zone_id,
+        "zone_name": item.zone_name,
+        "display_name": record.display_name,
+        **pump_fields(item.device),
     }

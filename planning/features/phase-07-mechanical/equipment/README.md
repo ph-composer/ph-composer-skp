@@ -26,7 +26,7 @@ for the equipment interview; this reference authorizes no implementation or prod
 | 2 | Hot water: tanks and heaters | `PhHotWaterSystem`, `PhHvacHotWaterTank`, `PhHvacHotWaterHeater` variants | Hot water piping |
 | 3 | Heat pumps | `PhHeatPumpSystem` variants with cooling parameters | |
 | 4 | Electric heaters | `PhHeatingDirectElectric` | |
-| 5 | Pumps | `PhSupportiveDevice` types 4, 6, 7 | |
+| 5 | Pumps | `PhSupportiveDevice` types 4, 6, 7, 10 (D4-34) | |
 | 6 | Fans | An exhaust ventilator, plus a linked `PhSupportiveDevice` type 10 when the electric block is filled (Q6) | |
 | 7 | Appliances | Superseded: Programs' Equipment Sets ([Phase 6](../../../archive/phase-06-program/README.md)) | |
 
