@@ -2,8 +2,12 @@
 
 DATE: 2026-11-24
 Register row: [M05](../ACCEPTANCE.md). Stage: [P4-05](../phases/p4-05-systems-tab-and-ventilators-view.md).
-Base: `feat/phase-07-mechanical-p4-04` at `32be127b` (PR #567, auto-merge armed, not merged when this branched).
-Branch `feat/phase-07-mechanical-p4-05`.
+Base: `feat/phase-07-mechanical-p4-04` at `32be127b` (PR #567); after #567 merged as `0e5ea3bb` (identical tree),
+rebased onto `main`. Branch `feat/phase-07-mechanical-p4-05`.
+
+Gate: `make ci` on Ruby 3.2.2 passed at `3b83204f` (the same tree as `2d7d01d4` after the rebase): Ruby suite 3,348
+runs, 44,622 assertions, 0 failures, 1 skip; JavaScript 1,158 passed; Python 379 passed, 1 skipped; hostkit 48 runs;
+"RBZ verified: 733 files, 8777644 bytes, 27004275 bytes installed", 995,725 bytes under the 28,000,000-byte ceiling.
 
 Offline evidence only. No SketchUp process was started. The host case `M05` (every gesture in M05 on the reference
 model with Ed at the mouse, the panel at its three sizes, and the Zone views cases the ledger screens) is owed to the
