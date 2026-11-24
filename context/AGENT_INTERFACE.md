@@ -878,6 +878,14 @@ Edge read takes the same rule: the selection and path reads give such an Edge no
 refuses it. [AGENT_GUIDE](../docs/AGENT_GUIDE.md),
 "Thermal Bridge Types", is the recipe.
 
+Mechanical (API 1.87) is one feature for the equipment families, `ph_composer.mechanical`, requiring Zones and
+Spaces. Its first family is the Ventilator kind (`ph_composer.mechanical.ventilator`, `vnt_`), a definition that
+names nothing: `ph_composer.mechanical.ventilators.create`, `update`, `duplicate` and `delete`, one Undo step each,
+with the bounded `ventilators.list` and the snapshot read `ventilators.all`, whose rows carry `export_ready` and
+`export_blockers` beside the record's view ([CONTRACTS.md](CONTRACTS.md), "Mechanical equipment"). The
+[Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
+[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", is the recipe.
+
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)
 use the same preview and invocation contract. Stored endpoint proof or an explicit retaining path

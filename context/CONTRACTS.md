@@ -830,6 +830,27 @@ carry a name reading as a local file path says so in its place, in the preflight
 Equipment Set and Dwelling `user_data` stays in the Model with a finding; the report's Programs part lists each
 Segment's set points and its Dwellings' units and counts from the Python result.
 
+## Mechanical equipment
+
+`ph_composer.mechanical` (`features/mechanical/`) requires Zones and Spaces, and no other feature names it. Each
+equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
+names Zones, Spaces, Programs or the Zone record (`tests/mechanical_dependency_test.rb`).
+
+- **Ventilator** (`ph_composer.mechanical.ventilator`, `vnt_`, `schema_version` 1): the shared name, notes, datasheet
+  links and source; `manufacturer` and `model` (text or null, absent by default); `quantity` (integer, at least 1,
+  default 1); `sensible_heat_recovery` and `latent_heat_recovery` (0 to 1, default 0); `electric_efficiency_wh_m3`
+  (at least 0, Wh/m³, default 0.55); `frost_protection_reqd` (default true); `temperature_below_defrost_used_c`
+  (°C, default -5); `in_conditioned_space` (default true); and two optional fields absent by default,
+  `subsoil_heat_exchange_efficiency` (0 to 1 or null) and `preheated_intake_temperature_c` (°C or null). It stores no
+  system type and no rated flow.
+
+`ph_composer.mechanical.ventilators.create`, `update`, `duplicate` and `delete` are one Undo step each. Names are
+unique; `update` is guarded by `expected_values` and a null removes an optional value; `duplicate` gives a new id,
+the source `derived` and a copy of the `user_data`; `delete` is the engine's guarded delete. `ventilators.list` and
+`ventilators.all` (also the snapshot section `ph_composer.mechanical.ventilators`) answer each record's view with
+`export_ready` and `export_blockers`, empty for a Ventilator. Its `user_data` and extension payloads are written with
+`ph_composer.records.update_metadata`; nothing exports yet.
+
 ## This computer's settings file
 
 Settings that belong to the computer and not to a Model, and that every SketchUp version must read,

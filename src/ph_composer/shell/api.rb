@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 86
+    MINOR = 87
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -528,7 +528,12 @@ module PhComposer
         "change" => "ph_composer.zones.save_segment_settings also emits ph_composer.zones.segment_settings_saving, " \
                     "before it stages the payloads, with building_segment_id and extension_payloads; a Segment's " \
                     "occupancy settings naming an unwritten default Program or Equipment Set store it in the same " \
-                    "step." }
+                    "step." },
+      { "minor" => 87, "date" => "2026-11-23",
+        "change" => "The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, " \
+                    "vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with " \
+                    "the reads ventilators.list and ventilators.all, whose rows carry export_ready and " \
+                    "export_blockers, and the snapshot section ph_composer.mechanical.ventilators." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
