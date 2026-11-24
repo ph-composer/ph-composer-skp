@@ -129,7 +129,9 @@ extension payload passed the preflight and then blocked the export; the prefligh
 `Export::MetadataCheck.findings` for the readable Ventilators with `user_data: true`, and two tests pin that the
 preflight and extraction refuse alike.
 
-Codex cycle 2 runs on that commit; its result is recorded with the ledger after it.
+Codex gpt-6-astra, cycle 2 on `678d21b6`: no findings, verdict approve. `make ci` on `678d21b6`, Ruby 2.7.2 and
+3.2.2: 3,339 runs, 44,457 assertions, 0 failures, 1 skip; Python 379 passed, 1 skipped; RBZ 26,933,400 bytes
+installed. Its residual notes: the sandbox could not run the tests itself, and M04's host case is owed to MS1.
 
 ## Native case
 
