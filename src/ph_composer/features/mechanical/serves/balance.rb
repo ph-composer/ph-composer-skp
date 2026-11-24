@@ -26,13 +26,14 @@ module PhComposer
 
         module_function
 
-        # The balance row of one item over the Zones it serves.
-        def call(zones)
+        # The balance row of one item over the Zones it serves. `programs_refusal` is why Programs could not be read
+        # at all, which a By Program Zone's dash then names.
+        def call(zones, programs_refusal: nil)
           return unknown(UNSERVED) if zones.empty?
 
           flows = zones.map { |zone| [zone, flow(zone)] }
           missing = flows.find { |_zone, rates| rates.nil? }
-          return unknown(program_missing(missing.first)) if missing
+          return unknown(program_missing(missing.first, programs_refusal)) if missing
 
           supply = flows.sum { |_zone, rates| rates.first }
           extract = flows.sum { |_zone, rates| rates.last }
@@ -69,7 +70,9 @@ module PhComposer
           { "supply_m3h" => nil, "extract_m3h" => nil, "imbalanced" => false, "missing" => reason }
         end
 
-        def program_missing(zone)
+        def program_missing(zone, refusal = nil)
+          return "Zone #{zone.name} is By Program, and Programs cannot be read: #{refusal}" if refusal
+
           "Zone #{zone.name} is By Program, and its Program's ventilation cannot be worked out yet."
         end
       end

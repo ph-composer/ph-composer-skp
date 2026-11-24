@@ -118,9 +118,10 @@ function (panel, snapshot, ui, fields, units, preferences, RecordForm, inventori
     this.replacement = new forms.ReplacementForm(session, send, changed, { section: SECTION, label: LABEL,
       replacement: true, allowClear: true, usedOn: "Zone", usage: function (state, id) { return self.usage(id); } });
     this.forms = [this.newVentilator, this.duplicate, this.replacement];
-    this.picker = new serves.Picker(session, send, { slot: "ventilator_id", family: LABEL, notify: panel.notify });
+    this.picker = new serves.Picker(session, send, { slot: "ventilator_id", family: LABEL, notify: panel.notify,
+      changed: changed });
     this.optional = new optional.OptionalValues(session, send, { action: SECTION + ".update", family: LABEL,
-      fields: OPTIONAL });
+      fields: OPTIONAL, changed: changed });
     this.create = ui.button("+ New " + LABEL, function () { if (allowed()) self.newVentilator.open(); });
     this.triggers = Object.create(null);
     var toggles = new colourBy.HeaderToggles({ serves: { mode: BY_VENTILATOR } });
@@ -228,7 +229,7 @@ function (panel, snapshot, ui, fields, units, preferences, RecordForm, inventori
     Object.keys(controls.columnFilters).forEach(function (field) {
       if (field !== "name") controls.filterColumn(field, null);
     });
-    controls.filter.value = "";
+    controls.setSearch("");
     controls.filterColumn("name", names);
   };
   /* A row's disclosure action, as the table last drew it. */

@@ -61,12 +61,17 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       var label = ui.element("label", "mech-optional-field"), held = { key: entry.key };
       held.unit = new unitFields.UnitField({ field: entry.field, value: record.values[entry.key], commitOnBlur: true,
         onCommit: function (value) { self.apply(held, value); },
-        onCancel: function () { held.base = undefined; } });
+        onCancel: function () { held.base = undefined; held.refused = false; } });
       held.unit.input.setAttribute("aria-label", entry.label);
-      // The value the draft started from is its guard, whatever a snapshot shows meanwhile.
+      // The value the draft started from is its guard, whatever a snapshot shows meanwhile. A draft that ends
+      // without a write (typed back, Escape) drops it, and typing clears a refusal shown on the field.
       held.unit.input.addEventListener("input", function () {
+        held.refused = false;
         if (held.base === undefined && self.held) held.base = stored(self.held.record, entry.key);
       });
+      function ended() { if (!held.unit.editing && self.pending !== held) held.base = undefined; }
+      held.unit.input.addEventListener("keydown", function (event) { if (event.key === "Enter") ended(); });
+      held.unit.input.addEventListener("blur", ended);
       label.appendChild(ui.element("span", "", entry.label));
       label.appendChild(held.unit.root);
       held.label = label;
@@ -97,13 +102,18 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     this.pending = held;
     this.requests.run(this.options.action, { id: record.id, values: values, expected_values: expected });
     this.paint();
+    if (this.options.changed) this.options.changed();
   };
   OptionalValues.prototype.paint = function () {
     var self = this, held = this.held;
     if (!held) return;
     held.fields.forEach(function (entry) {
       entry.unit.setDisabled(self.busy());
-      if (!entry.unit.editing) entry.unit.setValue(held.record.values[entry.key]);
+      // A refusal stays on its field, with what the user typed, until they edit or cancel it.
+      // The value being written shows until its answer arrives.
+      if (!entry.unit.editing && !entry.refused && !(self.pending === entry && self.busy())) {
+        entry.unit.setValue(held.record.values[entry.key]);
+      }
     });
   };
   OptionalValues.prototype.refresh = function (state, records) {
@@ -115,11 +125,20 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     if (record) held.record = record;
     if (outcome && outcome.status !== "completed" && pending) {
       held.closing = false;
-      pending.unit.setValue(held.record.values[pending.key]);
+      var unit = pending.unit, model = held.record.values[pending.key];
+      if (outcome.code === "target.changed") {
+        // The value changed meanwhile: start again from the Model's.
+        unit.setValue(model);
+      } else {
+        // Anything else keeps the typed text as a draft over the Model's value, guarded by it.
+        unit.editing = false; unit.baseline = present(model) ? model : null; unit.begin();
+        pending.base = stored(held.record, pending.key);
+      }
+      pending.refused = true;
       this.paint();
-      pending.unit.error.textContent = snapshot.message(outcome, "The value was not saved.");
-      pending.unit.error.hidden = false;
-      pending.unit.input.setAttribute("aria-invalid", "true");
+      unit.error.textContent = snapshot.message(outcome, "The value was not saved.");
+      unit.error.hidden = false;
+      unit.input.setAttribute("aria-invalid", "true");
       return;
     }
     this.paint();

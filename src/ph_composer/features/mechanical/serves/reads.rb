@@ -87,20 +87,28 @@ module PhComposer
         # that every row shares, each Zone found by its occurrence path. The Zones counted are those the export
         # writes the item to: each Zone once, its first occurrence by path, and none in no Building Segment.
         #
-        # A Spaces or Programs read that refuses (an unreadable Space anywhere in the Model) leaves every row's
-        # balance unknown with its message, and the Ventilators still read.
+        # A Spaces read that refuses (an unreadable Space anywhere in the Model) leaves every row's balance unknown
+        # with its message; a Programs read that refuses leaves unknown only a balance that needs a By Program
+        # Zone's flow. Either way the Ventilators still read.
         def balance(request)
           spaces = request.query(SPACES).fetch("zones").to_h { |row| [row.fetch("zone_path"), row] }
-          programs = request.query(PROGRAMS).fetch("zones").to_h { |row| [row.dig("reference", "zone_path"), row] }
+          programs, refusal = program_rows(request)
           lambda do |served|
             exported = served.reject(&:left_out).sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id)
             Balance.call(exported.map do |zone|
               path = zone.reference.fetch("zone_path")
               Balance::Zone.new(:name => label(zone), :spaces => spaces[path], :programs => programs[path])
-            end)
+            end, :programs_refusal => refusal)
           end
         rescue CodedError => error
           ->(_served) { Balance.unreadable(error.message) }
+        end
+
+        # Programs' Zone rows by occurrence path, and the message of its refusal when it cannot be read.
+        def program_rows(request)
+          [request.query(PROGRAMS).fetch("zones").to_h { |row| [row.dig("reference", "zone_path"), row] }, nil]
+        rescue CodedError => error
+          [{}, error.message]
         end
 
         def item_findings(record, served)

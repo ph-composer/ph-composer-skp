@@ -551,7 +551,8 @@ module PhComposer
                     "the Zones each Ventilator serves, and ph_composer.mechanical requires ph_composer.programs. " \
                     "ph_composer.mechanical.serves rows gain building_segment, the Segment's name. " \
                     "ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. " \
-                    "ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows carry locate." }
+                    "ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a " \
+                    "Ventilator or a Zone carry locate." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -181,9 +181,9 @@
       "sha256": "945d2d6222e8ec03ff371c9aecb71df33b6a1c3f7a1a09598c1733c0c87382f4"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 7524,
+      "bytes": 8685,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "c6f146101dc8162bd0b6a80d1371099a1cb20d6d188e3b3ca72428ad878fbb5d"
+      "sha256": "dda7fe04e8a796aa7ce1facccf921d1642899009c69346bba6b5c1e953a935b0"
     },
     "html/features/mechanical/section.js": {
       "bytes": 4960,
@@ -191,9 +191,9 @@
       "sha256": "682e789c9c0dd4f3c16d0685ff77d04b1b14f153701f64876b5416225e96159d"
     },
     "html/features/mechanical/serves.js": {
-      "bytes": 15359,
+      "bytes": 16131,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "66c0ec2b2877bc9fbac0787b8c344e703b68bf01199de447ba01355b720fd392"
+      "sha256": "85032925ad2bfecdc4ff6001af1af174192f2241dbb5f0c1d66212dde55d1064"
     },
     "html/features/mechanical/systems.js": {
       "bytes": 2025,
@@ -201,9 +201,9 @@
       "sha256": "e96bd2c8e94a83789b7dc7e6c6d94881916c6c7ef158d2b806b584c2c6bfa01f"
     },
     "html/features/mechanical/ventilators.js": {
-      "bytes": 16780,
+      "bytes": 16818,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "986cd6ffd4ad0b491fdf23669e04a88225e3ccdf3e81c216cdc908223f0b8bbb"
+      "sha256": "bacb887aa5d7c7d138dfad37e4bc448a0ed95786c2dabfa77def232d60327b43"
     },
     "html/features/programs/airtightness.js": {
       "bytes": 6073,
@@ -776,9 +776,9 @@
       "sha256": "2e94421a914c75953be65845ed1c30fad144f6bf10cc0ef7aaf4b023d4192025"
     },
     "html/view_controls.js": {
-      "bytes": 13309,
+      "bytes": 13508,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "82a559c6d8dfd7d3af015b3032ab78e11c0af63eaa37de52368aa1b7291c7161"
+      "sha256": "5d4ab18a758ba5685092ee99726725dad16fadf71541ca25947d7596ff1aa5fa"
     },
     "html/workspace.js": {
       "bytes": 1630,

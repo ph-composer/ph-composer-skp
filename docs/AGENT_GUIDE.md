@@ -932,9 +932,11 @@ reloads one system for them and PHX makes one device.
    written with no Ventilator, `mechanical.item_unserved` a Ventilator that serves no Zone and is not
    written, `mechanical.zone_left_out` a served Zone in no Building Segment, whose Room the export
    leaves out, and `mechanical.item_across_segments` a Ventilator whose Zones lie in more than one
-   Building Segment, each Segment's model carrying the whole Ventilator. None of these blocks. Each
-   row's `locate` names `ph_composer.mechanical.locate` with its params: `ventilator_ids` opens the
-   Mechanical tab narrowed to those Ventilators, `zones` the Zones tab with those Zones checked.
+   Building Segment, each Segment's model carrying the whole Ventilator. None of these blocks. A row
+   about a Ventilator or a Zone carries `locate`, naming `ph_composer.mechanical.locate` with its
+   params: `ventilator_ids` opens the Mechanical tab narrowed to those Ventilators, `zones` the Zones
+   tab with those Zones checked. Rows for an unreadable Ventilator, a metadata problem or a refused
+   read carry none.
 2. Export, then read back. The result's Mechanical section gives `ventilation`, one row per
    (Ventilator, Zone) pair: `zone_id`, `zone_name`, `item_id`, `display_name`,
    `system_identifier`, `unit_identifier` and the unit's values. In the HBJSON, each of those Rooms

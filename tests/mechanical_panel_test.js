@@ -364,3 +364,86 @@ test("search reads the Tag, model and served Zones, and a Locate shows its rows 
   assert.strictEqual(inventory.controls.filter.value, "");
   assert.strictEqual(row(o, fixtures.ERV2.id).hidden, false);
 });
+
+function zoneBox(picker, zone) {
+  return picker.held.list.querySelectorAll("input").filter(function (input) {
+    return input.getAttribute("data-zone-path") === JSON.stringify(zone.zone_path);
+  })[0];
+}
+function toggle(box, checked) { box.checked = checked; box.listeners.change({}); }
+
+test("a box put back drops its change, a Zone replaced at its path drops it too, and the table locks while out",
+  function () {
+    var o = setup();
+    press(row(o, fixtures.ERV1.id).querySelector(".mech-serves-cell"));
+    var picker = o.ventilators().picker, zones = o.state.sections[PREFIX + "serves"].value.zones;
+    toggle(zoneBox(picker, fixtures.ZONES.A), false);
+    toggle(zoneBox(picker, fixtures.ZONES.A), true);
+    assert.strictEqual(picker.changes().count, 0, "put back, nothing to send");
+    zones[0].slots = { ventilator_id: fixtures.ERV2.id };
+    o.paint();
+    assert.strictEqual(zoneBox(picker, fixtures.ZONES.A).checked, false, "the Model drives it again");
+    toggle(zoneBox(picker, fixtures.ZONES.C), true);
+    zones[2].zone_id = "zon_NEWNEWNEWNEW"; zones[2].reference = { zone_id: "zon_NEWNEWNEWNEW", zone_path: [3000] };
+    o.paint();
+    assert.strictEqual(picker.changes().count, 0, "a change to a Zone that is gone lapses");
+    toggle(zoneBox(picker, fixtures.ZONES.C), true);
+    press(picker.held.apply);
+    var assign = named(o, PREFIX + "serves.assign")[0];
+    assert.strictEqual(assign.payload.params.zones[0].reference.zone_id, "zon_NEWNEWNEWNEW");
+    assert.ok(o.ventilators().inventory.busy(), "the table is locked while the assign is out");
+    var quantity = cell(o, fixtures.ERV1.id + ":quantity");
+    quantity.input.value = "3"; quantity.input.listeners.input({}); key(quantity.input, "Enter");
+    assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 0, "no edit leaves beside it");
+  });
+
+test("an optional field typed back drops its guard, and a refusal stays with the typed text", function () {
+  var o = setup();
+  press(row(o, fixtures.ERV2.id).querySelectorAll("button").filter(function (node) {
+    return /^Optional values of/.test(node.getAttribute("aria-label") || "");
+  })[0]);
+  var optional = o.ventilators().optional, field = optional.held.fields[0], unit = field.unit;
+  unit.input.value = "0.3"; unit.input.listeners.input({});
+  unit.input.value = "0.2"; unit.input.listeners.input({}); key(unit.input, "Enter");
+  assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 0);
+  o.state.sections[PREFIX + "ventilators"].value.records[1].values.subsoil_heat_exchange_efficiency = 0.25;
+  o.paint();
+  unit.input.value = "0.4"; unit.input.listeners.input({}); key(unit.input, "Enter");
+  var update = named(o, PREFIX + "ventilators.update")[0];
+  assert.deepStrictEqual(clone(update.payload.params.expected_values), { subsoil_heat_exchange_efficiency: 0.25 });
+  answer(o, update, { status: "refused", code: "validation.failed", message: "The value is out of range." });
+  o.paint();
+  assert.strictEqual(unit.input.value, "0.4", "the typed text stays");
+  assert.strictEqual(unit.error.textContent, "The value is out of range.", "and the reason with it");
+  assert.ok(optional.guard(), "the refused draft holds the tab");
+});
+
+test("a Locate's cleared search survives a refused search edit", function () {
+  var o = setup(), controls = o.ventilators().inventory.controls;
+  controls.filter.value = "Q350"; controls.filter.listeners.input({});
+  o.navigate({ ventilator_ids: [fixtures.ERV2.id] });
+  var quantity = cell(o, fixtures.ERV2.id + ":quantity");
+  quantity.input.value = "4"; quantity.input.listeners.input({});
+  controls.filter.value = "x"; controls.filter.listeners.input({});
+  assert.strictEqual(controls.filter.value, "", "the refused edit returns to the cleared search");
+});
+
+test("a pasted range sends booleans and null guards, and invalid text sends nothing", function () {
+  var o = setup(), inventory = o.ventilators().inventory;
+  inventory.grid.refresh();
+  inventory.grid.select(cell(o, fixtures.ERV1.id + ":frost_protection_reqd"), false);
+  inventory.grid.paste([["No", "-5", "Yes"]]);
+  var sent = named(o, PREFIX + "ventilators.update").map(function (message) { return clone(message.payload.params); });
+  assert.deepStrictEqual(sent, [{ id: fixtures.ERV1.id, values: { frost_protection_reqd: false },
+    expected_values: { frost_protection_reqd: true } }]);
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "completed", value: {} });
+  inventory.grid.select(cell(o, fixtures.ERV3.id + ":manufacturer"), false);
+  inventory.grid.paste([["Acme"]]);
+  var identity = named(o, PREFIX + "ventilators.update")[1];
+  assert.deepStrictEqual(clone(identity.payload.params.expected_values), { manufacturer: null });
+  answer(o, identity, { status: "completed", value: {} });
+  inventory.grid.select(cell(o, fixtures.ERV2.id + ":frost_protection_reqd"), false);
+  inventory.grid.paste([["maybe"]]);
+  assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 2, "an invalid paste sends no write");
+  assert.match(o.notices[o.notices.length - 1].message, /Yes or No/);
+});

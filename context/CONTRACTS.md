@@ -906,9 +906,10 @@ unreadable Face record does not turn it off: each Zone occurrence whose slot nam
 the spread ramp and labelled with its name; an unserved Zone gets no entry and stays uncoloured; a slot naming no
 stored Ventilator is incomplete. The legend counts Zone occurrences.
 
-**Locate.** Each `ph_composer.mechanical.preflight` row carries `locate`, naming the view command
-`ph_composer.mechanical.locate`: a Ventilator's `ventilator_ids` open the Mechanical tab with its Ventilators narrowed
-to them, a Zone's `zones` open the Zones tab with them checked.
+**Locate.** A `ph_composer.mechanical.preflight` row about a stored Ventilator or a Zone carries `locate`, naming the
+view command `ph_composer.mechanical.locate`: a Ventilator's `ventilator_ids` open the Mechanical tab with its
+Ventilators narrowed to them, a Zone's `zones` open the Zones tab with them checked. Rows for an unreadable
+Ventilator, a metadata problem and a refused read carry none.
 
 **The Mechanical tab** (`html/features/mechanical/`). One page header over a subtab per system and a pill row
 (`html/pill_row.js`) picking one table of it; each family registers its system and tables in

@@ -64,6 +64,26 @@ class MechanicalBalanceTest < PhComposerTestCase
     assert_match(/serves no Zone/, BALANCE.call([]).fetch("missing"))
   end
 
+  # A Programs read that refuses leaves Detailed Zones' sums known and names the refusal where a flow needs it.
+  def test_a_programs_refusal_spares_detailed_balances_and_names_itself_for_by_program_ones
+    request = Object.new
+    def request.query(name)
+      raise PhComposer::CodedError.new("validation.failed", "A Program is unreadable.") if name.include?("programs")
+
+      { "zones" => [{ "zone_path" => [1], "space_count" => 1, "airflow_mode" => "detailed",
+                      "airflows" => { "v_sup_m3h" => 60.0, "v_eta_m3h" => 50.0 } },
+                    { "zone_path" => [2], "space_count" => 1, "airflow_mode" => "by_program",
+                      "airflows" => { "v_sup_m3h" => nil, "v_eta_m3h" => nil } }] }
+    end
+    zone = Struct.new(:id, :reference, :name, :left_out)
+    balance = PhComposer::Mechanical::Serves::Reads.balance(request)
+    assert_equal [60.0, 50.0, true], sums(balance.call([zone.new("zon_1", { "zone_path" => [1] }, "One", false)]))
+    by_program = balance.call([zone.new("zon_2", { "zone_path" => [2] }, "Two", false)])
+    assert_equal [nil, nil, false], sums(by_program)
+    assert_match(/Zone Two is By Program, and Programs cannot be read: A Program is unreadable/,
+                 by_program.fetch("missing"))
+  end
+
   def test_a_zone_with_no_spaces_adds_nothing
     empty = BALANCE::Zone.new(:name => "Empty", :spaces => { "space_count" => 0, "airflow_mode" => "by_program" },
                               :programs => { "ventilation_m3h" => nil })

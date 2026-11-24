@@ -138,6 +138,23 @@ Codex gpt-6.2-sol cycle 1 on `8218ed04`: 5 P1 and 7 P2, all fixed in the next co
 Tests added for each: `mechanical_panel_test.js` (five cases) and `mechanical_balance_test.rb` (the decimal
 boundary, the unreadable Space).
 
+Codex gpt-6.2-sol cycle 2 on `0daa05ab`: 1 P1, 7 P2, 1 P3, all fixed in the next commit, which merges after the
+two-cycle cap unreviewed.
+
+- A changed Zone keeps the reference it was changed on, and lapses when another Zone stands at its path; a box put
+  back as it started drops its change, so snapshots drive it again.
+- The table locks the moment a picker or optional-value write leaves, not on the next render.
+- An optional draft that ends without a write drops its guard; a refusal keeps the typed text and its reason on the
+  field (a `target.changed` refusal starts again from the Model's value), and the value being written shows until
+  its answer.
+- A Locate clears the search through `ViewControls#setSearch`, so a later refused search edit returns to the
+  cleared text.
+- A Programs refusal leaves Detailed Zones' sums known and names itself only where a By Program flow is needed.
+- A pasted range is tested through the grid: booleans, a null identity guard, and an invalid paste sending nothing.
+- `locate` is documented as carried only by rows about a Ventilator or a Zone.
+
+Tests: four more in `mechanical_panel_test.js`, one in `mechanical_balance_test.rb`.
+
 ## Host
 
 Owed to MS2 (D4-31): case `M05` added to `planning/native-acceptance/cases.json`. `acceptance_ledger.py status` over

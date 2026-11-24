@@ -80,10 +80,16 @@ function (snapshot, ui, request) {
     var touched = this.held.touched[key(row)];
     return touched ? touched.checked : row.slots[this.options.slot] === this.held.record.id;
   };
+  /* A change the user made: the Zone's reference and slot as they saw them. Putting a box back as it started
+     drops the change, so later snapshots drive that Zone again. */
   Picker.prototype.touch = function (row, checked) {
     var touched = this.held.touched, previous = touched[key(row)];
-    touched[key(row)] = { checked: checked, base: previous ? previous.base : JSON.parse(JSON.stringify(row.slots)) };
+    var entry = previous || { reference: JSON.parse(JSON.stringify(row.reference)),
+      base: JSON.parse(JSON.stringify(row.slots)) };
     this.held.filled = false;
+    if (checked === (entry.base[this.options.slot] === this.held.record.id)) { delete touched[key(row)]; return; }
+    entry.checked = checked;
+    touched[key(row)] = entry;
   };
   /* What the draft would change: Zones the user checked that the item does not serve, and Zones it serves that the
      user unchecked. */
@@ -93,6 +99,8 @@ function (snapshot, ui, request) {
     zoneRows(held.state).forEach(function (row) {
       var touched = held.touched[key(row)];
       if (!touched) return;
+      // Another Zone now stands at that path: the change was made to a Zone that is gone, so it lapses.
+      if (touched.reference.zone_id !== row.reference.zone_id) { delete held.touched[key(row)]; return; }
       var serves = row.slots[slot] === held.record.id;
       if (touched.checked && !serves) add.push(row);
       if (!touched.checked && serves) clear.push(row);
@@ -209,7 +217,10 @@ function (snapshot, ui, request) {
   /* Each Zone with the slot the user saw when they changed it, so a Zone changed since refuses. */
   Picker.prototype.targets = function (rows) {
     var touched = this.held.touched;
-    return rows.map(function (row) { return { reference: row.reference, expected_values: touched[key(row)].base }; });
+    return rows.map(function (row) {
+      var entry = touched[key(row)];
+      return { reference: entry.reference, expected_values: entry.base };
+    });
   };
   /* Assigns the newly checked Zones, then clears those left unchecked: two requests, one after the other, so the
      second reads the Model the first left. `replace` answers a mechanical.slot_filled refusal. */
@@ -229,6 +240,8 @@ function (snapshot, ui, request) {
       this.requests.run("ph_composer.mechanical.serves.clear", { zones: this.targets(changes.clear), slot: slot });
     }
     this.paint();
+    // The owner's table locks while a write is out, so nothing else leaves on the same revision.
+    if (this.options.changed) this.options.changed();
   };
   Picker.prototype.refresh = function (state, records) {
     this.state = state;

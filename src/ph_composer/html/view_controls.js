@@ -60,6 +60,8 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
     this.filter.setAttribute("aria-label", "Filter " + options.label);
     this.filter.addEventListener("input", filterChanged);
     filterLabel.appendChild(this.filter); this.root.appendChild(filterLabel);
+    // Sets the search as a user's accepted entry would, so a later refused edit returns to this text.
+    this.setSearch = function (text) { self.filter.value = text; filtered = text; changed(); };
     this.clear = button("Clear", function () {
       self.filter.value = "";
       if (filterChanged()) self.filter.focus();
