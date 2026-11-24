@@ -110,7 +110,7 @@ only when all three are done and its evidence file exists.
 | D4-26 | Code, UI | Mechanical cooling entered on the Building Segment, off by default | P4-08b | Answered 2026-11-22 |
 | D4-27 | UI | The Mechanical tab sits after Thermal Bridges, before Library | P4-05 | Answered 2026-11-22 |
 | D4-28 | UI, Code | `Equipment · Indoor` keeps identity columns only (`Tag`, `Manufacturer`, `Model`, `Notes`) | P4-08 | Answered 2026-11-23 |
-| D4-29 | Code | `min_coil_temp = 12.0 °C` default; no > 200 kW split in HBJSON (PHX handles WUFI split; METr unsplit) | P4-08 | Answered 2026-11-23 |
+| D4-29 | Code | `min_coil_temp = 12.0 °C` default; no > 200 kW split in HBJSON (PHX handles WUFI split; METr unsplit) | P4-08 | Answered 2026-11-23; 12.0 °C confirmed by Ed 2026-11-24 against the estimator's 45 °F (7.2 °C) |
 | D4-30 | UI | Skip extra wireframes for undrawn UI details; build from shipped UI kit patterns | P4-05, P4-07, P4-08 | Answered 2026-11-23 |
 | D4-31 | Scope | Batch SketchUp host gates by milestone (`MS1`, `MS2`, `MS3`); offline `make ci` + PHX round trips per PR | P4-01 to P4-15 | Answered 2026-11-23 |
 | D4-32 | UI, Code | Summer ventilation: 4 core fields in UI (honeybee-ph defaults); 7 extract/night-flush fields omitted in v1 UI, exported as defaults | P4-08b | Answered 2026-11-23 |

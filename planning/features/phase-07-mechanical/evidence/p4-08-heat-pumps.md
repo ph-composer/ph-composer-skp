@@ -49,7 +49,8 @@ Open.
      the weighted SEER.
 - **Minimum coil temperature.** D4-29 fixes 12.0 °C (53.6 °F) and says it was verified against the estimator. The
   estimator's `Inputs for Energy Model` holds a constant 45 °F (7.2 °C) in v25.1.1 and v25.1.2. The code writes
-  12.0 °C as decided; the private comparison leaves this value out. For Ed's judgment.
+  12.0 °C as decided; the private comparison leaves this value out. Settled 2026-11-24: Ed confirmed 12.0 °C knowing the
+  estimator's 45 °F (DECISIONS, the note under D4-29).
 - **The Blended result shows IP**, the estimator's units, whatever the unit preference, so the copied rows paste beside
   the estimator unchanged. A Segment over 682 kBtu/h shows the estimator's Number of Systems Needed and exports one
   system with the whole capacity (D4-29).
