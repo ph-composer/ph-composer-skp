@@ -58,8 +58,8 @@ the rows below are corrected to it.
 ## Stages
 
 Sixteen stages, one of them superseded. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
-steps, source, tests to write first, the host gate and the done condition. P4-08 to P4-14 and
-P4-08b are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
+steps, source, tests to write first, the host gate and the done condition; P4-08 and P4-08b were
+written in full before their runs (2026-11-23, 2026-11-24). P4-09 to P4-14 are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
@@ -71,7 +71,7 @@ P4-08b are gate stubs: entry gates, what the stage owns and reuses, and the inte
 | [P4-06](phases/p4-06-hot-water-records-and-export.md) | Flat Hot Water System, Heater and Tank kinds, operations, pure slotting, export section and PHX round trip | P4-03 | mechanical, export | Batched in MS2 |
 | [P4-07](phases/p4-07-hot-water-view.md) | The Hot Water subtab (`Systems`, `Heaters`, `Tanks` pills), `By hot water system`, litres (`volume_l`) | P4-05, P4-06 | mechanical, UI | MS2 sitting (M05–M07) |
 | [P4-08](phases/p4-08-heat-pumps.md) | Family 3: four flat Heat Pump kinds, pure Ruby per-Segment blend, five-pill subtab with `Blended result`, export section and PHX round trip | P4-07 | mechanical, export, UI | Batched in MS3 |
-| [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation as a Building Segment settings section with its `SEGMENT` export (Phase 6 handoff, F30) | P4-02, P4-08; the summer ventilation interview | mechanical, export | Stub |
+| [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation as a Building Segment settings section with its `SEGMENT` export (Phase 6 handoff, F30) | P4-02, P4-08; the summer ventilation interview (D4-32) | mechanical, export | Save in one Undo step with the other sections; PHX reads the values on each Variant (MS3) |
 | [P4-09](phases/p4-09-electric-heaters.md) | Family 4 | P4-07; its interview | mechanical | Stub |
 | [P4-10](phases/p4-10-pumps.md) | Family 5 | P4-07; its interview | mechanical | Stub |
 | [P4-11](phases/p4-11-fans.md) | Family 6: exhaust ventilator plus linked supportive device (Q6) | P4-10; its interview | mechanical | Stub |
