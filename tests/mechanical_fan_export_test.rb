@@ -107,6 +107,10 @@ class MechanicalFanExportTest < PhComposerTestCase
     assert_equal [zone_id("A")], fans(extraction).map { |row| row.fetch("zone_id") }.uniq
     assert_includes notes(extraction), ["mechanical.zone_left_out", @ids.fetch("F-1")]
     refute_includes notes(extraction).map(&:first), "mechanical.item_across_segments"
+    assert_equal notes(extraction).sort, preflight_rows.map { |row| row.values_at("code", "object_id") }.sort,
+                 "the preflight lists what the export notes"
+    assert_includes preflight_rows.map { |row| row.values_at("code", "section", "object_id", "blocks_export") },
+                    ["mechanical.zone_left_out", X::SECTION, @ids.fetch("F-1"), false]
   end
 
   def test_a_zone_naming_a_missing_fan_blocks_the_export_and_the_preflight

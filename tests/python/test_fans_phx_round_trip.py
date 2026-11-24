@@ -91,4 +91,7 @@ def test_a_fan_only_on_a_room_with_no_spaces_does_not_reach_phx() -> None:
     for row in records(value):
         if row["item_id"] == F_2:
             row["zone_id"], row["id"] = ZONE_B, f"{F_2}_{ZONE_B}"
-    assert sorted(exhausts(converted(value))) == ["F-1"]
+            row["norm_energy_demand_w"] = 30.0
+    project = converted(value)
+    assert sorted(exhausts(project)) == ["F-1"]
+    assert sorted(supportive(project)) == ["F-1"], "neither of F-2's two objects reaches PHX"

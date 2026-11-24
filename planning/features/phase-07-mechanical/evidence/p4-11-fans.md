@@ -45,7 +45,10 @@ panel manifests refreshed. Host case `M11` added to `cases.json`.
   Nothing compensates for it.
 - **Goldens.** Every extraction golden gains the empty Fan section (`make fixtures`); three Ruby tests and
   `tests/python/test_model_sections.py` that list sections by hand name it; the discovery test counts 27 record kinds.
-- **The `annual_minutes` quantity** changes both unit registries, so the Design System re-sync P4-10 owes covers it.
+- **Design System:** re-synced from `main@3a1483bd` (#574) as artifact version 37: the Table card gains P4-10's
+  `electric_power` (W) and `kilohours` (kh/yr) quantities; `bundle.css` unchanged (none of its eight stylesheets
+  changed since `main@d2ba5936`); tokens unchanged. This stage's `annual_minutes` quantity is owed to the sync after
+  #575 merges.
 
 ## PHX trace and round trip
 
@@ -95,6 +98,11 @@ quantity 0 held, the quantity note in PRODUCT, the PHX-only wording in the Agent
 Declined: a JS test of delete with a replacement (the shared `EquipmentTable` form, covered by its own tests); an
 identifier check in `FanRecord.read` (Ruby makes the identifier the item id, as for Pumps); one Spaces read shared by
 the Pump and Fan preflight rows (correct as is; the read is cheap).
+
+Codex gpt-6.2-sol cycle 1 on `2d1c817f` (PR #575): 3 P2, all test gaps, all fixed in the next commit: a powered fan
+only on a Room with no Spaces reaches neither PHX collection; a user-defined fan at 0 W with a named 0 kh keeps both
+zeros through the reload (and the Ruby kind keeps them); the preflight matches the export notes after a Zone leaves its
+Building Segment.
 
 UI polish (rubric `.agents/skills/ph-composer-ui-polish/SKILL.md`): the table reuses `EquipmentTable` and the
 Mechanical disclosure with no new kit part; columns carry their unit once in the header; a blank Power shows the

@@ -188,6 +188,22 @@ def test_a_supportive_device_under_a_fan_without_power_fails_conformance() -> No
         FanSection().conformance(model, result[FAN_SECTION_ID])
 
 
+def test_a_user_defined_fan_at_0_w_and_a_named_0_kh_keeps_both_zeros_through_the_reload() -> None:
+    value = document()
+    for row in records(value):
+        if row["item_id"] == F_2:
+            row.update(exhaust_type="user_defined", norm_energy_demand_w=0.0, annual_period_operation_khrs=0.0)
+    result = run(value)
+    assert result["summary"]["publishable"] is True, result["findings"]
+    check(result["canonical_model"], result, SECTIONS)
+    hvac = rooms(result)[ZONE_A]
+    assert by_id(hvac.exhaust_vent_devices)[F_2].device_class_name == "ExhaustVentUserDefined"
+    device = by_id(hvac.supportive_devices)[F_2]
+    assert (device.device_type, device.norm_energy_demand_W, device.annual_period_operation_khrs) == (10, 0.0, 0.0), (
+        "0 W is a Power, so the device is written; a named 0 kh is not replaced by the runtime's"
+    )
+
+
 def test_a_pump_and_a_fan_on_one_room_are_each_their_own_sections_to_check() -> None:
     result = run(document())
     model = reloaded(result)

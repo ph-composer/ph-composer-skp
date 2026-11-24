@@ -81,6 +81,12 @@ class MechanicalFanTest < PhComposerTestCase
     completed(invoke("#{FANS}.update", "id" => id, "values" => { "norm_energy_demand_w" => nil },
                                        "expected_values" => { "norm_energy_demand_w" => 120.0 }))
     refute values(id).key?("norm_energy_demand_w"), "a blank Power takes the supportive device away"
+
+    zero = create("name" => "F-0", "norm_energy_demand_w" => 0.0, "annual_runtime_minutes" => 6_000.0,
+                  "annual_period_operation_khrs" => 0.0)
+    assert_equal [0.0, 0.0],
+                 [values(zero).fetch("norm_energy_demand_w"), M::Fans.annual_period_operation_khrs(values(zero))],
+                 "0 W is a Power and 0 kh an operation the fan names, not the runtime's 0.1"
   end
 
   def test_a_guarded_edit_and_a_duplicate_keep_their_values_and_metadata
