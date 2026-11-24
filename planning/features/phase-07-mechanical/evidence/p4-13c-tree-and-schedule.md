@@ -109,6 +109,21 @@ locate refusals, compact and members, used length), `tests/thermal_bridge_runs_t
 the two moved tests, one assertion on a mixed quantity). The registry's reference test and `tests/agent_guide_test.rb`
 cover the new operations and the recipe.
 
+## Gate
+
+Final head `468d527d`, after both review cycles:
+
+- `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes: 3509 runs, 49802 assertions, 0 failures, 0 errors,
+  1 skips" each; JS 1214 pass, 0 fail; Python 467 passed, 1 skipped; hostkit 48 runs; "RBZ verified: 813 files,
+  8978157 bytes, 27618549 bytes installed" (3.2.2; 27618543 on 2.7.2).
+- Installed size: 27,618,549 bytes, 58,070 over P4-13b's 27,560,479 against the 55 KB estimate (5.6 percent over,
+  inside the 25 percent stop line); 381,451 under the 28,000,000 ceiling.
+- Browser checks: `make ui-checks` on `468d527d`: 39 of 39 scripts pass, exit 0, none skipped (no panel change).
+- PHX: `uv run --group phx pytest tests/python` on `468d527d`: 467 passed, 1 skipped (`test_map_borders.py`,
+  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: 24 passed, 0 skipped (this stage exports nothing).
+- Design System: not needed; no kit CSS, shared kit part or unit quantity changed.
+- The stale count on the final head against `main` (`2f360b5b`) is the same 28 cases.
+
 ## Review
 
 Codex gpt-6-astra cycle 1 on `79f98ede`: 2 P2, both fixed in the next commit. The System and Pipe Type rows beside the
