@@ -519,7 +519,7 @@
       return { zone_id: zone.id, reference: zone.reference, name: zone.values.name,
         building_segment_id: segment,
         building_segment: segment ? segments[segment] || null : zone.values.building_segment || null,
-        slots: { ventilator_id: item }, payload_status: item ? "understood" : null,
+        slots: { ventilator_id: item, hot_water_system_id: null }, payload_status: item ? "understood" : null,
         items: item ? [{ slot: "ventilator_id", id: item, name: names[item] || null }] : [], findings: [] };
     });
   };

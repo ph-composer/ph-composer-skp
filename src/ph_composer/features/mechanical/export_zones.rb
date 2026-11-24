@@ -1,0 +1,92 @@
+# frozen_string_literal: true
+
+module PhComposer
+  module Mechanical
+    # The Zones every mechanical export plan works over, each once, and the finding a plan gives. A plan takes plain
+    # values, so the export contributor and the preflight build the same Zones, the first from the export reader
+    # and the second from the live Serves read, and get the same pairs and findings.
+    module ExportZones
+      # One Zone, once per Zone id: `segment` names its Building Segment (nil when it is in none), `exported` says
+      # whether the export writes its Room, and `values` are its Serves slots.
+      Zone = Struct.new(:id, :name, :segment, :exported, :values, keyword_init: true) do
+        def label
+          name || id
+        end
+
+        def slot(key)
+          values.fetch(key)
+        end
+      end
+      # `record_id` is the row's object: a Zone for a Zone's finding, an item for an item's.
+      Finding = Struct.new(:code, :record_id, :message, :blocks, keyword_init: true)
+
+      module_function
+
+      # Each Zone once, the first occurrence by path: its slots from the claimed payload when the Zone exports, and
+      # from the Zone record when it is left out. Only the claimant of the Serves payload reads it, so this runs
+      # inside the Ventilator export's section, whose projection hands it to every other mechanical section.
+      def read(reader)
+        payloads = reader.entity_projection(Serves::NAMESPACE, Zones::REFERENCE_KIND)
+                         .sort_by { |row| row.fetch("path") || [] }.uniq { |row| row.fetch("id") }
+                         .to_h { |row| [row.fetch("id"), row.fetch("payload")] }
+        reader.section(Zones::ExportProjection::SECTION).sort_by { |row| row.fetch("zone_path") }
+              .uniq { |row| row.fetch("zone_id") }.map do |row|
+          id = row.fetch("zone_id")
+          exported = row.fetch("exported")
+          values = exported ? payloads.fetch(id) { Serves::EMPTY.dup } : left_out_values(reader, id)
+          Zone.new(:id => id, :name => row.fetch("name"), :segment => row.fetch("building_segment"),
+                   :exported => exported, :values => values)
+        end
+      end
+
+      # A payload this version does not understand reads as served by nothing, as the Serves reads answer it: the
+      # Zone leaves with its Room either way, and nothing checks what it held.
+      def left_out_values(reader, zone_id)
+        _entry, record = Zones::ExportProjection.zone_entry(reader, zone_id)
+        Serves::Payload.read(record.fetch("extension_data", {}), Serves::Payload::EXTENSION).first
+      end
+
+      # The same Zones from the live Serves read (Serves::State), each once, the first occurrence by path.
+      def live(serves_zones)
+        serves_zones.sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id).map do |zone|
+          Zone.new(:id => zone.id, :name => zone.name, :segment => zone.segment, :exported => !zone.left_out,
+                   :values => zone.values)
+        end
+      end
+
+      # Per item of a family: serving no Zone, each served Zone the export leaves out, and Zones in more than one
+      # Building Segment. `items` maps each stored item's id to its values with its name; `slot` is the family's
+      # single Serves slot and `label` its item's name, such as "Ventilator".
+      def item_findings(exported, left_out, items, slot, label)
+        items.keys.sort.flat_map do |id|
+          name = items.fetch(id).fetch("name")
+          served = exported.select { |zone| zone.slot(slot) == id }
+          gone = left_out.select { |zone| zone.slot(slot) == id }
+          next [unserved(id, name)] if served.empty? && gone.empty?
+
+          gone.map { |zone| left_out(id, name, zone) } + across_segments(id, name, served, label)
+        end
+      end
+
+      def unserved(id, name)
+        Finding.new(:code => Codes::ITEM_UNSERVED, :record_id => id, :blocks => false,
+                    :message => "#{name} serves no Zone, so nothing exports it.")
+      end
+
+      def left_out(id, name, zone)
+        Finding.new(:code => Codes::ZONE_LEFT_OUT, :record_id => id, :blocks => false,
+                    :message => "#{name} serves Zone #{zone.label}, which is in no Building Segment, so the export " \
+                                "leaves that Room out.")
+      end
+
+      def across_segments(id, name, served, label)
+        segments = served.map(&:segment).uniq.sort
+        return [] if segments.length < 2
+
+        [Finding.new(:code => Codes::ITEM_ACROSS_SEGMENTS, :record_id => id, :blocks => false,
+                     :message => "#{name} serves Zones in #{segments.length} Building Segments " \
+                                 "(#{segments.join(', ')}); each Segment's model carries the whole #{label}.")]
+      end
+    end
+  end
+end

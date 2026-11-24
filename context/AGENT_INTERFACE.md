@@ -892,10 +892,15 @@ naming the Zones. Since API 1.89 the export writes each served Zone's Room a ven
 feature also requires Programs: each `ventilators.all` and `ventilators.list` row carries `balance`, the supply and
 extract summed over the Zones the export writes it to (a By Program Zone counts its Program's flow as both), and
 a preflight row about a Ventilator or a Zone carries `locate`, which `ph_composer.mechanical.locate` opens. `ph_composer.zones.occurrences`
-reads every Zone occurrence without its Faces, for a feature that colours or assigns Zones. The
+reads every Zone occurrence without its Faces, for a feature that colours or assigns Zones. Since API 1.91 hot water
+is three more catalogs, `ph_composer.mechanical.hot_water_systems`, `hot_water_heaters` and `hot_water_tanks`, each
+with `list`, `all`, a snapshot section, `create`, `update`, `duplicate` and `delete`; a Heater or Tank names its
+System, a System serves Zones through the Serves slot `hot_water_system_id`, and its delete takes `replacement_id`
+for the Zones, Heaters and Tanks naming it. The export writes each served Zone's Room a hot water system, and the one
+`ph_composer.mechanical.preflight` lists both exports' findings. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
-[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone" and
-"Mechanical: the Ventilator export", is the recipe.
+[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
+"Mechanical: the Ventilator export", "Mechanical: hot water" and "Mechanical: the hot water export", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

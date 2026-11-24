@@ -9,11 +9,12 @@ module PhComposer
     # `user_data`, which the unit carries. A Zone in no Building Segment is left out with its Room: its Serves
     # payload is read from the Zone record only to name what leaves with it.
     #
-    # `ph_composer.mechanical.preflight` runs the same plan over the live Model. The report's Mechanical section
-    # reads the Python result and the findings the run reported against this section.
+    # The section claims the payload for the whole feature: its projection gives every Zone once with its slots
+    # (ExportZones), which each other mechanical section requires this one to read. `ph_composer.mechanical.preflight`
+    # (Preflight) runs the same plan over the live Model. The report's Mechanical section reads the Python result and
+    # the findings the run reported against this section.
     module VentilationExport
       SECTION = "#{FEATURE_ID}.export.ventilation"
-      PREFLIGHT = "#{FEATURE_ID}.preflight"
       LOCATE = "#{FEATURE_ID}.locate"
       # A Locate names at most this many Zones or Ventilators, as the Export pane caps a group's.
       LOCATE_LIMIT = 500
@@ -45,16 +46,9 @@ module PhComposer
 
       def install(feature)
         feature.export_contributor(SECTION, :section_version => 1, :requires => [ZONES], :result => RESULT,
-                                            :preflight => PREFLIGHT, :entity_projections => [CLAIM],
+                                            :preflight => Preflight::NAME, :entity_projections => [CLAIM],
+                                            :projection => method(:zones),
                                             :report => method(:report)) { |reader| records(reader) }
-        feature.query(PREFLIGHT, :description => "Mechanical export checks: a Zone naming a Ventilator that is not " \
-                                                 "in the Model (blocking), a Zone with no Ventilator, a Ventilator " \
-                                                 "serving no Zone, a served Zone in no Building Segment and a " \
-                                                 "Ventilator serving Zones in two Building Segments.",
-                                 :refuses => [], :params => Shapes::NONE,
-                                 :result => PhComposer::Export::PREFLIGHT_RESULT, :examples => [{}]) do |request|
-          preflight(request)
-        end
         feature.view_command(LOCATE, :description => "Open where a Mechanical finding is fixed: the Mechanical " \
                                                      "tab with its Ventilators narrowed to ventilator_ids, or, " \
                                                      "without them, the Zones tab with zones checked.",
@@ -80,40 +74,28 @@ module PhComposer
 
       # The pairs, once the plan finds nothing blocking; every other finding but the preflight's own is a note.
       def records(reader)
-        plan = VentilationPlan.call(:zones => exported_zones(reader), :ventilators => ventilators(reader))
-        blocking = plan.findings.select(&:blocks)
-        unless blocking.empty?
-          messages = blocking.map(&:message).uniq
-          more = messages.length > BLOCKING_SHOWN ? " And #{messages.length - BLOCKING_SHOWN} more." : ""
-          raise PhComposer::Export::Blocked.new(blocking.first.code, messages.first(BLOCKING_SHOWN).join(" ") + more)
-        end
-
+        plan = VentilationPlan.call(:zones => zones(reader), :ventilators => ventilators(reader))
+        raise_blocking!(plan.findings)
         plan.findings.reject { |finding| PREFLIGHT_ONLY.include?(finding.code) }.each do |finding|
           reader.note(finding.code, finding.record_id, finding.message)
         end
         plan.pairs
       end
 
-      # Each Zone once, the first occurrence by path: its slots from the claimed payload when the Zone exports, and
-      # from the Zone record when it is left out.
-      def exported_zones(reader)
-        payloads = reader.entity_projection(Serves::NAMESPACE, Zones::REFERENCE_KIND)
-                         .sort_by { |row| row.fetch("path") || [] }.uniq { |row| row.fetch("id") }
-                         .to_h { |row| [row.fetch("id"), row.fetch("payload")] }
-        reader.section(ZONES).sort_by { |row| row.fetch("zone_path") }.uniq { |row| row.fetch("zone_id") }.map do |row|
-          id = row.fetch("zone_id")
-          exported = row.fetch("exported")
-          values = exported ? payloads.fetch(id) { Serves::EMPTY.dup } : left_out_values(reader, id)
-          VentilationPlan::Zone.new(:id => id, :name => row.fetch("name"), :segment => row.fetch("building_segment"),
-                                    :exported => exported, :values => values)
-        end
+      # Every Zone once with its Serves slots (ExportZones), read once per export: this section's own plan reads it,
+      # and so does every mechanical section that requires this one, through `reader.section`.
+      def zones(reader)
+        reader.projection(:mechanical_export_zones) { ExportZones.read(reader) }
       end
 
-      # A payload this version does not understand reads as served by nothing, as the Serves reads answer it: the
-      # Zone leaves with its Room either way, and nothing checks what it held.
-      def left_out_values(reader, zone_id)
-        _entry, record = Zones::ExportProjection.zone_entry(reader, zone_id)
-        Serves::Payload.read(record.fetch("extension_data", {}), Serves::Payload::EXTENSION).first
+      # Stops the export on a plan's blocking findings, naming a few of them and counting the rest.
+      def raise_blocking!(findings)
+        blocking = findings.select(&:blocks)
+        return if blocking.empty?
+
+        messages = blocking.map(&:message).uniq
+        more = messages.length > BLOCKING_SHOWN ? " And #{messages.length - BLOCKING_SHOWN} more." : ""
+        raise PhComposer::Export::Blocked.new(blocking.first.code, messages.first(BLOCKING_SHOWN).join(" ") + more)
       end
 
       def ventilators(reader)
@@ -122,59 +104,33 @@ module PhComposer
 
       # ---------------------------------------------------------------- the preflight
 
-      # The plan's findings over the live Model, each where the export reports it, after what stops the export
-      # before the plan: an unreadable Ventilator, a Ventilator's metadata the export refuses (a reserved
-      # `user_data` key, an extension payload it cannot leave out), and an exported Zone's Serves payload this
-      # version does not understand. A read that refuses answers one blocking row, since the export would stop on
-      # the same cause.
-      def preflight(request)
+      # The preflight's Ventilator rows: a blocking row for each unreadable Ventilator and each Ventilator metadata
+      # problem the export refuses (a reserved `user_data` key, an extension payload it cannot leave out), then the
+      # plan's findings over the live Model, each where the export reports it. `zones` are the live ExportZones and
+      # `references` each Zone's occurrence reference by id.
+      def preflight_rows(request, zones, references)
         records, unreadable = DefinitionLists.read(request.engine, VENTILATOR_KIND,
                                                    request.engine.ids(VENTILATOR_KIND).sort)
-        rows = unreadable.map { |row| finding(row.fetch("code"), row.fetch("id"), row.fetch("message"), true) }
+        rows = unreadable.map do |row|
+          Preflight.row(row.fetch("code"), SECTION, row.fetch("id"), row.fetch("message"), true)
+        end
         rows.concat(PhComposer::Export::MetadataCheck.findings(request, records, :section => SECTION,
                                                                                  :user_data => true))
-        zones = Serves::State.zones(request).sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id)
-        rows.concat(zones.filter_map { |zone| payload_row(zone) })
-        plan = VentilationPlan.call(:zones => zones.map { |zone| plan_zone(zone) },
-                                    :ventilators => records.to_h { |record| [record.fetch("id"), record] },
+        ventilators = records.to_h { |record| [record.fetch("id"), record] }
+        plan = VentilationPlan.call(:zones => zones, :ventilators => ventilators,
                                     :unreadable => unreadable.map { |row| row.fetch("id") })
-        references = zones.to_h { |zone| [zone.id, zone.reference] }
-        { "findings" => rows + plan.findings.map do |found|
-          finding(found.code, found.record_id, found.message, found.blocks, locate_for(found.record_id, references))
-        end, "repairs" => [] }
-      rescue CodedError => error
-        { "findings" => [finding(error.code, nil, error.message, true)], "repairs" => [] }
-      end
-
-      # The claim refuses an exported Zone's payload this version does not understand, with the code the metadata
-      # check gives it (Export::MetadataCheck.payload_problem).
-      def payload_row(zone)
-        return nil if zone.left_out || zone.status.nil? || zone.status == "understood"
-
-        code = { "unavailable" => "extension.unavailable", "invalid" => "extension.invalid" }
-               .fetch(zone.status, "extension.schema_unsupported")
-        finding(code, zone.id, "What serves Zone #{zone.name || zone.id} is #{zone.status}, so the Model " \
-                               "cannot be exported.", true, locate_for(zone.id, zone.id => zone.reference))
+        rows + plan.findings.map do |found|
+          Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,
+                        locate_for(found.record_id, references))
+        end
       end
 
       # Where a finding's object is fixed: a Ventilator on the Mechanical tab, a Zone checked on the Zones tab.
       def locate_for(object_id, references)
-        if object_id.to_s.start_with?("#{Ventilators::KIND.id_prefix}_")
-          { "name" => LOCATE, "params" => { "ventilator_ids" => [object_id] } }
-        elsif (reference = references[object_id])
-          { "name" => LOCATE, "params" => { "zones" => [reference.slice("zone_id", "zone_path")] } }
-        end
-      end
+        return Preflight.zone_locate(object_id, references) unless
+          object_id.to_s.start_with?("#{Ventilators::KIND.id_prefix}_")
 
-      def plan_zone(zone)
-        VentilationPlan::Zone.new(:id => zone.id, :name => zone.name, :segment => zone.segment,
-                                  :exported => !zone.left_out, :values => zone.values)
-      end
-
-      def finding(code, object_id, message, blocks, locate = nil)
-        found = { "code" => code, "section" => SECTION, "object_id" => object_id, "message" => message,
-                  "blocks_export" => blocks }
-        locate ? found.merge("locate" => locate) : found
+        { "name" => LOCATE, "params" => { "ventilator_ids" => [object_id] } }
       end
 
       # ---------------------------------------------------------------- the report

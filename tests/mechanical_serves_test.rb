@@ -40,7 +40,8 @@ class MechanicalServesTest < PhComposerTestCase
     operations = @model.operations.length
     completed(assign(%w[Apt\ 1 Apt\ 2], "ERV-1"))
     assert_equal operations + 1, @model.operations.length
-    assert_equal({ "ventilator_id" => @erv.fetch("ERV-1") }, stored_payload("Apt 1"), "on the Zone record")
+    assert_equal(M::Serves::EMPTY.merge("ventilator_id" => @erv.fetch("ERV-1")), stored_payload("Apt 1"),
+                 "on the Zone record")
     assert_equal @erv.fetch("ERV-1"), slots("Apt 2").fetch("ventilator_id"), "the Zone in a Group too"
 
     revision = @session.revision
@@ -129,7 +130,8 @@ class MechanicalServesTest < PhComposerTestCase
     shape = ->(row) { row.values_at("slots", "items").push(codes(row)) }
     assert_equal shape.call(rows.fetch("Apt 3")), shape.call(rows.fetch("Apt 1"))
     assert_equal shape.call(rows.fetch("Apt 3")), shape.call(rows.fetch("Apt 2"))
-    assert_equal [M::Serves::EMPTY, [], ["mechanical.zone_unventilated"]], shape.call(rows.fetch("Apt 1"))
+    assert_equal [M::Serves::EMPTY, [], %w[mechanical.zone_unventilated mechanical.zone_no_hot_water]],
+                 shape.call(rows.fetch("Apt 1"))
     assert_nil rows.fetch("Apt 3").fetch("payload_status")
     assert_equal "understood", rows.fetch("Apt 1").fetch("payload_status")
   end
@@ -235,8 +237,8 @@ class MechanicalServesTest < PhComposerTestCase
     rows = serves_rows
     assert_equal [{ "slot" => "ventilator_id", "id" => @erv.fetch("ERV-1"), "name" => "ERV-1" }],
                  rows.fetch("Apt 1").fetch("items")
-    assert_empty codes(rows.fetch("Apt 1"))
-    assert_equal ["mechanical.zone_unventilated"], codes(rows.fetch("Apt 2"))
+    assert_equal ["mechanical.zone_no_hot_water"], codes(rows.fetch("Apt 1"))
+    assert_equal %w[mechanical.zone_unventilated mechanical.zone_no_hot_water], codes(rows.fetch("Apt 2"))
     erv = ventilator_rows
     assert_equal ["Apt 1"], erv.fetch("ERV-1").fetch("zones").map { |row| row.fetch("name") }
     assert_empty codes(erv.fetch("ERV-1"))
@@ -266,25 +268,29 @@ class MechanicalServesTest < PhComposerTestCase
   # Every route through the engine refuses a slot naming no stored item, the generic metadata route included; a Zone
   # record written outside it, as one pasted from another Model arrives, can still hold one, and the read reports it.
   def test_a_payload_naming_a_missing_ventilator_reads_item_missing_and_an_unknown_key_refuses
-    refused(metadata("Apt 1", "ventilator_id" => "vnt_ZZZZZZZZZZZZ"), "reference.invalid")
+    missing = M::Serves::EMPTY.merge("ventilator_id" => "vnt_ZZZZZZZZZZZZ")
+    refused(metadata("Apt 1", missing), "reference.invalid")
     group = zone_group_named("Apt 1")
     record = ZONES::ZONE_STORE.read(group)
-    envelope = M::Serves::Payload::EXTENSION.envelope("ventilator_id" => "vnt_ZZZZZZZZZZZZ")
+    envelope = M::Serves::Payload::EXTENSION.envelope(missing)
     ZONES::ZONE_STORE.write(group, record.merge("extension_data" => { NAMESPACE => envelope }))
     row = serves_rows.fetch("Apt 1")
-    assert_equal [["mechanical.item_missing", true]],
+    assert_equal [["mechanical.item_missing", true], ["mechanical.zone_no_hot_water", false]],
                  row.fetch("findings").map { |finding| finding.values_at("code", "blocks_export") }
     assert_equal [nil], row.fetch("items").map { |item| item.fetch("name") }
     refused(assign(["Apt 1"], "ERV-1"), "mechanical.slot_filled")
     completed(assign(["Apt 1"], "ERV-1", :replace => true))
-    assert_empty codes(serves_rows.fetch("Apt 1")), "the feature's own action repairs it"
+    assert_equal ["mechanical.zone_no_hot_water"], codes(serves_rows.fetch("Apt 1")),
+                 "the feature's own action repairs it"
 
-    refused(metadata("Apt 2", "ventilator_id" => nil, "heat_pump_ids" => []), "validation.failed")
-    assert_equal ["unknown fields heat_pump_ids"], M::Serves::Payload.problems("ventilator_id" => nil,
-                                                                               "heat_pump_ids" => [])
-    assert_equal ["missing fields ventilator_id"], M::Serves::Payload.problems({})
-    assert_equal ["ventilator_id must be a Ventilator id or null"],
-                 M::Serves::Payload.problems("ventilator_id" => "hws_ZZZZZZZZZZZZ")
+    refused(metadata("Apt 2", M::Serves::EMPTY.merge("heat_pump_ids" => [])), "validation.failed")
+    assert_equal ["unknown fields heat_pump_ids"], M::Serves::Payload.problems(M::Serves::EMPTY
+                                                                                 .merge("heat_pump_ids" => []))
+    assert_equal ["missing fields ventilator_id, hot_water_system_id"], M::Serves::Payload.problems({})
+    assert_equal ["ventilator_id must be a Ventilator id or null",
+                  "hot_water_system_id must be a Hot Water System id or null"],
+                 M::Serves::Payload.problems("ventilator_id" => "hws_ZZZZZZZZZZZZ",
+                                             "hot_water_system_id" => "vnt_ZZZZZZZZZZZZ")
   end
 
   # ---------------------------------------------------------------- beside Programs

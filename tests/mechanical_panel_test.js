@@ -151,7 +151,8 @@ test("the Zone picker assigns, refuses a filled Zone naming its item, replaces o
   press(picker.apply);
   var assign = named(o, PREFIX + "serves.assign")[0];
   assert.deepStrictEqual(clone(assign.payload.params), { zones: [{ reference: fixtures.ZONES.B,
-    expected_values: { ventilator_id: fixtures.ERV2.id } }], slot: "ventilator_id", item_id: fixtures.ERV1.id });
+    expected_values: { ventilator_id: fixtures.ERV2.id, hot_water_system_id: null } }], slot: "ventilator_id",
+  item_id: fixtures.ERV1.id });
   answer(o, assign, { status: "refused", code: "mechanical.slot_filled",
     message: "Zone B is served by ERV-2; assign with replace to replace it." });
   assert.ok(o.ventilators().picker.held, "the draft stays open");
@@ -164,7 +165,7 @@ test("the Zone picker assigns, refuses a filled Zone naming its item, replaces o
   answer(o, replace, { status: "completed", value: {} });
   var clear = named(o, PREFIX + "serves.clear")[0];
   assert.deepStrictEqual(clone(clear.payload.params), { zones: [{ reference: fixtures.ZONES.A,
-    expected_values: { ventilator_id: fixtures.ERV1.id } }], slot: "ventilator_id" });
+    expected_values: { ventilator_id: fixtures.ERV1.id, hot_water_system_id: null } }], slot: "ventilator_id" });
   answer(o, clear, { status: "completed", value: {} });
   assert.strictEqual(o.ventilators().picker.held, null, "the picker closes once both land");
   assert.strictEqual(o.notices[o.notices.length - 1].tone, "success");
@@ -290,7 +291,8 @@ test("the picker's draft holds only the Zones the user changed, guarded by what 
     assert.ok(picker.held);
     press(picker.held.apply);
     var assign = named(o, PREFIX + "serves.assign")[0];
-    assert.deepStrictEqual(clone(assign.payload.params.zones[0].expected_values), { ventilator_id: fixtures.ERV2.id });
+    assert.deepStrictEqual(clone(assign.payload.params.zones[0].expected_values),
+      { ventilator_id: fixtures.ERV2.id, hot_water_system_id: null });
   });
 
 test("a clear refused after an assign landed says the assign stays written", function () {

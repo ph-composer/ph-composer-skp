@@ -62,17 +62,22 @@ module PhComposer
               found << finding(Codes::ZONE_LEFT_OUT, "info", "Zone #{label(zone)} is in no Building Segment, so " \
                                                              "the export leaves its Room out.")
             end
-          elsif zone.values.fetch("ventilator_id").nil?
-            found << finding(Codes::ZONE_UNVENTILATED, "warning", "Zone #{label(zone)} has no Ventilator.")
+          else
+            if zone.values.fetch("ventilator_id").nil?
+              found << finding(Codes::ZONE_UNVENTILATED, "warning", "Zone #{label(zone)} has no Ventilator.")
+            end
+            if zone.values.fetch("hot_water_system_id").nil?
+              found << finding(Codes::ZONE_NO_HOT_WATER, "warning", "Zone #{label(zone)} has no Hot Water System.")
+            end
           end
           found
         end
 
         # What an item read adds to each row of `kind`: the Zone occurrences it serves and its findings, from one
-        # Zones read, and with `with_balance` its airflow balance over them (`balance`).
-        def usage(request, kind, with_balance: false)
+        # Zones read (`zones`, when the caller has read them already), and with `with_balance` its airflow balance
+        # over them (`balance`).
+        def usage(request, kind, with_balance: false, zones: State.zones(request))
           slots = SLOTS.select { |slot| slot.kind == kind }
-          zones = State.zones(request)
           balanced = with_balance ? balance(request) : nil
           lambda do |record|
             id = record.fetch("id")

@@ -1593,6 +1593,767 @@ Values:
 }
 ```
 
+### `ph_composer.mechanical.hot_water_heater`
+
+Hot Water Heater, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+References: `hot_water_system_id` names one `ph_composer.mechanical.hot_water_system`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "hot_water_system_id",
+    "variant",
+    "percent_coverage",
+    "in_conditioned_space"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "hot_water_system_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hot_water_system record."
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "electric",
+                "heat_pump_annual",
+                "heat_pump_monthly",
+                "heat_pump_inside"
+              ],
+              "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+            },
+            "percent_coverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The share of the System's hot water this heater makes, 0 to 1."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the heater sits inside the thermal envelope."
+            },
+            "total_system_perf_ratio": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "An annual heat pump's total system performance ratio."
+            },
+            "cop_1": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "A monthly heat pump's COP at ambient_temp_1_c."
+            },
+            "ambient_temp_1_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C",
+              "description": "A monthly heat pump's first rating temperature."
+            },
+            "cop_2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "A monthly heat pump's COP at ambient_temp_2_c."
+            },
+            "ambient_temp_2_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C",
+              "description": "A monthly heat pump's second rating temperature."
+            },
+            "annual_energy_factor": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "An inside heat pump's annual energy factor."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "hot_water_system_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hot_water_system record."
+    },
+    "variant": {
+      "type": "string",
+      "enum": [
+        "electric",
+        "heat_pump_annual",
+        "heat_pump_monthly",
+        "heat_pump_inside"
+      ],
+      "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+    },
+    "percent_coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "The share of the System's hot water this heater makes, 0 to 1."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the heater sits inside the thermal envelope."
+    },
+    "total_system_perf_ratio": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "An annual heat pump's total system performance ratio."
+    },
+    "cop_1": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "A monthly heat pump's COP at ambient_temp_1_c."
+    },
+    "ambient_temp_1_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "C",
+      "description": "A monthly heat pump's first rating temperature."
+    },
+    "cop_2": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "A monthly heat pump's COP at ambient_temp_2_c."
+    },
+    "ambient_temp_2_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "C",
+      "description": "A monthly heat pump's second rating temperature."
+    },
+    "annual_energy_factor": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "An inside heat pump's annual energy factor."
+    }
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_system`
+
+Hot Water System, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "number_tap_points": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+            },
+            "piping_calc_method": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 4,
+              "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "number_tap_points": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+    },
+    "piping_calc_method": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 4,
+      "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+    }
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_tank`
+
+Hot Water Tank, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+References: `hot_water_system_id` names one `ph_composer.mechanical.hot_water_system`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "hot_water_system_id",
+    "role",
+    "tank_type",
+    "quantity",
+    "in_conditioned_space",
+    "solar_connection",
+    "solar_losses_w",
+    "storage_loss_rate_w_k",
+    "storage_capacity_l",
+    "standby_losses_w_k",
+    "standby_fraction",
+    "room_temp_c",
+    "water_temp_c"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "hot_water_system_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hot_water_system record."
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "storage",
+                "buffer",
+                "solar"
+              ],
+              "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+            },
+            "tank_type": {
+              "type": "string",
+              "enum": [
+                "0-NO STORAGE TANK",
+                "1-DHW AND HEATING",
+                "2-DHW ONLY"
+              ],
+              "description": "What the tank stores water for."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical tanks this record stands for."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the tank sits inside the thermal envelope."
+            },
+            "solar_connection": {
+              "type": "boolean",
+              "description": "Whether a solar thermal collector feeds it."
+            },
+            "solar_losses_w": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W",
+              "description": "Solar thermal losses."
+            },
+            "storage_loss_rate_w_k": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W/K",
+              "description": "Storage heat loss rate."
+            },
+            "storage_capacity_l": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "L",
+              "description": "Tank volume."
+            },
+            "standby_losses_w_k": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W/K",
+              "description": "Standby heat losses."
+            },
+            "standby_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The share of standby losses that heat the space, 0 to 1."
+            },
+            "room_temp_c": {
+              "type": "number",
+              "x-unit": "C",
+              "description": "The temperature around the tank."
+            },
+            "water_temp_c": {
+              "type": "number",
+              "x-unit": "C",
+              "description": "The stored water temperature."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "hot_water_system_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hot_water_system record."
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "storage",
+        "buffer",
+        "solar"
+      ],
+      "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+    },
+    "tank_type": {
+      "type": "string",
+      "enum": [
+        "0-NO STORAGE TANK",
+        "1-DHW AND HEATING",
+        "2-DHW ONLY"
+      ],
+      "description": "What the tank stores water for."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical tanks this record stands for."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the tank sits inside the thermal envelope."
+    },
+    "solar_connection": {
+      "type": "boolean",
+      "description": "Whether a solar thermal collector feeds it."
+    },
+    "solar_losses_w": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W",
+      "description": "Solar thermal losses."
+    },
+    "storage_loss_rate_w_k": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W/K",
+      "description": "Storage heat loss rate."
+    },
+    "storage_capacity_l": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "L",
+      "description": "Tank volume."
+    },
+    "standby_losses_w_k": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W/K",
+      "description": "Standby heat losses."
+    },
+    "standby_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "The share of standby losses that heat the space, 0 to 1."
+    },
+    "room_temp_c": {
+      "type": "number",
+      "x-unit": "C",
+      "description": "The temperature around the tank."
+    },
+    "water_temp_c": {
+      "type": "number",
+      "x-unit": "C",
+      "description": "The stored water temperature."
+    }
+  }
+}
+```
+
 ### `ph_composer.mechanical.ventilator`
 
 Ventilator, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
@@ -16094,9 +16855,2654 @@ Example params:
 {}
 ```
 
+### `ph_composer.mechanical.hot_water_heaters.all`
+
+Every Hot Water Heater, with export readiness, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.hot_water_heaters.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "hot_water_system_id",
+              "variant",
+              "percent_coverage",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "hot_water_system_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                      },
+                      "variant": {
+                        "type": "string",
+                        "enum": [
+                          "electric",
+                          "heat_pump_annual",
+                          "heat_pump_monthly",
+                          "heat_pump_inside"
+                        ],
+                        "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+                      },
+                      "percent_coverage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the System's hot water this heater makes, 0 to 1."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the heater sits inside the thermal envelope."
+                      },
+                      "total_system_perf_ratio": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "An annual heat pump's total system performance ratio."
+                      },
+                      "cop_1": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "A monthly heat pump's COP at ambient_temp_1_c."
+                      },
+                      "ambient_temp_1_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "A monthly heat pump's first rating temperature."
+                      },
+                      "cop_2": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "A monthly heat pump's COP at ambient_temp_2_c."
+                      },
+                      "ambient_temp_2_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "A monthly heat pump's second rating temperature."
+                      },
+                      "annual_energy_factor": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "An inside heat pump's annual energy factor."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "hot_water_system_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hot_water_system record."
+              },
+              "variant": {
+                "type": "string",
+                "enum": [
+                  "electric",
+                  "heat_pump_annual",
+                  "heat_pump_monthly",
+                  "heat_pump_inside"
+                ],
+                "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+              },
+              "percent_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the System's hot water this heater makes, 0 to 1."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the heater sits inside the thermal envelope."
+              },
+              "total_system_perf_ratio": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "An annual heat pump's total system performance ratio."
+              },
+              "cop_1": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "A monthly heat pump's COP at ambient_temp_1_c."
+              },
+              "ambient_temp_1_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "A monthly heat pump's first rating temperature."
+              },
+              "cop_2": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "A monthly heat pump's COP at ambient_temp_2_c."
+              },
+              "ambient_temp_2_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "A monthly heat pump's second rating temperature."
+              },
+              "annual_energy_factor": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "An inside heat pump's annual energy factor."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.hot_water_heaters.list`
+
+One bounded page of Hot Water Heaters in id order, with export readiness. Owner: `ph_composer.mechanical`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hwh_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water Heater id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "hot_water_system_id",
+              "variant",
+              "percent_coverage",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "hot_water_system_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                      },
+                      "variant": {
+                        "type": "string",
+                        "enum": [
+                          "electric",
+                          "heat_pump_annual",
+                          "heat_pump_monthly",
+                          "heat_pump_inside"
+                        ],
+                        "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+                      },
+                      "percent_coverage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the System's hot water this heater makes, 0 to 1."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the heater sits inside the thermal envelope."
+                      },
+                      "total_system_perf_ratio": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "An annual heat pump's total system performance ratio."
+                      },
+                      "cop_1": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "A monthly heat pump's COP at ambient_temp_1_c."
+                      },
+                      "ambient_temp_1_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "A monthly heat pump's first rating temperature."
+                      },
+                      "cop_2": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "A monthly heat pump's COP at ambient_temp_2_c."
+                      },
+                      "ambient_temp_2_c": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "C",
+                        "description": "A monthly heat pump's second rating temperature."
+                      },
+                      "annual_energy_factor": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "An inside heat pump's annual energy factor."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "hot_water_system_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hot_water_system record."
+              },
+              "variant": {
+                "type": "string",
+                "enum": [
+                  "electric",
+                  "heat_pump_annual",
+                  "heat_pump_monthly",
+                  "heat_pump_inside"
+                ],
+                "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+              },
+              "percent_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the System's hot water this heater makes, 0 to 1."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the heater sits inside the thermal envelope."
+              },
+              "total_system_perf_ratio": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "An annual heat pump's total system performance ratio."
+              },
+              "cop_1": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "A monthly heat pump's COP at ambient_temp_1_c."
+              },
+              "ambient_temp_1_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "A monthly heat pump's first rating temperature."
+              },
+              "cop_2": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "A monthly heat pump's COP at ambient_temp_2_c."
+              },
+              "ambient_temp_2_c": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "C",
+                "description": "A monthly heat pump's second rating temperature."
+              },
+              "annual_energy_factor": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "An inside heat pump's annual energy factor."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
+### `ph_composer.mechanical.hot_water_systems.all`
+
+Every Hot Water System, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, the Building Segment pooling note among them, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.hot_water_systems.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings",
+          "heater_count",
+          "tank_count",
+          "recirculation"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "number_tap_points": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+                      },
+                      "piping_calc_method": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 4,
+                        "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "number_tap_points": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+              },
+              "piping_calc_method": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 4,
+                "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "heater_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable Heaters name it."
+          },
+          "tank_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable Tanks name it."
+          },
+          "recirculation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "temperature_c",
+              "hours",
+              "from_piping"
+            ],
+            "properties": {
+              "temperature_c": {
+                "type": "number",
+                "x-unit": "C"
+              },
+              "hours": {
+                "type": "integer",
+                "x-unit": "h"
+              },
+              "from_piping": {
+                "type": "boolean",
+                "description": "False while no recirculation piping gives them."
+              }
+            },
+            "description": "Read-only: the recirculation piping's length-weighted temperature and hours, honeybee-ph's 60 C and 24 h while the System has none. This is what the export carries."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.hot_water_systems.list`
+
+One bounded page of Hot Water Systems in id order, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, the Building Segment pooling note among them. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hws_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water System id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings",
+          "heater_count",
+          "tank_count",
+          "recirculation"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "number_tap_points": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+                      },
+                      "piping_calc_method": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 4,
+                        "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "number_tap_points": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+              },
+              "piping_calc_method": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 4,
+                "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "heater_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable Heaters name it."
+          },
+          "tank_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable Tanks name it."
+          },
+          "recirculation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "temperature_c",
+              "hours",
+              "from_piping"
+            ],
+            "properties": {
+              "temperature_c": {
+                "type": "number",
+                "x-unit": "C"
+              },
+              "hours": {
+                "type": "integer",
+                "x-unit": "h"
+              },
+              "from_piping": {
+                "type": "boolean",
+                "description": "False while no recirculation piping gives them."
+              }
+            },
+            "description": "Read-only: the recirculation piping's length-weighted temperature and hours, honeybee-ph's 60 C and 24 h while the System has none. This is what the export carries."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.all`
+
+Every Hot Water Tank, with export readiness and the System tank slot each fills, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.hot_water_tanks.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "slot",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "hot_water_system_id",
+              "role",
+              "tank_type",
+              "quantity",
+              "in_conditioned_space",
+              "solar_connection",
+              "solar_losses_w",
+              "storage_loss_rate_w_k",
+              "storage_capacity_l",
+              "standby_losses_w_k",
+              "standby_fraction",
+              "room_temp_c",
+              "water_temp_c"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "hot_water_system_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                      },
+                      "role": {
+                        "type": "string",
+                        "enum": [
+                          "storage",
+                          "buffer",
+                          "solar"
+                        ],
+                        "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+                      },
+                      "tank_type": {
+                        "type": "string",
+                        "enum": [
+                          "0-NO STORAGE TANK",
+                          "1-DHW AND HEATING",
+                          "2-DHW ONLY"
+                        ],
+                        "description": "What the tank stores water for."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical tanks this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the tank sits inside the thermal envelope."
+                      },
+                      "solar_connection": {
+                        "type": "boolean",
+                        "description": "Whether a solar thermal collector feeds it."
+                      },
+                      "solar_losses_w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W",
+                        "description": "Solar thermal losses."
+                      },
+                      "storage_loss_rate_w_k": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/K",
+                        "description": "Storage heat loss rate."
+                      },
+                      "storage_capacity_l": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "L",
+                        "description": "Tank volume."
+                      },
+                      "standby_losses_w_k": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/K",
+                        "description": "Standby heat losses."
+                      },
+                      "standby_fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of standby losses that heat the space, 0 to 1."
+                      },
+                      "room_temp_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The temperature around the tank."
+                      },
+                      "water_temp_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The stored water temperature."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "hot_water_system_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hot_water_system record."
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "storage",
+                  "buffer",
+                  "solar"
+                ],
+                "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+              },
+              "tank_type": {
+                "type": "string",
+                "enum": [
+                  "0-NO STORAGE TANK",
+                  "1-DHW AND HEATING",
+                  "2-DHW ONLY"
+                ],
+                "description": "What the tank stores water for."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical tanks this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the tank sits inside the thermal envelope."
+              },
+              "solar_connection": {
+                "type": "boolean",
+                "description": "Whether a solar thermal collector feeds it."
+              },
+              "solar_losses_w": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W",
+                "description": "Solar thermal losses."
+              },
+              "storage_loss_rate_w_k": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/K",
+                "description": "Storage heat loss rate."
+              },
+              "storage_capacity_l": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "L",
+                "description": "Tank volume."
+              },
+              "standby_losses_w_k": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/K",
+                "description": "Standby heat losses."
+              },
+              "standby_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of standby losses that heat the space, 0 to 1."
+              },
+              "room_temp_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The temperature around the tank."
+              },
+              "water_temp_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The stored water temperature."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "slot": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "tank_1",
+              "tank_2",
+              "tank_buffer",
+              "tank_solar",
+              null
+            ],
+            "description": "The System's tank slot it fills at export; null when its role has none free."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.list`
+
+One bounded page of Hot Water Tanks in id order, with export readiness and the System tank slot each fills. Owner: `ph_composer.mechanical`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hwt_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water Tank id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "slot",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "hot_water_system_id",
+              "role",
+              "tank_type",
+              "quantity",
+              "in_conditioned_space",
+              "solar_connection",
+              "solar_losses_w",
+              "storage_loss_rate_w_k",
+              "storage_capacity_l",
+              "standby_losses_w_k",
+              "standby_fraction",
+              "room_temp_c",
+              "water_temp_c"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "hot_water_system_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                      },
+                      "role": {
+                        "type": "string",
+                        "enum": [
+                          "storage",
+                          "buffer",
+                          "solar"
+                        ],
+                        "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+                      },
+                      "tank_type": {
+                        "type": "string",
+                        "enum": [
+                          "0-NO STORAGE TANK",
+                          "1-DHW AND HEATING",
+                          "2-DHW ONLY"
+                        ],
+                        "description": "What the tank stores water for."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical tanks this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the tank sits inside the thermal envelope."
+                      },
+                      "solar_connection": {
+                        "type": "boolean",
+                        "description": "Whether a solar thermal collector feeds it."
+                      },
+                      "solar_losses_w": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W",
+                        "description": "Solar thermal losses."
+                      },
+                      "storage_loss_rate_w_k": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/K",
+                        "description": "Storage heat loss rate."
+                      },
+                      "storage_capacity_l": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "L",
+                        "description": "Tank volume."
+                      },
+                      "standby_losses_w_k": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/K",
+                        "description": "Standby heat losses."
+                      },
+                      "standby_fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of standby losses that heat the space, 0 to 1."
+                      },
+                      "room_temp_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The temperature around the tank."
+                      },
+                      "water_temp_c": {
+                        "type": "number",
+                        "x-unit": "C",
+                        "description": "The stored water temperature."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "hot_water_system_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hot_water_system record."
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "storage",
+                  "buffer",
+                  "solar"
+                ],
+                "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+              },
+              "tank_type": {
+                "type": "string",
+                "enum": [
+                  "0-NO STORAGE TANK",
+                  "1-DHW AND HEATING",
+                  "2-DHW ONLY"
+                ],
+                "description": "What the tank stores water for."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical tanks this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the tank sits inside the thermal envelope."
+              },
+              "solar_connection": {
+                "type": "boolean",
+                "description": "Whether a solar thermal collector feeds it."
+              },
+              "solar_losses_w": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W",
+                "description": "Solar thermal losses."
+              },
+              "storage_loss_rate_w_k": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/K",
+                "description": "Storage heat loss rate."
+              },
+              "storage_capacity_l": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "L",
+                "description": "Tank volume."
+              },
+              "standby_losses_w_k": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/K",
+                "description": "Standby heat losses."
+              },
+              "standby_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of standby losses that heat the space, 0 to 1."
+              },
+              "room_temp_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The temperature around the tank."
+              },
+              "water_temp_c": {
+                "type": "number",
+                "x-unit": "C",
+                "description": "The stored water temperature."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "slot": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "tank_1",
+              "tank_2",
+              "tank_buffer",
+              "tank_solar",
+              null
+            ],
+            "description": "The System's tank slot it fills at export; null when its role has none free."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
 ### `ph_composer.mechanical.preflight`
 
-Mechanical export checks: a Zone naming a Ventilator that is not in the Model (blocking), a Zone with no Ventilator, a Ventilator serving no Zone, a served Zone in no Building Segment and a Ventilator serving Zones in two Building Segments. Owner: `ph_composer.mechanical`.
+Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot and Hot Water Systems pooled in one Building Segment. Owner: `ph_composer.mechanical`.
 
 Refuses: only the `query` common set.
 
@@ -16308,7 +19714,8 @@ Result:
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "ventilator_id"
+              "ventilator_id",
+              "hot_water_system_id"
             ],
             "properties": {
               "ventilator_id": {
@@ -16318,6 +19725,14 @@ Result:
                 ],
                 "pattern": "^vnt_[A-Za-z0-9]{12}$",
                 "description": "Its Ventilator, null for none."
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^hws_[A-Za-z0-9]{12}$",
+                "description": "Its Hot Water System, null for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -16343,9 +19758,10 @@ Result:
                 "slot": {
                   "type": "string",
                   "enum": [
-                    "ventilator_id"
+                    "ventilator_id",
+                    "hot_water_system_id"
                   ],
-                  "description": "The family slot: ventilator_id."
+                  "description": "The family slot: ventilator_id, hot_water_system_id."
                 },
                 "id": {
                   "type": "string"
@@ -16507,7 +19923,8 @@ Result:
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "ventilator_id"
+              "ventilator_id",
+              "hot_water_system_id"
             ],
             "properties": {
               "ventilator_id": {
@@ -16517,6 +19934,14 @@ Result:
                 ],
                 "pattern": "^vnt_[A-Za-z0-9]{12}$",
                 "description": "Its Ventilator, null for none."
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^hws_[A-Za-z0-9]{12}$",
+                "description": "Its Hot Water System, null for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -16542,9 +19967,10 @@ Result:
                 "slot": {
                   "type": "string",
                   "enum": [
-                    "ventilator_id"
+                    "ventilator_id",
+                    "hot_water_system_id"
                   ],
-                  "description": "The family slot: ventilator_id."
+                  "description": "The family slot: ventilator_id, hot_water_system_id."
                 },
                 "id": {
                   "type": "string"
@@ -59874,6 +63300,3529 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.hot_water_heaters.create`
+
+Create one Hot Water Heater. Unless values give them, it is an electric heater covering all the System's hot water, in conditioned space. A monthly heat pump takes honeybee-ph's COP 2.5 at -8.333 C and at 8.333 C; an annual or inside heat pump needs its value. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Hot Water Heater. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Hot Water Heater's. The Hot Water System it belongs to, which must exist.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "hot_water_system_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "variant": {
+                  "type": "string",
+                  "enum": [
+                    "electric",
+                    "heat_pump_annual",
+                    "heat_pump_monthly",
+                    "heat_pump_inside"
+                  ],
+                  "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the System's hot water this heater makes, 0 to 1."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the heater sits inside the thermal envelope."
+                },
+                "total_system_perf_ratio": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An annual heat pump's total system performance ratio."
+                },
+                "cop_1": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_1_c."
+                },
+                "ambient_temp_1_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's first rating temperature."
+                },
+                "cop_2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_2_c."
+                },
+                "ambient_temp_2_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's second rating temperature."
+                },
+                "annual_energy_factor": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An inside heat pump's annual energy factor."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "electric",
+            "heat_pump_annual",
+            "heat_pump_monthly",
+            "heat_pump_inside"
+          ],
+          "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+        },
+        "percent_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the System's hot water this heater makes, 0 to 1."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the heater sits inside the thermal envelope."
+        },
+        "total_system_perf_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An annual heat pump's total system performance ratio."
+        },
+        "cop_1": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_1_c."
+        },
+        "ambient_temp_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's first rating temperature."
+        },
+        "cop_2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_2_c."
+        },
+        "ambient_temp_2_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's second rating temperature."
+        },
+        "annual_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An inside heat pump's annual energy factor."
+        }
+      },
+      "description": "The new Hot Water Heater's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "H-HP",
+    "hot_water_system_id": "hws_Ab12Cd34Ef56",
+    "variant": "heat_pump_annual",
+    "percent_coverage": 0.7,
+    "total_system_perf_ratio": 2.5
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_heaters.delete`
+
+Delete one Hot Water Heater. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Hot Water Heater. Deletes one definition and its metadata; Undo restores it.
+
+Before calling: The Hot Water Heater exists and is readable.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwh_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Heater to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "variant": {
+                  "type": "string",
+                  "enum": [
+                    "electric",
+                    "heat_pump_annual",
+                    "heat_pump_monthly",
+                    "heat_pump_inside"
+                  ],
+                  "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the System's hot water this heater makes, 0 to 1."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the heater sits inside the thermal envelope."
+                },
+                "total_system_perf_ratio": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An annual heat pump's total system performance ratio."
+                },
+                "cop_1": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_1_c."
+                },
+                "ambient_temp_1_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's first rating temperature."
+                },
+                "cop_2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_2_c."
+                },
+                "ambient_temp_2_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's second rating temperature."
+                },
+                "annual_energy_factor": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An inside heat pump's annual energy factor."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electric",
+            "heat_pump_annual",
+            "heat_pump_monthly",
+            "heat_pump_inside",
+            null
+          ],
+          "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the System's hot water this heater makes, 0 to 1."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the heater sits inside the thermal envelope."
+        },
+        "total_system_perf_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An annual heat pump's total system performance ratio."
+        },
+        "cop_1": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_1_c."
+        },
+        "ambient_temp_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's first rating temperature."
+        },
+        "cop_2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_2_c."
+        },
+        "ambient_temp_2_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's second rating temperature."
+        },
+        "annual_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An inside heat pump's annual energy factor."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwh_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.hot_water_heaters.duplicate`
+
+Duplicate one Hot Water Heater with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Hot Water Heater. Creates one definition; user_data is copied.
+
+Before calling: The Hot Water Heater exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwh_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Heater to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwh_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.hot_water_heaters.update`
+
+Edit guarded values of one Hot Water Heater; a changed expected value refuses and writes nothing. A new variant takes its own efficiency values and nulls the old variant's in the same edit. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Hot Water Heater. Updates one definition and preserves its metadata.
+
+Before calling: The Hot Water Heater exists and is readable. A new name is not another Hot Water Heater's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwh_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Heater to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electric",
+            "heat_pump_annual",
+            "heat_pump_monthly",
+            "heat_pump_inside",
+            null
+          ],
+          "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the System's hot water this heater makes, 0 to 1."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the heater sits inside the thermal envelope."
+        },
+        "total_system_perf_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An annual heat pump's total system performance ratio."
+        },
+        "cop_1": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_1_c."
+        },
+        "ambient_temp_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's first rating temperature."
+        },
+        "cop_2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_2_c."
+        },
+        "ambient_temp_2_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's second rating temperature."
+        },
+        "annual_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An inside heat pump's annual energy factor."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "variant": {
+                  "type": "string",
+                  "enum": [
+                    "electric",
+                    "heat_pump_annual",
+                    "heat_pump_monthly",
+                    "heat_pump_inside"
+                  ],
+                  "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the System's hot water this heater makes, 0 to 1."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the heater sits inside the thermal envelope."
+                },
+                "total_system_perf_ratio": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An annual heat pump's total system performance ratio."
+                },
+                "cop_1": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_1_c."
+                },
+                "ambient_temp_1_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's first rating temperature."
+                },
+                "cop_2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "A monthly heat pump's COP at ambient_temp_2_c."
+                },
+                "ambient_temp_2_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C",
+                  "description": "A monthly heat pump's second rating temperature."
+                },
+                "annual_energy_factor": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "An inside heat pump's annual energy factor."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electric",
+            "heat_pump_annual",
+            "heat_pump_monthly",
+            "heat_pump_inside",
+            null
+          ],
+          "description": "The kind of heater, which picks its efficiency values: electric, heat_pump_annual, heat_pump_monthly, heat_pump_inside."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the System's hot water this heater makes, 0 to 1."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the heater sits inside the thermal envelope."
+        },
+        "total_system_perf_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An annual heat pump's total system performance ratio."
+        },
+        "cop_1": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_1_c."
+        },
+        "ambient_temp_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's first rating temperature."
+        },
+        "cop_2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "A monthly heat pump's COP at ambient_temp_2_c."
+        },
+        "ambient_temp_2_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "A monthly heat pump's second rating temperature."
+        },
+        "annual_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "An inside heat pump's annual energy factor."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwh_Ab12Cd34Ef56",
+  "values": {
+    "variant": "electric",
+    "total_system_perf_ratio": null
+  },
+  "expected_values": {
+    "variant": "heat_pump_annual"
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_systems.create`
+
+Create one Hot Water System. Unless values give them, its tap points and piping calculation method are absent. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Hot Water System. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Hot Water System's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "number_tap_points": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+                },
+                "piping_calc_method": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "number_tap_points": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+        },
+        "piping_calc_method": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+        }
+      },
+      "description": "The new Hot Water System's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "HWS-1",
+    "number_tap_points": 8
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_systems.delete`
+
+Delete one Hot Water System. While a Zone, Heater or Tank names it, name a replacement_id, which takes its place on each of them; null empties the Zones' slots, and a Heater or Tank still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Hot Water System. Deletes one definition and its metadata, and rewrites the Zones, Heaters and Tanks that name it; Undo restores all of them.
+
+Before calling: The Hot Water System exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "number_tap_points": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+                },
+                "piping_calc_method": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "number_tap_points": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+        },
+        "piping_calc_method": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System that takes this one's place on every Zone, Heater and Tank, or null to empty the Zones' slots. Needed while a Zone, Heater or Tank names it; null leaves Heaters and Tanks in use."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hws_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hws_Ab12Cd34Ef56",
+  "replacement_id": "hws_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.hot_water_systems.duplicate`
+
+Duplicate one Hot Water System with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Hot Water System. Creates one definition; user_data is copied.
+
+Before calling: The Hot Water System exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hws_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.hot_water_systems.update`
+
+Edit guarded values of one Hot Water System; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Hot Water System. Updates one definition and preserves its metadata.
+
+Before calling: The Hot Water System exists and is readable. A new name is not another Hot Water System's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "number_tap_points": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+        },
+        "piping_calc_method": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "number_tap_points": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+                },
+                "piping_calc_method": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "number_tap_points": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many hot water tap points the System feeds; absent to let the piping count them."
+        },
+        "piping_calc_method": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "The piping calculation method, 1 to 4; absent for none. Exported once honeybee-ph carries it."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hws_Ab12Cd34Ef56",
+  "values": {
+    "number_tap_points": 10
+  },
+  "expected_values": {
+    "number_tap_points": 8
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.create`
+
+Create one Hot Water Tank. Unless values give them, it is one 300 L storage tank for hot water only in conditioned space, with honeybee-ph's default losses (standby 4.0 W/K, fraction 0.3) at 20 C room and 60 C water. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Hot Water Tank. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Hot Water Tank's. The Hot Water System it belongs to, which must exist.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "hot_water_system_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "storage",
+                    "buffer",
+                    "solar"
+                  ],
+                  "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+                },
+                "tank_type": {
+                  "type": "string",
+                  "enum": [
+                    "0-NO STORAGE TANK",
+                    "1-DHW AND HEATING",
+                    "2-DHW ONLY"
+                  ],
+                  "description": "What the tank stores water for."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical tanks this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the tank sits inside the thermal envelope."
+                },
+                "solar_connection": {
+                  "type": "boolean",
+                  "description": "Whether a solar thermal collector feeds it."
+                },
+                "solar_losses_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Solar thermal losses."
+                },
+                "storage_loss_rate_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Storage heat loss rate."
+                },
+                "storage_capacity_l": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "L",
+                  "description": "Tank volume."
+                },
+                "standby_losses_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Standby heat losses."
+                },
+                "standby_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of standby losses that heat the space, 0 to 1."
+                },
+                "room_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The temperature around the tank."
+                },
+                "water_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The stored water temperature."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "storage",
+            "buffer",
+            "solar"
+          ],
+          "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+        },
+        "tank_type": {
+          "type": "string",
+          "enum": [
+            "0-NO STORAGE TANK",
+            "1-DHW AND HEATING",
+            "2-DHW ONLY"
+          ],
+          "description": "What the tank stores water for."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical tanks this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the tank sits inside the thermal envelope."
+        },
+        "solar_connection": {
+          "type": "boolean",
+          "description": "Whether a solar thermal collector feeds it."
+        },
+        "solar_losses_w": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Solar thermal losses."
+        },
+        "storage_loss_rate_w_k": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Storage heat loss rate."
+        },
+        "storage_capacity_l": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "L",
+          "description": "Tank volume."
+        },
+        "standby_losses_w_k": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Standby heat losses."
+        },
+        "standby_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of standby losses that heat the space, 0 to 1."
+        },
+        "room_temp_c": {
+          "type": "number",
+          "x-unit": "C",
+          "description": "The temperature around the tank."
+        },
+        "water_temp_c": {
+          "type": "number",
+          "x-unit": "C",
+          "description": "The stored water temperature."
+        }
+      },
+      "description": "The new Hot Water Tank's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "T1",
+    "hot_water_system_id": "hws_Ab12Cd34Ef56",
+    "role": "storage",
+    "storage_capacity_l": 300
+  }
+}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.delete`
+
+Delete one Hot Water Tank. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Hot Water Tank. Deletes one definition and its metadata; Undo restores it.
+
+Before calling: The Hot Water Tank exists and is readable.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwt_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Tank to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "storage",
+                    "buffer",
+                    "solar"
+                  ],
+                  "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+                },
+                "tank_type": {
+                  "type": "string",
+                  "enum": [
+                    "0-NO STORAGE TANK",
+                    "1-DHW AND HEATING",
+                    "2-DHW ONLY"
+                  ],
+                  "description": "What the tank stores water for."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical tanks this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the tank sits inside the thermal envelope."
+                },
+                "solar_connection": {
+                  "type": "boolean",
+                  "description": "Whether a solar thermal collector feeds it."
+                },
+                "solar_losses_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Solar thermal losses."
+                },
+                "storage_loss_rate_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Storage heat loss rate."
+                },
+                "storage_capacity_l": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "L",
+                  "description": "Tank volume."
+                },
+                "standby_losses_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Standby heat losses."
+                },
+                "standby_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of standby losses that heat the space, 0 to 1."
+                },
+                "room_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The temperature around the tank."
+                },
+                "water_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The stored water temperature."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "storage",
+            "buffer",
+            "solar",
+            null
+          ],
+          "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+        },
+        "tank_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "0-NO STORAGE TANK",
+            "1-DHW AND HEATING",
+            "2-DHW ONLY",
+            null
+          ],
+          "description": "What the tank stores water for."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical tanks this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the tank sits inside the thermal envelope."
+        },
+        "solar_connection": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether a solar thermal collector feeds it."
+        },
+        "solar_losses_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Solar thermal losses."
+        },
+        "storage_loss_rate_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Storage heat loss rate."
+        },
+        "storage_capacity_l": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "L",
+          "description": "Tank volume."
+        },
+        "standby_losses_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Standby heat losses."
+        },
+        "standby_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of standby losses that heat the space, 0 to 1."
+        },
+        "room_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The temperature around the tank."
+        },
+        "water_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The stored water temperature."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.duplicate`
+
+Duplicate one Hot Water Tank with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Hot Water Tank. Creates one definition; user_data is copied.
+
+Before calling: The Hot Water Tank exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwt_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Tank to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.hot_water_tanks.update`
+
+Edit guarded values of one Hot Water Tank; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Hot Water Tank. Updates one definition and preserves its metadata.
+
+Before calling: The Hot Water Tank exists and is readable. A new name is not another Hot Water Tank's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hwt_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water Tank to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "storage",
+            "buffer",
+            "solar",
+            null
+          ],
+          "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+        },
+        "tank_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "0-NO STORAGE TANK",
+            "1-DHW AND HEATING",
+            "2-DHW ONLY",
+            null
+          ],
+          "description": "What the tank stores water for."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical tanks this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the tank sits inside the thermal envelope."
+        },
+        "solar_connection": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether a solar thermal collector feeds it."
+        },
+        "solar_losses_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Solar thermal losses."
+        },
+        "storage_loss_rate_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Storage heat loss rate."
+        },
+        "storage_capacity_l": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "L",
+          "description": "Tank volume."
+        },
+        "standby_losses_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Standby heat losses."
+        },
+        "standby_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of standby losses that heat the space, 0 to 1."
+        },
+        "room_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The temperature around the tank."
+        },
+        "water_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The stored water temperature."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "hot_water_system_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hot_water_system record."
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "storage",
+                    "buffer",
+                    "solar"
+                  ],
+                  "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+                },
+                "tank_type": {
+                  "type": "string",
+                  "enum": [
+                    "0-NO STORAGE TANK",
+                    "1-DHW AND HEATING",
+                    "2-DHW ONLY"
+                  ],
+                  "description": "What the tank stores water for."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical tanks this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the tank sits inside the thermal envelope."
+                },
+                "solar_connection": {
+                  "type": "boolean",
+                  "description": "Whether a solar thermal collector feeds it."
+                },
+                "solar_losses_w": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W",
+                  "description": "Solar thermal losses."
+                },
+                "storage_loss_rate_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Storage heat loss rate."
+                },
+                "storage_capacity_l": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "L",
+                  "description": "Tank volume."
+                },
+                "standby_losses_w_k": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/K",
+                  "description": "Standby heat losses."
+                },
+                "standby_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of standby losses that heat the space, 0 to 1."
+                },
+                "room_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The temperature around the tank."
+                },
+                "water_temp_c": {
+                  "type": "number",
+                  "x-unit": "C",
+                  "description": "The stored water temperature."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "hot_water_system_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hot_water_system record."
+        },
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "storage",
+            "buffer",
+            "solar",
+            null
+          ],
+          "description": "Which of the System's tank slots it fills: storage the first two, buffer the buffer slot, solar the solar slot."
+        },
+        "tank_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "0-NO STORAGE TANK",
+            "1-DHW AND HEATING",
+            "2-DHW ONLY",
+            null
+          ],
+          "description": "What the tank stores water for."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical tanks this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the tank sits inside the thermal envelope."
+        },
+        "solar_connection": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether a solar thermal collector feeds it."
+        },
+        "solar_losses_w": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W",
+          "description": "Solar thermal losses."
+        },
+        "storage_loss_rate_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Storage heat loss rate."
+        },
+        "storage_capacity_l": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "L",
+          "description": "Tank volume."
+        },
+        "standby_losses_w_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/K",
+          "description": "Standby heat losses."
+        },
+        "standby_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of standby losses that heat the space, 0 to 1."
+        },
+        "room_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The temperature around the tank."
+        },
+        "water_temp_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C",
+          "description": "The stored water temperature."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hwt_Ab12Cd34Ef56",
+  "values": {
+    "role": "buffer"
+  },
+  "expected_values": {
+    "role": "storage"
+  }
+}
+```
+
 ### `ph_composer.mechanical.serves.assign`
 
 Name an item in one slot of Zones. A Ventilator serves a Zone alone. Owner: `ph_composer.mechanical`.
@@ -59938,6 +66887,14 @@ Params:
                 ],
                 "pattern": "^vnt_[A-Za-z0-9]{12}$",
                 "description": "Its Ventilator, null for none."
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^hws_[A-Za-z0-9]{12}$",
+                "description": "Its Hot Water System, null for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -59950,9 +66907,10 @@ Params:
     "slot": {
       "type": "string",
       "enum": [
-        "ventilator_id"
+        "ventilator_id",
+        "hot_water_system_id"
       ],
-      "description": "The family slot: ventilator_id."
+      "description": "The family slot: ventilator_id, hot_water_system_id."
     },
     "item_id": {
       "type": "string",
@@ -59989,9 +66947,10 @@ Result:
     "slot": {
       "type": "string",
       "enum": [
-        "ventilator_id"
+        "ventilator_id",
+        "hot_water_system_id"
       ],
-      "description": "The family slot: ventilator_id."
+      "description": "The family slot: ventilator_id, hot_water_system_id."
     },
     "item_id": {
       "type": "string"
@@ -60084,6 +67043,14 @@ Params:
                 ],
                 "pattern": "^vnt_[A-Za-z0-9]{12}$",
                 "description": "Its Ventilator, null for none."
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^hws_[A-Za-z0-9]{12}$",
+                "description": "Its Hot Water System, null for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -60096,7 +67063,8 @@ Params:
     "slot": {
       "type": "string",
       "enum": [
-        "ventilator_id"
+        "ventilator_id",
+        "hot_water_system_id"
       ],
       "description": "The slot to empty; every slot when absent."
     }
@@ -98679,11 +105647,15 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `mechanical.hot_water_pooled` | More than one Hot Water System serves one Building Segment; WUFI-Passive and METr pool their tanks and heaters and keep one tap point count. |
 | `mechanical.item_across_segments` | An item serves Zones in more than one Building Segment; each Segment's model carries the whole item. |
 | `mechanical.item_missing` | A Zone's slot names an item that is not in the Model; reassign or clear it. |
 | `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
+| `mechanical.method_not_exported` | A Hot Water System's piping calculation method is set, and the pinned honeybee-ph has no field for it, so the export leaves it out. |
 | `mechanical.slot_filled` | The Zone's slot already names another item; assign with replace to use the new one. |
+| `mechanical.tank_unslotted` | A Hot Water Tank has no free slot of its role on its System, so the export leaves it out. |
 | `mechanical.zone_left_out` | A served Zone is in no Building Segment, so the export leaves its Room out. |
+| `mechanical.zone_no_hot_water` | A Zone in a Building Segment has no Hot Water System. |
 | `mechanical.zone_unventilated` | A Zone in a Building Segment has no Ventilator. |
 
 ### `ph_composer.programs`
@@ -98986,3 +105958,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.88 | 2026-11-23 | What serves each Zone: the extension ph_composer.mechanical.zone_serves on the Zone record, ph_composer.mechanical.serves.assign and serves.clear, the reads serves.list and serves.all with the snapshot section ph_composer.mechanical.serves, and the codes mechanical.slot_filled, zone_unventilated, item_unserved, item_missing and zone_left_out. ventilators.list and ventilators.all rows carry zones and findings; ventilators.delete takes replacement_id, an id or null, and refuses reference.in_use naming the Zones without one. |
 | 1.89 | 2026-11-24 | The Ventilator export: the section ph_composer.mechanical.export.ventilation writes one ventilation system per served Zone and claims ph_composer.mechanical.zone_serves, now required for export. ph_composer.mechanical.preflight is new; mechanical.item_missing blocks export and mechanical.item_across_segments is a new code. |
 | 1.90 | 2026-11-24 | ph_composer.mechanical.ventilators.all and .list rows gain balance, the airflow balance over the Zones each Ventilator serves, and ph_composer.mechanical requires ph_composer.programs. ph_composer.mechanical.serves rows gain building_segment, the Segment's name. ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a Ventilator or a Zone carry locate. |
+| 1.91 | 2026-11-24 | ph_composer.mechanical.hot_water_systems, hot_water_heaters and hot_water_tanks are new, each with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 2 with the hot_water_system_id slot, and serves rows gain mechanical.zone_no_hot_water. The export section ph_composer.mechanical.export.hot_water is new, and ph_composer.mechanical.preflight adds its rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings. |

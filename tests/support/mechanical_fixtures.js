@@ -23,7 +23,8 @@ function servesRow(letter, item, segment) {
   var id = segment === undefined ? SEGMENT : legacy ? null : segment;
   return { zone_id: ZONES[letter].zone_id, reference: ZONES[letter], name: "Zone " + letter,
     building_segment_id: id, building_segment: legacy || (id ? "Apartments" : null),
-    slots: { ventilator_id: item ? item.id : null }, payload_status: item ? "understood" : null,
+    slots: { ventilator_id: item ? item.id : null, hot_water_system_id: null },
+    payload_status: item ? "understood" : null,
     items: item ? [{ slot: "ventilator_id", id: item.id, name: item.name }] : [], findings: [] };
 }
 var ERV1 = { id: "vnt_AAAAAAAAAAAA", name: "ERV-1" }, ERV2 = { id: "vnt_BBBBBBBBBBBB", name: "ERV-2" };

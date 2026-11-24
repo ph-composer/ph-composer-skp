@@ -42,6 +42,7 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.programs.export.set_points",
         "ph_composer.shading.export.shades",
         "ph_composer.mechanical.export.ventilation",
+        "ph_composer.mechanical.export.hot_water",
     ]
     assert EXPORTERS == ()
     empty = {"schema_version": 1, "run_id": "run-0", "sections": {}}

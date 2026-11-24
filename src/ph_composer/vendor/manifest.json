@@ -806,9 +806,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1677,
+      "bytes": 1717,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "d5877afe6dcbf428baeadbe885006a0e867ed1ecfcf8c4464fce221b5daa149d"
+      "sha256": "4c9abf8d7580c28c6447e2b699fbd8230cba80aea8fff0e4264eb2ae31044d98"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -831,9 +831,9 @@
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
     },
     "python/ph_composer_translation/contract/mechanical_records.py": {
-      "bytes": 3805,
+      "bytes": 11442,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "d7b68aeab48f32683cde1a7498bfbe58657fc6fd8ee0c3f4a888f00e7201f7af"
+      "sha256": "c5b21956376a32812a18c943e06bfc43e0aa0fc24f2c854e8eddb0a9e3f3afa0"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -876,9 +876,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/mechanical_sections.py": {
-      "bytes": 7682,
+      "bytes": 17568,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "36f97f4c26608fe926d4944e9f0d38e1898ea8f7bccf1b8ab853db96025d0dce"
+      "sha256": "d357950ece7212c8e8db7f3b30bbf64dc664aaa05042f7878112efca1ba4bc93"
     },
     "python/ph_composer_translation/model_metadata.py": {
       "bytes": 1484,
