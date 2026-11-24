@@ -1323,8 +1323,9 @@ pipe segment carries its pipe's.
   System's `distribution_length_m` by role and its recirculation sum), `types` (every Pipe Type's `used_length_m` and
   line count) and the first 50 `unreadable` records with `unreadable_total`. Names from a user's text and finding
   messages are cut and named in `truncated`. With `compact`, a run leaves out `edge_paths` and each finding its
-  `locate`, giving `edge_count` and the run's `index`, and `ph_composer.piping.runs.members` pages one run's pipes, or
-  one finding's. A pipe or group record that cannot be read, or fails its schema (a `water_temp_c` outside 0 to 100
+  `locate`, giving `edge_count` and the run's `index`, the `systems`, `types` and `unreadable` rows are left out with
+  `system_count` and `type_count`, and every page fits one agent reply; `ph_composer.piping.schedule.details` pages
+  those rows (`part`) and `ph_composer.piping.runs.members` one run's pipes, or one finding's. A pipe or group record that cannot be read, or fails its schema (a `water_temp_c` outside 0 to 100
   included), is an `unreadable` row (`record.unreadable`), never a raise, and blocks export.
   `ph_composer.piping.systems` answers the `systems` rows alone and is the snapshot section
   `ph_composer.piping.piping_systems`; `pipe_types.list` and `pipe_types.all` add `used_length_m`. Both walk without

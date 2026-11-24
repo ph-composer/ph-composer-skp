@@ -134,6 +134,16 @@ class PipingRunsTest < Minitest::Test
     assert_equal({ branch.first.fetch("display_name") => ["piping.parent_ambiguous"] }, codes(rows))
   end
 
+  # A branch touching its trunk at both ends has one parent, not two.
+  def test_a_branch_touching_its_trunk_twice_has_one_parent
+    trunk = line("trunk", PT1, [[0, 0, 0], [1, 0, 0], [2, 0, 0]], :values => TRUNK)
+    loop_branch = line("branch", PT2, [[0, 0, 0], [0, 1, 0], [2, 1, 0], [2, 0, 0]])
+    rows = schedule(trunk + loop_branch).fetch("runs")
+    branch = rows.find { |row| row.fetch("role") == "branch" }
+    assert_equal rows.first.fetch("identifier"), branch.fetch("parent")
+    assert_empty codes(rows)
+  end
+
   def test_a_branch_broken_from_its_trunk_is_unconnected_and_keeps_its_twigs
     facts = riser + line("branch", PT2, [[1, 1, 3], [3, 1, 3], [5, 1, 3]]) +
             line("branch", PT2, [[1.05, 1, 6], [3, 1, 6], [5, 1, 6]]) +

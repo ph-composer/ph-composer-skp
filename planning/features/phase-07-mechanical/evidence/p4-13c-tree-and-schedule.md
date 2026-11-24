@@ -78,11 +78,13 @@ refresh. A stub Model is not the host: the host figure is `M13c`'s, and over 200
   Nesting cannot keep 24 for every split; a fix belongs in honeybee-ph (rounding before `int()`).
 - **The order of the sums.** Runs add in schedule order and pipes in run order; P4-13d must add elements and segments
   in that order for float equality.
-- **`compact` and `runs.members`.** A page carries each run's `edge_paths` and each finding's; one long run would pass
-  an agent's 24 KiB reply, which the executor refuses. As thermal bridges' `schedule.list`, `compact` counts them and
-  `ph_composer.piping.runs.members` pages one run's pipes, or a finding's. Names from user text and finding messages
-  are cut to 256 and 512 characters and named in `truncated`. The `systems` and `types` rows beside the runs are not
-  paged; a Model with hundreds of Pipe Types or Systems would pass the budget (a follow-up if one appears).
+- **`compact`, `schedule.details` and `runs.members`.** A page carries each run's `edge_paths` and each finding's, and
+  every System, Pipe Type and unreadable row; one long run, one long name or many records would pass an agent's 24 KiB
+  reply, which the executor refuses. As thermal bridges' `schedule.list`, `compact` counts the paths and leaves the
+  three lists out, counted; `ph_composer.piping.schedule.details` pages those lists and
+  `ph_composer.piping.runs.members` one run's pipes, or a finding's. Names from user text and finding messages are cut
+  to 256 and 512 characters and named in `truncated`. A compact page and every details page fit one reply with a
+  30,000-character name and 60 unreadable records (`tests/piping_schedule_test.rb`).
 - **`water_temp_c` 0 to 100.** The pipe assignment's temperature had no bound, so a stored `1e308` made the
   recirculation sum infinite, which no JSON reply carries. The schema now takes 0 to 100 °C; a stored record outside it
   reads as unreadable.
@@ -108,6 +110,13 @@ the two moved tests, one assertion on a mixed quantity). The registry's referenc
 cover the new operations and the recipe.
 
 ## Review
+
+Codex gpt-6-astra cycle 1 on `79f98ede`: 2 P2, both fixed in the next commit. The System and Pipe Type rows beside the
+runs, with uncut names, and the 50 unreadable messages could pass one reply even with `compact` and `limit` 1 (now
+cut, left out of compact pages and paged by `schedule.details`). A run's parents were deduplicated by `uniq` on whole
+Run Structs, hashing their pipes and the tree: an alternating-type branch over 1,998 pipes took 1.24 s in `Tree.call`
+(Codex's figure); by identity it takes 41 ms (scratch, Ruby 3.2.2), with a test for a branch touching its trunk twice.
+
 
 Sonnet adversarial read before the gate: 13 findings. Fixed: an unbounded `water_temp_c` could make the sum infinite
 (schema bound); names and messages uncut and long runs past a reply (cut, `compact`, `runs.members`); the two doc

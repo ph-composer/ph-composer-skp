@@ -3,11 +3,15 @@
 module PhComposer
   module Piping
     # The schedule a bounded page at a time, for an agent whose reply has a size limit: one page of runs beside the
-    # totals, Systems, Pipe Types and the first unreadable records, and one run's pipes a page at a time. Each read
-    # walks the Model again, so a cursor holds only a run's place in schedule order.
+    # totals, Systems, Pipe Types and the first unreadable records; with compact, the runs beside the totals alone,
+    # and the Systems, Pipe Types, unreadable records and one run's pipes each a page at a time. Each read walks the
+    # Model again, so a cursor holds only a row's place.
     module SchedulePages
       PAGE = "#{FEATURE_ID}.schedule".freeze
       MEMBERS = "#{FEATURE_ID}.runs.members".freeze
+      DETAILS = "#{FEATURE_ID}.schedule.details".freeze
+      # Each list the details read pages, by the key its rows sort by.
+      PARTS = { "systems" => "hot_water_system_id", "types" => "pipe_type_id", "unreadable" => "path" }.freeze
       # Unreadable records a page lists beside a count of every one.
       DETAIL_ROWS = 50
       MAX_MESSAGE = Scan::MAX_MESSAGE
@@ -17,12 +21,21 @@ module PhComposer
       module_function
 
       # One page of runs in schedule order, beside what is over every run. With `compact`, each run leaves out its
-      # Edge paths and each finding its pipes, counting them, and gives its `index` for `runs.members`. A bad limit or
-      # cursor refuses before the Model is walked.
+      # Edge paths and each finding its pipes, counting them, and gives its `index` for `runs.members`, and the System,
+      # Pipe Type and unreadable rows are left to DETAILS, counted. A bad limit or cursor refuses before the Model is
+      # walked.
       def page(request)
         whole = paged(request, PAGE)
         compact = request.params["compact"]
-        beside = whole.merge("runs" => [], "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS))
+        beside = if compact
+                   whole.reject { |key, _value| PARTS.key?(key) }
+                        .merge("runs" => [], "system_count" => whole.fetch("systems").length,
+                               "type_count" => whole.fetch("types").length)
+                 else
+                   whole.merge("runs" => [], "systems" => named(whole.fetch("systems")),
+                               "types" => named(whole.fetch("types")),
+                               "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS))
+                 end
         budget = [Pages::MAX_PAGE_BYTES - JSON.generate(beside).bytesize, 0].max
         indexed = whole.fetch("runs").each_with_index.map do |row, index|
           [[index], compact ? compact(bound(row), index) : bound(row)]
@@ -50,6 +63,20 @@ module PhComposer
         end
         page, cursor = Pages.bounded(request, MEMBERS, rows, :key => ->(row) { [row.fetch("index")] })
         { "identifier" => identifier, "members" => page, "next_cursor" => cursor, "total" => rows.length }
+      end
+
+      # One page of the schedule's System, Pipe Type or unreadable rows, by id or path, each name cut.
+      def details(request)
+        part = request.params.fetch("part")
+        key = PARTS.fetch(part)
+        rows = named(paged(request, DETAILS).fetch(part)).sort_by { |row| row.fetch(key) }
+        page, cursor = Pages.bounded(request, DETAILS, rows, :key => ->(row) { Array(row.fetch(key)) })
+        { part => page, "next_cursor" => cursor, "total" => rows.length }
+      end
+
+      # Rows with a user-named `name` cut, naming it in `truncated`.
+      def named(rows)
+        rows.map { |row| row.key?("name") ? row.merge(OccurrencePath.bounded_names(row.slice("name"))) : row }
       end
 
       def paged(request, query)

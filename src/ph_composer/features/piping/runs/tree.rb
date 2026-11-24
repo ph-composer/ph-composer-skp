@@ -105,8 +105,9 @@ module PhComposer
             parent_role = PARENT_ROLE[run.role]
             next unless parent_role
 
+            # By identity: a run's Struct hash would walk its pipes and the tree it hangs in.
             run.candidates = run.nodes.flat_map { |node| at.fetch(node) }.select { |other| other.role == parent_role }
-                                .uniq.sort_by(&:identifier)
+                                .uniq(&:object_id).sort_by(&:identifier)
             run.candidates.each { |candidate| candidate.children << run }
             run.parent = run.candidates.first&.identifier
           end

@@ -219,6 +219,40 @@ class PipingScheduleTest < PhComposerTestCase
     assert_equal [256, ["group.name"]], [named.dig("group", "name").length, named.fetch("truncated")]
   end
 
+  # Every compact page and every details page fits one agent reply, whatever the names and however many unreadable
+  # records there are.
+  def test_compact_and_details_pages_fit_one_reply_with_long_names_and_many_unreadable_records
+    the_case
+    invoke("#{PREFIX}.pipe_types.update", "id" => @pt1, "values" => { "name" => "T" * 30_000 },
+                                          "expected_values" => {})
+    @group.name = "G" * 30_000
+    stray = (0...60).map { |index| Sketchup::Edge.new(next_id, point([20, index, 0]), point([21, index, 0])) }
+    stray.each { |edge| edge.set_attribute(STORE.dictionary, STORE.key, "{#{'x' * 2_000}") }
+    @model.entities << piping_group(560, "ppg_STRAYSTRAY01", stray)
+    budget = PhComposer::Pages::REPLY_BYTES
+    compact = query("schedule", "compact" => true, "limit" => 1)
+    assert_operator JSON.generate(compact).bytesize, :<, budget
+    assert_equal [1, 2, 60],
+                 [compact.fetch("system_count"), compact.fetch("type_count"), compact.fetch("unreadable_total")]
+    refute(%w[systems types unreadable].any? { |key| compact.key?(key) })
+    %w[systems types unreadable].each do |part|
+      page = query("schedule.details", "part" => part)
+      assert_operator JSON.generate(page).bytesize, :<, budget, part
+    end
+    types = query("schedule.details", "part" => "types").fetch("types")
+    assert_equal [256, ["name"]], types.find { |row| row.fetch("pipe_type_id") == @pt1 }.values_at("name", "truncated")
+                                       .then { |name, cut| [name.length, cut] }
+    read = []
+    cursor = nil
+    loop do
+      page = query("schedule.details",
+                   { "part" => "unreadable", "limit" => 500 }.merge(cursor ? { "cursor" => cursor } : {}))
+      read.concat(page.fetch("unreadable"))
+      break unless (cursor = page["next_cursor"])
+    end
+    assert_equal 60, read.map { |row| row.fetch("path") }.uniq.length
+  end
+
   def test_pipe_types_list_gives_used_length
     the_case
     rows = query("pipe_types.list").fetch("records")

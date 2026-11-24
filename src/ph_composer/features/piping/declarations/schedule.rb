@@ -85,10 +85,12 @@ module PhComposer
         "recirculation_hours" => Shapes.described(COUNT, "Length-weighted and truncated, as honeybee-ph's " \
                                                          "recirc_hours; 24 with no recirculation pipe."),
         "from_piping" => Shapes.described({ "type" => "boolean" }, "Whether a recirculation pipe sets the two " \
-                                                                   "values above.")
-      })
+                                                                   "values above."),
+        "truncated" => ContextChildren::TRUNCATED
+      }, :optional => ["truncated"])
       TYPE = Shapes.object({ "pipe_type_id" => Shapes::TEXT, "name" => Shapes::TEXT, "used_length_m" => NUMBER,
-                             "line_count" => COUNT })
+                             "line_count" => COUNT, "truncated" => ContextChildren::TRUNCATED },
+                           :optional => ["truncated"])
       UNREADABLE = Shapes.object({ "path" => PATH, "code" => Shapes::TEXT, "message" => Shapes::TEXT })
       RESULT = Shapes.object({
         "runs" => Shapes.list(RUN).merge("description" => "One page of runs in schedule order: by Hot Water " \
@@ -100,8 +102,24 @@ module PhComposer
         "unreadable" => Shapes.list(UNREADABLE).merge("description" => "The first #{SchedulePages::DETAIL_ROWS} " \
                                                                        "group and pipe records that cannot be read; " \
                                                                        "not counted, and each blocks export."),
-        "unreadable_total" => COUNT, "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
-      })
+        "unreadable_total" => COUNT,
+        "system_count" => COUNT.merge("description" => "With compact: how many Systems; " \
+                                                       "#{SchedulePages::DETAILS} pages them."),
+        "type_count" => COUNT.merge("description" => "With compact: how many Pipe Types; " \
+                                                     "#{SchedulePages::DETAILS} pages them."),
+        "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
+      }, :optional => %w[systems types unreadable system_count type_count])
+      DETAILS_PARAMS = Shapes.object({
+        "part" => { "type" => "string", "enum" => SchedulePages::PARTS.keys,
+                    "description" => "systems, types or unreadable: which of the schedule's lists to page." },
+        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+      }, :optional => %w[limit cursor])
+      DETAILS_RESULT = Shapes.object({
+        "systems" => Shapes.list(SYSTEM).merge("description" => "With part systems: System rows by id."),
+        "types" => Shapes.list(TYPE).merge("description" => "With part types: Pipe Type rows by id."),
+        "unreadable" => Shapes.list(UNREADABLE).merge("description" => "With part unreadable: records by path."),
+        "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
+      }, :optional => %w[systems types unreadable])
       LOCATE_PARAMS = Shapes.object({ "edge_paths" => EDGE_PATHS.merge(
         "minItems" => 1, "maxItems" => LOCATE_EDGE_LIMIT,
         "description" => "The pipes of one run, or of one finding, as the schedule reads them."
@@ -110,8 +128,10 @@ module PhComposer
                                       "selected" => COUNT })
       PAGE_PARAMS = Shapes.object({
         "compact" => { "type" => "boolean",
-                       "description" => "Leave out each run's edge_paths and each finding's pipes, counted instead; " \
-                                        "#{SchedulePages::MEMBERS} pages a run's pipes. False when absent." },
+                       "description" => "Leave out each run's edge_paths and each finding's pipes, counted instead, " \
+                                        "and the System, Pipe Type and unreadable rows, which " \
+                                        "#{SchedulePages::DETAILS} pages; #{SchedulePages::MEMBERS} pages a run's " \
+                                        "pipes. Every page then fits one agent reply. False when absent." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
       }, :optional => %w[compact limit cursor])
       MEMBERS_PARAMS = Shapes.object({
@@ -130,6 +150,25 @@ module PhComposer
 
       module_function
 
+      # The parts a compact schedule page leaves out, a bounded page at a time.
+      def install_pages(feature)
+        feature.query(SchedulePages::DETAILS,
+                      :description => "One bounded page of the schedule's System rows, Pipe Type rows or unreadable " \
+                                      "records, each name cut, for a compact read.",
+                      :refuses => PAGE, :params => DETAILS_PARAMS, :result => DETAILS_RESULT,
+                      :examples => [{ "part" => "systems" }, { "part" => "unreadable", "limit" => 20 }]) do |request|
+          SchedulePages.details(request)
+        end
+        feature.query(SchedulePages::MEMBERS,
+                      :description => "One bounded page of one run's pipes in run order, each with its path, or only " \
+                                      "those one of its findings names.",
+                      :refuses => MEMBERS_REFUSES, :params => MEMBERS_PARAMS, :result => MEMBERS_RESULT,
+                      :examples => [{ "identifier" => "pipe_0a1b2c3d4e5f6a7b" },
+                                    { "identifier" => "pipe_0a1b2c3d4e5f6a7b", "finding" => 0 }]) do |request|
+          SchedulePages.members(request)
+        end
+      end
+
       def install(feature)
         feature.query(SchedulePages::PAGE,
                       :description => "One bounded page of hot water piping runs, each with its Hot Water System, " \
@@ -141,14 +180,7 @@ module PhComposer
                       :examples => [{}, { "limit" => 20 }, { "compact" => true }]) do |request|
           SchedulePages.page(request)
         end
-        feature.query(SchedulePages::MEMBERS,
-                      :description => "One bounded page of one run's pipes in run order, each with its path, or only " \
-                                      "those one of its findings names.",
-                      :refuses => MEMBERS_REFUSES, :params => MEMBERS_PARAMS, :result => MEMBERS_RESULT,
-                      :examples => [{ "identifier" => "pipe_0a1b2c3d4e5f6a7b" },
-                                    { "identifier" => "pipe_0a1b2c3d4e5f6a7b", "finding" => 0 }]) do |request|
-          SchedulePages.members(request)
-        end
+        install_pages(feature)
         feature.query(SYSTEMS,
                       :description => "Every Hot Water System's drawn distribution length by role and its " \
                                       "recirculation length, temperature and hours from its recirculation pipes, as " \

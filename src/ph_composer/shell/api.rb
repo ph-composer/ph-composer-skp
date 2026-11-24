@@ -619,7 +619,8 @@ module PhComposer
       { "minor" => 100, "date" => "2026-11-24",
         "change" => "ph_composer.piping adds the schedule: ph_composer.piping.schedule (runs by connection with " \
                     "their parents, lengths and findings, totals, each Hot Water System's distribution and " \
-                    "recirculation and each Pipe Type's used length, with compact), ph_composer.piping.runs.members, " \
+                    "recirculation and each Pipe Type's used length, with compact), " \
+                    "ph_composer.piping.schedule.details, ph_composer.piping.runs.members, " \
                     "ph_composer.piping.systems and its snapshot section, and the view command " \
                     "ph_composer.piping.runs.locate, with the codes " \
                     "piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, " \

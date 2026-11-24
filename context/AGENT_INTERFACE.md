@@ -942,8 +942,8 @@ and pipes `ph_composer.piping.pipes` (`assign` and `clear` over explicit Edges, 
 `piping.group_in_zone` and `piping.group_nested`. The
 [piping assignment walkthrough](../tools/examples/authoring/piping_assignment_walkthrough.rb) creates a group, draws,
 assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
-The bounded read `ph_composer.piping.schedule` (with `compact`, and `ph_composer.piping.runs.members` for one run's
-pipes) walks the Model for runs by connection, their parents, lengths and findings, with totals by role, each Hot Water System's distribution and recirculation (also
+The bounded read `ph_composer.piping.schedule` (with `compact`, `ph_composer.piping.schedule.details` for its System, Pipe
+Type and unreadable rows and `ph_composer.piping.runs.members` for one run's pipes) walks the Model for runs by connection, their parents, lengths and findings, with totals by role, each Hot Water System's distribution and recirculation (also
 `ph_composer.piping.systems`, the snapshot section `ph_composer.piping.piping_systems`) and each Pipe Type's used length,
 which `pipe_types.list` and `pipe_types.all` rows also carry as `used_length_m`. The view command
 `ph_composer.piping.runs.locate` selects a run's pipes through `ph_composer.context.open` and refuses `piping.hidden`.

@@ -1303,9 +1303,11 @@ distribution length by role and its recirculation length, temperature and hours,
 honeybee-ph does (60 and 24 with no recirculation pipe), and one `types` row per Pipe Type with its
 `used_length_m`, which `pipe_types.list` also gives. `ph_composer.piping.systems` reads the `systems`
 rows alone. Identifiers (`pipe_` and a digest) follow the geometry; never store one. Pass `compact`
-true to leave out each run's `edge_paths` and each finding's pipes, counted instead, and page one run's
-pipes with `ph_composer.piping.runs.members` (its `identifier`, the row's `index`, and `finding` for
-only a finding's pipes). Pass a run's or a finding's `edge_paths` to `ph_composer.piping.runs.locate`
+true so every page fits one reply: each run leaves out its `edge_paths` and each finding its pipes,
+counted instead, and the `systems`, `types` and `unreadable` rows are left out, counted; page those with
+`ph_composer.piping.schedule.details` (`part` `systems`, `types` or `unreadable`) and one run's pipes
+with `ph_composer.piping.runs.members` (its `identifier`, the row's `index`, and `finding` for only a
+finding's pipes). Pass a run's or a finding's `edge_paths` to `ph_composer.piping.runs.locate`
 to select those pipes, opening their group; a hidden pipe or group refuses `piping.hidden`.
 
 ### Library records
