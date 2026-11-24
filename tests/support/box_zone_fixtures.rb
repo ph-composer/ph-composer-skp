@@ -7,7 +7,7 @@ module BoxZoneFixtures
   Z = PhComposer::Zones
 
   def box(base, letter, name, segment, (x_min, x_max, y_min, y_max), space: true, split_west: false,
-          adiabatic_north: false, net_area_factor: 1.0, weighting_factor: 1.0)
+          adiabatic_north: false, net_area_factor: 1.0, weighting_factor: 1.0, airflows: {})
     children = box_faces(x_min, x_max, y_min, y_max, split_west).each_with_index.map do |(type, normal, loop), index|
       face = Sketchup::Face.new(base + index + 1, {}, :points => loop.map { |xyz| metres(xyz) },
                                                       :normal => Geom::Vector3d.new(*normal))
@@ -27,7 +27,7 @@ module BoxZoneFixtures
       floor = children.shift
       floor_record = segment_record(letter, :net_area_factor => net_area_factor, :weighting_factor => weighting_factor)
       SpaceFixtures::SPACES::FLOOR_SEGMENT_STORE.write(floor, floor_record)
-      children << space_group(base + 50, space_record(letter, :number => "1", :name => name),
+      children << space_group(base + 50, space_record(letter, :number => "1", :name => name, :airflows => airflows),
                               [volume_group(base + 60, volume_record(letter), [floor], :locked => false)])
     end
     group = Sketchup::Group.new(base, Sketchup::Entities.new(children), :name => name)

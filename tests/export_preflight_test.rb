@@ -12,10 +12,11 @@ class ExportPreflightTest < PhComposerTestCase
     @context = API.connect(:session_id => @session.id, :capabilities => ["read"])
   end
 
-  # The findings other than Spaces' warning that the seeded Zone has no Spaces, which never blocks.
+  # The findings other than the warnings that the seeded Zone has no Spaces and no Ventilator, which never block.
   def beside_spaces(outcome)
     findings = outcome.dig("value", "findings")
-    spaces, others = findings.partition { |finding| finding["code"] == "space.zone_without_spaces" }
+    lacking = %w[space.zone_without_spaces mechanical.zone_unventilated]
+    spaces, others = findings.partition { |finding| lacking.include?(finding["code"]) }
     assert(spaces.none? { |finding| finding.fetch("blocks_export") })
     others
   end

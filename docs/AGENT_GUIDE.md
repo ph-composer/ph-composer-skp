@@ -912,6 +912,27 @@ and `mechanical.item_missing` on a slot naming a Ventilator that is not in the M
 Zone written outside these actions can carry; it is the one that blocks export. Assign with
 `replace: true`, or clear, to repair it.
 
+### Mechanical: the Ventilator export
+
+The export writes each served Zone's Room a ventilation system holding its Ventilator, with the
+Ventilator's values and `user_data`. Every Room one Ventilator serves carries the same system
+identifier, the Ventilator's id, and the unit identifier, that id followed by `_unit`, so the HBJSON
+reloads one system for them and PHX makes one device.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`, or the whole `export_preflight`. A
+   `mechanical.item_missing` row blocks the export: a Zone names a Ventilator that is not in the Model.
+   Assign another with `replace: true`, or clear the slot. `mechanical.zone_unventilated` names a Zone
+   written with no Ventilator, `mechanical.item_unserved` a Ventilator that serves no Zone and is not
+   written, `mechanical.zone_left_out` a served Zone in no Building Segment, whose Room the export
+   leaves out, and `mechanical.item_across_segments` a Ventilator whose Zones lie in more than one
+   Building Segment, each Segment's model carrying the whole Ventilator. None of these blocks.
+2. Export, then read back. The result's Mechanical section gives `ventilation`, one row per
+   (Ventilator, Zone) pair: `zone_id`, `zone_name`, `item_id`, `display_name`,
+   `system_identifier`, `unit_identifier` and the unit's values. In the HBJSON, each of those Rooms
+   has `properties.ph_hvac.ventilation_system` with that `identifier` and `sys_type` 1, and its
+   `ventilation_unit` with the unit identifier and the Ventilator's values. The report's
+   "Mechanical: Ventilators" section lists each Ventilator with the Zones it serves.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

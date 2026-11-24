@@ -13,6 +13,7 @@ from .certification_sections import CertificationSection
 from .constructions import ConstructionSection
 from .exporters import Exporter
 from .material_sources import MaterialSourcesSection
+from .mechanical_sections import VentilationSection
 from .model_metadata import ModelMetadataSection
 from .model_sections import FaceSection, ZoneSection
 from .program_sections import ProgramTypeSection, RoomProgramSection, ScheduleSection, SetPointSection
@@ -41,5 +42,6 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     RoomProgramSection(),
     SetPointSection(),
     ShadeSection(),
+    VentilationSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

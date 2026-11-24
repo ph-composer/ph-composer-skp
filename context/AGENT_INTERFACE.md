@@ -887,9 +887,11 @@ the Zones each item serves are a payload on the Zone record that Zones stages: `
 and `serves.clear` take Zone references with `expected_values`, one Undo step each, refusing `mechanical.slot_filled`
 for a second Ventilator unless `replace`; `serves.list` and `serves.all` read each Zone occurrence's slots and
 findings; `ventilators.delete` takes `replacement_id`, an id or null, and without one refuses `reference.in_use`
-naming the Zones. The [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with
-the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators" and "Mechanical: what serves each
-Zone", is the recipe.
+naming the Zones. Since API 1.89 the export writes each served Zone's Room a ventilation system, and
+`ph_composer.mechanical.preflight` lists the Ventilator export's findings before you export. The
+[Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
+[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone" and
+"Mechanical: the Ventilator export", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

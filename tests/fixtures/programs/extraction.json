@@ -109,6 +109,10 @@
       ],
       "version": 1
     },
+    "ph_composer.mechanical.export.ventilation": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.model.export.model": {
       "records": [],
       "version": 1

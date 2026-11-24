@@ -52,9 +52,9 @@ module PhComposer
       EMPTY = SLOTS.to_h { |slot| [slot.key, slot.empty] }.freeze
 
       module Payload
-        # Local to the Model until the Ventilator export claims the namespace and moves it to `required`: a
-        # `required` namespace no contributor claims would block every export of a Zone that carries it.
-        EXPORT_RELEVANCE = "local_only"
+        # The Ventilator export claims the namespace on the Zone record (VentilationExport), so a payload this
+        # version does not understand blocks the export rather than being left out.
+        EXPORT_RELEVANCE = "required"
 
         module_function
 
@@ -99,12 +99,13 @@ module PhComposer
                                            :validate => ->(payload) { problems(payload) })
 
         # A Zone's slots from its `extension_data`, and the stored payload's status: nil for none. A payload this
-        # version does not understand reads as served by nothing; its status says why.
-        def read(extension_data, catalog)
+        # version does not understand reads as served by nothing; its status says why. `installed` is the
+        # extension the catalog holds for the namespace.
+        def read(extension_data, installed)
           envelope = extension_data.fetch(NAMESPACE, nil)
           return [EMPTY.dup, nil] unless envelope
 
-          status = Records::Extension.status(envelope, catalog.extension(NAMESPACE))
+          status = Records::Extension.status(envelope, installed)
           values = status == "understood" ? DeepCopy.call(envelope.fetch("payload")) : EMPTY.dup
           [values, status]
         end

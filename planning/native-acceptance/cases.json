@@ -5427,6 +5427,27 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "M04",
+      "label": "The Ventilator export on the installed RBZ from a fresh process, the panel closed, on the reference model (Zone A and Zone B in one Building Segment, each with its detailed Space): export the base case (ERV-1 serves A, ERV-2 serves B) and the shared case (ERV-1 serves both, ERV-2 serves nothing), reload each exact HBJSON in the pinned honeybee stack and read back both Rooms' ph_hvac.ventilation_system, sys_type 1, its Ventilator's values and identifiers (two systems in the base case, one identifier on both Rooms in the shared case), with mechanical.item_unserved in the shared case's report; move Zone B to No Building Segment and export again (Room B absent, mechanical.zone_left_out); save, fresh-process reopen and re-export give the same HBJSON",
+      "mode": "bridge",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/mechanical/codes.rb",
+        "src/ph_composer/features/mechanical/export.rb",
+        "src/ph_composer/features/mechanical/ventilation_plan.rb",
+        "src/ph_composer/features/mechanical/serves/*",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/mechanical_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/mechanical_records.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "src/ph_composer/vendor/manifest.json"
+      ],
+      "native_control_required": false
     }
   ]
 }
