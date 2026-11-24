@@ -92,6 +92,10 @@ passed); `uv run --group phx pytest tests/python`: "445 passed, 1 skipped" (`tes
 PH_COMPOSER_MAP_DATA unset), the PHX round trips 21 executed, 0 skipped (3 new); `uv run tools/runtime/vendor.py
 --refresh-manifest` "Runtime verified: 211 assets, 8 wheels, 23059331 bytes".
 
+Final head `07e4a7bf` (after both review cycles): `make ci` on Ruby 3.2.2 (chained into its commit) and 2.7.2:
+"Ruby suite, 10 processes: 3437 runs, 48212 assertions, 0 failures, 0 errors, 1 skips"; Python "445 passed, 1
+skipped"; "27412194 bytes installed", 587,806 under the ceiling. `make ui-checks` 39 of 39 scripts exit 0 on this head.
+
 ## UI polish review
 
 Against `ph-composer-ui-polish`: the Pumps table is the shared `EquipmentTable`; the disclosure is the Ventilator's
