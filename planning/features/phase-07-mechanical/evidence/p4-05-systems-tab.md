@@ -3,7 +3,7 @@
 DATE: 2026-11-24
 Register row: [M05](../ACCEPTANCE.md). Stage: [P4-05](../phases/p4-05-systems-tab-and-ventilators-view.md).
 Base: `feat/phase-07-mechanical-p4-04` at `32be127b` (PR #567); after #567 merged as `0e5ea3bb` (identical tree),
-rebased onto `main`. Branch `feat/phase-07-mechanical-p4-05`.
+rebased onto `main`. Branch `feat/phase-07-mechanical-p4-05`, PR #568.
 
 Gate: `make ci` on Ruby 3.2.2 passed at `3b83204f` (the same tree as `2d7d01d4` after the rebase): Ruby suite 3,348
 runs, 44,622 assertions, 0 failures, 1 skip; JavaScript 1,158 passed; Python 379 passed, 1 skipped; hostkit 48 runs;
@@ -161,6 +161,13 @@ runs, "RBZ verified: 733 files, 8780337 bytes, 27012485 bytes installed" (3.2.2)
 (`mechanical_checks.cjs`, `inventories_checks.cjs`, `thermal_bridges_checks.cjs`, `preview_checks.cjs`). The
 Design System was re-synced from this PR's head `8218ed04` (artifact version 34: `bundle.css` rebuilt with the pill
 row, a PillRow card); the later commits change no shared stylesheet.
+
+The whole browser suite, `make ui-checks` (39 scripts), on `a25e58aa`: every check passed but
+`programs_tab_checks.cjs`, whose "the editor keeps its place at 420 x 732" measured the editor from the window top.
+The Mechanical tab lengthens the tab row's second line at 420 px (Thermal Bridges, Mechanical, Library and Export
+with the units and Setup slot need 441 px of the 404 available), so the app header takes three rows there, 111 px
+against main's 79 (main hid the disabled Systems button below 500 px). The check now measures from the top of the
+panes, which is what it means, and passes. The taller header at 420 px is for the MS2 review.
 
 ## Host
 

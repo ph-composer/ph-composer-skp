@@ -896,9 +896,11 @@ its first occurrence by path, none in no Building Segment. A Zone in Detailed ai
 `ph_composer.spaces.all`; a By Program Zone gives its Program's flow, `ventilation_m3h` on its
 `ph_composer.programs.zones` row, as both supply and extract, which is what PHX writes for it; a Zone with no Spaces
 exports no ventilation and adds nothing. `imbalanced` is supply and extract differing by more than a tenth of the
-larger (the rule Spaces once applied per Zone, now per ventilator). Both sums are null, with the reason in `missing`,
-while a By Program Zone's Program cannot work its flow out, and while the Ventilator serves no Zone the export writes.
-Each read takes one Spaces read and one Programs read for all its rows.
+larger (the rule Spaces once applied per Zone, now per ventilator), compared to 6 decimal places of m³/h so a tenth
+exactly is not. Both sums are null, with the reason in `missing`, while a By Program Zone's Program cannot work its
+flow out, and while the Ventilator serves no Zone the export writes. Each read takes one Spaces read and one Programs
+read for all its rows. A Spaces read that refuses leaves every balance null, and a Programs read that refuses leaves
+null only a balance that needs a By Program flow, each with the refusal in `missing`; the Ventilators still read.
 
 **By ventilator.** The Colour-by mode `ph_composer.mechanical.by_ventilator` (`features/mechanical/colour_modes.rb`,
 `entity_kind` `zone`) gives one entry per row of `ph_composer.zones.occurrences`, which leaves Faces out, so an

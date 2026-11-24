@@ -62,7 +62,11 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
   (`features/mechanical/serves.js`). Values kept off the row sit behind a chevron row action, pressed while any is set
   and naming them in its tooltip, that opens a bubble of unit fields applying on Enter or leaving
   (`features/mechanical/optional_values.js`); Pumps and Fans reuse both. Out-of-balance supply and extract are amber
-  on both cells, and an unknown one a dash with the reason in its tooltip.
+  on both cells, and an unknown one a dash with the reason in its tooltip. The picker's draft holds only the Zones the
+  user changed, each with the reference and slot it showed, and a click elsewhere or a scroll keeps a changed draft
+  open. The Ventilators table pins its Tag beside Actions (`stickyWidths`, with the inventories' unpinning overridden
+  in `mechanical.css`) and its search reads Tag, identity, notes and served Zones (`Inventory` `search` and
+  `placeholder`).
 - A tree row with nothing under it keeps the chevron's place but offers nothing to open: give the table `expandable(row)`. A value a row still needs is flagged on its own cell: the enum pill turns amber, reads "?", and its accessible name says what to set ("Set Wall 2 boundary"). There is no separate State column: anything else the row needs (a stale adjacency, a missing Attached zone record) is flagged amber on the cell where it is fixed, with the reason in its tooltip.
 - An enum cell is `select.phc-enum-cell` (`table.css`): a compact 24px pill with a chevron on every screen, neutral unless the value has a colour of its own through `--category-fill`. A value that cannot be chosen there (a paired Surface) is the same pill read only, `span.phc-enum-pill`, with what sets it in its tooltip. Face types and boundary conditions take a light tint of honeybee's display hue, the one the viewport's Colour-by modes draw: `face_words.fill(field, value)` or a `fill` on a `selectFields` choice, never a feature-local palette. Never style a select by its column name.
 - A cell under a header that names a unit holds the number alone: `units.format(..., { showUnit: false })`.

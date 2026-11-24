@@ -891,8 +891,9 @@ Each row's `balance` gives `supply_m3h` and `extract_m3h`, summed over the Zones
 Ventilator to, and `imbalanced` when they differ by more than a tenth of the larger. A Zone with its own
 Space rates gives their sums; a By Program Zone gives its Program's ventilation as both supply and
 extract; a Zone in no Building Segment is not counted. The two sums are null, with the reason in
-`missing`, while a By Program Zone's Program cannot work its flow out, and while the Ventilator serves
-no Zone the export writes.
+`missing`, while a By Program Zone's Program cannot work its flow out, while the Ventilator serves
+no Zone the export writes, and while the Spaces or Programs read they need is refused; the
+Ventilators are read either way.
 
 ### Mechanical: what serves each Zone
 
