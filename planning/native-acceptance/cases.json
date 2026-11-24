@@ -5609,6 +5609,37 @@
       "native_control_required": true
     },
     {
+      "id": "M11",
+      "label": "Fans on the installed RBZ, with Ed at the mouse, on M06's reference model (Zones A and B, each with a Space, in one Building Segment) plus a Zone C with no Space in the same Segment: the Fans subtab after Pumps with its Fans pill; New Fan asks for a Tag and creates F-1 as a user-defined exhaust at 0 m3/h and 0 min/yr with no Power; its Type set to Kitchen hood, Flow to 250, Runtime to 10950 and Power to 120 each send one guarded update, and -5 W is held with its reason, then Escape cancels it; the row's Electric values arrow opens In conditioned space and Operation, the empty Operation reading From runtime (0.18 kh/yr); In conditioned space No fills the arrow and Yes empties it; Operation 2.5 fills it and a blank returns it to the runtime's; F-1's Serves picker assigns Zones A and B, and a second fan F-2, a dryer with Power left blank, on Zone A sits beside it with nothing replaced; Duplicate copies F-1; Columns hides Manufacturer, Model and Notes; F-2 assigned to Zone C shows mechanical.zone_without_spaces in the Export tab, not blocking, whose Locate opens the Fans table narrowed to F-2, then clear that filter and take F-2 off Zone C; mechanical.item_unserved shows for the copy; export, reload the exact HBJSON in the pinned honeybee stack and read Room A's two exhaust ventilators and Room B's one, each under its fan's id with its Tag and values, and F-1's linked type 10 PhSupportiveDevice on Rooms A and B with 120 W and 0.1825 kh, F-2 holding none; then deleting F-1 in use asks for a replacement, and with F-2 leaves both Zones holding F-2 once in one native Undo step, which Undo takes back and Redo restores, and a second Undo takes back; save, fresh-process reopen and re-export give the first export's HBJSON; the panel at 1280 x 800, 420 px and 360 x 520",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/features/mechanical/*",
+        "src/ph_composer/html/unit_tables.js",
+        "src/ph_composer/html/fields.js",
+        "src/ph_composer/core/units.rb",
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/mechanical/catalog_operations.rb",
+        "src/ph_composer/features/mechanical/codes.rb",
+        "src/ph_composer/features/mechanical/fans/*",
+        "src/ph_composer/features/mechanical/fan_plan.rb",
+        "src/ph_composer/features/mechanical/fan_export.rb",
+        "src/ph_composer/features/mechanical/export_zones.rb",
+        "src/ph_composer/features/mechanical/declarations/*",
+        "src/ph_composer/features/mechanical/serves/*",
+        "src/ph_composer/features/mechanical/locate.rb",
+        "src/ph_composer/features/mechanical/preflight.rb",
+        "src/ph_composer/features/spaces/export.rb",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/mechanical_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/mechanical_records.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/vendor/manifest.json"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

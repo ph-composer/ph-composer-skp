@@ -95,6 +95,32 @@ module PhComposer
         end
       end
 
+      # The ids of the exported Zones a Space names, from Spaces' export projection: the export's `spaced` for
+      # `spaceless_findings`.
+      def spaced(reader)
+        reader.section(Spaces::ExportProjection::SECTION).select { |row| row.fetch("space_count").positive? }
+              .map { |row| row.fetch("zone_id") }
+      end
+
+      # The same over the live Model, for the preflight: each Space read under the Zone it names, as the Spaces export
+      # counts them, except one that sits inside a Zone the export leaves out, which leaves with that Zone. `zones` are
+      # the live Zones and `references` each Zone's occurrence reference by id. Read only while an exported Zone's
+      # `slot` names an item. A Spaces read that refuses gives nil, so the plan skips the no-Spaces finding and the
+      # family's rows stand: the Spaces preflight reports that refusal under its own section.
+      def live_spaced(request, zones, references, slot)
+        return [] unless zones.any? { |zone| zone.exported && !zone.slot(slot).empty? }
+
+        gone = zones.reject(&:exported).filter_map { |zone| references[zone.id]&.fetch("zone_path") }
+        request.query(Serves::Reads::SPACES).fetch("spaces").filter_map do |space|
+          path = Array(space.dig("reference", "entity_path"))
+          next if gone.any? { |zone_path| path.length > zone_path.length && path[0, zone_path.length] == zone_path }
+
+          space.dig("zone", "zone_id")
+        end.uniq
+      rescue CodedError
+        nil
+      end
+
       def unserved(id, name)
         Finding.new(:code => Codes::ITEM_UNSERVED, :record_id => id, :blocks => false,
                     :message => "#{name} serves no Zone, so nothing exports it.")

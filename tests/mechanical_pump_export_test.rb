@@ -126,7 +126,7 @@ class MechanicalPumpExportTest < PhComposerTestCase
                                     :values => M::Serves::EMPTY.merge(SLOT => ["pmp_AAAAAAAAAAAA"]))
     refusing = Object.new
     refusing.define_singleton_method(:query) { |_name| raise PhComposer::CodedError.new("record.unreadable", "x") }
-    assert_nil X.spaced(refusing, [zone], {})
+    assert_nil M::ExportZones.live_spaced(refusing, [zone], {}, SLOT)
     pumps = { "pmp_AAAAAAAAAAAA" => { "name" => "P-1", "device_type" => 6 } }
     assert_equal ["mechanical.zone_without_spaces"],
                  M::PumpPlan.call(:zones => [zone], :pumps => pumps, :spaced => []).findings.map(&:code)

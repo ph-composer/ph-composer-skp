@@ -1,23 +1,26 @@
 /* The values an equipment row keeps behind a disclosure (a Ventilator's subsoil heat exchanger and preheated
-   intake temperature, a Pump's internal heat gain values, later a Fan's), so they stay off the row. The row's action
-   opens them in a bubble anchored to it, one field each; the action is pressed while any of them is set, and its
-   tooltip names them, so a closed row still shows they are there. A value is set while it is present and, for a
-   field with a `defaultValue`, differs from it.
+   intake temperature, a Pump's internal heat gain values, a Fan's electric values), so they stay off the row. The
+   row's action opens them in a bubble anchored to it, one field each; the action is pressed while any of them is
+   set, and its tooltip names them, so a closed row still shows they are there. A value is set while it is present
+   and, for a field with a `defaultValue`, differs from it.
 
-   A field is a unit field (`field`, a unit descriptor) or a choice (`choices(record)`, [{ value, label }], whose
-   value "" stands for null and `parse(text)` gives the stored value). A unit field applies on Enter or leaving, a
+   A field is a unit field (`field`, a unit descriptor; `placeholder(record)` is what its empty input shows, such as
+   the value a blank stands for, and describes the field to assistive technology beside its error) or a choice
+   (`choices(record)`, [{ value, label }], whose value "" stands for null and `parse(text)` gives the stored value). A
+   unit field applies on Enter or leaving, a
    choice when it changes, each as its own guarded update (`expected_values` the value it showed), one Undo step; a
    blank removes the value. Escape restores a unit field, and Escape again closes. A refusal stays in the bubble
    beside its field until the next edit.
 
    new OptionalValues(session, send, { action, family, title, unset, fields: [{ key, label, field | choices, parse,
-   defaultValue }], notify }): `title` heads the bubble before the record's name ("Optional values"), `unset` is the
-   summary while none is set ("None set"); with set(record), summary(record), open(record, trigger, layer),
-   refresh(state, records), guard(), dispose(). */
+   placeholder, defaultValue }], notify }): `title` heads the bubble before the record's name ("Optional values"),
+   `unset` is the summary while none is set ("None set"); with set(record), summary(record), open(record, trigger,
+   layer), refresh(state, records), guard(), dispose(). */
 PhComposerUI.define("features/mechanical/optional_values", ["workspace", "unit_field", "units", "unit_preferences",
   "request", "snapshot"],
 function (ui, unitFields, units, preferences, request, snapshot) {
   "use strict";
+  var hints = 0;
 
   function present(value) { return value !== null && value !== undefined; }
   function stored(record, key) { return present(record.values[key]) ? record.values[key] : null; }
@@ -122,6 +125,15 @@ function (ui, unitFields, units, preferences, request, snapshot) {
         onCommit: function (value) { self.apply(held, value); },
         onCancel: function () { held.base = undefined; held.refused = false; } });
       held.unit.input.setAttribute("aria-label", entry.label);
+      if (entry.placeholder) {
+        held.hint = ui.element("span", "", entry.placeholder(record));
+        held.hint.id = "mech-optional-hint-" + (hints += 1);
+        held.hint.setAttribute("id", held.hint.id);
+        held.hint.hidden = true;
+        held.unit.input.placeholder = held.hint.textContent;
+        held.unit.input.setAttribute("aria-describedby", held.unit.error.id + " " + held.hint.id);
+        held.unit.root.appendChild(held.hint);
+      }
       // The value the draft started from is its guard, whatever a snapshot shows meanwhile. A draft that ends
       // without a write (typed back, Escape) drops it, and typing clears a refusal shown on the field.
       held.unit.input.addEventListener("input", function () {
@@ -172,6 +184,10 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       if (self.pending === entry && self.busy()) return;
       // A choice holds no draft, so it always shows the Model's value; its refusal message stays beside it.
       if (entry.entry.choices) { entry.unit.paint(held.record); return; }
+      if (entry.hint) {
+        entry.hint.textContent = entry.entry.placeholder(held.record);
+        entry.unit.input.placeholder = entry.hint.textContent;
+      }
       // A refusal stays on a unit field, with what the user typed, until they edit or cancel it. A field holding no
       // draft follows the snapshot, so its next write is guarded by the value it shows; its message stays.
       if (entry.unit.editing) return;

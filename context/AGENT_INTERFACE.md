@@ -918,12 +918,16 @@ each to every Room it serves as a direct electric heating system, the preflight 
 takes `electric_heater_ids`. Since API 1.96 Pumps are the catalog `ph_composer.mechanical.pumps`, with the same
 operations; they serve Zones through the list slot `pump_ids`, the export adds each to every Room it serves as a
 supportive device, the preflight lists its findings with `mechanical.zone_without_spaces` for a served Zone with no
-Spaces, and `locate` takes `pump_ids`. The
+Spaces, and `locate` takes `pump_ids`. Since API 1.97 Fans are the catalog `ph_composer.mechanical.fans`, with the
+same operations; they serve Zones through the list slot `fan_ids`, the export adds each to every Room it serves as an
+exhaust ventilator and, when the fan has Power, a linked supportive device under the same id, the preflight lists its
+findings with `mechanical.zone_without_spaces`, and `locate` takes `fan_ids`. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
 "Mechanical: the Ventilator export", "Mechanical: hot water", "Mechanical: the hot water export", "Mechanical: heat
 pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mechanical: the Electric Heater export",
-"Mechanical: pumps", "Mechanical: the Pump export" and "Mechanical settings", is the recipe.
+"Mechanical: pumps", "Mechanical: the Pump export", "Mechanical: fans", "Mechanical: the Fan export" and "Mechanical
+settings", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

@@ -53,7 +53,8 @@ module PhComposer
                  :prefix => "hiu", :cardinality => "many"),
         Slot.new(:key => "heater_ids", :kind => ELECTRIC_HEATER_KIND, :label => "Electric Heater", :prefix => "ehr",
                  :cardinality => "many"),
-        Slot.new(:key => "pump_ids", :kind => PUMP_KIND, :label => "Pump", :prefix => "pmp", :cardinality => "many")
+        Slot.new(:key => "pump_ids", :kind => PUMP_KIND, :label => "Pump", :prefix => "pmp", :cardinality => "many"),
+        Slot.new(:key => "fan_ids", :kind => FAN_KIND, :label => "Fan", :prefix => "fan", :cardinality => "many")
       ].freeze
       KEYS = SLOTS.map(&:key).freeze
       EMPTY = SLOTS.to_h { |slot| [slot.key, slot.empty] }.freeze
@@ -101,7 +102,7 @@ module PhComposer
           end
         end
 
-        EXTENSION = Records::Extension.new(:namespace => NAMESPACE, :schema_version => 5,
+        EXTENSION = Records::Extension.new(:namespace => NAMESPACE, :schema_version => 6,
                                            :references => references, :export_relevance => EXPORT_RELEVANCE,
                                            :validate => ->(payload) { problems(payload) })
 

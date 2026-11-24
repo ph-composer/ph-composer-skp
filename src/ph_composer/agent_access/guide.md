@@ -921,8 +921,8 @@ Ventilators are read either way.
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
 `ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
-(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids`, `heater_ids` and
-`pump_ids`, lists, empty for none), the `items` the slots name with their names, and `findings`.
+(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids`, `heater_ids`,
+`pump_ids` and `fan_ids`, lists, empty for none), the `items` the slots name with their names, and `findings`.
 A Zone served by nothing reads the same whether it stores no payload or an emptied one.
 
 Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
@@ -931,9 +931,10 @@ Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
 already has another, the command is refused as `mechanical.slot_filled`, naming that Ventilator, and
 nothing is written; send it again with `replace: true` to replace it. Empty a slot with
 `ph_composer.mechanical.serves.clear`, giving `zones` and `slot`, or leave `slot` out to empty every
-slot. The list slots, `hp_indoor_unit_ids`, `heater_ids` and `pump_ids`, hold several items: assigning adds the item
-beside those the Zone has, and nothing is replaced; to take one item off a Zone, clear with `slot` and
-`item_id`. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
+slot. The list slots, `hp_indoor_unit_ids`, `heater_ids`, `pump_ids` and `fan_ids`, hold several items:
+assigning adds the item beside those the Zone has, and nothing is replaced; to take one item off a Zone,
+clear with `slot` and `item_id`. A slot changed since you read it refuses the whole command as
+`target.changed`. A Zone in a
 locked Group, in a shared component or inside another Zone is refused with Zones' own codes
 (`target.locked`, `target.shared_definition`, `target.wrong_hierarchy`). Each command is one Undo step
 and leaves other features' data on the Zone, such as its Program, as it was. A copied Zone keeps
@@ -1185,6 +1186,52 @@ Building Segment it serves; a Room with no Spaces gives it none.
    `display_name`, the values under the record's names, the exported `ihg_usage_profile` and `digest`.
    In the HBJSON each of those Rooms has an entry in `properties.ph_hvac.supportive_devices` with that
    identifier.
+
+### Mechanical: fans
+
+A Fan is an exhaust fan, kept in the Model as a definition: honeybee-ph's exhaust ventilator with an
+optional electric block. Read `ph_composer.mechanical.fans.list`, a bounded page at a time; names are
+unique. Create one with `ph_composer.mechanical.fans.create`, giving at least `name` (shown as Tag).
+Unless you give them, it is one (`quantity` 1) user-defined exhaust (`exhaust_type` `user_defined`)
+moving `exhaust_flow_rate_m3h` 0 m3/h for `annual_runtime_minutes` 0 minutes a year, in conditioned
+space. `exhaust_type` is `kitchen_hood`, `dryer` or `user_defined`. `norm_energy_demand_w`, its power
+in W while it runs, is absent unless you give it: absent means its electricity is not modelled, and the
+export writes no supportive device for it. `annual_period_operation_khrs` is the kilohours a year that
+supportive device runs; leave it absent to follow the runtime (`annual_runtime_minutes / 60,000`). Each
+row gives that value as `annual_period_operation_khrs_default`. Setting either to null returns it to
+absent. `in_conditioned_space` and the operation are kept whatever the power holds and export only with
+it. A value outside its range is refused as `params.invalid` and nothing is written.
+
+Edit with `ph_composer.mechanical.fans.update`, copying `expected_values` from the values you read;
+`ph_composer.mechanical.fans.duplicate` copies one with its `user_data`. Assign fans to Zones with
+`ph_composer.mechanical.serves.assign`, `slot` `fan_ids`: a Zone may hold several. Clear one with `slot`
+and `item_id`. `ph_composer.mechanical.fans.delete` is refused as `reference.in_use` while a Zone names
+the fan; `replacement_id` puts another in its place on every Zone (once, where the Zone already holds
+it), and `replacement_id: null` takes it off them, each one Undo step. Rows carry the Zones each fan
+serves under `zones`, and `findings`: `mechanical.item_unserved` when it serves no Zone, and
+`mechanical.zone_left_out` for each Zone it serves in no Building Segment.
+
+### Mechanical: the Fan export
+
+The export adds to each served Zone's Room one exhaust ventilator per fan serving it, of the class its
+type names, under the fan's id, with its Tag, quantity, flow (in m3/s), runtime and `user_data`. A fan
+with power also adds a supportive device of type 10 under the same id, with its quantity, power,
+operation and in conditioned space: one Fan, two honeybee-ph objects. Every Room one fan serves carries
+the same objects. PHX reads both through each Room's Spaces and makes one of each per fan in each
+Building Segment it serves; a Room with no Spaces gives it none. PHX 1.59.4 does not copy an exhaust
+ventilator's quantity; it copies the supportive device's.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`; its fan rows name the Fan export as their
+   `section`. `mechanical.item_missing` blocks: a Zone the export writes names a fan that is not in the
+   Model. `mechanical.item_unserved`, `mechanical.zone_left_out`, `mechanical.item_across_segments` and
+   `mechanical.zone_without_spaces` are as for Pumps; none of these blocks. A row about a fan carries
+   `locate` with `fan_ids`.
+2. Export, then read back. The result gives `fans`, one row per (fan, Zone) pair: `identifier`,
+   `display_name`, `exhaust_type`, `quantity`, `exhaust_flow_rate_m3s`, `annual_runtime_minutes`,
+   `digest`, and the supportive device's `norm_energy_demand_w`, `in_conditioned_space`,
+   `annual_period_operation_khrs` and `supportive_device_digest`, each null without power. In the HBJSON
+   each of those Rooms has an entry in `properties.ph_hvac.exhaust_vent_devices` with that identifier,
+   and, with power, one in `properties.ph_hvac.supportive_devices`.
 
 ### Library records
 

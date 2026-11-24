@@ -110,7 +110,7 @@ module PhComposer
         feature.action("#{PREFIX}.assign",
                        :description => "Name an item in one slot of Zones. A single slot holds one item (a " \
                                        "Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids, " \
-                                       "heater_ids or pump_ids, adds it beside the items it holds.",
+                                       "heater_ids, pump_ids or fan_ids, adds it beside the items it holds.",
                        :refuses => ASSIGN, :params => params, :result => result, :participants => [STAGE],
                        :undo_name => "Assign Equipment",
                        :preconditions => ["The item exists.", "Each Zone is writable: no locked Group, shared " \

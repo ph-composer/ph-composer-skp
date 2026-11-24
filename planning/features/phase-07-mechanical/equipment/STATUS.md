@@ -41,7 +41,7 @@ the interview state only.
 ## Next step
 
 D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Electric heaters, pumps and fans were interviewed on
-2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps are built in P4-10; heat pumps were settled
+2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps in P4-10, and fans are built in P4-11; heat pumps were settled
 on 2026-11-15, and appliances are Programs'.
 
 ## Blockers
@@ -63,7 +63,7 @@ on 2026-11-15, and appliances are Programs'.
   round trip in the pumps and fans stages: PHX reads exhaust
   ventilators and supportive devices through a Room's Spaces, so a Zone with no Space loses them
   in METr (PRD, family 6). P4-10 proved it for supportive devices and reports a served Zone with no
-  Spaces as `mechanical.zone_without_spaces`, which Fans reuse.
+  Spaces as `mechanical.zone_without_spaces`, which Fans reuse; P4-11 proved it for exhaust ventilators.
 
 ## Verification
 

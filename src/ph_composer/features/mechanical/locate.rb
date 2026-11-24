@@ -16,7 +16,8 @@ module PhComposer
         HotWater::Heaters::KIND => "hot_water_heater_ids", HotWater::Tanks::KIND => "hot_water_tank_ids",
         HeatPumps::OutdoorEquipment::KIND => "hp_outdoor_equipment_ids",
         HeatPumps::OutdoorUnits::KIND => "hp_outdoor_unit_ids", HeatPumps::IndoorUnits::KIND => "hp_indoor_unit_ids",
-        ElectricHeaters::KIND => "electric_heater_ids", Pumps::KIND => "pump_ids"
+        ElectricHeaters::KIND => "electric_heater_ids", Pumps::KIND => "pump_ids",
+        Fans::KIND => "fan_ids"
       }.freeze
       PARAMS = Shapes.object(
         ITEMS.to_h do |kind, param|
@@ -37,8 +38,8 @@ module PhComposer
                                                    "hot_water_system_ids, hot_water_heater_ids, " \
                                                    "hot_water_tank_ids, hp_outdoor_equipment_ids, " \
                                                    "hp_outdoor_unit_ids, hp_indoor_unit_ids, " \
-                                                   "electric_heater_ids or pump_ids; one kind per " \
-                                                   "request), narrowed to " \
+                                                   "electric_heater_ids, pump_ids or fan_ids; one kind " \
+                                                   "per request), narrowed to " \
                                                    "them, or, with none, the Zones tab with zones checked.",
                                    :refuses => %w[session.inactive], :params => PARAMS,
                                    :side_effects => "Opens or raises the panel on the Mechanical or the Zones tab.",

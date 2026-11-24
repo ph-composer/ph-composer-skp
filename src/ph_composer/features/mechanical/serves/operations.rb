@@ -37,8 +37,8 @@ module PhComposer
         end
 
         # Empties `slot`, or every slot when nil, on each target; with `item_id`, takes only that item out of the
-        # slot, which a list slot (several indoor units, heaters or pumps on one Zone) needs. A Zone that stores no
-        # payload is left as it is.
+        # slot, which a list slot (several indoor units, heaters, pumps or fans on one Zone) needs. A Zone that stores
+        # no payload is left as it is.
         def clear(request, proposal, targets:, slot: nil, item_id: nil)
           slot = slot && slot!(slot)
           raise CodedError.new("params.invalid", "item_id needs its slot.") if item_id && slot.nil?

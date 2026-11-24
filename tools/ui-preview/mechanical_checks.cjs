@@ -8,7 +8,9 @@
    then the Electric Heating subtab's Heaters: coverage in percent, a heater added beside a Zone's others, New and
    the delete with clearing; then the Pumps subtab: a type chosen in place, the internal heat gains behind the row's
    disclosure with the profile following the type, Serves beside a Zone's others, New and the delete with clearing;
-   each at the panel's three sizes. Browser evidence; not host acceptance. */
+   then the Fans subtab: a type chosen in place, a blank Power, the electric values behind the row's disclosure with
+   the operation following the runtime, Serves beside a Zone's others, New and the delete with clearing; each at the
+   panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -498,6 +500,87 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
       `Pumps does not scroll sideways at ${width} x ${height}`);
     await page.screenshot({ path: path.join(output, `pumps-${width}x${height}.png`) });
+  }
+
+  step("Fans › Fans: a type in place, a blank Power, the electric values, Serves beside a Zone's others, New, delete");
+  await setPanelSize(page, 1280, 800);
+  await pane.getByRole("tab", { name: "Fans", exact: true }).click();
+  const fanPills = pane.getByRole("group", { name: "Fans tables", exact: true });
+  assert.deepEqual(await fanPills.locator("button").allTextContents(), ["Fans"]);
+  const fanTable = pane.locator(".mech-fans");
+  const fanRow = id => fanTable.locator(`[data-row-key='${id}']`);
+  const FHOOD = "fan_Aa11Bb22Cc33", FDRYER = "fan_Dd44Ee55Ff66", FBATH = "fan_Gg77Hh88Ii99";
+  const fans = key => host(`window.previewHost.mechanical.fans[${JSON.stringify(key)}]`);
+  const fanValues = id => host(`window.previewHost.mechanical.fans.fans.filter(r => r.id === ${
+    JSON.stringify(id)})[0].values`);
+  await fanRow(FHOOD).waitFor();
+  assert.equal(await fanRow(FHOOD).locator("[data-record-field='norm_energy_demand_w']").inputValue(), "120");
+  assert.equal(await fanRow(FDRYER).locator("[data-record-field='norm_energy_demand_w']").inputValue(), "",
+    "no Power reads blank");
+  await fanRow(FDRYER).locator("[data-record-field='exhaust_type']").selectOption("user_defined");
+  await page.waitForFunction(id => window.previewHost.mechanical.fans.fans.filter(r => r.id === id)[0]
+    .values.exhaust_type === "user_defined", FDRYER);
+  assert.deepEqual((await sent(PREFIX + "fans.update")).pop().payload.params,
+    { id: FDRYER, values: { exhaust_type: "user_defined" }, expected_values: { exhaust_type: "dryer" } });
+  const hoodPower = fanRow(FHOOD).locator("[data-record-field='norm_energy_demand_w']");
+  await hoodPower.dblclick();
+  await hoodPower.fill("");
+  await hoodPower.press("Enter");
+  await page.waitForFunction(id => window.previewHost.mechanical.fans.fans.filter(r => r.id === id)[0]
+    .values.norm_energy_demand_w === undefined, FHOOD);
+  assert.deepEqual((await sent(PREFIX + "fans.update")).pop().payload.params,
+    { id: FHOOD, values: { norm_energy_demand_w: null }, expected_values: { norm_energy_demand_w: 120 } });
+  await page.screenshot({ path: path.join(output, "fans.png") });
+  assert.equal(await fanRow(FHOOD).getByRole("button", { name: /^Electric values of F-Hood/ })
+    .getAttribute("aria-pressed"), "false", "both at their defaults");
+  assert.equal(await fanRow(FBATH).getByRole("button", { name: /^Electric values of F-Bath/ })
+    .getAttribute("aria-pressed"), "true", "outside the envelope, its operation named");
+  await fanRow(FHOOD).hover();
+  await clickSettled(page, fanRow(FHOOD).getByRole("button", { name: /^Electric values of F-Hood/ }));
+  const fanElectric = page.getByRole("dialog", { name: "Electric values of F-Hood" });
+  const operation = fanElectric.getByRole("textbox", { name: "Operation" });
+  assert.equal(await operation.inputValue(), "", "no operation named: it follows the runtime");
+  assert.equal(await operation.getAttribute("placeholder"), "From runtime (0.18 kh/yr)");
+  await operation.fill("2.5");
+  await operation.press("Enter");
+  await page.waitForFunction(id => window.previewHost.mechanical.fans.fans.filter(r => r.id === id)[0]
+    .values.annual_period_operation_khrs === 2.5, FHOOD);
+  await fanElectric.getByRole("combobox", { name: "In conditioned space" }).selectOption("false");
+  await page.waitForFunction(id => window.previewHost.mechanical.fans.fans.filter(r => r.id === id)[0]
+    .values.in_conditioned_space === false, FHOOD);
+  await page.screenshot({ path: path.join(output, "fans-electric-values.png") });
+  await page.keyboard.press("Escape");
+  await fanElectric.waitFor({ state: "hidden" });
+  await clickSettled(page, fanRow(FBATH).locator(".mech-serves-cell"));
+  const fanPicker = page.getByRole("dialog", { name: "Zones served by F-Bath" });
+  await fanPicker.locator(".mech-zone-row").filter({ hasText: "Apt 1" }).locator("input").check();
+  assert.equal(await fanPicker.getByText("will be replaced").count(), 0, "a list slot replaces nothing");
+  await fanPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
+  await fanPicker.waitFor({ state: "hidden" });
+  assert.deepEqual((await fans("serves")).zon_apt1, [FHOOD, FDRYER, FBATH]);
+  await pane.getByRole("button", { name: "+ New Fan", exact: true }).click();
+  const newFan = page.getByRole("dialog", { name: "New Fan" });
+  await newFan.getByRole("textbox", { name: "Tag", exact: true }).fill("F-4");
+  await newFan.getByRole("button", { name: "Create Fan", exact: true }).click();
+  await newFan.waitFor({ state: "hidden" });
+  const madeFan = (await fans("fans")).filter(row => row.values.name === "F-4")[0].values;
+  assert.deepEqual([madeFan.exhaust_type, madeFan.norm_energy_demand_w], ["user_defined", undefined],
+    "a new fan is a user-defined exhaust with no Power");
+  await fanTable.getByRole("button", { name: "Delete F-Hood", exact: true }).click();
+  const fanDelete = page.getByRole("dialog", { name: /F-Hood$/ });
+  await fanDelete.getByRole("combobox").selectOption("__clear__");
+  await fanDelete.getByRole("button", { name: /delete$/i }).click();
+  await fanDelete.waitFor({ state: "hidden" });
+  assert.equal((await sent(PREFIX + "fans.delete")).pop().payload.params.replacement_id, null);
+  assert.deepEqual((await fans("serves")).zon_apt1, [FDRYER, FBATH], "clearing takes it off its Zones");
+  assert.equal((await fanValues(FDRYER)).exhaust_type, "user_defined");
+
+  step("Fans fits the panel's sizes");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+      `Fans does not scroll sideways at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `fans-${width}x${height}.png`) });
   }
   return `mechanical browser checks passed; screenshots: ${output}`;
 });

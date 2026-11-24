@@ -316,7 +316,7 @@ Hot water flow stays in L/h per m².
 ## Add Ventilators and choose the Zones they serve
 
 1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation**, **Heat Pumps**,
-   **Hot Water**, **Pumps** and **Electric Heating** now, and the pills beneath them pick one table of that system. The
+   **Hot Water**, **Pumps**, **Fans** and **Electric Heating**, and the pills beneath them pick one table of that system. The
    tab remembers the subtab and table you last used on this computer.
 2. **+ New Ventilator** asks for a Tag; every other value starts at its default (0.55 Wh/m³, frost
    protection on below -5 °C, in conditioned space). Edit any value in its cell: Enter or leaving the cell
@@ -376,6 +376,25 @@ Hot water flow stays in L/h per m².
    so assigning one never replaces another. PHX reads a pump through a Room's Spaces, so the Export pane
    warns when a pump serves a Zone with no Spaces.
 5. Deleting a pump that serves Zones asks which pump takes its place on them, or clears it from them.
+
+## Add fans
+
+1. Use **Mechanical > Fans**. Its pill is **Fans**.
+2. **+ New Fan** asks for a Tag. A new fan is one user-defined exhaust moving 0 m³/h for 0 minutes a year,
+   with no Power. Choose its **Type** (kitchen hood, dryer or user-defined) and enter its **Flow** and its
+   **Runtime** in minutes a year.
+3. Enter its **Power** in W to model its electricity; leave Power blank when you do not. A fan with Power
+   exports a second object beside its exhaust: a supportive device drawing that power, so one row gives two
+   honeybee-ph objects. The supportive device takes the fan's Quantity, so a row of three hoods draws three times
+   its Power.
+4. Its electric values sit behind the row's arrow: **In conditioned space** (Yes by default) and the
+   **Operation** in kilohours a year its supportive device runs. Leave Operation blank to follow the
+   runtime: its empty field shows the value the runtime gives (minutes a year over 60,000). Both export
+   only with Power. The arrow is filled while the fan is outside conditioned space or names an Operation.
+5. Click a row's **Serves** cell to choose its Zones, as for a Ventilator. A Zone may have several fans,
+   so assigning one never replaces another. PHX reads a fan through a Room's Spaces, so the Export pane
+   warns when a fan serves a Zone with no Spaces.
+6. Deleting a fan that serves Zones asks which fan takes its place on them, or clears it from them.
 
 ## Add electric heaters
 

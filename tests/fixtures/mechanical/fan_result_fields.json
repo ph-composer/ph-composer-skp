@@ -1,0 +1,19 @@
+{
+  "fans": [
+    "id",
+    "item_id",
+    "zone_id",
+    "zone_name",
+    "display_name",
+    "identifier",
+    "exhaust_type",
+    "quantity",
+    "exhaust_flow_rate_m3s",
+    "annual_runtime_minutes",
+    "norm_energy_demand_w",
+    "in_conditioned_space",
+    "annual_period_operation_khrs",
+    "digest",
+    "supportive_device_digest"
+  ]
+}

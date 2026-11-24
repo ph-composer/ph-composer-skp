@@ -194,7 +194,7 @@ class PhaseOneExportTest < PhComposerTestCase
      PhComposer::Mechanical::VentilationExport::SECTION, PhComposer::Mechanical::HotWaterExport::SECTION,
      PhComposer::Mechanical::HeatPumpExport::SECTION,
      PhComposer::Mechanical::ElectricHeaterExport::SECTION, PhComposer::Mechanical::PumpExport::SECTION,
-     PhComposer::Mechanical::SegmentExport::SECTION]
+     PhComposer::Mechanical::FanExport::SECTION, PhComposer::Mechanical::SegmentExport::SECTION]
   end
 
   def seed_two_boxes
