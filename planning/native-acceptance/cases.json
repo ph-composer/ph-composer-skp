@@ -5503,7 +5503,7 @@
     },
     {
       "id": "M07",
-      "label": "The Hot Water subtab on the installed RBZ, with Ed at the mouse, on M06's reference model (HWS-1 serving Zone A and Zone B with 8 tap points, Tanks T1, T2 and T3, Heaters H-E and H-HP): the Hot Water subtab after Ventilation with its Systems, Heaters and Tanks pills; Systems shows HWS-1's Serves chips, tap points edited in place with a stale edit refused and its draft kept, the Heaters' and Tanks' Tags, recirculation 60 C and 24 h read only and muted, calculation method 2 with its info badge, and with HWS-2 serving Zone B the pooling note beneath the table; HWS-1's delete offers no clearing while Heaters and Tanks name it; Heaters shows the System chosen in place, H-HP's Type changed to monthly in the dialog naming the performance ratio that goes, only the monthly COP and temperature cells live and a paste over an inactive cell refused; Tanks shows Role, Type, the export slot (Tank 1, Tank 2, Buffer tank) and, after adding T4 (storage), No slot left amber; capacity 300 L under SI and 79.3 gal under IP with a draft keeping its unit through a switch; New Heater and New Tank ask for a Tag and a System; Columns hides Manufacturer, Model and Notes on each table; By hot water system from the Systems Serves header colours Zone A and Zone B by their System and leaves an unserved Zone uncoloured; Locate from the Export tab's hot water findings opens the Tanks table narrowed to T4 and the Systems table narrowed to an unserved System; each write one native Undo step; the panel at 1280 x 800, 420 px and 360 x 520",
+      "label": "The Hot Water subtab on the installed RBZ, with Ed at the mouse, on M06's reference model (HWS-1 serving Zone A and Zone B with 8 tap points, Tanks T1, T2 and T3, Heaters H-E and H-HP): the Hot Water subtab after Ventilation with its Systems, Heaters and Tanks pills; Systems shows HWS-1's Serves chips, tap points edited in place with a stale edit refused and its draft kept, the Heaters' and Tanks' Tags, recirculation 60 C and 24 h read only and muted, calculation method 2 with its info badge, and with HWS-2 serving Zone B the pooling note beneath the table; HWS-1's delete offers no clearing while Heaters and Tanks name it; Heaters shows the System chosen in place, coverage in percent (an edit sent as the stored fraction), H-HP's Type changed to monthly in the dialog naming the performance ratio that goes, only the monthly COP and temperature cells live and a paste over an inactive cell refused; Tanks shows Role, Type, the export slot (Tank 1, Tank 2, Buffer tank) and, after adding T4 (storage), No slot left amber; capacity 300 L under SI and 79.3 gal under IP with a draft keeping its unit through a switch; New Heater and New Tank ask for a Tag and a System; Columns hides Manufacturer, Model and Notes on each table; By hot water system from the Systems Serves header colours Zone A and Zone B by their System and leaves an unserved Zone uncoloured; Locate from the Export tab's hot water findings opens the Tanks table narrowed to T4 and the Systems table narrowed to an unserved System; each write one native Undo step; the panel at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",
       "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
       "paths": [
@@ -5516,7 +5516,11 @@
         "src/ph_composer/features/mechanical/preflight.rb",
         "src/ph_composer/features/mechanical/hot_water/*",
         "src/ph_composer/features/mechanical/declarations/*",
-        "src/ph_composer/core/units.rb"
+        "src/ph_composer/core/units.rb",
+        "src/ph_composer/html/inventory.js",
+        "src/ph_composer/html/sections/export.js",
+        "src/ph_composer/features/mechanical/hot_water_export.rb",
+        "src/ph_composer/features/mechanical/export.rb"
       ],
       "native_control_required": true
     }

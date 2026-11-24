@@ -84,14 +84,26 @@ and no sideways scroll on each table at 1280 x 800, 420 x 732 and 360 x 520. Scr
 [Heaters](p4-07/hot-water-heaters.png), [the Type change](p4-07/heater-type-change.png),
 [Tanks under IP](p4-07/hot-water-tanks-ip.png), [Tanks at 360 x 520](p4-07/hot-water-tanks-360x520.png).
 
-Design System re-sync: not needed. No stylesheet in the bundle (`base`, `overlay`, `shell`, `table`, `zones`,
-`library`) changed; the kit changes (`ReplacementForm`'s `allowClear` as a function, the `Inventory`'s `readOnly`
+Design System re-sync: not run, bundle unchanged. `git diff --stat origin/main...HEAD` over the six bundled
+stylesheets (`base`, `overlay`, `shell`, `table`, `zones`, `library`) is empty; the kit changes (`ReplacementForm`'s `allowClear` as a function, the `Inventory`'s `readOnly`
 passthrough to its cell editor, Export grouping a cause by section, the `percent` quantity) are behaviour with no new
 visual state. The feature's own `mechanical.css` gained its cell and note styles.
 
 Not run: anything in SketchUp.
 
 ## Review
+
+UI polish review: the `ph-composer-ui-polish` skill and its patterns reference were loaded before any panel code, and
+the screens were built from the shipped kit (D4-30): the page header's New, the pill row, the kit `Inventory` with
+Columns and column menus, Serves chips and the Zone picker, the shared form dialog for New, Delete and the Type change,
+read-only cells muted with their source in the tooltip, amber only where the user must act (No slot left), an info
+glyph for an information finding, and one muted note under the table for a group of rows. Checked in the preview at
+1280 x 800, 420 x 732 and 360 x 520: no sideways scroll on any of the three tables, the Tag pinned beside Actions above
+900 px, header labels elided with their tooltip, and the dialog within the pane. Changed after looking: wider
+recirculation, method and loss columns so their headers read at 1280. The same rubric went to the Sonnet read and both
+Codex cycles; their UI findings (paste across an inactive cell, a draft losing its field, focus after the Type
+dialog, coverage in percent, a refused Type change kept) are below. The host review of these screens is part of M07 at
+the MS2 sitting.
 
 Sonnet adversarial read before the gate: no P1; 1 P2 and 10 P3. Fixed: a pasted calculation method that was not one
 of the four reached the host as NaN (now read by label or value, else refused), pasted Role and Type read by label, an
