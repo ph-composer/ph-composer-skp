@@ -175,6 +175,11 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
+    "html/features/mechanical/electric_heaters.js": {
+      "bytes": 5403,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
+    },
     "html/features/mechanical/equipment_table.js": {
       "bytes": 18100,
       "mime": "text/javascript; charset=utf-8",
@@ -231,9 +236,9 @@
       "sha256": "4b4938310f8ecd75accd3caa8763d100cd3bf0a7fd39d1ddb15baec3f133bc14"
     },
     "html/features/mechanical/serves.js": {
-      "bytes": 16811,
+      "bytes": 16831,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "78460998d1dbf005948252a4314aa4a5662e068805cb56ea933827bab27796de"
+      "sha256": "2b7599a834e1b21b976985bdd00b58a37989fc399ae15f4641d6632e1968597a"
     },
     "html/features/mechanical/systems.js": {
       "bytes": 2025,
@@ -551,9 +556,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 11430,
+      "bytes": 11498,
       "mime": "text/html; charset=utf-8",
-      "sha256": "3d3b3d33b42f41efdfa3b1801fb1a7fc75f53c299f6a5a290680c6dc7265d3f5"
+      "sha256": "85af469d411dd555764e2fc9110d91079bad64ad13af2792dd9d9b657411c8ab"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -846,9 +851,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1855,
+      "bytes": 1907,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "70ca4a86c70e22e2881a298f705daf80f454c964dc448f68833d9160a2980d58"
+      "sha256": "e9fac701ab8d8d51d86f1e208a7c9c72b5034d0d8badf77c8fc657878a188557"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -871,9 +876,9 @@
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
     },
     "python/ph_composer_translation/contract/mechanical_records.py": {
-      "bytes": 14228,
+      "bytes": 15436,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "f477fcf8b6203d11b630b15ee58c64507c51fbdfddf5c3aea767da710e031e08"
+      "sha256": "4683ce3a6fdebd0dcac84afe901f5fb842e9353163d93fbedb0011c9ee64fc87"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -916,9 +921,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/mechanical_sections.py": {
-      "bytes": 23721,
+      "bytes": 29265,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "44c6a87935bfd467f701258c1df60efe27d264b19432799a4b03629a26ba480c"
+      "sha256": "156fedc2edf3683527d035f3b4f90ce40ed1597b513ea9a05e223269a9b50f4d"
     },
     "python/ph_composer_translation/mechanical_segment_sections.py": {
       "bytes": 6882,

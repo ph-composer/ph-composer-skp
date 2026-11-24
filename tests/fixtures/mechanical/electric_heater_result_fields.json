@@ -1,0 +1,12 @@
+{
+  "electric_heaters": [
+    "id",
+    "item_id",
+    "zone_id",
+    "zone_name",
+    "display_name",
+    "identifier",
+    "percent_coverage",
+    "digest"
+  ]
+}

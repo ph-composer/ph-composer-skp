@@ -6,9 +6,9 @@
    the commit, labelled with what it does: newly checked Zones through serves.assign, then Zones left unchecked
    through serves.clear, each one Undo step. A Zone another item fills refuses the assign with
    mechanical.slot_filled, naming it; the draft stays, and the commit, now "Replace and assign", sends it again with
-   `replace`. A list slot (a Zone's heat pump indoor units) holds several items, so nothing is replaced there and an
-   unchecked Zone loses only this item (serves.clear with `item_id`). Cancel, the close and Escape write nothing; a
-   click elsewhere or a scroll leaves a changed draft open.
+   `replace`. A list slot (a Zone's heat pump indoor units or electric heaters) holds several items, so nothing is
+   replaced there and an unchecked Zone loses only this item (serves.clear with `item_id`). Cancel, the close and
+   Escape write nothing; a click elsewhere or a scroll leaves a changed draft open.
 
    The draft holds only the Zones the user changed, each with the slot it showed then, which is what each write's
    `expected_values` carries; every other row follows the Model as snapshots arrive.

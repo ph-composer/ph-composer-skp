@@ -1593,6 +1593,157 @@ Values:
 }
 ```
 
+### `ph_composer.mechanical.electric_heater`
+
+Electric Heater, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "percent_coverage"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "percent_coverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The share of the heating load it covers, 0 to 1."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "percent_coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction",
+      "description": "The share of the heating load it covers, 0 to 1."
+    }
+  }
+}
+```
+
 ### `ph_composer.mechanical.hot_water_heater`
 
 Hot Water Heater, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
@@ -17705,6 +17856,731 @@ Example params:
 {}
 ```
 
+### `ph_composer.mechanical.electric_heaters.all`
+
+Every Electric Heater with its values, the Zones it serves and its findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.electric_heaters.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "percent_coverage"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "percent_coverage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the heating load it covers, 0 to 1."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "percent_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the heating load it covers, 0 to 1."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.electric_heaters.list`
+
+One bounded page of Electric Heaters in id order, with the Zones each serves and its findings. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^ehr_[A-Za-z0-9]{12}$",
+        "description": "An Electric Heater id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "percent_coverage"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "percent_coverage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the heating load it covers, 0 to 1."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "percent_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the heating load it covers, 0 to 1."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "zones"
+  ]
+}
+```
+
 ### `ph_composer.mechanical.heat_pumps.blended`
 
 The blended air-source heat pump of each exported Building Segment, read-only, in the Phius Heat Pump Performance Estimator's sections (v25.1.2), from the outdoor models whose outdoor units have indoor units serving the Segment's Zones; with the climate it reads and every heat pump finding. Fans and pumps are left out. Owner: `ph_composer.mechanical`.
@@ -23997,7 +24873,8 @@ Result:
             "required": [
               "ventilator_id",
               "hot_water_system_id",
-              "hp_indoor_unit_ids"
+              "hp_indoor_unit_ids",
+              "heater_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -24024,6 +24901,15 @@ Result:
                   "description": "A Heat Pump Indoor Unit."
                 },
                 "description": "Its Heat Pump Indoor Units, empty for none."
+              },
+              "heater_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^ehr_[A-Za-z0-9]{12}$",
+                  "description": "A Electric Heater."
+                },
+                "description": "Its Electric Heaters, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -24051,9 +24937,10 @@ Result:
                   "enum": [
                     "ventilator_id",
                     "hot_water_system_id",
-                    "hp_indoor_unit_ids"
+                    "hp_indoor_unit_ids",
+                    "heater_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
                 },
                 "id": {
                   "type": "string"
@@ -24217,7 +25104,8 @@ Result:
             "required": [
               "ventilator_id",
               "hot_water_system_id",
-              "hp_indoor_unit_ids"
+              "hp_indoor_unit_ids",
+              "heater_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -24244,6 +25132,15 @@ Result:
                   "description": "A Heat Pump Indoor Unit."
                 },
                 "description": "Its Heat Pump Indoor Units, empty for none."
+              },
+              "heater_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^ehr_[A-Za-z0-9]{12}$",
+                  "description": "A Electric Heater."
+                },
+                "description": "Its Electric Heaters, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -24271,9 +25168,10 @@ Result:
                   "enum": [
                     "ventilator_id",
                     "hot_water_system_id",
-                    "hp_indoor_unit_ids"
+                    "hp_indoor_unit_ids",
+                    "heater_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
                 },
                 "id": {
                   "type": "string"
@@ -67603,6 +68501,808 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.electric_heaters.create`
+
+Create one Electric Heater. Unless values give it, it covers the whole heating load (percent_coverage 1.0, honeybee-ph's default), with no manufacturer or model. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Electric Heater. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Electric Heater's.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the heating load it covers, 0 to 1."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "percent_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the heating load it covers, 0 to 1."
+        }
+      },
+      "description": "The new Electric Heater's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "EH-1",
+    "percent_coverage": 0.25,
+    "manufacturer": "Kaltwerk"
+  }
+}
+```
+
+### `ph_composer.mechanical.electric_heaters.delete`
+
+Delete one Electric Heater. While a Zone names it, name a replacement_id, which takes its place in every Zone's heater list (once, where the list already holds it), or null, which takes it out of them; without one it refuses as reference.in_use, naming the Zones. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Electric Heater. Deletes one definition and its metadata, and rewrites the Zones that name it; Undo restores all of them.
+
+Before calling: The Electric Heater exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ehr_[A-Za-z0-9]{12}$",
+      "description": "The Electric Heater to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the heating load it covers, 0 to 1."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the heating load it covers, 0 to 1."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^ehr_[A-Za-z0-9]{12}$",
+      "description": "The Electric Heater that takes this one's place in every Zone's heater list, or null to take it out of them. Needed while a Zone names it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ehr_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ehr_Ab12Cd34Ef56",
+  "replacement_id": "ehr_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.electric_heaters.duplicate`
+
+Duplicate one Electric Heater with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Electric Heater. Creates one definition; user_data is copied.
+
+Before calling: The Electric Heater exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ehr_[A-Za-z0-9]{12}$",
+      "description": "The Electric Heater to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ehr_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.electric_heaters.update`
+
+Edit guarded values of one Electric Heater; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Electric Heater. Updates one definition and preserves its metadata.
+
+Before calling: The Electric Heater exists and is readable. A new name: Its name, trimmed and in any case, is not another Electric Heater's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ehr_[A-Za-z0-9]{12}$",
+      "description": "The Electric Heater to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the heating load it covers, 0 to 1."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "percent_coverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The share of the heating load it covers, 0 to 1."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "percent_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The share of the heating load it covers, 0 to 1."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ehr_Ab12Cd34Ef56",
+  "values": {
+    "percent_coverage": 0.5
+  },
+  "expected_values": {
+    "percent_coverage": 1.0
+  }
+}
+```
+
 ### `ph_composer.mechanical.heat_pumps.indoor_equipment.create`
 
 Create one Heat Pump Indoor Equipment. It holds its Tag, Manufacturer, Model and Notes only. Owner: `ph_composer.mechanical`.
@@ -75232,7 +76932,7 @@ Example params:
 
 ### `ph_composer.mechanical.serves.assign`
 
-Name an item in one slot of Zones. A single slot holds one item (a Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids, adds it beside the items it holds. Owner: `ph_composer.mechanical`.
+Name an item in one slot of Zones. A single slot holds one item (a Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids or heater_ids, adds it beside the items it holds. Owner: `ph_composer.mechanical`.
 
 Undo step: Assign Equipment. Writes each Zone's Serves payload; Programs' assignment is untouched.
 
@@ -75311,6 +77011,15 @@ Params:
                   "description": "A Heat Pump Indoor Unit."
                 },
                 "description": "Its Heat Pump Indoor Units, empty for none."
+              },
+              "heater_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^ehr_[A-Za-z0-9]{12}$",
+                  "description": "A Electric Heater."
+                },
+                "description": "Its Electric Heaters, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -75325,9 +77034,10 @@ Params:
       "enum": [
         "ventilator_id",
         "hot_water_system_id",
-        "hp_indoor_unit_ids"
+        "hp_indoor_unit_ids",
+        "heater_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
     },
     "item_id": {
       "type": "string",
@@ -75366,9 +77076,10 @@ Result:
       "enum": [
         "ventilator_id",
         "hot_water_system_id",
-        "hp_indoor_unit_ids"
+        "hp_indoor_unit_ids",
+        "heater_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids."
     },
     "item_id": {
       "type": "string"
@@ -75478,6 +77189,15 @@ Params:
                   "description": "A Heat Pump Indoor Unit."
                 },
                 "description": "Its Heat Pump Indoor Units, empty for none."
+              },
+              "heater_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^ehr_[A-Za-z0-9]{12}$",
+                  "description": "A Electric Heater."
+                },
+                "description": "Its Electric Heaters, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -75492,7 +77212,8 @@ Params:
       "enum": [
         "ventilator_id",
         "hot_water_system_id",
-        "hp_indoor_unit_ids"
+        "hp_indoor_unit_ids",
+        "heater_ids"
       ],
       "description": "The slot to empty; every slot when absent."
     },
@@ -106713,7 +108434,7 @@ Example params:
 
 ### `ph_composer.mechanical.locate`
 
-Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids, hot_water_tank_ids, hp_outdoor_equipment_ids, hp_outdoor_unit_ids or hp_indoor_unit_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
+Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids, hot_water_tank_ids, hp_outdoor_equipment_ids, hp_outdoor_unit_ids, hp_indoor_unit_ids or electric_heater_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
 
 Side effects: Opens or raises the panel on the Mechanical or the Zones tab.
 
@@ -106795,6 +108516,16 @@ Params:
         "description": "A Heat Pump Indoor Unit id."
       },
       "description": "Heat Pump Indoor Units to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "electric_heater_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^ehr_[A-Za-z0-9]{12}$",
+        "description": "A Electric Heater id."
+      },
+      "description": "Electric Heaters to show on the Mechanical tab, their table narrowed to them.",
       "maxItems": 500
     },
     "zones": {
@@ -114470,3 +116201,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.92 | 2026-11-24 | ph_composer.mechanical.locate takes hot_water_system_ids, hot_water_heater_ids and hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's hot water item rows carry it; Hot Water System rows add mechanical.method_not_exported while a piping calculation method is set; the colour mode ph_composer.mechanical.by_hot_water_system is new. |
 | 1.93 | 2026-11-24 | ph_composer.mechanical.heat_pumps.outdoor_equipment, indoor_equipment, outdoor_units and indoor_units are new, each with list, all, a snapshot section, create, update, duplicate and delete; ph_composer.mechanical.heat_pumps.blended and its snapshot section heat_pumps_blended are new. ph_composer.mechanical requires ph_composer.climate. ph_composer.mechanical.zone_serves moves to schema 3 with the hp_indoor_unit_ids list slot, and serves.clear takes item_id to take one item out of a slot. The export section ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, hp_outdoor_unit_ids and hp_indoor_unit_ids. |
 | 1.94 | 2026-11-24 | The Building Segment extension ph_composer.mechanical.segment is new (mechanical_cooling, mech_room_temp_c, summer_bypass_mode, ventilation_system_ach, daytime_window_ach and nighttime_window_ach), saved through ph_composer.zones.save_segment_settings and read by the new ph_composer.mechanical.segment.get. The export section ph_composer.mechanical.export.segments is new, and ph_composer.mechanical.preflight adds its rows: mechanical.segment_cooling_mismatch. |
+| 1.95 | 2026-11-24 | ph_composer.mechanical.electric_heaters is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 4 with the heater_ids list slot. The export section ph_composer.mechanical.export.electric_heaters is new and ph_composer.mechanical.preflight adds its rows; ph_composer.mechanical.locate takes electric_heater_ids. |

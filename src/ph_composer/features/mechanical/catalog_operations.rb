@@ -2,10 +2,10 @@
 
 module PhComposer
   module Mechanical
-    # Persistence every flat equipment catalog shares (hot water's three kinds, heat pumps' four). Each operation
-    # takes the kind and its inputs as named arguments, so a declaration unpacks its params once and any other caller
-    # uses the same operation (context/EXTENSIBILITY.md, "Organization and dependencies"). The engine validates the
-    # proposal, and each action is one Undo step. Names are unique within a kind.
+    # Persistence every flat equipment catalog shares (hot water's three kinds, heat pumps' four, the Electric
+    # Heater). Each operation takes the kind and its inputs as named arguments, so a declaration unpacks its params
+    # once and any other caller uses the same operation (context/EXTENSIBILITY.md, "Organization and dependencies").
+    # The engine validates the proposal, and each action is one Undo step. Names are unique within a kind.
     module CatalogOperations
       module_function
 

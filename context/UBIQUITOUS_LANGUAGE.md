@@ -208,7 +208,7 @@ terms are at the end, marked planned.
 | Term | Meaning |
 | --- | --- |
 | Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps and fans a Phius model needs. Appliances and Phius devices are Equipment Sets instead. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
-| Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation and Hot Water now; Heat Pumps, Pumps, Fans and Electric Heating as each lands) and, beneath it, a pill row picking one table of that system (Ventilators, later Ducting; Systems, Heaters and Tanks, later Piping) |
+| Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation, Heat Pumps, Hot Water and Electric Heating now; Pumps and Fans as each lands) and, beneath it, a pill row picking one table of that system (Ventilators, later Ducting; Systems, Heaters and Tanks, later Piping; Heaters) |
 | Serves | Which Zones an equipment item serves. Shown as Zone chips on the item's row; the Zone picker chooses them, grouped by Building Segment |
 | Tag | An equipment item's name, as its tables show it |
 | Hot Water System | The hot water record that serves Zones, one per Zone, with its tap points. Exported as one honeybee-ph hot water system per served Room, all under the System's id |
@@ -219,6 +219,7 @@ terms are at the end, marked planned.
 | Pooled hot water | Two or more served Hot Water Systems in one Building Segment. WUFI-Passive and METr add their tanks and heaters together and keep one tap point count; a note, not an error |
 | Heat Pump Outdoor Equipment, Heat Pump Indoor Equipment | The outdoor and indoor heat pump models, shown as Equipment · Outdoor and Equipment · Indoor. An outdoor model holds the Phius estimator's inputs (capacities at 17 °F, 47 °F and 95 °F, a COP pair or an HSPF, an EER and SEER or an IEER) and may name its paired indoor model; an indoor model is identity only |
 | Heat Pump Outdoor Unit, Heat Pump Indoor Unit | Installed units, shown as Units · Outdoor and Units · Indoor. An outdoor unit installs an outdoor model; an indoor unit installs an indoor model on an outdoor unit and serves Zones, several to a Zone |
+| Electric Heater | Direct electric resistance heating, one record serving any number of Zones, several to a Zone, shown in Electric Heating › Heaters. Its **Coverage** is the share of the heating load it covers, shown in percent, 100% by default; coverages are not added up or checked. Exported as one honeybee-ph direct electric heating system per served Room, all under the heater's id |
 | Blended heat pump | The one air-source heat pump exported for each Building Segment, on every Room an indoor unit serves, computed by the Phius Heat Pump Performance Estimator's method from the outdoor models whose units serve the Segment's Zones. Read-only in the Blended result pill |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
 

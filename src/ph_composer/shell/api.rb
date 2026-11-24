@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 94
+    MINOR = 95
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -583,7 +583,13 @@ module PhComposer
                     "nighttime_window_ach), saved through ph_composer.zones.save_segment_settings and read by the " \
                     "new ph_composer.mechanical.segment.get. The export section " \
                     "ph_composer.mechanical.export.segments is new, and ph_composer.mechanical.preflight adds its " \
-                    "rows: mechanical.segment_cooling_mismatch." }
+                    "rows: mechanical.segment_cooling_mismatch." },
+      { "minor" => 95, "date" => "2026-11-24",
+        "change" => "ph_composer.mechanical.electric_heaters is new, with list, all, a snapshot section, create, " \
+                    "update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 4 with the " \
+                    "heater_ids list slot. The export section ph_composer.mechanical.export.electric_heaters is new " \
+                    "and ph_composer.mechanical.preflight adds its rows; ph_composer.mechanical.locate takes " \
+                    "electric_heater_ids." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

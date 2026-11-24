@@ -21,6 +21,11 @@ Heat pumps: one record per (Building Segment's blended heat pump, served Zone) p
 Room of one Segment carries an equal object and PHX keys one device. Its four cooling parameter sets take
 identifiers derived from it, so two exports of one Model write equal dictionaries. honeybee-ph reloads heat pumps
 sharing an identifier by keeping the last, so each row records its heat pump's digest, as hot water does.
+
+Electric heating: one record per (Electric Heater, served Zone) pair. Each becomes its own `PhHeatingDirectElectric`
+under the heater's id, with its Tag, coverage and `user_data`, so every Room one heater serves carries an equal object
+and PHX keys one device. A Room holds every heater that serves it. honeybee-ph reloads heating systems sharing an
+identifier by keeping the last, so each row records its heater's digest, as hot water does.
 """
 
 from __future__ import annotations
@@ -36,6 +41,7 @@ from .contract import JSONValue, RecordError
 from .contract.mechanical_records import (
     TANK_SLOTS,
     UNIT_FIELDS,
+    ElectricHeaterRecord,
     HeaterValues,
     HeatPumpRecord,
     HotWaterRecord,
@@ -49,6 +55,9 @@ from .sections import ROOM, Attachment, Inputs, Requirement, Section
 VENTILATION_SECTION_ID = "ph_composer.mechanical.export.ventilation"
 HOT_WATER_SECTION_ID = "ph_composer.mechanical.export.hot_water"
 HEAT_PUMP_SECTION_ID = "ph_composer.mechanical.export.heat_pumps"
+ELECTRIC_HEATER_SECTION_ID = "ph_composer.mechanical.export.electric_heaters"
+#: The honeybee-ph heating type this section writes; a Room's other heating systems belong to other sections.
+DIRECT_ELECTRIC = "PhHeatingDirectElectric"
 ZONES = Requirement(ZONE_SECTION_ID, TranslatedZone)
 #: Balanced ventilation with heat recovery, the only system type PH-Composer writes.
 SYS_TYPE = 1
@@ -502,4 +511,110 @@ def heat_pump_row(item: TranslatedHeatPump) -> dict[str, JSONValue]:
         "segment": record.segment,
         "display_name": record.display_name,
         **heat_pump_fields(item.heat_pump),
+    }
+
+
+# -- Electric heating ---------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class TranslatedElectricHeater:
+    source: ElectricHeaterRecord
+    zone_name: str
+    heater: Any
+
+    @property
+    def zone_id(self) -> str:
+        return self.source.zone_id
+
+
+def electric_heater(record: ElectricHeaterRecord) -> Any:
+    """The pair's direct electric heating system, built fresh so every pair of one heater builds an equal object."""
+    heater = getattr(stack.load("honeybee_phhvac.heating"), DIRECT_ELECTRIC)()
+    heater.identifier, heater.display_name = record.identifier, record.display_name
+    heater.percent_coverage = record.percent_coverage
+    heater.user_data = dict(record.user_data)
+    return heater
+
+
+class ElectricHeaterSection(Section[ElectricHeaterRecord, TranslatedElectricHeater]):
+    id = ELECTRIC_HEATER_SECTION_ID
+    versions = frozenset({1})
+    object_type = TranslatedElectricHeater
+    requires = (ZONES,)
+    attaches = Attachment(ROOM, lambda item: item.zone_id)
+
+    def read(self, raw: Mapping[str, object]) -> ElectricHeaterRecord:
+        return ElectricHeaterRecord.read(raw)
+
+    def translate(self, record: ElectricHeaterRecord, inputs: Inputs) -> TranslatedElectricHeater:
+        zone = inputs.get(ZONES, record.zone_id)
+        return TranslatedElectricHeater(record, zone.source.name, electric_heater(record))
+
+    def attach(self, host: Any, objects: Sequence[TranslatedElectricHeater]) -> None:
+        """A Room holds each heater that serves it, each once, which Ruby's list of heater ids per Zone makes
+        structural."""
+        identifiers = [item.heater.identifier for item in objects]
+        if len(set(identifiers)) != len(identifiers):
+            raise RecordError(f"Room {host.identifier} holds one electric heater twice")
+        for item in objects:
+            host.properties.ph_hvac.add_heating_system(item.heater)
+
+    def result_fields(self, objects: Mapping[str, TranslatedElectricHeater]) -> Mapping[str, JSONValue]:
+        rows: list[JSONValue] = [electric_heater_row(item) for _identifier, item in sorted(objects.items())]
+        return {"electric_heaters": rows}
+
+    def conformance(self, model: Any, fields: Mapping[str, JSONValue]) -> None:
+        """Each reported pair's Room holds a heating system with the row's identifier, coverage and the digest its own
+        heater had as translated; and no Room holds a direct electric heating system the run did not report. Another
+        section's heating systems (a boiler) are not this section's to check."""
+        rooms = {room.identifier: room for room in model.rooms}
+        reported = fields.get("electric_heaters")
+        rows = [item for item in (reported if isinstance(reported, list) else []) if isinstance(item, dict)]
+        named: dict[str, set[str]] = {}
+        for item in rows:
+            room = rooms.get(str(item.get("zone_id")))
+            if room is None:
+                raise ValueError(f"Room {item.get('zone_id')} is not in the model")
+            systems = {system.identifier: system for system in room.properties.ph_hvac.heating_systems}
+            identifier = str(item.get("identifier"))
+            if identifier not in systems:
+                raise ValueError(f"Room {room.identifier} lost electric heater {identifier}")
+            found = electric_heater_fields(systems[identifier])
+            expected = {key: item.get(key) for key in found}
+            if found != expected:
+                raise ValueError(f"Room {room.identifier} electric heater is {found}, the run reported {expected}")
+            named.setdefault(room.identifier, set()).add(identifier)
+        if extra := sorted(
+            room.identifier
+            for room in model.rooms
+            if {
+                system.identifier
+                for system in room.properties.ph_hvac.heating_systems
+                if system.heating_type == DIRECT_ELECTRIC
+            }
+            - named.get(room.identifier, set())
+        ):
+            raise ValueError(f"Room {', '.join(extra)} holds an electric heater the run did not report")
+
+
+def electric_heater_fields(heater: Any) -> dict[str, JSONValue]:
+    """What a row reports of its heater and conformance reads back: its identifier, coverage and the digest of the
+    whole, which carries its type and `user_data`."""
+    return {
+        "identifier": heater.identifier,
+        "percent_coverage": heater.percent_coverage,
+        "digest": digest(heater),
+    }
+
+
+def electric_heater_row(item: TranslatedElectricHeater) -> dict[str, JSONValue]:
+    record = item.source
+    return {
+        "id": record.id,
+        "item_id": record.item_id,
+        "zone_id": record.zone_id,
+        "zone_name": item.zone_name,
+        "display_name": record.display_name,
+        **electric_heater_fields(item.heater),
     }

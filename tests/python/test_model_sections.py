@@ -15,7 +15,12 @@ from ph_composer_translation.constructions import ConstructionSection, Translate
 from ph_composer_translation.contract import RecordError
 from ph_composer_translation.coordinator import translate
 from ph_composer_translation.material_sources import MaterialSourcesSection
-from ph_composer_translation.mechanical_sections import HeatPumpSection, HotWaterSection, VentilationSection
+from ph_composer_translation.mechanical_sections import (
+    ElectricHeaterSection,
+    HeatPumpSection,
+    HotWaterSection,
+    VentilationSection,
+)
 from ph_composer_translation.mechanical_segment_sections import MechanicalSegmentSection
 from ph_composer_translation.model_metadata import ModelMetadataSection
 from ph_composer_translation.model_sections import FaceSection, ZoneSection
@@ -142,6 +147,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             VentilationSection(),
             HotWaterSection(),
             HeatPumpSection(),
+            ElectricHeaterSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -180,6 +186,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             VentilationSection(),
             HotWaterSection(),
             HeatPumpSection(),
+            ElectricHeaterSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -224,6 +231,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             VentilationSection(),
             HotWaterSection(),
             HeatPumpSection(),
+            ElectricHeaterSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -296,6 +304,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             VentilationSection(),
             HotWaterSection(),
             HeatPumpSection(),
+            ElectricHeaterSection(),
             MechanicalSegmentSection(),
         ),
     )
@@ -351,6 +360,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 VentilationSection(),
                 HotWaterSection(),
                 HeatPumpSection(),
+                ElectricHeaterSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -413,6 +423,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 VentilationSection(),
                 HotWaterSection(),
                 HeatPumpSection(),
+                ElectricHeaterSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -449,6 +460,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 VentilationSection(),
                 HotWaterSection(),
                 HeatPumpSection(),
+                ElectricHeaterSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -487,6 +499,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 VentilationSection(),
                 HotWaterSection(),
                 HeatPumpSection(),
+                ElectricHeaterSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
