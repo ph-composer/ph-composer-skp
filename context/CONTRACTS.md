@@ -902,7 +902,8 @@ identifiers and PHX keys one device. Its result rows (`ventilation`: the pair's 
 values) are what `conformance` reads back: each row's Room holds its system with those identifiers, `sys_type` 1 and
 the unit's values, one Ventilator carries one identifier on every Room, and no Room holds a system the run did not
 report. A record value out of range is a `RecordError`, so `object.unavailable` blocks the pair. The same plan answers
-`ph_composer.mechanical.preflight`, after a blocking row for each unreadable Ventilator (`record.unreadable`) and each
+`ph_composer.mechanical.preflight`, after a blocking row for each unreadable Ventilator (`record.unreadable`), each
+Ventilator metadata problem extraction refuses (`Export::MetadataCheck`, `user_data` passed through) and each
 exported Zone whose Serves payload this version does not understand (the claim's `extension.*` code), each finding
 with the code and object the export uses:
 `mechanical.item_missing` blocks (the export refuses with it), `mechanical.item_unserved` and

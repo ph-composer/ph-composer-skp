@@ -189,6 +189,22 @@ class MechanicalExportTest < PhComposerTestCase
 
     completed(metadata(erv1, "ph_composer" => { "x" => 1 }))
     assert_equal "export.blocked", assert_raises(PhComposer::Export::Blocked) { extract }.code
+    assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
+                    ["export.blocked", erv1, true], "the preflight refuses what extraction refuses"
+  end
+
+  # An extension payload on a Ventilator that no contributor exports and that declares itself required.
+  def test_a_required_extension_payload_on_a_ventilator_blocks_the_export_and_the_preflight
+    reference
+    erv1 = @erv.fetch("ERV-1")
+    engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+    store = engine.kind(M::VENTILATOR_KIND).store
+    envelope = { "schema_version" => 1, "payload" => { "x" => 1 }, "references" => [],
+                 "export_relevance" => "required" }
+    store.write(@model, engine.find(M::VENTILATOR_KIND, erv1).merge("extension_data" => { "acme.rating" => envelope }))
+    error = assert_raises(PhComposer::Export::Blocked) { extract }
+    assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
+                    [error.code, erv1, true]
   end
 
   def test_the_privacy_allowlist_admits_only_the_declared_rows_and_the_metadata_guard_passes_user_data

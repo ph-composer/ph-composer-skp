@@ -91,12 +91,16 @@ module PhComposer
       # ---------------------------------------------------------------- the preflight
 
       # The plan's findings over the live Model, each where the export reports it, after what stops the export
-      # before the plan: an unreadable Ventilator, and an exported Zone's Serves payload this version does not
-      # understand. A read that refuses answers one blocking row, since the export would stop on the same cause.
+      # before the plan: an unreadable Ventilator, a Ventilator's metadata the export refuses (a reserved
+      # `user_data` key, an extension payload it cannot leave out), and an exported Zone's Serves payload this
+      # version does not understand. A read that refuses answers one blocking row, since the export would stop on
+      # the same cause.
       def preflight(request)
         records, unreadable = DefinitionLists.read(request.engine, VENTILATOR_KIND,
                                                    request.engine.ids(VENTILATOR_KIND).sort)
         rows = unreadable.map { |row| finding(row.fetch("code"), row.fetch("id"), row.fetch("message"), true) }
+        rows.concat(PhComposer::Export::MetadataCheck.findings(request, records, :section => SECTION,
+                                                                                 :user_data => true))
         zones = Serves::State.zones(request).sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id)
         rows.concat(zones.filter_map { |zone| payload_row(zone) })
         plan = VentilationPlan.call(:zones => zones.map { |zone| plan_zone(zone) },
