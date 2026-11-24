@@ -35,7 +35,8 @@ module PhComposer
 
       def install(feature)
         feature.export_contributor(SECTION, :section_version => 1, :preflight => PREFLIGHT, :requires => [ZONES],
-                                            :result => RESULT, :report => SiteReport.method(:call)) do |reader|
+                                            :result => RESULT, :report => SiteReport.method(:call),
+                                            :projection => method(:readings)) do |reader|
           records(reader)
         end
         feature.query(PREFLIGHT, :description => "Climate export checks: what the Site section writes as unset, " \
@@ -56,6 +57,17 @@ module PhComposer
         climate = stored && Schema::KIND.values(stored)
         SiteRecord.findings(site, climate).each { |code, message| reader.note(code, SiteRecord::ID, message) }
         [SiteRecord.call(site, design, climate)]
+      end
+
+      # What another feature's export section reads of the climate, through `reader.section` (CONTRACTS section 9,
+      # "What other features read"): the monthly mean air temperatures and the two design temperatures, as stored
+      # and in C, each null when not entered. The blended heat pump reads them.
+      def readings(reader)
+        design = snapshot_settings(reader.snapshot, Settings::DESIGN_TEMPERATURES)
+        stored = reader.records(Schema::KIND_ID).first
+        monthly = stored && Schema::KIND.values(stored).dig("monthly", "air_c")
+        { "monthly_air_c" => monthly && DeepCopy.call(monthly), "heating_99_c" => design.fetch("heating_99_c"),
+          "cooling_1_c" => design.fetch("cooling_1_c") }
       end
 
       def snapshot_settings(snapshot, settings)

@@ -2,8 +2,10 @@
    efficiency in both unit systems, the Zone picker with its replace route, By ventilator from the Serves header,
    the optional values, the Columns menu and the record forms; then the Hot Water subtab's Systems, Heaters and
    Tanks: read-only recirculation, the method badge and the pooling note, Serves and By hot water system, a Heater's
-   Type change, litres in US gallons, the export slot, the System delete and New Tank; each at the panel's three
-   sizes. Browser evidence; not host acceptance. */
+   Type change, litres in US gallons, the export slot, the System delete and New Tank; then the Heat Pumps subtab's
+   five pills: capacities in kBtu/h, a rating mode chosen in place, a lacking value, the indoor units grouped by
+   outdoor unit with their list Serves slot and New with two parents, and the Blended result with its copy action;
+   each at the panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -178,7 +180,8 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
   assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c input").count(), 0, "read only");
   assert.match(await systemRow(DHW1).locator(".col-piping_calc_method .mech-cell-badge").getAttribute("aria-label"),
     /pinned honeybee-ph has no field/);
-  assert.match(await pane.locator(".mech-table-note").textContent(), /DHW-1 Central, DHW-2 Retail serve Building Segment Apartments/);
+  assert.match(await systems.locator("xpath=..").locator(".mech-table-note").textContent(),
+    /DHW-1 Central, DHW-2 Retail serve Building Segment Apartments/);
   await page.screenshot({ path: path.join(output, "hot-water-systems.png") });
   const taps = systemRow(DHW1).locator("[data-record-field='number_tap_points']");
   await taps.dblclick();
@@ -275,6 +278,93 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
       assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
         `Hot Water ${pill} does not scroll sideways at ${width} x ${height}`);
       await page.screenshot({ path: path.join(output, `hot-water-${pill.toLowerCase()}-${width}x${height}.png`) });
+    }
+  }
+
+  step("Heat Pumps › Equipment · Outdoor: capacities in kBtu/h under IP, a rating mode in place, a lacking value amber");
+  await setPanelSize(page, 1280, 800);
+  await pane.getByRole("tab", { name: "Heat Pumps" }).click();
+  const hpPills = pane.getByRole("group", { name: "Heat Pumps tables" });
+  assert.deepEqual(await hpPills.locator("button").allTextContents(), ["Equipment · Outdoor", "Equipment · Indoor",
+    "Units · Outdoor", "Units · Indoor", "Blended result"]);
+  const outdoor = pane.locator(".mech-heat-pump-outdoor");
+  const outdoorRow = id => outdoor.locator(`[data-row-key='${id}']`);
+  const ODU_A = "hpo_Aa11Bb22Cc33", ODU_B = "hpo_Dd44Ee55Ff66", ODU_D = "hpo_Jj00Kk11Ll22";
+  const heatPumps = key => host(`window.previewHost.mechanical.heatPumps[${JSON.stringify(key)}]`);
+  await outdoorRow(ODU_A).waitFor();
+  assert.equal(await outdoorRow(ODU_A).locator("[data-record-field='heating_cap_17f_kw']").inputValue(), "6.4");
+  assert.match(await outdoorRow(ODU_B).locator(".col-cop_17f").getAttribute("class"), /mech-inactive/,
+    "an HSPF2 model reads no COP");
+  assert.match(await outdoorRow(ODU_D).locator(".col-heating_cap_17f_kw").getAttribute("class"), /mech-missing/);
+  await page.screenshot({ path: path.join(output, "heat-pumps-outdoor.png") });
+  await page.getByRole("button", { name: "Set display units to IP", exact: true }).click();
+  assert.equal(await outdoorRow(ODU_A).locator("[data-record-field='heating_cap_17f_kw']").inputValue(), "21.8");
+  assert.match(await outdoor.locator("th.col-heating_cap_17f_kw").textContent(), /kBtu\/h/);
+  await page.screenshot({ path: path.join(output, "heat-pumps-outdoor-ip.png") });
+  await page.getByRole("button", { name: "Set display units to SI", exact: true }).click();
+  await outdoorRow(ODU_A).locator(".col-cooling_data select").selectOption("ieer");
+  await page.waitForFunction(id => window.previewHost.mechanical.heatPumps.outdoor_equipment.filter(r => r.id === id)[0]
+    .values.cooling_rating_mode === "ieer", ODU_A);
+  assert.deepEqual((await sent(PREFIX + "heat_pumps.outdoor_equipment.update")).pop().payload.params.values,
+    { cooling_rating_mode: "ieer" });
+  assert.match(await outdoorRow(ODU_A).locator(".col-ieer").getAttribute("class"), /mech-missing/,
+    "IEER is now read, and lacking");
+
+  step("Units · Indoor: grouped by outdoor unit, Serves keeps a Zone's other indoor units");
+  await hpPills.getByRole("button", { name: "Units · Indoor" }).click();
+  const indoor = pane.locator(".mech-heat-pump-indoor-units");
+  const indoorRow = id => indoor.locator(`[data-row-key='${id}']`);
+  const HP32 = "hiu_Pp66Qq77Rr88";
+  await indoorRow(HP32).waitFor();
+  assert.ok((await indoor.locator("tr").allTextContents()).some(text => /HP-1 · ODU-A/.test(text)),
+    "the units sit under their outdoor unit");
+  assert.match(await indoor.locator("xpath=..").locator(".mech-table-note").textContent(), /HP-3\.2 serves no Zone/);
+  await page.screenshot({ path: path.join(output, "heat-pumps-units-indoor.png") });
+  await clickSettled(page, indoorRow(HP32).locator(".mech-serves-cell"));
+  const hpPicker = page.getByRole("dialog", { name: "Zones served by HP-3.2" });
+  await hpPicker.locator(".mech-zone-row").filter({ hasText: "Apt 2" }).locator("input").check();
+  assert.equal(await hpPicker.getByText("will be replaced").count(), 0, "a list slot replaces nothing");
+  await hpPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
+  await hpPicker.waitFor({ state: "hidden" });
+  assert.deepEqual((await heatPumps("serves")).zon_apt2, ["hiu_Dd44Ee55Ff66", HP32]);
+  await clickSettled(page, indoorRow(HP32).locator(".mech-serves-cell"));
+  await hpPicker.locator(".mech-zone-row").filter({ hasText: "Apt 2" }).locator("input").uncheck();
+  await hpPicker.getByRole("button", { name: "Clear 1 Zone", exact: true }).click();
+  await hpPicker.waitFor({ state: "hidden" });
+  const cleared = (await sent(PREFIX + "serves.clear")).pop().payload.params;
+  assert.deepEqual([cleared.slot, cleared.item_id], ["hp_indoor_unit_ids", HP32]);
+  assert.deepEqual((await heatPumps("serves")).zon_apt2, ["hiu_Dd44Ee55Ff66"]);
+  await pane.getByRole("button", { name: "+ New Heat Pump Indoor Unit", exact: true }).click();
+  const newUnit = page.getByRole("dialog", { name: "New Heat Pump Indoor Unit" });
+  await newUnit.getByRole("textbox", { name: "Tag", exact: true }).fill("HP-3.3");
+  await newUnit.getByRole("combobox", { name: "Indoor equipment" }).selectOption("hpi_Jj00Kk11Ll22");
+  await newUnit.getByRole("combobox", { name: "Outdoor unit" }).selectOption("hou_Gg77Hh88Ii99");
+  await newUnit.getByRole("button", { name: "Create Heat Pump Indoor Unit", exact: true }).click();
+  await newUnit.waitFor({ state: "hidden" });
+  assert.equal((await heatPumps("indoor_units")).filter(row => row.values.name === "HP-3.3")[0].values
+    .outdoor_unit_id, "hou_Gg77Hh88Ii99");
+
+  step("Blended result: each Segment in the estimator's sections, and the header copies the rows");
+  await hpPills.getByRole("button", { name: "Blended result" }).click();
+  const blocks = pane.locator(".mech-blend-segment");
+  await blocks.first().waitFor();
+  assert.deepEqual(await blocks.locator(".mech-blend-title").allTextContents(), ["Apartments", "House"]);
+  assert.deepEqual(await blocks.first().locator(".mech-blend-section").allTextContents(), ["Inputs for Energy Model",
+    "Climate Information", "Pumps or Fans", "Performance Data", "Weighted Value Calculations"]);
+  await page.screenshot({ path: path.join(output, "heat-pumps-blended.png"), fullPage: true });
+  await pane.getByRole("button", { name: "Copy the blended result's rows for the Phius estimator" }).click();
+  await page.getByText("Copied the blended result for the Phius estimator.").waitFor();
+
+  step("each Heat Pumps pill fits the panel's sizes");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    for (const pill of ["Equipment · Outdoor", "Equipment · Indoor", "Units · Outdoor", "Units · Indoor",
+      "Blended result"]) {
+      await hpPills.getByRole("button", { name: pill }).click();
+      assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+        `Heat Pumps ${pill} does not scroll sideways at ${width} x ${height}`);
+      const slug = pill.toLowerCase().replace(/[^a-z]+/g, "-");
+      await page.screenshot({ path: path.join(output, `heat-pumps-${slug}-${width}x${height}.png`) });
     }
   }
   return `mechanical browser checks passed; screenshots: ${output}`;

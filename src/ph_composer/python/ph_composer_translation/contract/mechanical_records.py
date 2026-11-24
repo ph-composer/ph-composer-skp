@@ -272,3 +272,73 @@ def optional_whole(value: object, label: str, minimum: int, maximum: int | None)
         bound = f"from {minimum} to {maximum}" if maximum else f"of at least {minimum}"
         raise RecordError(f"{label} must be a whole number {bound}")
     return value
+
+
+# -- Heat pumps ---------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class RecirculationValues:
+    """The blend's recirculation cooling: used only when the blend cools; capacity in kW, airflow in m³/h, the coil's
+    minimum temperature in °C."""
+
+    used: bool
+    percent_coverage: float
+    capacity_kw: float
+    flow_rate_m3_hr: float
+    annual_cop: float
+    min_coil_temp_c: float
+    single_speed: bool
+    flow_rate_variable: bool
+
+    @classmethod
+    def read(cls, raw: object, label: str) -> RecirculationValues:
+        if not isinstance(raw, dict):
+            raise RecordError(f"{label} must be an object")
+        return cls(
+            flag(raw.get("used"), f"{label} used"),
+            fraction(raw.get("percent_coverage"), f"{label} percent_coverage"),
+            non_negative(raw.get("capacity_kw"), f"{label} capacity_kw"),
+            non_negative(raw.get("flow_rate_m3_hr"), f"{label} flow_rate_m3_hr"),
+            non_negative(raw.get("annual_cop"), f"{label} annual_cop"),
+            as_number(raw.get("min_coil_temp_c"), f"{label} min_coil_temp_c"),
+            flag(raw.get("single_speed"), f"{label} single_speed"),
+            flag(raw.get("flow_rate_variable"), f"{label} flow_rate_variable"),
+        )
+
+
+@dataclass(frozen=True)
+class HeatPumpRecord:
+    """One (Building Segment's blended heat pump, Zone) pair: the blend's identifier and name, which every pair of
+    one Segment shares, its COPs at its two rating temperatures and its recirculation cooling, as Ruby worked them
+    out (`HeatPumpPlan`)."""
+
+    id: str
+    zone_id: str
+    segment: str
+    display_name: str
+    system_identifier: str
+    percent_coverage: float
+    cop_1: float
+    ambient_temp_1_c: float
+    cop_2: float
+    ambient_temp_2_c: float
+    cooling: RecirculationValues
+
+    @classmethod
+    def read(cls, raw: Mapping[str, object]) -> HeatPumpRecord:
+        identifier = as_text(raw.get("id"), "heat pump id")
+        label = f"heat pump {identifier}"
+        return cls(
+            identifier,
+            as_text(raw.get("zone_id"), f"{label} zone_id"),
+            as_text(raw.get("segment"), f"{label} segment"),
+            as_text(raw.get("display_name"), f"{label} display_name"),
+            as_text(raw.get("system_identifier"), f"{label} system_identifier"),
+            fraction(raw.get("percent_coverage"), f"{label} percent_coverage"),
+            positive(raw.get("cop_1"), f"{label} cop_1"),
+            as_number(raw.get("ambient_temp_1_c"), f"{label} ambient_temp_1_c"),
+            positive(raw.get("cop_2"), f"{label} cop_2"),
+            as_number(raw.get("ambient_temp_2_c"), f"{label} ambient_temp_2_c"),
+            RecirculationValues.read(raw.get("cooling"), f"{label} cooling"),
+        )

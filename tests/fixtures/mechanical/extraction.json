@@ -91,6 +91,10 @@
       ],
       "version": 1
     },
+    "ph_composer.mechanical.export.heat_pumps": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.mechanical.export.hot_water": {
       "records": [],
       "version": 1

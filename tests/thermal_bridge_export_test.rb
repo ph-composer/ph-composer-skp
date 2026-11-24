@@ -50,7 +50,8 @@ class ThermalBridgeExportTest < PhComposerTestCase
      PhComposer::Climate::SiteExport::SECTION, PhComposer::Shading::ExportSection::SECTION,
      PhComposer::Certification::SegmentExport::SECTION, PhComposer::Programs::AirtightnessExport::SECTION,
      *PhComposer::Programs::ProgramExport::SECTIONS, PhComposer::Mechanical::VentilationExport::SECTION,
-     PhComposer::Mechanical::HotWaterExport::SECTION, X::SECTION]
+     PhComposer::Mechanical::HotWaterExport::SECTION,
+     PhComposer::Mechanical::HeatPumpExport::SECTION, X::SECTION]
   end
 
   # ACCEPTANCE's reference: Zone A spans x 0 to 5 m and Zone B x 5 to 9 m, each 4 m deep and 3 m high, each

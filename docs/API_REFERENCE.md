@@ -2354,6 +2354,856 @@ Values:
 }
 ```
 
+### `ph_composer.mechanical.hp_indoor_equipment`
+
+Heat Pump Indoor Equipment, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    }
+  }
+}
+```
+
+### `ph_composer.mechanical.hp_indoor_unit`
+
+Heat Pump Indoor Unit, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+References: `indoor_equipment_id` names one `ph_composer.mechanical.hp_indoor_equipment`; `outdoor_unit_id` names one `ph_composer.mechanical.hp_outdoor_unit`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "indoor_equipment_id",
+    "outdoor_unit_id",
+    "quantity",
+    "in_conditioned_space"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "indoor_equipment_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+            },
+            "outdoor_unit_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical units this record stands for."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the unit sits inside the thermal envelope."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "indoor_equipment_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+    },
+    "outdoor_unit_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical units this record stands for."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the unit sits inside the thermal envelope."
+    }
+  }
+}
+```
+
+### `ph_composer.mechanical.hp_outdoor_equipment`
+
+Heat Pump Outdoor Equipment, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+References: `paired_indoor_equipment_id` names one `ph_composer.mechanical.hp_indoor_equipment`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "heating_rating_mode",
+    "hspf_version",
+    "seer_version"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "paired_indoor_equipment_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+            },
+            "heating_cap_17f_kw": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "kW",
+              "description": "Heating capacity at 17 F (-8.3 C)."
+            },
+            "heating_cap_47f_kw": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "kW",
+              "description": "Heating capacity at 47 F (8.3 C)."
+            },
+            "heating_rating_mode": {
+              "type": "string",
+              "enum": [
+                "cop_pair",
+                "hspf"
+              ],
+              "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+            },
+            "cop_17f": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "COP at 17 F, read when cop_pair."
+            },
+            "cop_47f": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "COP at 47 F, read when cop_pair."
+            },
+            "hspf_value": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "The HSPF rating, read when hspf."
+            },
+            "hspf_version": {
+              "type": "string",
+              "enum": [
+                "hspf",
+                "hspf2"
+              ],
+              "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+            },
+            "cooling_cap_95f_kw": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "kW",
+              "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+            },
+            "cooling_rating_mode": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "eer_seer",
+                "ieer",
+                null
+              ],
+              "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+            },
+            "eer": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "The EER rating, read when eer_seer."
+            },
+            "seer": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "The SEER rating, read when eer_seer."
+            },
+            "seer_version": {
+              "type": "string",
+              "enum": [
+                "seer",
+                "seer2"
+              ],
+              "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+            },
+            "ieer": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "description": "The IEER rating, read when ieer."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "paired_indoor_equipment_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+    },
+    "heating_cap_17f_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "x-unit": "kW",
+      "description": "Heating capacity at 17 F (-8.3 C)."
+    },
+    "heating_cap_47f_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "x-unit": "kW",
+      "description": "Heating capacity at 47 F (8.3 C)."
+    },
+    "heating_rating_mode": {
+      "type": "string",
+      "enum": [
+        "cop_pair",
+        "hspf"
+      ],
+      "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+    },
+    "cop_17f": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "COP at 17 F, read when cop_pair."
+    },
+    "cop_47f": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "COP at 47 F, read when cop_pair."
+    },
+    "hspf_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "The HSPF rating, read when hspf."
+    },
+    "hspf_version": {
+      "type": "string",
+      "enum": [
+        "hspf",
+        "hspf2"
+      ],
+      "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+    },
+    "cooling_cap_95f_kw": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "x-unit": "kW",
+      "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+    },
+    "cooling_rating_mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "eer_seer",
+        "ieer",
+        null
+      ],
+      "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+    },
+    "eer": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "The EER rating, read when eer_seer."
+    },
+    "seer": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "The SEER rating, read when eer_seer."
+    },
+    "seer_version": {
+      "type": "string",
+      "enum": [
+        "seer",
+        "seer2"
+      ],
+      "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+    },
+    "ieer": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "The IEER rating, read when ieer."
+    }
+  }
+}
+```
+
+### `ph_composer.mechanical.hp_outdoor_unit`
+
+Heat Pump Outdoor Unit, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
+
+References: `outdoor_equipment_id` names one `ph_composer.mechanical.hp_outdoor_equipment`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "outdoor_equipment_id",
+    "quantity",
+    "in_conditioned_space"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "manufacturer": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker; absent when unknown."
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The maker's model; absent when unknown."
+            },
+            "outdoor_equipment_id": {
+              "type": "string",
+              "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many identical units this record stands for."
+            },
+            "in_conditioned_space": {
+              "type": "boolean",
+              "description": "Whether the unit sits inside the thermal envelope."
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "manufacturer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker; absent when unknown."
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The maker's model; absent when unknown."
+    },
+    "outdoor_equipment_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical units this record stands for."
+    },
+    "in_conditioned_space": {
+      "type": "boolean",
+      "description": "Whether the unit sits inside the thermal envelope."
+    }
+  }
+}
+```
+
 ### `ph_composer.mechanical.ventilator`
 
 Ventilator, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
@@ -16855,6 +17705,3320 @@ Example params:
 {}
 ```
 
+### `ph_composer.mechanical.heat_pumps.blended`
+
+The blended air-source heat pump of each exported Building Segment, read-only, in the Phius Heat Pump Performance Estimator's sections (v25.1.2), from the outdoor models whose outdoor units have indoor units serving the Segment's Zones; with the climate it reads and every heat pump finding. Fans and pumps are left out. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "climate",
+    "segments",
+    "findings"
+  ],
+  "properties": {
+    "climate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "reason"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "missing"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "segment",
+          "identifier",
+          "display_name",
+          "zones",
+          "outdoor_unit_ids",
+          "result"
+        ],
+        "properties": {
+          "segment": {
+            "type": "string",
+            "description": "The Building Segment's name."
+          },
+          "identifier": {
+            "type": "string",
+            "description": "The blended heat pump's identifier on every Room it is written to."
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The served Zones it is written to."
+          },
+          "outdoor_unit_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The outdoor units its indoor units name."
+          },
+          "result": {
+            "type": "object",
+            "description": "The estimator's sections: climate (design temperatures in F, monthly means and heating months), devices (each outdoor model's inputs in kBtu/h), weighted (each model's shares and weighted ratings), totals (capacity, COP and input power for cooling and heating at 17 F and 47 F), energy_model (the Inputs for Energy Model) and export (the SI values the HBJSON carries)."
+          }
+        }
+      },
+      "description": "One blend per exported Building Segment with a served Zone, in name order."
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "severity",
+          "message",
+          "blocks_export",
+          "object_id"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about; null for a Building Segment's or the climate's."
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.all`
+
+Every Heat Pump Indoor Equipment record, with its indoor unit count, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.heat_pumps.indoor_equipment.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "unit_count",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable indoor units install it."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.list`
+
+One bounded page of Heat Pump Indoor Equipment records in id order, with its indoor unit count. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hpi_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Indoor Equipment id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "unit_count",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable indoor units install it."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.all`
+
+Every Heat Pump Indoor Unit record, with the Zones each serves and its findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.heat_pumps.indoor_units.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "indoor_equipment_id",
+              "outdoor_unit_id",
+              "quantity",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "indoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                      },
+                      "outdoor_unit_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "indoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+              },
+              "outdoor_unit_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.list`
+
+One bounded page of Heat Pump Indoor Unit records in id order, with the Zones each serves and its findings. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hiu_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Indoor Unit id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "zones",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "indoor_equipment_id",
+              "outdoor_unit_id",
+              "quantity",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "indoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                      },
+                      "outdoor_unit_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "indoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+              },
+              "outdoor_unit_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.all`
+
+Every Heat Pump Outdoor Equipment record, with export readiness (false while it lacks a value the blend needs), its outdoor unit count and findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.heat_pumps.outdoor_equipment.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "unit_count",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "heating_rating_mode",
+              "hspf_version",
+              "seer_version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "paired_indoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                      },
+                      "heating_cap_17f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Heating capacity at 17 F (-8.3 C)."
+                      },
+                      "heating_cap_47f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Heating capacity at 47 F (8.3 C)."
+                      },
+                      "heating_rating_mode": {
+                        "type": "string",
+                        "enum": [
+                          "cop_pair",
+                          "hspf"
+                        ],
+                        "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+                      },
+                      "cop_17f": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "COP at 17 F, read when cop_pair."
+                      },
+                      "cop_47f": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "COP at 47 F, read when cop_pair."
+                      },
+                      "hspf_value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The HSPF rating, read when hspf."
+                      },
+                      "hspf_version": {
+                        "type": "string",
+                        "enum": [
+                          "hspf",
+                          "hspf2"
+                        ],
+                        "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+                      },
+                      "cooling_cap_95f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+                      },
+                      "cooling_rating_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "eer_seer",
+                          "ieer",
+                          null
+                        ],
+                        "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+                      },
+                      "eer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The EER rating, read when eer_seer."
+                      },
+                      "seer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The SEER rating, read when eer_seer."
+                      },
+                      "seer_version": {
+                        "type": "string",
+                        "enum": [
+                          "seer",
+                          "seer2"
+                        ],
+                        "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+                      },
+                      "ieer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The IEER rating, read when ieer."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "paired_indoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+              },
+              "heating_cap_17f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Heating capacity at 17 F (-8.3 C)."
+              },
+              "heating_cap_47f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Heating capacity at 47 F (8.3 C)."
+              },
+              "heating_rating_mode": {
+                "type": "string",
+                "enum": [
+                  "cop_pair",
+                  "hspf"
+                ],
+                "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+              },
+              "cop_17f": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "COP at 17 F, read when cop_pair."
+              },
+              "cop_47f": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "COP at 47 F, read when cop_pair."
+              },
+              "hspf_value": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The HSPF rating, read when hspf."
+              },
+              "hspf_version": {
+                "type": "string",
+                "enum": [
+                  "hspf",
+                  "hspf2"
+                ],
+                "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+              },
+              "cooling_cap_95f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+              },
+              "cooling_rating_mode": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "eer_seer",
+                  "ieer",
+                  null
+                ],
+                "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+              },
+              "eer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The EER rating, read when eer_seer."
+              },
+              "seer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The SEER rating, read when eer_seer."
+              },
+              "seer_version": {
+                "type": "string",
+                "enum": [
+                  "seer",
+                  "seer2"
+                ],
+                "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+              },
+              "ieer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The IEER rating, read when ieer."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable outdoor units install it."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.list`
+
+One bounded page of Heat Pump Outdoor Equipment records in id order, with export readiness (false while it lacks a value the blend needs), its outdoor unit count and findings. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hpo_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Outdoor Equipment id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "unit_count",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "heating_rating_mode",
+              "hspf_version",
+              "seer_version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "paired_indoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                      },
+                      "heating_cap_17f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Heating capacity at 17 F (-8.3 C)."
+                      },
+                      "heating_cap_47f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Heating capacity at 47 F (8.3 C)."
+                      },
+                      "heating_rating_mode": {
+                        "type": "string",
+                        "enum": [
+                          "cop_pair",
+                          "hspf"
+                        ],
+                        "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+                      },
+                      "cop_17f": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "COP at 17 F, read when cop_pair."
+                      },
+                      "cop_47f": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "COP at 47 F, read when cop_pair."
+                      },
+                      "hspf_value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The HSPF rating, read when hspf."
+                      },
+                      "hspf_version": {
+                        "type": "string",
+                        "enum": [
+                          "hspf",
+                          "hspf2"
+                        ],
+                        "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+                      },
+                      "cooling_cap_95f_kw": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "x-unit": "kW",
+                        "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+                      },
+                      "cooling_rating_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "eer_seer",
+                          "ieer",
+                          null
+                        ],
+                        "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+                      },
+                      "eer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The EER rating, read when eer_seer."
+                      },
+                      "seer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The SEER rating, read when eer_seer."
+                      },
+                      "seer_version": {
+                        "type": "string",
+                        "enum": [
+                          "seer",
+                          "seer2"
+                        ],
+                        "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+                      },
+                      "ieer": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "description": "The IEER rating, read when ieer."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "paired_indoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+              },
+              "heating_cap_17f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Heating capacity at 17 F (-8.3 C)."
+              },
+              "heating_cap_47f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Heating capacity at 47 F (8.3 C)."
+              },
+              "heating_rating_mode": {
+                "type": "string",
+                "enum": [
+                  "cop_pair",
+                  "hspf"
+                ],
+                "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+              },
+              "cop_17f": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "COP at 17 F, read when cop_pair."
+              },
+              "cop_47f": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "COP at 47 F, read when cop_pair."
+              },
+              "hspf_value": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The HSPF rating, read when hspf."
+              },
+              "hspf_version": {
+                "type": "string",
+                "enum": [
+                  "hspf",
+                  "hspf2"
+                ],
+                "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+              },
+              "cooling_cap_95f_kw": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "kW",
+                "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+              },
+              "cooling_rating_mode": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "eer_seer",
+                  "ieer",
+                  null
+                ],
+                "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+              },
+              "eer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The EER rating, read when eer_seer."
+              },
+              "seer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The SEER rating, read when eer_seer."
+              },
+              "seer_version": {
+                "type": "string",
+                "enum": [
+                  "seer",
+                  "seer2"
+                ],
+                "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+              },
+              "ieer": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "description": "The IEER rating, read when ieer."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable outdoor units install it."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.all`
+
+Every Heat Pump Outdoor Unit record, with its indoor unit count and findings: none of its indoor units serving a Zone, or Zones in two Building Segments, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.heat_pumps.outdoor_units.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "indoor_unit_count",
+          "findings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "outdoor_equipment_id",
+              "quantity",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "outdoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "outdoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "indoor_unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable indoor units it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.list`
+
+One bounded page of Heat Pump Outdoor Unit records in id order, with its indoor unit count and findings: none of its indoor units serving a Zone, or Zones in two Building Segments. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hou_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Outdoor Unit id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "export_ready",
+          "export_blockers",
+          "indoor_unit_count",
+          "findings"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "outdoor_equipment_id",
+              "quantity",
+              "in_conditioned_space"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "manufacturer": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker; absent when unknown."
+                      },
+                      "model": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The maker's model; absent when unknown."
+                      },
+                      "outdoor_equipment_id": {
+                        "type": "string",
+                        "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many identical units this record stands for."
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean",
+                        "description": "Whether the unit sits inside the thermal envelope."
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "manufacturer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker; absent when unknown."
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The maker's model; absent when unknown."
+              },
+              "outdoor_equipment_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "How many identical units this record stands for."
+              },
+              "in_conditioned_space": {
+                "type": "boolean",
+                "description": "Whether the unit sits inside the thermal envelope."
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether the record can export once it serves something."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "indoor_unit_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many readable indoor units it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
+}
+```
+
 ### `ph_composer.mechanical.hot_water_heaters.all`
 
 Every Hot Water Heater, with export readiness, for the panel snapshot. Owner: `ph_composer.mechanical`.
@@ -19502,7 +23666,7 @@ Example params:
 
 ### `ph_composer.mechanical.preflight`
 
-Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot and Hot Water Systems pooled in one Building Segment. Owner: `ph_composer.mechanical`.
+Mechanical export checks: a Zone naming an item that is not in the Model (blocking), a Zone with no Ventilator or no Hot Water System, an item serving no Zone, a served Zone in no Building Segment, an item serving Zones in two Building Segments, a Tank with no free slot, Hot Water Systems pooled in one Building Segment, and the heat pump blend's: a climate it cannot read, an unpaired unit, an incomplete outdoor model and cooling over 200 kW. Owner: `ph_composer.mechanical`.
 
 Refuses: only the `query` common set.
 
@@ -19715,7 +23879,8 @@ Result:
             "additionalProperties": false,
             "required": [
               "ventilator_id",
-              "hot_water_system_id"
+              "hot_water_system_id",
+              "hp_indoor_unit_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -19733,6 +23898,15 @@ Result:
                 ],
                 "pattern": "^hws_[A-Za-z0-9]{12}$",
                 "description": "Its Hot Water System, null for none."
+              },
+              "hp_indoor_unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^hiu_[A-Za-z0-9]{12}$",
+                  "description": "A Heat Pump Indoor Unit."
+                },
+                "description": "Its Heat Pump Indoor Units, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -19759,9 +23933,10 @@ Result:
                   "type": "string",
                   "enum": [
                     "ventilator_id",
-                    "hot_water_system_id"
+                    "hot_water_system_id",
+                    "hp_indoor_unit_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
                 },
                 "id": {
                   "type": "string"
@@ -19924,7 +24099,8 @@ Result:
             "additionalProperties": false,
             "required": [
               "ventilator_id",
-              "hot_water_system_id"
+              "hot_water_system_id",
+              "hp_indoor_unit_ids"
             ],
             "properties": {
               "ventilator_id": {
@@ -19942,6 +24118,15 @@ Result:
                 ],
                 "pattern": "^hws_[A-Za-z0-9]{12}$",
                 "description": "Its Hot Water System, null for none."
+              },
+              "hp_indoor_unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^hiu_[A-Za-z0-9]{12}$",
+                  "description": "A Heat Pump Indoor Unit."
+                },
+                "description": "Its Heat Pump Indoor Units, empty for none."
               }
             },
             "description": "What serves it, every slot empty when it stores none."
@@ -19968,9 +24153,10 @@ Result:
                   "type": "string",
                   "enum": [
                     "ventilator_id",
-                    "hot_water_system_id"
+                    "hot_water_system_id",
+                    "hp_indoor_unit_ids"
                   ],
-                  "description": "The family slot: ventilator_id, hot_water_system_id."
+                  "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
                 },
                 "id": {
                   "type": "string"
@@ -63300,6 +67486,4110 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.create`
+
+Create one Heat Pump Indoor Equipment. It holds its Tag, Manufacturer, Model and Notes only. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Heat Pump Indoor Equipment. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Heat Pump Indoor Equipment's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        }
+      },
+      "description": "The new Heat Pump Indoor Equipment's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "IDU-W09",
+    "manufacturer": "Kaltwerk"
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.delete`
+
+Delete one Heat Pump Indoor Equipment. While an outdoor model pairs with it or an indoor unit installs it, name a replacement_id, which takes its place; null empties an outdoor model's pairing or a Zone's indoor units, and a unit still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Heat Pump Indoor Equipment. Deletes one definition and its metadata, and rewrites the records and Zones that name it; Undo restores all of them.
+
+Before calling: The Heat Pump Indoor Equipment exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpi_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Equipment to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^hpi_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Equipment that takes this one's place on every record and Zone naming it, or null to empty what may be empty."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpi_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpi_Ab12Cd34Ef56",
+  "replacement_id": "hpi_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.duplicate`
+
+Duplicate one Heat Pump Indoor Equipment with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Heat Pump Indoor Equipment. Creates one definition; user_data is copied.
+
+Before calling: The Heat Pump Indoor Equipment exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpi_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Equipment to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpi_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_equipment.update`
+
+Edit guarded values of one Heat Pump Indoor Equipment; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Heat Pump Indoor Equipment. Updates one definition and preserves its metadata.
+
+Before calling: The Heat Pump Indoor Equipment exists and is readable. A new name is not another Heat Pump Indoor Equipment's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpi_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Equipment to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpi_Ab12Cd34Ef56",
+  "values": {
+    "model": "MSZ-09NA"
+  },
+  "expected_values": {
+    "model": null
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.create`
+
+Create one Heat Pump Indoor Unit. Unless values give them, it is one unit inside the conditioned space. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Heat Pump Indoor Unit. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Heat Pump Indoor Unit's. The record indoor_equipment_id names exists. The record outdoor_unit_id names exists.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "indoor_equipment_id",
+        "outdoor_unit_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "outdoor_unit_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "indoor_equipment_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "outdoor_unit_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "The new Heat Pump Indoor Unit's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "HP-1.1",
+    "indoor_equipment_id": "hpi_Ab12Cd34Ef56",
+    "outdoor_unit_id": "hou_Ab12Cd34Ef56"
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.delete`
+
+Delete one Heat Pump Indoor Unit. While a Zone names it, name a replacement_id, which takes its place; null empties an outdoor model's pairing or a Zone's indoor units, and a unit still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Heat Pump Indoor Unit. Deletes one definition and its metadata, and rewrites the records and Zones that name it; Undo restores all of them.
+
+Before calling: The Heat Pump Indoor Unit exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hiu_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Unit to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "outdoor_unit_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "outdoor_unit_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^hiu_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Unit that takes this one's place on every record and Zone naming it, or null to empty what may be empty."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hiu_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hiu_Ab12Cd34Ef56",
+  "replacement_id": "hiu_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.duplicate`
+
+Duplicate one Heat Pump Indoor Unit with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Heat Pump Indoor Unit. Creates one definition; user_data is copied.
+
+Before calling: The Heat Pump Indoor Unit exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hiu_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Unit to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hiu_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.indoor_units.update`
+
+Edit guarded values of one Heat Pump Indoor Unit; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Heat Pump Indoor Unit. Updates one definition and preserves its metadata.
+
+Before calling: The Heat Pump Indoor Unit exists and is readable. A new name is not another Heat Pump Indoor Unit's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hiu_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Indoor Unit to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "outdoor_unit_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "outdoor_unit_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "outdoor_unit_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_unit record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hiu_Ab12Cd34Ef56",
+  "values": {
+    "quantity": 2
+  },
+  "expected_values": {
+    "quantity": 1
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.create`
+
+Create one Heat Pump Outdoor Equipment. Unless values give them, it is rated by a COP pair, honeybee-ph's 2.5 at 17 F and 47 F, with HSPF2 and SEER2 versions and no cooling; its capacities stay absent until given, and the blend leaves it out until then. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Heat Pump Outdoor Equipment. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Heat Pump Outdoor Equipment's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "paired_indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "heating_cap_17f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 17 F (-8.3 C)."
+                },
+                "heating_cap_47f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 47 F (8.3 C)."
+                },
+                "heating_rating_mode": {
+                  "type": "string",
+                  "enum": [
+                    "cop_pair",
+                    "hspf"
+                  ],
+                  "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+                },
+                "cop_17f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 17 F, read when cop_pair."
+                },
+                "cop_47f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 47 F, read when cop_pair."
+                },
+                "hspf_value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The HSPF rating, read when hspf."
+                },
+                "hspf_version": {
+                  "type": "string",
+                  "enum": [
+                    "hspf",
+                    "hspf2"
+                  ],
+                  "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+                },
+                "cooling_cap_95f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+                },
+                "cooling_rating_mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "eer_seer",
+                    "ieer",
+                    null
+                  ],
+                  "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+                },
+                "eer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The EER rating, read when eer_seer."
+                },
+                "seer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The SEER rating, read when eer_seer."
+                },
+                "seer_version": {
+                  "type": "string",
+                  "enum": [
+                    "seer",
+                    "seer2"
+                  ],
+                  "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+                },
+                "ieer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The IEER rating, read when ieer."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "paired_indoor_equipment_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "heating_cap_17f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 17 F (-8.3 C)."
+        },
+        "heating_cap_47f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 47 F (8.3 C)."
+        },
+        "heating_rating_mode": {
+          "type": "string",
+          "enum": [
+            "cop_pair",
+            "hspf"
+          ],
+          "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+        },
+        "cop_17f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 17 F, read when cop_pair."
+        },
+        "cop_47f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 47 F, read when cop_pair."
+        },
+        "hspf_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The HSPF rating, read when hspf."
+        },
+        "hspf_version": {
+          "type": "string",
+          "enum": [
+            "hspf",
+            "hspf2"
+          ],
+          "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+        },
+        "cooling_cap_95f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+        },
+        "cooling_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "eer_seer",
+            "ieer",
+            null
+          ],
+          "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+        },
+        "eer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The EER rating, read when eer_seer."
+        },
+        "seer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The SEER rating, read when eer_seer."
+        },
+        "seer_version": {
+          "type": "string",
+          "enum": [
+            "seer",
+            "seer2"
+          ],
+          "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+        },
+        "ieer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The IEER rating, read when ieer."
+        }
+      },
+      "description": "The new Heat Pump Outdoor Equipment's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "ODU-A",
+    "heating_cap_17f_kw": 6.4,
+    "heating_cap_47f_kw": 7.3,
+    "cop_17f": 2.4,
+    "cop_47f": 3.9
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.delete`
+
+Delete one Heat Pump Outdoor Equipment. While an outdoor unit installs it, name a replacement_id, which takes its place; null empties an outdoor model's pairing or a Zone's indoor units, and a unit still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Heat Pump Outdoor Equipment. Deletes one definition and its metadata, and rewrites the records and Zones that name it; Undo restores all of them.
+
+Before calling: The Heat Pump Outdoor Equipment exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpo_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Equipment to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "paired_indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "heating_cap_17f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 17 F (-8.3 C)."
+                },
+                "heating_cap_47f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 47 F (8.3 C)."
+                },
+                "heating_rating_mode": {
+                  "type": "string",
+                  "enum": [
+                    "cop_pair",
+                    "hspf"
+                  ],
+                  "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+                },
+                "cop_17f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 17 F, read when cop_pair."
+                },
+                "cop_47f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 47 F, read when cop_pair."
+                },
+                "hspf_value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The HSPF rating, read when hspf."
+                },
+                "hspf_version": {
+                  "type": "string",
+                  "enum": [
+                    "hspf",
+                    "hspf2"
+                  ],
+                  "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+                },
+                "cooling_cap_95f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+                },
+                "cooling_rating_mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "eer_seer",
+                    "ieer",
+                    null
+                  ],
+                  "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+                },
+                "eer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The EER rating, read when eer_seer."
+                },
+                "seer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The SEER rating, read when eer_seer."
+                },
+                "seer_version": {
+                  "type": "string",
+                  "enum": [
+                    "seer",
+                    "seer2"
+                  ],
+                  "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+                },
+                "ieer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The IEER rating, read when ieer."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "paired_indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "heating_cap_17f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 17 F (-8.3 C)."
+        },
+        "heating_cap_47f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 47 F (8.3 C)."
+        },
+        "heating_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "cop_pair",
+            "hspf",
+            null
+          ],
+          "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+        },
+        "cop_17f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 17 F, read when cop_pair."
+        },
+        "cop_47f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 47 F, read when cop_pair."
+        },
+        "hspf_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The HSPF rating, read when hspf."
+        },
+        "hspf_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "hspf",
+            "hspf2",
+            null
+          ],
+          "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+        },
+        "cooling_cap_95f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+        },
+        "cooling_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "eer_seer",
+            "ieer",
+            null
+          ],
+          "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+        },
+        "eer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The EER rating, read when eer_seer."
+        },
+        "seer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The SEER rating, read when eer_seer."
+        },
+        "seer_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "seer",
+            "seer2",
+            null
+          ],
+          "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+        },
+        "ieer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The IEER rating, read when ieer."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^hpo_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Equipment that takes this one's place on every record and Zone naming it, or null to empty what may be empty."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpo_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpo_Ab12Cd34Ef56",
+  "replacement_id": "hpo_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.duplicate`
+
+Duplicate one Heat Pump Outdoor Equipment with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Heat Pump Outdoor Equipment. Creates one definition; user_data is copied.
+
+Before calling: The Heat Pump Outdoor Equipment exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpo_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Equipment to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpo_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_equipment.update`
+
+Edit guarded values of one Heat Pump Outdoor Equipment; a changed expected value refuses and writes nothing. Each rating mode reads only its own values; the other mode's stay stored and are read again when the mode is switched back. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Heat Pump Outdoor Equipment. Updates one definition and preserves its metadata.
+
+Before calling: The Heat Pump Outdoor Equipment exists and is readable. A new name is not another Heat Pump Outdoor Equipment's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hpo_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Equipment to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "paired_indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "heating_cap_17f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 17 F (-8.3 C)."
+        },
+        "heating_cap_47f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 47 F (8.3 C)."
+        },
+        "heating_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "cop_pair",
+            "hspf",
+            null
+          ],
+          "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+        },
+        "cop_17f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 17 F, read when cop_pair."
+        },
+        "cop_47f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 47 F, read when cop_pair."
+        },
+        "hspf_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The HSPF rating, read when hspf."
+        },
+        "hspf_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "hspf",
+            "hspf2",
+            null
+          ],
+          "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+        },
+        "cooling_cap_95f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+        },
+        "cooling_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "eer_seer",
+            "ieer",
+            null
+          ],
+          "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+        },
+        "eer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The EER rating, read when eer_seer."
+        },
+        "seer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The SEER rating, read when eer_seer."
+        },
+        "seer_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "seer",
+            "seer2",
+            null
+          ],
+          "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+        },
+        "ieer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The IEER rating, read when ieer."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "paired_indoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+                },
+                "heating_cap_17f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 17 F (-8.3 C)."
+                },
+                "heating_cap_47f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Heating capacity at 47 F (8.3 C)."
+                },
+                "heating_rating_mode": {
+                  "type": "string",
+                  "enum": [
+                    "cop_pair",
+                    "hspf"
+                  ],
+                  "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+                },
+                "cop_17f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 17 F, read when cop_pair."
+                },
+                "cop_47f": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "COP at 47 F, read when cop_pair."
+                },
+                "hspf_value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The HSPF rating, read when hspf."
+                },
+                "hspf_version": {
+                  "type": "string",
+                  "enum": [
+                    "hspf",
+                    "hspf2"
+                  ],
+                  "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+                },
+                "cooling_cap_95f_kw": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "kW",
+                  "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+                },
+                "cooling_rating_mode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "eer_seer",
+                    "ieer",
+                    null
+                  ],
+                  "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+                },
+                "eer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The EER rating, read when eer_seer."
+                },
+                "seer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The SEER rating, read when eer_seer."
+                },
+                "seer_version": {
+                  "type": "string",
+                  "enum": [
+                    "seer",
+                    "seer2"
+                  ],
+                  "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+                },
+                "ieer": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "description": "The IEER rating, read when ieer."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "paired_indoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_indoor_equipment record."
+        },
+        "heating_cap_17f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 17 F (-8.3 C)."
+        },
+        "heating_cap_47f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Heating capacity at 47 F (8.3 C)."
+        },
+        "heating_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "cop_pair",
+            "hspf",
+            null
+          ],
+          "description": "How heating is rated: cop_pair (COP at 17 F and 47 F) or hspf."
+        },
+        "cop_17f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 17 F, read when cop_pair."
+        },
+        "cop_47f": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "COP at 47 F, read when cop_pair."
+        },
+        "hspf_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The HSPF rating, read when hspf."
+        },
+        "hspf_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "hspf",
+            "hspf2",
+            null
+          ],
+          "description": "Whether hspf_value is an HSPF or an HSPF2 rating."
+        },
+        "cooling_cap_95f_kw": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kW",
+          "description": "Cooling capacity at 95 F (35 C); absent for a heating-only model."
+        },
+        "cooling_rating_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "eer_seer",
+            "ieer",
+            null
+          ],
+          "description": "How cooling is rated: eer_seer, ieer, or null for a heating-only model."
+        },
+        "eer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The EER rating, read when eer_seer."
+        },
+        "seer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The SEER rating, read when eer_seer."
+        },
+        "seer_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "seer",
+            "seer2",
+            null
+          ],
+          "description": "Whether eer and seer are EER and SEER or EER2 and SEER2 ratings."
+        },
+        "ieer": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "description": "The IEER rating, read when ieer."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hpo_Ab12Cd34Ef56",
+  "values": {
+    "cooling_rating_mode": "ieer",
+    "cooling_cap_95f_kw": 28.1,
+    "ieer": 21.4
+  },
+  "expected_values": {
+    "cooling_rating_mode": null
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.create`
+
+Create one Heat Pump Outdoor Unit. Unless values give them, it is one unit outside the conditioned space. Owner: `ph_composer.mechanical`.
+
+Undo step: Create Heat Pump Outdoor Unit. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Heat Pump Outdoor Unit's. The record outdoor_equipment_id names exists.
+
+Refuses: `record.unreadable`, `reference.invalid`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "outdoor_equipment_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "outdoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "outdoor_equipment_id": {
+          "type": "string",
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": "boolean",
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "The new Heat Pump Outdoor Unit's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "HP-1",
+    "outdoor_equipment_id": "hpo_Ab12Cd34Ef56"
+  }
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.delete`
+
+Delete one Heat Pump Outdoor Unit. While an indoor unit names it, name a replacement_id, which takes its place; null empties an outdoor model's pairing or a Zone's indoor units, and a unit still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+
+Undo step: Delete Heat Pump Outdoor Unit. Deletes one definition and its metadata, and rewrites the records and Zones that name it; Undo restores all of them.
+
+Before calling: The Heat Pump Outdoor Unit exists and is readable.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hou_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Unit to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "outdoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "outdoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^hou_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Unit that takes this one's place on every record and Zone naming it, or null to empty what may be empty."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hou_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hou_Ab12Cd34Ef56",
+  "replacement_id": "hou_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.duplicate`
+
+Duplicate one Heat Pump Outdoor Unit with a new id and source derived. Owner: `ph_composer.mechanical`.
+
+Undo step: Duplicate Heat Pump Outdoor Unit. Creates one definition; user_data is copied.
+
+Before calling: The Heat Pump Outdoor Unit exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hou_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Unit to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hou_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.heat_pumps.outdoor_units.update`
+
+Edit guarded values of one Heat Pump Outdoor Unit; a changed expected value refuses and writes nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Edit Heat Pump Outdoor Unit. Updates one definition and preserves its metadata.
+
+Before calling: The Heat Pump Outdoor Unit exists and is readable. A new name is not another Heat Pump Outdoor Unit's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^hou_[A-Za-z0-9]{12}$",
+      "description": "The Heat Pump Outdoor Unit to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "outdoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "manufacturer": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker; absent when unknown."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The maker's model; absent when unknown."
+                },
+                "outdoor_equipment_id": {
+                  "type": "string",
+                  "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "How many identical units this record stands for."
+                },
+                "in_conditioned_space": {
+                  "type": "boolean",
+                  "description": "Whether the unit sits inside the thermal envelope."
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker; absent when unknown."
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The maker's model; absent when unknown."
+        },
+        "outdoor_equipment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of a ph_composer.mechanical.hp_outdoor_equipment record."
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "How many identical units this record stands for."
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the unit sits inside the thermal envelope."
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "hou_Ab12Cd34Ef56",
+  "values": {
+    "quantity": 2
+  },
+  "expected_values": {
+    "quantity": 1
+  }
+}
+```
+
 ### `ph_composer.mechanical.hot_water_heaters.create`
 
 Create one Hot Water Heater. Unless values give them, it is an electric heater covering all the System's hot water, in conditioned space. A monthly heat pump takes honeybee-ph's COP 2.5 at -8.333 C and at 8.333 C; an annual or inside heat pump needs its value. Owner: `ph_composer.mechanical`.
@@ -66825,7 +75115,7 @@ Example params:
 
 ### `ph_composer.mechanical.serves.assign`
 
-Name an item in one slot of Zones. A Ventilator serves a Zone alone. Owner: `ph_composer.mechanical`.
+Name an item in one slot of Zones. A single slot holds one item (a Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids, adds it beside the items it holds. Owner: `ph_composer.mechanical`.
 
 Undo step: Assign Equipment. Writes each Zone's Serves payload; Programs' assignment is untouched.
 
@@ -66895,6 +75185,15 @@ Params:
                 ],
                 "pattern": "^hws_[A-Za-z0-9]{12}$",
                 "description": "Its Hot Water System, null for none."
+              },
+              "hp_indoor_unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^hiu_[A-Za-z0-9]{12}$",
+                  "description": "A Heat Pump Indoor Unit."
+                },
+                "description": "Its Heat Pump Indoor Units, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -66908,9 +75207,10 @@ Params:
       "type": "string",
       "enum": [
         "ventilator_id",
-        "hot_water_system_id"
+        "hot_water_system_id",
+        "hp_indoor_unit_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
     },
     "item_id": {
       "type": "string",
@@ -66948,9 +75248,10 @@ Result:
       "type": "string",
       "enum": [
         "ventilator_id",
-        "hot_water_system_id"
+        "hot_water_system_id",
+        "hp_indoor_unit_ids"
       ],
-      "description": "The family slot: ventilator_id, hot_water_system_id."
+      "description": "The family slot: ventilator_id, hot_water_system_id, hp_indoor_unit_ids."
     },
     "item_id": {
       "type": "string"
@@ -66983,7 +75284,7 @@ Example params:
 
 ### `ph_composer.mechanical.serves.clear`
 
-Empty one slot of Zones, or every slot, so they read as served by nothing. Owner: `ph_composer.mechanical`.
+Empty one slot of Zones, or every slot, so they read as served by nothing; with item_id, take only that item out of the slot. Owner: `ph_composer.mechanical`.
 
 Undo step: Clear Equipment. Writes each Zone's Serves payload; a Zone that stores none is left as it is.
 
@@ -67051,6 +75352,15 @@ Params:
                 ],
                 "pattern": "^hws_[A-Za-z0-9]{12}$",
                 "description": "Its Hot Water System, null for none."
+              },
+              "hp_indoor_unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^hiu_[A-Za-z0-9]{12}$",
+                  "description": "A Heat Pump Indoor Unit."
+                },
+                "description": "Its Heat Pump Indoor Units, empty for none."
               }
             },
             "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
@@ -67064,9 +75374,15 @@ Params:
       "type": "string",
       "enum": [
         "ventilator_id",
-        "hot_water_system_id"
+        "hot_water_system_id",
+        "hp_indoor_unit_ids"
       ],
       "description": "The slot to empty; every slot when absent."
+    },
+    "item_id": {
+      "type": "string",
+      "pattern": "^[a-z]{3}_[A-Za-z0-9]{12}$",
+      "description": "Take only this item out of the slot, which a list slot needs; the slot must be given."
     }
   }
 }
@@ -98280,7 +106596,7 @@ Example params:
 
 ### `ph_composer.mechanical.locate`
 
-Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids or hot_water_tank_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
+Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids, hot_water_tank_ids, hp_outdoor_equipment_ids, hp_outdoor_unit_ids or hp_indoor_unit_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
 
 Side effects: Opens or raises the panel on the Mechanical or the Zones tab.
 
@@ -98332,6 +106648,36 @@ Params:
         "description": "A Hot Water Tank id."
       },
       "description": "Hot Water Tanks to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hp_outdoor_equipment_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hpo_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Outdoor Equipment id."
+      },
+      "description": "Heat Pump Outdoor Equipments to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hp_outdoor_unit_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hou_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Outdoor Unit id."
+      },
+      "description": "Heat Pump Outdoor Units to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hp_indoor_unit_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hiu_[A-Za-z0-9]{12}$",
+        "description": "A Heat Pump Indoor Unit id."
+      },
+      "description": "Heat Pump Indoor Units to show on the Mechanical tab, their table narrowed to them.",
       "maxItems": 500
     },
     "zones": {
@@ -105688,6 +114034,10 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | Code | Meaning |
 | --- | --- |
 | `mechanical.hot_water_pooled` | More than one Hot Water System serves one Building Segment; WUFI-Passive and METr pool their tanks and heaters and keep one tap point count. |
+| `mechanical.hp_climate_missing` | Heat pumps serve Zones, and the Model's climate lacks its monthly mean air temperatures or its two design temperatures, so the blended heat pump is left out. |
+| `mechanical.hp_cooling_over_200kw` | A Building Segment's blended cooling is over 200 kW (682 kBtu/h); PH-Composer exports it as one system and PHX splits it for WUFI-Passive. |
+| `mechanical.hp_equipment_incomplete` | A heat pump outdoor model lacks a value the blend needs, or a Building Segment's models blend to no heating COP, so the blend leaves them out. |
+| `mechanical.hp_unit_unpaired` | A heat pump indoor unit serves no Zone, or an outdoor unit has no indoor unit serving one, so the blend leaves it out. |
 | `mechanical.item_across_segments` | An item serves Zones in more than one Building Segment; each Segment's model carries the whole item. |
 | `mechanical.item_missing` | A Zone's slot names an item that is not in the Model; reassign or clear it. |
 | `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
@@ -106000,3 +114350,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.90 | 2026-11-24 | ph_composer.mechanical.ventilators.all and .list rows gain balance, the airflow balance over the Zones each Ventilator serves, and ph_composer.mechanical requires ph_composer.programs. ph_composer.mechanical.serves rows gain building_segment, the Segment's name. ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a Ventilator or a Zone carry locate. |
 | 1.91 | 2026-11-24 | ph_composer.mechanical.hot_water_systems, hot_water_heaters and hot_water_tanks are new, each with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 2 with the hot_water_system_id slot, and serves rows gain mechanical.zone_no_hot_water. The export section ph_composer.mechanical.export.hot_water is new, and ph_composer.mechanical.preflight adds its rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings. |
 | 1.92 | 2026-11-24 | ph_composer.mechanical.locate takes hot_water_system_ids, hot_water_heater_ids and hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's hot water item rows carry it; Hot Water System rows add mechanical.method_not_exported while a piping calculation method is set; the colour mode ph_composer.mechanical.by_hot_water_system is new. |
+| 1.93 | 2026-11-24 | ph_composer.mechanical.heat_pumps.outdoor_equipment, indoor_equipment, outdoor_units and indoor_units are new, each with list, all, a snapshot section, create, update, duplicate and delete; ph_composer.mechanical.heat_pumps.blended and its snapshot section heat_pumps_blended are new. ph_composer.mechanical requires ph_composer.climate. ph_composer.mechanical.zone_serves moves to schema 3 with the hp_indoor_unit_ids list slot, and serves.clear takes item_id to take one item out of a slot. The export section ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, hp_outdoor_unit_ids and hp_indoor_unit_ids. |

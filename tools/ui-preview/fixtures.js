@@ -1459,6 +1459,80 @@
       solar_losses_w: 0, storage_loss_rate_w_k: 0, storage_capacity_l: 300, standby_losses_w_k: 4,
       standby_fraction: 0.3, room_temp_c: 20, water_temp_c: 60 }, values));
   }
+  function heatPump(id, kind, name, values) {
+    return { id: id, kind: "ph_composer.mechanical." + kind, schema_version: 1, user_data: {}, extension_data: {},
+      extension_status: {}, export_ready: true, export_blockers: [],
+      values: Object.assign({ name: name, notes: "", datasheet_links: [], source: { kind: "manual" } }, values) };
+  }
+  function outdoorModel(id, name, values) {
+    return heatPump(id, "hp_outdoor_equipment", name, Object.assign({ heating_rating_mode: "cop_pair", cop_17f: 2.5,
+      cop_47f: 2.5, hspf_version: "hspf2", seer_version: "seer2" }, values));
+  }
+  function indoorUnit(id, name, outdoor, model) {
+    return heatPump(id, "hp_indoor_unit", name, { indoor_equipment_id: model, outdoor_unit_id: outdoor, quantity: 1,
+      in_conditioned_space: true });
+  }
+  /* The Blended result the host's plan gives for the heat pumps below (heat_pump_plan.rb, run on these values with a
+     typed climate of -12.0 C and 31.5 C design temperatures): Apartments from ODU-A and ODU-C, House from ODU-B. */
+  var BLENDED = JSON.parse("{\"climate\": {\"state\": \"complete\", \"reason\": null}, \"segments\": [{\"segment\": " +
+    "\"Apartments\", \"identifier\": \"ph_composer_heat_pump_35807ac1baf4\", \"display_name\": \"Heat " +
+    "pumps: Apartments\", \"zones\": [{\"zone_id\": \"zon_apt1\", \"name\": \"Apt 1\"}, {\"zone_id\": " +
+    "\"zon_apt2\", \"name\": \"Apt 2\"}, {\"zone_id\": \"zon_corridor\", \"name\": \"Corridor\"}], " +
+    "\"outdoor_unit_ids\": [\"hou_Aa11Bb22Cc33\", \"hou_Gg77Hh88Ii99\"], \"result\": {\"climate\": " +
+    "{\"heating_99_f\": 10.4, \"cooling_1_f\": 88.7, \"monthly_air_f\": [29.84, 31.46, 39.38, " +
+    "50.36, 60.44, 69.98, 75.74, 74.66, 67.28, 56.12, 45.68, 35.24], \"heating_months\": 5, " +
+    "\"share_below_17f\": 0.0, \"share_below_47f\": 1.0}, \"devices\": [{\"id\": \"hpo_Aa11Bb22Cc33\", " +
+    "\"name\": \"ODU-A\", \"quantity\": 1, \"heating_data_type\": \"COPs\", \"capacity_17f_kbtuh\": " +
+    "21.837706, \"capacity_47f_kbtuh\": 24.908634, \"cop_17f\": 2.4, \"cop_47f\": 3.9, \"hspf\": " +
+    "null, \"cooling_data_type\": \"EER2/SEER2\", \"capacity_95f_kbtuh\": 21.837706, \"eer\": 12.5, " +
+    "\"seer\": 20.0, \"ieer\": null}, {\"id\": \"hpo_Gg77Hh88Ii99\", \"name\": \"ODU-C\", \"quantity\": 1, " +
+    "\"heating_data_type\": \"COPs\", \"capacity_17f_kbtuh\": 71.654974, \"capacity_47f_kbtuh\": " +
+    "95.88118, \"cop_17f\": 2.1, \"cop_47f\": 3.6, \"hspf\": null, \"cooling_data_type\": \"IEER\", " +
+    "\"capacity_95f_kbtuh\": 95.88118, \"eer\": null, \"seer\": null, \"ieer\": 21.4}], \"weighted\": " +
+    "[{\"id\": \"hpo_Aa11Bb22Cc33\", \"name\": \"ODU-A\", \"recirc\": 0.185507, \"capacity_17f\": " +
+    "0.233577, \"capacity_47f\": 0.206215, \"cop_17f\": 0.560584, \"cop_47f\": 0.804237, \"hspf\": " +
+    "null, \"derated_hspf\": null, \"eer\": 2.411594, \"seer\": 3.877101, \"derated_seer\": 4.046736," +
+    " \"ieer\": 0.0, \"cop\": 0.946414}, {\"id\": \"hpo_Gg77Hh88Ii99\", \"name\": \"ODU-C\", \"recirc\": " +
+    "0.814493, \"capacity_17f\": 0.766423, \"capacity_47f\": 0.793785, \"cop_17f\": 1.609489, " +
+    "\"cop_47f\": 2.857627, \"hspf\": null, \"derated_hspf\": null, \"eer\": 0.0, \"seer\": 0.0, " +
+    "\"derated_seer\": 0.0, \"ieer\": 17.430145, \"cop\": 5.108483}], \"totals\": {\"cooling\": " +
+    "{\"capacity_kbtuh\": 117.718886, \"cop\": 6.054897, \"input_kbtuh\": 19.441929}, " +
+    "\"heating_17f\": {\"capacity_kbtuh\": 93.492681, \"cop\": 2.170073, \"input_kbtuh\": 43.082735}," +
+    " \"heating_47f\": {\"capacity_kbtuh\": 120.789814, \"cop\": 3.661864, \"input_kbtuh\": " +
+    "32.985878}}, \"energy_model\": {\"systems_needed\": 1, \"cooling_coverage\": 1.0, " +
+    "\"min_coil_temp_f\": 53.6, \"flow_rate_cfm\": 2942.972159, \"cooling_capacity_kbtuh\": " +
+    "117.718886, \"cooling_cop\": 6.054897, \"heating_coverage\": 1.0, \"cop_1\": 2.170073, " +
+    "\"ambient_1_f\": 17.0, \"cop_2\": 3.661864, \"ambient_2_f\": 47.0}, \"export\": " +
+    "{\"percent_coverage\": 1.0, \"cop_1\": 2.170073, \"ambient_temp_1_c\": -8.333, \"cop_2\": " +
+    "3.661864, \"ambient_temp_2_c\": 8.333, \"cooling\": {\"used\": true, \"percent_coverage\": 1.0, " +
+    "\"capacity_kw\": 34.5, \"flow_rate_m3_hr\": 5000.141468, \"annual_cop\": 6.054897, " +
+    "\"min_coil_temp_c\": 12.0, \"single_speed\": false, \"flow_rate_variable\": true}}}}, " +
+    "{\"segment\": \"House\", \"identifier\": \"ph_composer_heat_pump_2526c620c181\", \"display_name\":" +
+    " \"Heat pumps: House\", \"zones\": [{\"zone_id\": \"zon_living\", \"name\": \"Living\"}], " +
+    "\"outdoor_unit_ids\": [\"hou_Dd44Ee55Ff66\"], \"result\": {\"climate\": {\"heating_99_f\": 10.4, " +
+    "\"cooling_1_f\": 88.7, \"monthly_air_f\": [29.84, 31.46, 39.38, 50.36, 60.44, 69.98, 75.74, " +
+    "74.66, 67.28, 56.12, 45.68, 35.24], \"heating_months\": 5, \"share_below_17f\": 0.0, " +
+    "\"share_below_47f\": 1.0}, \"devices\": [{\"id\": \"hpo_Dd44Ee55Ff66\", \"name\": \"ODU-B\", " +
+    "\"quantity\": 1, \"heating_data_type\": \"HSPF2\", \"capacity_17f_kbtuh\": 10.577639, " +
+    "\"capacity_47f_kbtuh\": 12.966138, \"cop_17f\": null, \"cop_47f\": null, \"hspf\": 10.0, " +
+    "\"cooling_data_type\": \"EER2/SEER2\", \"capacity_95f_kbtuh\": 11.942496, \"eer\": 13.0, \"seer\":" +
+    " 22.5, \"ieer\": null}], \"weighted\": [{\"id\": \"hpo_Dd44Ee55Ff66\", \"name\": \"ODU-B\", " +
+    "\"recirc\": 1.0, \"capacity_17f\": 1.0, \"capacity_47f\": 1.0, \"cop_17f\": 2.211639, \"cop_47f\":" +
+    " 2.211639, \"hspf\": 11.2, \"derated_hspf\": 7.546111, \"eer\": 13.6, \"seer\": 23.6, " +
+    "\"derated_seer\": 19.842984, \"ieer\": 0.0, \"cop\": 4.900789}], \"totals\": {\"cooling\": " +
+    "{\"capacity_kbtuh\": 11.942496, \"cop\": 4.900789, \"input_kbtuh\": 2.436852}, \"heating_17f\": " +
+    "{\"capacity_kbtuh\": 10.577639, \"cop\": 2.211639, \"input_kbtuh\": 4.782716}, \"heating_47f\": " +
+    "{\"capacity_kbtuh\": 12.966138, \"cop\": 2.211639, \"input_kbtuh\": 5.862684}}, " +
+    "\"energy_model\": {\"systems_needed\": 1, \"cooling_coverage\": 1.0, \"min_coil_temp_f\": 53.6, " +
+    "\"flow_rate_cfm\": 298.562393, \"cooling_capacity_kbtuh\": 11.942496, \"cooling_cop\": " +
+    "4.900789, \"heating_coverage\": 1.0, \"cop_1\": 2.211639, \"ambient_1_f\": 17.0, \"cop_2\": " +
+    "2.211639, \"ambient_2_f\": 47.0}, \"export\": {\"percent_coverage\": 1.0, \"cop_1\": 2.211639, " +
+    "\"ambient_temp_1_c\": -8.333, \"cop_2\": 2.211639, \"ambient_temp_2_c\": 8.333, \"cooling\": " +
+    "{\"used\": true, \"percent_coverage\": 1.0, \"capacity_kw\": 3.5, \"flow_rate_m3_hr\": " +
+    "507.260729, \"annual_cop\": 4.900789, \"min_coil_temp_c\": 12.0, \"single_speed\": false, " +
+    "\"flow_rate_variable\": true}}}}], \"findings\": [{\"code\": \"mechanical.hp_unit_unpaired\", " +
+    "\"severity\": \"warning\", \"message\": \"HP-3.2 serves no Zone, so the blend leaves it out.\", " +
+    "\"blocks_export\": false, \"object_id\": \"hiu_Pp66Qq77Rr88\"}]}");
   FIXTURES.mechanical = Object.assign(copy(FIXTURES.programs), { mechanical: {
     ventilators: [
       ventilator("vnt_Aa11Bb22Cc33", "ERV-1", { sensible_heat_recovery: 0.85, latent_heat_recovery: 0.6,
@@ -1497,7 +1571,50 @@
         water_temp_c: 55 }),
       tank("hwt_Gg77Hh88Ii99", "T-3", { role: "buffer", storage_capacity_l: 200, standby_losses_w_k: 1.4,
         water_temp_c: 55 })],
-      serves: { zon_apt1: "hws_Aa11Bb22Cc33", zon_apt2: "hws_Aa11Bb22Cc33", zon_corridor: "hws_Dd44Ee55Ff66" } }
+      serves: { zon_apt1: "hws_Aa11Bb22Cc33", zon_apt2: "hws_Aa11Bb22Cc33", zon_corridor: "hws_Dd44Ee55Ff66" } },
+    /* Heat pumps, as the wireframes draw them: ODU-A (COPs, EER2/SEER2) paired with IDU-W09, ODU-B (HSPF2) paired with
+       IDU-W12, ODU-C (COPs, IEER) unpaired and ODU-D Spare lacking its capacities; HP-1 installs ODU-A with three
+       indoor units on the Apartments, HP-2 ODU-B on Living, HP-3 ODU-C with one indoor unit on Apt 1 and one serving
+       no Zone. */
+    heatPumps: {
+      outdoor_equipment: [
+        outdoorModel("hpo_Aa11Bb22Cc33", "ODU-A", { manufacturer: "Kaltwerk", model: "MXZ-3C24",
+          paired_indoor_equipment_id: "hpi_Aa11Bb22Cc33", heating_cap_17f_kw: 6.4, heating_cap_47f_kw: 7.3,
+          cop_17f: 2.4, cop_47f: 3.9, cooling_rating_mode: "eer_seer", cooling_cap_95f_kw: 6.4, eer: 12.5,
+          seer: 20.0 }),
+        outdoorModel("hpo_Dd44Ee55Ff66", "ODU-B", { manufacturer: "Kaltwerk", model: "MUZ-12NA",
+          paired_indoor_equipment_id: "hpi_Dd44Ee55Ff66", heating_cap_17f_kw: 3.1, heating_cap_47f_kw: 3.8,
+          heating_rating_mode: "hspf", hspf_value: 10.0, cooling_rating_mode: "eer_seer", cooling_cap_95f_kw: 3.5,
+          eer: 13.0, seer: 22.5 }),
+        outdoorModel("hpo_Gg77Hh88Ii99", "ODU-C", { manufacturer: "Borealis", model: "VRF-096",
+          heating_cap_17f_kw: 21.0, heating_cap_47f_kw: 28.1, cop_17f: 2.1, cop_47f: 3.6, cooling_rating_mode: "ieer",
+          cooling_cap_95f_kw: 28.1, ieer: 21.4, notes: "Common areas" }),
+        Object.assign(outdoorModel("hpo_Jj00Kk11Ll22", "ODU-D Spare", {}), { export_ready: false,
+          export_blockers: ["mechanical.hp_equipment_incomplete"] })],
+      indoor_equipment: [
+        heatPump("hpi_Aa11Bb22Cc33", "hp_indoor_equipment", "IDU-W09", { manufacturer: "Kaltwerk", model: "MSZ-09NA",
+          notes: "Wall, ductless" }),
+        heatPump("hpi_Dd44Ee55Ff66", "hp_indoor_equipment", "IDU-W12", { manufacturer: "Kaltwerk", model: "MSZ-12NA" }),
+        heatPump("hpi_Gg77Hh88Ii99", "hp_indoor_equipment", "IDU-D12", { manufacturer: "Kaltwerk", model: "SEZ-12NA",
+          notes: "Slim duct" }),
+        heatPump("hpi_Jj00Kk11Ll22", "hp_indoor_equipment", "IDU-C24", { manufacturer: "Borealis", model: "CAS-024" })],
+      outdoor_units: [
+        heatPump("hou_Aa11Bb22Cc33", "hp_outdoor_unit", "HP-1", { outdoor_equipment_id: "hpo_Aa11Bb22Cc33",
+          quantity: 1, in_conditioned_space: false }),
+        heatPump("hou_Dd44Ee55Ff66", "hp_outdoor_unit", "HP-2", { outdoor_equipment_id: "hpo_Dd44Ee55Ff66",
+          quantity: 1, in_conditioned_space: false }),
+        heatPump("hou_Gg77Hh88Ii99", "hp_outdoor_unit", "HP-3", { outdoor_equipment_id: "hpo_Gg77Hh88Ii99",
+          quantity: 1, in_conditioned_space: false })],
+      indoor_units: [
+        indoorUnit("hiu_Aa11Bb22Cc33", "HP-1.1", "hou_Aa11Bb22Cc33", "hpi_Aa11Bb22Cc33"),
+        indoorUnit("hiu_Dd44Ee55Ff66", "HP-1.2", "hou_Aa11Bb22Cc33", "hpi_Aa11Bb22Cc33"),
+        indoorUnit("hiu_Gg77Hh88Ii99", "HP-1.3", "hou_Aa11Bb22Cc33", "hpi_Gg77Hh88Ii99"),
+        indoorUnit("hiu_Jj00Kk11Ll22", "HP-2.1", "hou_Dd44Ee55Ff66", "hpi_Dd44Ee55Ff66"),
+        indoorUnit("hiu_Mm33Nn44Oo55", "HP-3.1", "hou_Gg77Hh88Ii99", "hpi_Jj00Kk11Ll22"),
+        indoorUnit("hiu_Pp66Qq77Rr88", "HP-3.2", "hou_Gg77Hh88Ii99", "hpi_Jj00Kk11Ll22")],
+      serves: { zon_apt1: ["hiu_Aa11Bb22Cc33", "hiu_Mm33Nn44Oo55"], zon_apt2: ["hiu_Dd44Ee55Ff66"],
+        zon_corridor: ["hiu_Gg77Hh88Ii99"], zon_living: ["hiu_Jj00Kk11Ll22"] },
+      blended: BLENDED }
   } });
 
   global.PhComposerPreviewFixtures = {

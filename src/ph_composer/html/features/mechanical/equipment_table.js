@@ -12,7 +12,8 @@
                                    rawValue, defaultWidths, columnMenus, headerActions, value, search, placeholder,
                                    afterCell); `cell(td, row, field)` draws a family's own cell and answers true
      actions(row), act(row, command, control)   row actions before Duplicate and Delete, and their handler
-     parent                        { key, label, section } for a kind that names its parent record: New asks for it
+     parent, parents               { key, label, section } for a kind that names its parent record, or a list of them
+                                   for one that names several: New asks for each
      forms                         a family's own record forms in the shared dialog, each with refresh(state),
                                    busy() and dispose(); an open one holds the tab as New's does
      replacement                   inventory_forms ReplacementForm options for Delete beyond section and label
@@ -59,8 +60,8 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     return value === undefined ? null : value;
   }
 
-  /* New <label>: its Tag and, for a kind that names its parent record, that record. Every other value starts at
-     its default and is edited on the row. */
+  /* New <label>: its Tag and, for a kind that names its parent records, each of them (a heat pump indoor unit names
+     its indoor model and its outdoor unit). Every other value starts at its default and is edited on the row. */
   function TagForm(session, send, changed, options) {
     RecordForm.call(this, session, send, { title: "New " + options.label, action: options.section + ".create",
       label: options.section + "-create", submitLabel: "Create " + options.label, pendingText: "Creating...",
@@ -75,21 +76,27 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.name = forms.labelled(this.form, "Tag", ui.element("input"));
     RecordForm.required(this.name.parentNode, this.name);
     this.name.addEventListener("input", edited);
-    if (options.parent) {
-      this.parent = forms.labelled(this.form, options.parent.label, ui.element("select"));
-      RecordForm.required(this.parent.parentNode, this.parent);
-      this.parent.addEventListener("change", edited);
-    }
-    this.parents = [];
+    this.parents = (options.parents || (options.parent ? [options.parent] : [])).map(function (parent) {
+      var select = forms.labelled(self.form, parent.label, ui.element("select"));
+      RecordForm.required(select.parentNode, select);
+      select.addEventListener("change", edited);
+      return { spec: parent, select: select, records: [] };
+    });
+    // The first parent's select, for a kind that names one.
+    this.parent = this.parents.length ? this.parents[0].select : null;
     this.finish();
   }
   RecordForm.extend(TagForm);
   /* What Create waits for, or "". */
   TagForm.prototype.waitsFor = function () {
     if (!this.name.value.trim()) return "Enter a Tag to create the " + this.options.label + ".";
-    if (this.parent && !this.parents.length) return "Create a " + this.options.parent.label + " first.";
-    if (this.parent && !this.parent.value) return "Choose the " + this.options.parent.label + " it belongs to.";
-    return "";
+    var waiting = "";
+    this.parents.some(function (parent) {
+      if (!parent.records.length) waiting = "Create a " + parent.spec.label + " first.";
+      else if (!parent.select.value) waiting = "Choose the " + parent.spec.label + " it belongs to.";
+      return Boolean(waiting);
+    });
+    return waiting;
   };
   TagForm.prototype.updateButton = function () {
     var waiting = this.waitsFor(), hinted = this.error.classList.contains("phc-form-hint");
@@ -99,21 +106,22 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     if (waiting || hinted || !this.error.textContent) this.error.textContent = waiting;
     this.error.classList.toggle("phc-form-hint", Boolean(waiting));
   };
-  /* The parent choices, from the parent's section as the snapshot has it. The current choice is kept while it is
-     there and cleared when it goes; only a form just opened takes the sole choice for the user. */
+  /* Each parent's choices, from its section as the snapshot has it. The current choice is kept while it is there and
+     cleared when it goes; only a form just opened takes the sole choice for the user. */
   TagForm.prototype.paintParents = function (fresh) {
-    if (!this.parent) return;
-    var chosen = this.parent.value;
-    this.parent.replaceChildren(ui.option("", "Choose a " + this.options.parent.label));
-    this.parents.forEach(function (record) { this.parent.appendChild(ui.option(record.id, record.values.name)); },
-      this);
-    this.parent.value = this.parents.some(function (record) { return record.id === chosen; }) ? chosen :
-      fresh && this.parents.length === 1 ? this.parents[0].id : "";
+    this.parents.forEach(function (parent) {
+      var select = parent.select, chosen = select.value;
+      select.replaceChildren(ui.option("", "Choose a " + parent.spec.label));
+      parent.records.forEach(function (record) { select.appendChild(ui.option(record.id, record.values.name)); });
+      select.value = parent.records.some(function (record) { return record.id === chosen; }) ? chosen :
+        fresh && parent.records.length === 1 ? parent.records[0].id : "";
+    });
   };
   TagForm.prototype.open = function () {
     if (!this.enabled) return;
     this.name.value = ""; this.error.textContent = "";
-    if (this.parent) { this.parent.value = ""; this.paintParents(true); }
+    this.parents.forEach(function (parent) { parent.select.value = ""; });
+    this.paintParents(true);
     this.updateButton();
     this.show(); this.name.focus();
   };
@@ -121,15 +129,15 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.updateButton();
     if (this.submitButton.disabled) return;
     var values = { name: this.name.value.trim() };
-    if (this.parent) values[this.options.parent.key] = this.parent.value;
+    this.parents.forEach(function (parent) { values[parent.spec.key] = parent.select.value; });
     this.run({ values: values });
   };
   TagForm.prototype.refresh = function (state) {
-    if (this.parent) {
-      this.parents = ((snapshot.value(state, this.options.parent.section) || {}).records || []).slice()
+    this.parents.forEach(function (parent) {
+      parent.records = ((snapshot.value(state, parent.spec.section) || {}).records || []).slice()
         .sort(function (a, b) { return ui.compareText(a.values.name, b.values.name); });
-      if (!this.root.hidden) this.paintParents();
-    }
+    });
+    if (!this.root.hidden) this.paintParents();
     var outcome = forms.refreshForm(this, state, this.options.section);
     if (outcome && outcome.status === "completed") this.hide(outcome.value);
     else this.updateButton();
@@ -170,7 +178,7 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.changed = changed;
     this.cells = request.channel(session, send, spec.section + "-cells");
     this.newRecord = new TagForm(session, send, changed, { section: spec.section, label: label,
-      parent: spec.parent });
+      parent: spec.parent, parents: spec.parents });
     this.duplicate = new forms.DuplicateForm(session, send, changed, { section: spec.section, label: label,
       datasheets: false });
     this.replacement = new forms.ReplacementForm(session, send, changed, Object.assign({ section: spec.section,

@@ -6,12 +6,14 @@
    the commit, labelled with what it does: newly checked Zones through serves.assign, then Zones left unchecked
    through serves.clear, each one Undo step. A Zone another item fills refuses the assign with
    mechanical.slot_filled, naming it; the draft stays, and the commit, now "Replace and assign", sends it again with
-   `replace`. Cancel, the close and Escape write nothing; a click elsewhere or a scroll leaves a changed draft open.
+   `replace`. A list slot (a Zone's heat pump indoor units) holds several items, so nothing is replaced there and an
+   unchecked Zone loses only this item (serves.clear with `item_id`). Cancel, the close and Escape write nothing; a
+   click elsewhere or a scroll leaves a changed draft open.
 
    The draft holds only the Zones the user changed, each with the slot it showed then, which is what each write's
    `expected_values` carries; every other row follows the Model as snapshots arrive.
 
-   new Picker(session, send, { slot, family, notify }) with open(record, trigger, layer), refresh(state),
+   new Picker(session, send, { slot, family, notify, many }) with open(record, trigger, layer), refresh(state),
    guard(), dispose(). chips(record, state) answers the cell's button; `record.zones` are its served Zones. */
 PhComposerUI.define("features/mechanical/serves", ["snapshot", "workspace", "request"],
 function (snapshot, ui, request) {
@@ -21,6 +23,8 @@ function (snapshot, ui, request) {
 
   function zoneRows(state) { var value = snapshot.value(state, SERVES); return value ? value.zones : []; }
   function key(row) { return JSON.stringify(row.reference.zone_path); }
+  /* Whether a slot's value names `id`: a single slot holds one id, a list slot several. */
+  function names(value, id) { return Array.isArray(value) ? value.indexOf(id) >= 0 : value === id; }
   function plural(count, word) { return count + " " + word + (count === 1 ? "" : "s"); }
 
   /* The Zones under their headings, in the Zone views' order. */
@@ -78,7 +82,7 @@ function (snapshot, ui, request) {
   /* Whether a Zone shows checked: as the user left it, else as the Model has it. */
   Picker.prototype.isChecked = function (row) {
     var touched = this.held.touched[key(row)];
-    return touched ? touched.checked : row.slots[this.options.slot] === this.held.record.id;
+    return touched ? touched.checked : names(row.slots[this.options.slot], this.held.record.id);
   };
   /* A change the user made: the Zone's reference and slot as they saw them. Putting a box back as it started
      drops the change, so later snapshots drive that Zone again. */
@@ -87,7 +91,7 @@ function (snapshot, ui, request) {
     var entry = previous || { reference: JSON.parse(JSON.stringify(row.reference)),
       base: JSON.parse(JSON.stringify(row.slots)) };
     this.held.filled = false;
-    if (checked === (entry.base[this.options.slot] === this.held.record.id)) { delete touched[key(row)]; return; }
+    if (checked === names(entry.base[this.options.slot], this.held.record.id)) { delete touched[key(row)]; return; }
     entry.checked = checked;
     touched[key(row)] = entry;
   };
@@ -101,7 +105,7 @@ function (snapshot, ui, request) {
       if (!touched) return;
       // Another Zone now stands at that path: the change was made to a Zone that is gone, so it lapses.
       if (touched.reference.zone_id !== row.reference.zone_id) { delete held.touched[key(row)]; return; }
-      var serves = row.slots[slot] === held.record.id;
+      var serves = names(row.slots[slot], held.record.id);
       if (touched.checked && !serves) add.push(row);
       if (!touched.checked && serves) clear.push(row);
     });
@@ -185,7 +189,8 @@ function (snapshot, ui, request) {
         });
         line.appendChild(box);
         line.appendChild(ui.element("span", "mech-zone-name", row.name || row.zone_id));
-        var other = row.slots[slot] && row.slots[slot] !== record.id ? (row.items || []).filter(function (item) {
+        var value = row.slots[slot];
+        var other = value && !Array.isArray(value) && value !== record.id ? (row.items || []).filter(function (item) {
           return item.slot === slot;
         })[0] : null;
         if (other) {
@@ -222,6 +227,12 @@ function (snapshot, ui, request) {
       return { reference: entry.reference, expected_values: entry.base };
     });
   };
+  /* Unchecked Zones lose the item: a single slot empties, a list slot gives up only this item. */
+  Picker.prototype.clearParams = function (rows) {
+    var params = { zones: this.targets(rows), slot: this.options.slot };
+    if (this.options.many) params.item_id = this.held.record.id;
+    return params;
+  };
   /* Assigns the newly checked Zones, then clears those left unchecked: two requests, one after the other, so the
      second reads the Model the first left. `replace` answers a mechanical.slot_filled refusal. */
   Picker.prototype.apply = function (replace) {
@@ -237,7 +248,7 @@ function (snapshot, ui, request) {
       this.requests.run("ph_composer.mechanical.serves.assign", params);
     } else {
       held.step = "clear";
-      this.requests.run("ph_composer.mechanical.serves.clear", { zones: this.targets(changes.clear), slot: slot });
+      this.requests.run("ph_composer.mechanical.serves.clear", this.clearParams(changes.clear));
     }
     this.paint();
     // The owner's table locks while a write is out, so nothing else leaves on the same revision.
@@ -273,8 +284,7 @@ function (snapshot, ui, request) {
     if (held.step === "assign" && changes.clear.length) {
       // The assign landed; the Zones left unchecked are cleared next, from the Model as the assign left it.
       held.step = "clear";
-      this.requests.run("ph_composer.mechanical.serves.clear", { zones: this.targets(changes.clear),
-        slot: this.options.slot });
+      this.requests.run("ph_composer.mechanical.serves.clear", this.clearParams(changes.clear));
       return;
     }
     var name = held.record.values.name;

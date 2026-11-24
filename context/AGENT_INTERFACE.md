@@ -900,10 +900,18 @@ for the Zones, Heaters and Tanks naming it. The export writes each served Zone's
 `ph_composer.mechanical.preflight` lists both exports' findings. Since API 1.92 `ph_composer.mechanical.locate` also
 takes `hot_water_system_ids`, `hot_water_heater_ids` and `hot_water_tank_ids`, one kind per request (two refuse
 `params.invalid`), which a preflight row about a hot water item carries; a System row notes `mechanical.method_not_exported` while it sets a piping calculation method the pinned
-honeybee-ph cannot carry; and `ph_composer.mechanical.by_hot_water_system` colours each Zone by its System. The
+honeybee-ph cannot carry; and `ph_composer.mechanical.by_hot_water_system` colours each Zone by its System. Since API
+1.93 heat pumps are four catalogs under `ph_composer.mechanical.heat_pumps.`: `outdoor_equipment`, `indoor_equipment`,
+`outdoor_units` and `indoor_units`, each with `list`, `all`, a snapshot section, `create`, `update`, `duplicate` and
+`delete` (with `replacement_id` for every record and Zone naming it). Indoor units serve Zones through the list slot
+`hp_indoor_unit_ids`, and `serves.clear` takes `item_id` to take one off. `ph_composer.mechanical.heat_pumps.blended`
+reads the blended heat pump of each Building Segment, worked out by the Phius estimator's method from the Model's
+climate, so the feature requires `ph_composer.climate`; the export writes it on every served Room, the preflight lists
+its findings, and `locate` takes `hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` and `hp_indoor_unit_ids`. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
-"Mechanical: the Ventilator export", "Mechanical: hot water" and "Mechanical: the hot water export", is the recipe.
+"Mechanical: the Ventilator export", "Mechanical: hot water", "Mechanical: the hot water export", "Mechanical: heat
+pumps" and "Mechanical: the heat pump export", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

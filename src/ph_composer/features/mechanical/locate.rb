@@ -13,7 +13,9 @@ module PhComposer
       # accepts its param (html/features/mechanical/).
       ITEMS = {
         Ventilators::KIND => "ventilator_ids", HotWater::Systems::KIND => "hot_water_system_ids",
-        HotWater::Heaters::KIND => "hot_water_heater_ids", HotWater::Tanks::KIND => "hot_water_tank_ids"
+        HotWater::Heaters::KIND => "hot_water_heater_ids", HotWater::Tanks::KIND => "hot_water_tank_ids",
+        HeatPumps::OutdoorEquipment::KIND => "hp_outdoor_equipment_ids",
+        HeatPumps::OutdoorUnits::KIND => "hp_outdoor_unit_ids", HeatPumps::IndoorUnits::KIND => "hp_indoor_unit_ids"
       }.freeze
       PARAMS = Shapes.object(
         ITEMS.to_h do |kind, param|
@@ -31,8 +33,10 @@ module PhComposer
       def install(feature)
         feature.view_command(NAME, :description => "Open where a Mechanical finding is fixed: the Mechanical tab " \
                                                    "on the table of the items named (ventilator_ids, " \
-                                                   "hot_water_system_ids, hot_water_heater_ids or " \
-                                                   "hot_water_tank_ids; one kind per request), narrowed to " \
+                                                   "hot_water_system_ids, hot_water_heater_ids, " \
+                                                   "hot_water_tank_ids, hp_outdoor_equipment_ids, " \
+                                                   "hp_outdoor_unit_ids or hp_indoor_unit_ids; one kind per " \
+                                                   "request), narrowed to " \
                                                    "them, or, with none, the Zones tab with zones checked.",
                                    :refuses => %w[session.inactive], :params => PARAMS,
                                    :side_effects => "Opens or raises the panel on the Mechanical or the Zones tab.",

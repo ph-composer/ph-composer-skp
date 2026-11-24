@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
 # One feature owns the mechanical equipment a Zone's Room carries in the energy model: the equipment families'
-# catalogs, which Zones each item serves, and their export. It requires Zones and Spaces, and Programs, whose Zone
-# flow the airflow balance counts for a By Program Zone; no file of theirs, nor any other feature's, names it
+# catalogs, which Zones each item serves, and their export. It requires Zones and Spaces, Programs, whose Zone flow
+# the airflow balance counts for a By Program Zone, and Climate, whose climate the blended heat pump reads; no file of
+# theirs, nor any other feature's, names it
 # (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
 # Each family is a folder of definitions that names no Zone, Space, Program or assignment, so a family reads
 # and validates on its own. Serves sits above the families and names them:
 #
 #   ventilators/    the Ventilator kind, its operations and its reads
+#   catalog_operations.rb  create, update, duplicate and delete, which every flat catalog shares
 #   hot_water/      the Hot Water System, Heater and Tank kinds, their operations and reads, and the pure tank slotting
+#   heat_pumps/     the outdoor and indoor models and units, their operations and reads, and the pure blend
 #   serves/         what serves each Zone: a payload on the Zone record that Zones stages, Assign and Clear, the
 #                   Zone half of an item's delete, the reads with their findings and the airflow balance
 #   codes.rb        the `mechanical` noun's codes
@@ -19,18 +22,26 @@
 #   export.rb            the Ventilator export section, which claims the Serves payload for the feature, and its report
 #   hot_water_plan.rb    the hot water export worked out in pure Ruby: its pairs, tank slots and findings
 #   hot_water_export.rb  the hot water export section
+#   heat_pump_plan.rb    the blended heat pump per Building Segment worked out in pure Ruby: its pairs and findings
+#   heat_pump_reads.rb   the heat pump tables' Zones, counts and findings, and the Blended result
+#   heat_pump_export.rb  the heat pump export section
 #   locate.rb            the Locate view command, which opens the Mechanical tab on an item's table or the Zones tab
 #   preflight.rb         the one preflight query, each family's rows from its own plan
 #   colour_modes.rb      By ventilator: each served Zone in its item's colour
 require_relative "ventilators/schema"
 require_relative "ventilators/operations"
 require_relative "ventilators/reads"
+require_relative "catalog_operations"
 require_relative "hot_water/systems"
 require_relative "hot_water/heaters"
 require_relative "hot_water/tanks"
 require_relative "hot_water/slotting"
 require_relative "hot_water/operations"
 require_relative "hot_water/reads"
+require_relative "heat_pumps/outdoor_equipment"
+require_relative "heat_pumps/units"
+require_relative "heat_pumps/blend"
+require_relative "heat_pumps/operations"
 require_relative "codes"
 require_relative "serves/payload"
 require_relative "serves/state"
@@ -46,6 +57,11 @@ require_relative "ventilation_plan"
 require_relative "export"
 require_relative "hot_water_plan"
 require_relative "hot_water_export"
+require_relative "heat_pump_plan"
+require_relative "heat_pumps/reads"
+require_relative "heat_pump_reads"
+require_relative "declarations/heat_pumps"
+require_relative "heat_pump_export"
 require_relative "locate"
 require_relative "preflight"
 require_relative "colour_modes"
@@ -57,12 +73,14 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => 1,
                                              :requires => %w[ph_composer.zones ph_composer.spaces
-                                                             ph_composer.programs])
+                                                             ph_composer.programs ph_composer.climate])
       ServesRegistration.install(feature)
       VentilatorRegistration.install(feature)
       HotWaterRegistration.install(feature)
       VentilationExport.install(feature)
       HotWaterExport.install(feature)
+      HeatPumpRegistration.install(feature)
+      HeatPumpExport.install(feature)
       Locate.install(feature)
       Preflight.install(feature)
       ColourModes.install(feature)
