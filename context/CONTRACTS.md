@@ -833,7 +833,7 @@ Segment's set points and its Dwellings' units and counts from the Python result.
 ## Mechanical equipment
 
 `ph_composer.mechanical` (`features/mechanical/`) requires Zones, Spaces, Programs and Climate, and no other feature
-names it. Each
+names it but Piping, which requires it (`tests/mechanical_dependency_test.rb` reads that from the registry). Each
 equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
 names Zones, Spaces, Programs, the Zone record or `serves/` (`tests/mechanical_dependency_test.rb`). Serves
 (`features/mechanical/serves/`) sits above the families and names them.
@@ -1237,6 +1237,35 @@ export identifier and the six values as honeybee-ph holds them, and `conformance
 Building Segment. PHX 1.59.4 copies all of them to the Variant's building data; its WUFI XML and METr writers carry
 the room temperature and the bypass mode and not mechanical cooling
 (`tests/python/test_mechanical_segment_phx_round_trip.py`).
+
+## Hot water piping
+
+`ph_composer.piping` (`features/piping/`) requires Mechanical, which owns the Hot Water System its pipes export into,
+and Zones, and installs last. Nothing under `features/mechanical/` or `html/features/mechanical/` names it
+(`tests/piping_dependency_test.rb`); Mechanical's own words for piping, such as `piping_calc_method`, stay. Codes are
+under the noun `piping` (`features/piping/codes.rb`).
+
+- **Pipe Type** (`ph_composer.piping.pipe_type`, `ppt_`, `schema_version` 1, `features/piping/type/`), a Model-owned
+  definition stored by `DictionaryStore` in the Model dictionary `ph_composer.records.ph_composer.piping.pipe_type`:
+  the shared name (shown as Tag), notes, datasheet links and source; `material` (honeybee-ph's 1 to 8: Copper M,
+  Copper L, Copper K, CPVC CTS SDR, CPVC Sch 40, PEX, PE, PEX CTS SDR; default 2); `diameter_mm` (one of the eight
+  nominal sizes stored as the inch size times 25.4: 9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1, 50.8; default
+  12.7, the 1/2 in size); `insulation_thickness_mm` (at least 0, default 12.7); `insulation_conductivity_w_mk`
+  (W/(m K), above 0, or absent; default 0.04); `insulation_reflective` (default true); `insulation_quality` (1 None, 2
+  Moderate, 3 Good; default 1); and `color`, stored only once authored, read as a ramp colour by id until then, as a
+  Thermal Bridge Type's. A pipe's role, water temperature and daily hours are not on the type. It names no Edge, group
+  or run, and it is not a library kind.
+
+`ph_composer.piping.pipe_types.create`, `update`, `duplicate` and `delete` are one Undo step each, through
+Mechanical's `CatalogOperations`, as a flat equipment catalog's are: names are unique, `update` is guarded by
+`expected_values` and a null removes an optional value, `duplicate` gives a new id, the source `derived` and a copy of
+the `user_data`, and `delete` is the engine's guarded delete. `delete` takes `replacement_id`, another existing type
+or null, which refuses `params.invalid` when it names the type itself. `pipe_types.list` and `pipe_types.all` (also
+the snapshot section `ph_composer.piping.pipe_types`) answer each record's view with `display.color`,
+`export_ready` and `export_blockers`: `piping.insulation_conductivity_missing` for a type with insulation above 0 mm
+and no conductivity, which blocks the export only of a pipe that uses it; a bare pipe needs no conductivity. Its
+`user_data` is written with `ph_composer.records.update_metadata`; the export leaves a Pipe Type's map out, since each
+pipe segment carries its pipe's.
 
 ## This computer's settings file
 

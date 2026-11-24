@@ -28,7 +28,8 @@ file in the same change.
 
 | Feature id | Folder | Requires | Registered in |
 | --- | --- | --- | --- |
-| `ph_composer.mechanical` (new; D4-22), Ruby module `Mechanical` | `features/mechanical/` | `ph_composer.zones`, `ph_composer.spaces` (D4-02, D4-10); `ph_composer.programs` from P4-05 (D4-24); `ph_composer.climate` from P4-08 (D4-15) | `FEATURES`, last, after Programs (F22): `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs, Mechanical]` |
+| `ph_composer.mechanical` (new; D4-22), Ruby module `Mechanical` | `features/mechanical/` | `ph_composer.zones`, `ph_composer.spaces` (D4-02, D4-10); `ph_composer.programs` from P4-05 (D4-24); `ph_composer.climate` from P4-08 (D4-15) | `FEATURES`, after Programs (F22): `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs, Mechanical, Piping]` |
+| `ph_composer.piping` (P4-13a, D4-36), Ruby module `Piping` | `features/piping/` | `ph_composer.mechanical` (the Hot Water System and its export, D4-09), `ph_composer.zones` (containment, Q13) | `FEATURES`, last, after Mechanical |
 
 One feature for the six families (D4-02, from Q1; the seventh, appliances, is Programs' Equipment
 Sets). It is named for its tab (D4-22): "equipment" stays the glossary word for its records
@@ -36,7 +37,11 @@ together, and Programs owns the term Equipment Set. Two layers inside it: the fa
 layer 1 definitions that validate without a Zone (the Zone child pattern's "definition values and
 rules"); Serves is layer 3, a payload on a Zone record. A test holds the line from
 P4-02: nothing under `features/mechanical/<family>/` names Zones, Spaces, Programs, the Zone
-record or `serves/`. Nothing under another feature's folder names this one.
+record or `serves/`. Nothing under another feature's folder names this one, except a feature that requires it:
+Piping (P4-13a), whose Pipe Type CRUD is Mechanical's `CatalogOperations` and whose later export names the hot water
+section. `tests/mechanical_dependency_test.rb` reads the exemption from the registry, and
+`tests/piping_dependency_test.rb` holds that nothing under `features/mechanical/` or `html/features/mechanical/`
+names Piping.
 
 Proposed layout, following `features/windows/install.rb` and `features/spaces/install.rb`:
 
@@ -161,6 +166,14 @@ Deleting a Hot Water System follows `reference.in_use` for both Serves payloads 
 
 **Fan (`fan_`):** `Fields.common` (`name` shown as `Tag`), `manufacturer` (string or null), `model` (string or null), honeybee-ph's exhaust ventilator values: `exhaust_type` (`kitchen_hood`, `dryer` or `user_defined`, required, default `user_defined`), `quantity` (integer >= 1, default 1), `exhaust_flow_rate_m3h` (m3/h >= 0, default 0), `annual_runtime_minutes` (>= 0, default 0); and the optional electric block, a linked `PhSupportiveDevice` type 10: `norm_energy_demand_w` (W >= 0 or absent; absent means no supportive device), `in_conditioned_space` (boolean, default true) and `annual_period_operation_khrs` (>= 0 or absent; absent follows the runtime, `annual_runtime_minutes / 60,000`). The last two sit behind a collapsed per-row disclosure (D4-35). Serves names `fan_` ids in the `fan_ids` list (payload schema 6).
 
+### Pipe Type (catalog record, piping; D4-36, built in P4-13a)
+
+| Kind id | Label | Prefix | Store |
+| --- | --- | --- | --- |
+| `ph_composer.piping.pipe_type` (new) | Pipe Type | `ppt` | `DictionaryStore`, Model dictionary `ph_composer.records.ph_composer.piping.pipe_type` |
+
+**Pipe Type (`ppt_`, `features/piping/type/`):** `Fields.common` (`name` shown as `Tag`), `material` (integer 1 to 8, required, default 2, Copper L), `diameter_mm` (one of 9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1, 50.8, `x-unit` `mm`, required, default 12.7; labelled 3/8 in to 2 in in both unit systems, Q4), `insulation_thickness_mm` (`mm`, >= 0, required, default 12.7), `insulation_conductivity_w_mk` (`W/mK`, > 0 or absent, default 0.04), `insulation_reflective` (boolean, required, default true), `insulation_quality` (1 None, 2 Moderate, 3 Good, required, default 1) and `color` (hex, stored only once authored; reads show a ramp colour by id in `display.color`, D3b-05). Schema version 1. Temperature, period, role and the trunk values are not on the type (PRD, "Records"). Its export blocker, `piping.insulation_conductivity_missing`, is insulation above 0 mm with no conductivity, read by P4-13c and P4-13d only for a type a pipe uses. Not a library kind (Q10). Its `user_data` is the engine's; the export leaves it out (P4-13d).
+
 ### Serves (a payload on the Zone record, layer 3)
 
 D4-21, answered 2026-11-22: Serves is stored as Programs stores a Zone's assignment
@@ -216,7 +229,7 @@ is Zones'. The catalog kinds above keep theirs through the engine.
 
 ## 3. Operations
 
-Every name starts with `ph_composer.mechanical.`. Each query, action and view command is registered
+Every name starts with `ph_composer.mechanical.`, except piping's, which start with `ph_composer.piping.`. Each query, action and view command is registered
 with schemas and an example, so `docs/API_REFERENCE.md` regenerates and the reference test covers
 it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 
@@ -240,11 +253,13 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | `electric_heaters.list`, `.all`, `electric_heaters`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-09 | The flat Electric Heaters table (D4-33): CRUD through `CatalogOperations`; delete with `replacement_id` rewrites every Zone's `heater_ids`, null drops it from them |
 | `pumps.list`, `.all`, `pumps`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-10 | The flat Pumps table (D4-34): CRUD through `CatalogOperations`; rows add `ihg_usage_profile_default`; delete with `replacement_id` rewrites every Zone's `pump_ids`, null drops it from them |
 | `fans.list`, `.all`, `fans`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-11 | The flat Fans table (D4-35): CRUD through `CatalogOperations`; rows add `annual_period_operation_khrs_default`; delete with `replacement_id` rewrites every Zone's `fan_ids`, null drops it from them |
+| `ph_composer.piping.pipe_types.list`, `.all`, `pipe_types`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-13a | The flat Pipe Types catalog (D4-36): CRUD through Mechanical's `CatalogOperations`; rows add `display.color`, `export_ready` and `export_blockers`; delete takes `replacement_id` (another existing type or null; the type itself refuses `params.invalid`), whose Edge rewrite P4-13b adds. Used length joins `.all` in P4-13c |
 | `by_ventilator`, `by_hot_water_system` | colour mode | P4-05, P4-07 | `entity_kind: "zone"`: each Zone in its serving item's colour; unserved Zones uncoloured; the legend row counts Zones. The projection gives one entry per row of `ph_composer.zones.all`, which is one per Zone occurrence (two occurrences may share a Zone id), its value from that Zone's payload, and resolves the row's `reference.zone_path` with the core `OccurrencePath.resolve` for the entity and world transform, naming nothing of Zones' (section 8) |
 | `preflight` | query | P4-04 | The export preflight rows, passed to `export_contributor(preflight:)`. One query for the feature (P4-06): the export pane runs each contributor's named preflight, so only the Ventilator export names it, and each family's rows carry that family's `section` |
 
 Codes are declared once with `feature.code` in `features/mechanical/codes.rb` under the noun
-`mechanical`. P4-02 raises none of its own (its refusals are the foundation's), so the file arrives with the first,
+`mechanical`; piping's in `features/piping/codes.rb` under the noun `piping`, arriving in P4-13a with
+`piping.insulation_conductivity_missing`. P4-02 raises none of its own (its refusals are the foundation's), so the file arrives with the first,
 `mechanical.slot_filled` in P4-03. Refusals that Zones owns keep Zones' `target.*` codes, and a delete in use keeps the
 foundation's `reference.in_use`.
 

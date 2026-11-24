@@ -372,6 +372,25 @@ uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # seven tim
 uv run tools/hostkit/host_bridge.py eval 'VentilatorsWalkthrough.serve_verify'
 ```
 
+## Pipe Types with the panel closed
+
+`pipe_types_walkthrough.rb` creates two Pipe Types, edits one's diameter, duplicates it and deletes the
+other, each a registered action and one native Undo step, and reads the catalog back through
+`ph_composer.piping.pipe_types.all`. `verify` compares that read with the expected catalog, so it serves
+after Undo and Redo and after a save and reopen. `tests/pipe_types_walkthrough_test.rb` runs it offline.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/pipe_types_walkthrough.rb"; PipeTypesWalkthrough.run'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'     # five times, reading state between
+uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.state'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # five times
+uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.verify'
+uv run tools/hostkit/host_bridge.py save
+```
+
+After a fresh-process reopen, load the script and run `PipeTypesWalkthrough.verify`.
+
 ## Edge assignment with the panel closed
 
 `thermal_bridge_assignment_walkthrough.rb` works on the Edges selected natively inside a Zone:

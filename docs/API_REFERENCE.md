@@ -4095,6 +4095,219 @@ Values:
 }
 ```
 
+### `ph_composer.piping.pipe_type`
+
+Pipe Type, a catalog kind owned by `ph_composer.piping`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "material",
+    "diameter_mm",
+    "insulation_thickness_mm",
+    "insulation_reflective",
+    "insulation_quality"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "material": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+            },
+            "diameter_mm": {
+              "type": "number",
+              "enum": [
+                9.525,
+                12.7,
+                15.875,
+                19.05,
+                25.4,
+                31.75,
+                38.1,
+                50.8
+              ],
+              "x-unit": "mm",
+              "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+            },
+            "insulation_thickness_mm": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "mm",
+              "description": "The insulation thickness; 0 for a bare pipe."
+            },
+            "insulation_conductivity_w_mk": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "x-unit": "W/mK",
+              "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+            },
+            "insulation_reflective": {
+              "type": "boolean",
+              "description": "Whether the insulation has a reflective facing."
+            },
+            "insulation_quality": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "material": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8,
+      "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+    },
+    "diameter_mm": {
+      "type": "number",
+      "enum": [
+        9.525,
+        12.7,
+        15.875,
+        19.05,
+        25.4,
+        31.75,
+        38.1,
+        50.8
+      ],
+      "x-unit": "mm",
+      "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+    },
+    "insulation_thickness_mm": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "mm",
+      "description": "The insulation thickness; 0 for a bare pipe."
+    },
+    "insulation_conductivity_w_mk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "x-unit": "W/mK",
+      "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+    },
+    "insulation_reflective": {
+      "type": "boolean",
+      "description": "Whether the insulation has a reflective facing."
+    },
+    "insulation_quality": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    }
+  }
+}
+```
+
 ### `ph_composer.programs.dwelling`
 
 Dwelling, a catalog kind owned by `ph_composer.programs`, schema version 1.
@@ -28978,6 +29191,731 @@ Example params:
 {
   "path": [
     "user_data"
+  ]
+}
+```
+
+### `ph_composer.piping.pipe_types.all`
+
+Every Pipe Type with its values and export readiness, for the panel snapshot. Owner: `ph_composer.piping`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.piping.pipe_types.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "material",
+              "diameter_mm",
+              "insulation_thickness_mm",
+              "insulation_reflective",
+              "insulation_quality"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "material": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 8,
+                        "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+                      },
+                      "diameter_mm": {
+                        "type": "number",
+                        "enum": [
+                          9.525,
+                          12.7,
+                          15.875,
+                          19.05,
+                          25.4,
+                          31.75,
+                          38.1,
+                          50.8
+                        ],
+                        "x-unit": "mm",
+                        "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+                      },
+                      "insulation_thickness_mm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "mm",
+                        "description": "The insulation thickness; 0 for a bare pipe."
+                      },
+                      "insulation_conductivity_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "W/mK",
+                        "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+                      },
+                      "insulation_reflective": {
+                        "type": "boolean",
+                        "description": "Whether the insulation has a reflective facing."
+                      },
+                      "insulation_quality": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3,
+                        "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "material": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+              },
+              "diameter_mm": {
+                "type": "number",
+                "enum": [
+                  9.525,
+                  12.7,
+                  15.875,
+                  19.05,
+                  25.4,
+                  31.75,
+                  38.1,
+                  50.8
+                ],
+                "x-unit": "mm",
+                "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+              },
+              "insulation_thickness_mm": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "mm",
+                "description": "The insulation thickness; 0 for a bare pipe."
+              },
+              "insulation_conductivity_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "W/mK",
+                "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+              },
+              "insulation_reflective": {
+                "type": "boolean",
+                "description": "Whether the insulation has a reflective facing."
+              },
+              "insulation_quality": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether a pipe using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once a pipe uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.piping.pipe_types.list`
+
+One bounded page of Pipe Types in id order, with export readiness. Owner: `ph_composer.piping`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^ppt_[A-Za-z0-9]{12}$",
+        "description": "A Pipe Type id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "material",
+              "diameter_mm",
+              "insulation_thickness_mm",
+              "insulation_reflective",
+              "insulation_quality"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "material": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 8,
+                        "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+                      },
+                      "diameter_mm": {
+                        "type": "number",
+                        "enum": [
+                          9.525,
+                          12.7,
+                          15.875,
+                          19.05,
+                          25.4,
+                          31.75,
+                          38.1,
+                          50.8
+                        ],
+                        "x-unit": "mm",
+                        "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+                      },
+                      "insulation_thickness_mm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "mm",
+                        "description": "The insulation thickness; 0 for a bare pipe."
+                      },
+                      "insulation_conductivity_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "W/mK",
+                        "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+                      },
+                      "insulation_reflective": {
+                        "type": "boolean",
+                        "description": "Whether the insulation has a reflective facing."
+                      },
+                      "insulation_quality": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3,
+                        "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "material": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+              },
+              "diameter_mm": {
+                "type": "number",
+                "enum": [
+                  9.525,
+                  12.7,
+                  15.875,
+                  19.05,
+                  25.4,
+                  31.75,
+                  38.1,
+                  50.8
+                ],
+                "x-unit": "mm",
+                "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+              },
+              "insulation_thickness_mm": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "mm",
+                "description": "The insulation thickness; 0 for a bare pipe."
+              },
+              "insulation_conductivity_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "W/mK",
+                "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+              },
+              "insulation_reflective": {
+                "type": "boolean",
+                "description": "Whether the insulation has a reflective facing."
+              },
+              "insulation_quality": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3,
+                "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether a pipe using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once a pipe uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
   ]
 }
 ```
@@ -83197,6 +84135,1058 @@ Example params:
 }
 ```
 
+### `ph_composer.piping.pipe_types.create`
+
+Create one Pipe Type. Unless values give them, it is a 1/2 in (diameter_mm 12.7) Copper L pipe (material 2) with 12.7 mm of reflective insulation at 0.04 W/mK, insulation_quality 1, and no stored color. Owner: `ph_composer.piping`.
+
+Undo step: Create Pipe Type. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Pipe Type's.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "material": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8,
+                  "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+                },
+                "diameter_mm": {
+                  "type": "number",
+                  "enum": [
+                    9.525,
+                    12.7,
+                    15.875,
+                    19.05,
+                    25.4,
+                    31.75,
+                    38.1,
+                    50.8
+                  ],
+                  "x-unit": "mm",
+                  "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare pipe."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "insulation_quality": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3,
+                  "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "material": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+        },
+        "diameter_mm": {
+          "type": "number",
+          "enum": [
+            9.525,
+            12.7,
+            15.875,
+            19.05,
+            25.4,
+            31.75,
+            38.1,
+            50.8
+          ],
+          "x-unit": "mm",
+          "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+        },
+        "insulation_thickness_mm": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare pipe."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+        },
+        "insulation_reflective": {
+          "type": "boolean",
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "insulation_quality": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The new Pipe Type's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "PEX 3/4",
+    "material": 6,
+    "diameter_mm": 19.05,
+    "insulation_thickness_mm": 25.4
+  }
+}
+```
+
+### `ph_composer.piping.pipe_types.delete`
+
+Delete one Pipe Type. A type a pipe still uses refuses as reference.in_use unless replacement_id names another type to take its place, or is null to clear it. Owner: `ph_composer.piping`.
+
+Undo step: Delete Pipe Type. Deletes one definition and its metadata; Undo restores both.
+
+Before calling: The Pipe Type exists and is readable.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ppt_[A-Za-z0-9]{12}$",
+      "description": "The Pipe Type to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "material": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8,
+                  "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+                },
+                "diameter_mm": {
+                  "type": "number",
+                  "enum": [
+                    9.525,
+                    12.7,
+                    15.875,
+                    19.05,
+                    25.4,
+                    31.75,
+                    38.1,
+                    50.8
+                  ],
+                  "x-unit": "mm",
+                  "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare pipe."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "insulation_quality": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3,
+                  "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "material": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 8,
+          "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "enum": [
+            9.525,
+            12.7,
+            15.875,
+            19.05,
+            25.4,
+            31.75,
+            38.1,
+            50.8,
+            null
+          ],
+          "x-unit": "mm",
+          "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare pipe."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "insulation_quality": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^ppt_[A-Za-z0-9]{12}$",
+      "description": "Another existing Pipe Type to take this one's place on every pipe using it, or null to clear them; while no pipe uses it, there is nothing to move."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ppt_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ppt_Ab12Cd34Ef56",
+  "replacement_id": "ppt_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.piping.pipe_types.duplicate`
+
+Duplicate one Pipe Type with a new id and source derived. Owner: `ph_composer.piping`.
+
+Undo step: Duplicate Pipe Type. Creates one definition; user_data is copied.
+
+Before calling: The Pipe Type exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ppt_[A-Za-z0-9]{12}$",
+      "description": "The Pipe Type to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ppt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.piping.pipe_types.update`
+
+Edit guarded values of one Pipe Type; a changed expected value refuses and writes nothing. Owner: `ph_composer.piping`.
+
+Undo step: Edit Pipe Type. Updates one definition and preserves its metadata.
+
+Before calling: The Pipe Type exists and is readable. A new name: Its name, trimmed and in any case, is not another Pipe Type's.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ppt_[A-Za-z0-9]{12}$",
+      "description": "The Pipe Type to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "material": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 8,
+          "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "enum": [
+            9.525,
+            12.7,
+            15.875,
+            19.05,
+            25.4,
+            31.75,
+            38.1,
+            50.8,
+            null
+          ],
+          "x-unit": "mm",
+          "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare pipe."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "insulation_quality": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value; a null color returns the type to its default colour."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "material": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8,
+                  "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+                },
+                "diameter_mm": {
+                  "type": "number",
+                  "enum": [
+                    9.525,
+                    12.7,
+                    15.875,
+                    19.05,
+                    25.4,
+                    31.75,
+                    38.1,
+                    50.8
+                  ],
+                  "x-unit": "mm",
+                  "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare pipe."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "insulation_quality": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3,
+                  "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "material": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 8,
+          "description": "The pipe material: 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE, 8 PEX CTS SDR."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "enum": [
+            9.525,
+            12.7,
+            15.875,
+            19.05,
+            25.4,
+            31.75,
+            38.1,
+            50.8,
+            null
+          ],
+          "x-unit": "mm",
+          "description": "The nominal diameter, one of eight sizes: 9.525 (3/8 in), 12.7 (1/2 in), 15.875 (5/8 in), 19.05 (3/4 in), 25.4 (1 in), 31.75 (1 1/4 in), 38.1 (1 1/2 in), 50.8 (2 in)."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare pipe."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a pipe uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "insulation_quality": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "The quality of the insulation's installation: 1 None, 2 Moderate, 3 Good."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "ppt_Ab12Cd34Ef56",
+  "values": {
+    "insulation_conductivity_w_mk": 0.035
+  },
+  "expected_values": {
+    "insulation_conductivity_w_mk": 0.04
+  }
+}
+```
+
 ### `ph_composer.programs.assign_dwelling`
 
 Put Zones in a Dwelling: one shared, one each, none, or an existing one. A Dwelling left with no Zones is deleted in the same step. Owner: `ph_composer.programs`.
@@ -120557,6 +122547,12 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `mechanical.zone_unventilated` | A Zone in a Building Segment has no Ventilator. |
 | `mechanical.zone_without_spaces` | An item PHX reads through a Room's Spaces (a Pump or a Fan) serves an exported Zone with no Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only through another Room it serves in the same Building Segment. |
 
+### `ph_composer.piping`
+
+| Code | Meaning |
+| --- | --- |
+| `piping.insulation_conductivity_missing` | A Pipe Type has insulation and no insulation conductivity, so a pipe using it cannot export. |
+
 ### `ph_composer.programs`
 
 | Code | Meaning |
@@ -120864,3 +122860,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.95 | 2026-11-24 | ph_composer.mechanical.electric_heaters is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 4 with the heater_ids list slot. The export section ph_composer.mechanical.export.electric_heaters is new and ph_composer.mechanical.preflight adds its rows; ph_composer.mechanical.locate takes electric_heater_ids. |
 | 1.96 | 2026-11-24 | ph_composer.mechanical.pumps is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 5 with the pump_ids list slot. The export section ph_composer.mechanical.export.pumps is new and ph_composer.mechanical.preflight adds its rows, with the new code mechanical.zone_without_spaces; ph_composer.mechanical.locate takes pump_ids. The Spaces export's projection gives each Zone's space_count, with a row for every Zone holding a Space. |
 | 1.97 | 2026-11-24 | ph_composer.mechanical.fans is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 6 with the fan_ids list slot. The export section ph_composer.mechanical.export.fans is new and ph_composer.mechanical.preflight adds its rows, mechanical.zone_without_spaces among them; ph_composer.mechanical.locate takes fan_ids. |
+| 1.98 | 2026-11-24 | ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, with the code piping.insulation_conductivity_missing. |
