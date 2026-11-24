@@ -72,7 +72,7 @@ module PhComposer
           end
           if replacement == KEEP
             in_use!(request, kind, id, users) unless users.empty?
-            return nil
+            return plan(State.entries(request))
           end
 
           check_replacement!(request, kind, id, replacement)
@@ -86,7 +86,8 @@ module PhComposer
             moved = slots.to_h { |slot| [slot.key, slot.renamed(zone.values.fetch(slot.key), id, replacement)] }
             [zone, zone.values.merge(moved)]
           end
-          plan(State.stage(request, payloads))
+          State.stage(request, payloads)
+          plan(State.entries(request))
         end
 
         def plan(entries)

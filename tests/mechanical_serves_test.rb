@@ -182,6 +182,29 @@ class MechanicalServesTest < PhComposerTestCase
     assert_equal [@erv.fetch("ERV-1")] * 2, %w[Apt\ 1 Apt\ 2].map { |name| slots(name).fetch("ventilator_id") }
   end
 
+  # A caller composing Serves' operations in one proposal: the delete's move reads what the earlier assign staged,
+  # not the stored payload, and its reference plan projects that Zone as the proposal leaves it.
+  def test_a_delete_after_an_assign_in_one_proposal_builds_from_the_staged_payload
+    completed(assign(%w[Apt\ 1 Apt\ 2], "ERV-1"))
+    proposal = PhComposer::Operations::Proposal.new
+    request = PhComposer::HandlerRequest.for(@session, :owner => M::FEATURE_ID, :name => "#{VENTILATORS}.delete",
+                                                       :proposal => proposal)
+    M::Serves::Operations.assign(request, proposal, :targets => [target("Apt 1")], :slot => "ventilator_id",
+                                                    :item_id => @erv.fetch("ERV-3"), :replace => true)
+    erv1 = @erv.fetch("ERV-1")
+    M::Serves::Operations.delete(request, proposal, M::VENTILATOR_KIND, :id => erv1, :expected_values => {},
+                                                                        :replacement => @erv.fetch("ERV-2")) do |plan|
+      M::Ventilators::Operations.delete(request, proposal, :id => erv1, :reference_plan => plan)
+    end
+    assert_nil proposal.refusal
+    staged = proposal.steps.filter_map do |step|
+      after = step.descriptor["after"]
+      after && [after.fetch("name"), after.dig("extension_data", NAMESPACE, "payload", "ventilator_id")]
+    end
+    assert_equal [["Apt 1", @erv.fetch("ERV-3")], ["Apt 2", @erv.fetch("ERV-2")]], staged.uniq.last(2).sort,
+                 "Apt 1 keeps ERV-3, staged before the delete; Apt 2 moves to ERV-2"
+  end
+
   # ---------------------------------------------------------------- copy
 
   def test_a_copied_zone_keeps_what_serves_it_with_no_step_of_this_feature

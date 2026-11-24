@@ -874,7 +874,8 @@ The declared references put each named item in the engine's incoming-reference s
 `replacement_id` refuses `reference.in_use`, its message naming the Zones; with an id, every slot naming the item
 takes the replacement, and with null each is emptied, staged through `stage_extension` in the delete's proposal and
 handed to `propose_delete` as a `Records::ReferencePlan`, one Undo step. Only an understood payload is moved; any
-other stays as stored and the engine refuses the delete. A Zone whose two occurrences share an id, a copy not yet
+other stays as stored and the engine refuses the delete. A Zone this feature staged earlier in the same proposal
+reads as staged, so the move builds from that write, and the plan projects every Zone the proposal rewrote. A Zone whose two occurrences share an id, a copy not yet
 made independent, refuses the move as `target.ambiguous`. Every route through the engine, the generic metadata
 routes included, refuses a slot naming no stored item as `reference.invalid`.
 

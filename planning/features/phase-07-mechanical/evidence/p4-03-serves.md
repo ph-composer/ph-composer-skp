@@ -45,7 +45,8 @@ README.
 
 ## Tests
 
-`tests/mechanical_serves_test.rb`, Ruby 3.2.2 and 2.7.2: 13 runs, 320 assertions, 0 failures.
+`tests/mechanical_serves_test.rb`, Ruby 3.2.2 and 2.7.2: 14 runs, 332 assertions, 0 failures (13 runs at the first
+gate; the fourteenth is the Codex cycle 1 fix's).
 
 | Stage doc test | Test |
 | --- | --- |
@@ -100,7 +101,12 @@ serves (the list honours `fields`, and a page cuts at a whole row); the in-use m
 is understood (the engine's incoming check refuses the rest); assign over an invalid payload rebuilds it, as
 Programs' does; `proposal.refuse` keeps the first refusal, so calling it twice is harmless.
 
-Codex: see the PR.
+Codex gpt-6-astra, cycle 1 on `5ff4cfda` (PR #566): 1 P2, fixed in the next commit. A delete's move read the
+stored Zones, so a Zone an earlier step of the same proposal had assigned another Ventilator was moved over that
+write; `Serves::State` now keeps each payload it stages, with Zones' reference entry, on the request, reads a staged
+Zone as staged, and the delete's plan projects every Zone the proposal rewrote.
+`test_a_delete_after_an_assign_in_one_proposal_builds_from_the_staged_payload` composes the two operations in one
+proposal; reading the stored payload instead fails it.
 
 ## Native case
 
