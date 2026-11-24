@@ -5,7 +5,10 @@
  * declared choices included. `config.headerActions(field, state)`, when given, adds a feature's own actions to
  * a column's header, before its menu; each is a `{ node, persistent }` (table.js). An owner with a create action
  * sets `emptyAction` ({ label, run }) to offer it in the empty state of a table with no records.
- * `config.defaultWidths` ({ field: px }) adds or replaces a column's starting width.
+ * `config.defaultWidths` ({ field: px }) adds or replaces a column's starting width; `config.stickyWidths`
+ * ({ field: px }) keeps those identity columns pinned beside Actions while the table scrolls sideways.
+ * `config.search(record)` is the text the search field matches, and `config.placeholder` says what it is; both
+ * default to the record's name and notes.
  * `config.optionalColumns` ([[field, label]]) are columns the user may hide from a Columns menu in the control
  * row; `config.hiddenColumns` ({ field: true }) is the session state that holds which are hidden, owned by the
  * feature so a rebuilt view keeps it. A held cell draft keeps every column where it is, and hiding a column clears
@@ -68,7 +71,8 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
       label: function (row, field) { return row.record.values.name + " " + self.columnLabel(field); },
       recordLabel: config.label });
     this.menus = Object.create(null);
-    this.controls = new viewControls.ViewControls({ label: config.label, placeholder: "Name or notes",
+    this.controls = new viewControls.ViewControls({ label: config.label,
+      placeholder: config.placeholder || "Name or notes",
       fields: config.columns, groups: config.groups, count: config.count, columnSort: Boolean(config.columnMenus),
       guard: function () { return self.guard(); }, refused: notice },
       function () {
@@ -206,7 +210,7 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.controls.setFields(columns);
     if (this.dirty()) this.controls.collapsed = Object.create(null);
     var projected = this.controls.project(this.records, { value: config.value,
-      search: function (record) { return record.values.name + " " + (record.values.notes || ""); },
+      search: config.search || function (record) { return record.values.name + " " + (record.values.notes || ""); },
       group: config.group, columnMatch: function (record, filters) {
         return Object.keys(filters).every(function (field) {
           return filters[field].indexOf(filterKey(config.value(record, field))) >= 0;
@@ -219,7 +223,8 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     });
     this.edits.batchPending = this.ranges.busy();
     this.edits.refresh(rows, state);
-    this.tableOptions = { rows: rows, columns: [["actions", "Actions"]].concat(columns), stickyWidths: {},
+    this.tableOptions = { rows: rows, columns: [["actions", "Actions"]].concat(columns),
+      stickyWidths: config.stickyWidths || {},
       hiddenColumns: this.hidden,
       defaultWidths: Object.assign({ name: 228, notes: 180, color: 60, category: 170, exterior_condition: 140,
         total_thickness_mm: 104 }, config.defaultWidths),

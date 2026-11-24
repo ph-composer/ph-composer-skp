@@ -117,6 +117,27 @@ after a save, the preview host's Segment names, and the missing tests it named. 
 balance case (Spaces gives such a copy's Spaces to its first occurrence, so the case tests Spaces, not this read);
 `item_missing`'s locate (its object is the Zone, which the Zones locate opens).
 
+Codex gpt-6.2-sol cycle 1 on `8218ed04`: 5 P1 and 7 P2, all fixed in the next commit.
+
+- The Zone picker's draft now holds only the Zones the user changed, each with the slot it showed then: a snapshot
+  no longer turns an untouched Zone into a pending clear, each write's `expected_values` is what the user saw, a
+  click elsewhere or a scroll keeps a changed draft open (Cancel, the close and Escape drop it), and a clear refused
+  after an assign landed says the assign stays written.
+- An optional value's edit is guarded by the value its draft started from, and a row that vanishes from a
+  snapshot drops the draft instead of sending it.
+- A pasted Yes or No reaches the booleans (the choice's value or its label, in any case); other text is refused
+  before any range write. An absent Manufacturer or Model is `null`, so a range edit carries it as a value and a guard.
+- A Spaces or Programs read that refuses (an unreadable Space anywhere) leaves the Ventilators readable with every
+  balance unknown and the reason in `missing`.
+- The imbalance comparison rounds to 6 decimal places of m³/h, so 57 and 51.3 is not out of balance.
+- A Locate clears the search and the other column filters before narrowing to its Ventilators.
+- The Tag stays pinned beside Actions while the table scrolls (`mechanical.css`; it lets go below 900 px, as every
+  table does), and the search reads the Tag, Manufacturer, Model, Notes and the Zones served ("Tag, model or Zone").
+  The kit `Inventory` gains `search`, `placeholder` and `stickyWidths` for this.
+
+Tests added for each: `mechanical_panel_test.js` (five cases) and `mechanical_balance_test.rb` (the decimal
+boundary, the unreadable Space).
+
 ## Host
 
 Owed to MS2 (D4-31): case `M05` added to `planning/native-acceptance/cases.json`. `acceptance_ledger.py status` over

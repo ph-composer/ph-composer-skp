@@ -86,6 +86,9 @@ module PhComposer
         # An item's airflow balance over the Zones it serves (Balance), from one Spaces read and one Programs read
         # that every row shares, each Zone found by its occurrence path. The Zones counted are those the export
         # writes the item to: each Zone once, its first occurrence by path, and none in no Building Segment.
+        #
+        # A Spaces or Programs read that refuses (an unreadable Space anywhere in the Model) leaves every row's
+        # balance unknown with its message, and the Ventilators still read.
         def balance(request)
           spaces = request.query(SPACES).fetch("zones").to_h { |row| [row.fetch("zone_path"), row] }
           programs = request.query(PROGRAMS).fetch("zones").to_h { |row| [row.dig("reference", "zone_path"), row] }
@@ -96,6 +99,8 @@ module PhComposer
               Balance::Zone.new(:name => label(zone), :spaces => spaces[path], :programs => programs[path])
             end)
           end
+        rescue CodedError => error
+          ->(_served) { Balance.unreadable(error.message) }
         end
 
         def item_findings(record, served)

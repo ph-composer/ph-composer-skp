@@ -6,7 +6,10 @@
    the commit, labelled with what it does: newly checked Zones through serves.assign, then Zones left unchecked
    through serves.clear, each one Undo step. A Zone another item fills refuses the assign with
    mechanical.slot_filled, naming it; the draft stays, and the commit, now "Replace and assign", sends it again with
-   `replace`. Cancel, the close and Escape write nothing.
+   `replace`. Cancel, the close and Escape write nothing; a click elsewhere or a scroll leaves a changed draft open.
+
+   The draft holds only the Zones the user changed, each with the slot it showed then, which is what each write's
+   `expected_values` carries; every other row follows the Model as snapshots arrive.
 
    new Picker(session, send, { slot, family, notify }) with open(record, trigger, layer), refresh(state),
    guard(), dispose(). chips(record, state) answers the cell's button; `record.zones` are its served Zones. */
@@ -72,28 +75,41 @@ function (snapshot, ui, request) {
     if (this.busy()) return "Wait for the Zones to be assigned.";
     return this.held && this.changes().count ? "Apply or cancel the Zone picker first." : null;
   };
-  /* What the draft would change: Zones to assign, and Zones the item serves now that are left unchecked. */
+  /* Whether a Zone shows checked: as the user left it, else as the Model has it. */
+  Picker.prototype.isChecked = function (row) {
+    var touched = this.held.touched[key(row)];
+    return touched ? touched.checked : row.slots[this.options.slot] === this.held.record.id;
+  };
+  Picker.prototype.touch = function (row, checked) {
+    var touched = this.held.touched, previous = touched[key(row)];
+    touched[key(row)] = { checked: checked, base: previous ? previous.base : JSON.parse(JSON.stringify(row.slots)) };
+    this.held.filled = false;
+  };
+  /* What the draft would change: Zones the user checked that the item does not serve, and Zones it serves that the
+     user unchecked. */
   Picker.prototype.changes = function () {
     var held = this.held, slot = this.options.slot, add = [], clear = [];
     if (!held) return { add: add, clear: clear, count: 0 };
     zoneRows(held.state).forEach(function (row) {
-      var checked = Boolean(held.checked[key(row)]), serves = row.slots[slot] === held.record.id;
-      if (checked && !serves) add.push(row);
-      if (!checked && serves) clear.push(row);
+      var touched = held.touched[key(row)];
+      if (!touched) return;
+      var serves = row.slots[slot] === held.record.id;
+      if (touched.checked && !serves) add.push(row);
+      if (!touched.checked && serves) clear.push(row);
     });
     return { add: add, clear: clear, count: add.length + clear.length };
   };
   Picker.prototype.open = function (record, trigger, layer) {
     if (this.held && this.held.record.id === record.id) { this.close(true); return; }
-    this.close(false);
-    var self = this, slot = this.options.slot, state = this.state, checked = Object.create(null);
-    zoneRows(state).forEach(function (row) { if (row.slots[slot] === record.id) checked[key(row)] = true; });
+    if (!this.close(false)) return;
+    var self = this, state = this.state;
     var bubble = new ui.Bubble(trigger, "Zones served by " + record.values.name,
       { detachedTrigger: true, ownTrigger: true });
     bubble.root.classList.add("mech-zone-picker");
     var originalClose = bubble.close;
+    // An implicit close (a click elsewhere, a scroll) keeps a changed draft; Cancel, the close and Escape drop it.
     bubble.close = function (focus) {
-      if (self.busy()) return false;
+      if (self.busy() || (focus === false && self.changes().count)) return false;
       var closed = originalClose.call(bubble, focus);
       if (closed !== false) self.release();
       return closed;
@@ -108,8 +124,8 @@ function (snapshot, ui, request) {
     var apply = ui.button("Assign", function () { self.apply(Boolean(self.held && self.held.filled)); });
     bubble.content.replaceChildren(find, list, status, ui.actionRow(cancel, apply));
     (layer || document.body).appendChild(bubble.root);
-    this.held = { record: record, bubble: bubble, checked: checked, state: state, find: find, list: list,
-      status: status, apply: apply, cancel: cancel, filled: false };
+    this.held = { record: record, bubble: bubble, touched: Object.create(null), state: state, find: find,
+      list: list, status: status, apply: apply, cancel: cancel, filled: false, assigned: 0 };
     this.paint();
     bubble.open(false);
     find.focus({ preventScroll: true });
@@ -139,25 +155,25 @@ function (snapshot, ui, request) {
       var heading = ui.element("label", "mech-zone-group" + (group.key === NONE ? " is-muted" : ""));
       var all = ui.element("input");
       all.type = "checkbox"; all.setAttribute("type", "checkbox");
-      var count = group.rows.filter(function (row) { return held.checked[key(row)]; }).length;
+      var count = group.rows.filter(function (row) { return self.isChecked(row); }).length;
       all.checked = count === group.rows.length;
       all.indeterminate = count > 0 && count < group.rows.length;
       all.disabled = busy;
       all.setAttribute("data-zone-group", group.key);
       all.setAttribute("aria-label", (words ? "Every shown Zone in " : "Every Zone in ") + group.label);
       all.addEventListener("change", function () {
-        group.rows.forEach(function (row) { held.checked[key(row)] = all.checked; });
-        held.filled = false; self.paint();
+        group.rows.forEach(function (row) { self.touch(row, all.checked); });
+        self.paint();
       });
       heading.appendChild(all); heading.appendChild(ui.element("span", "", group.label));
       nodes.push(heading);
       group.rows.forEach(function (row) {
         var line = ui.element("label", "mech-zone-row"), box = ui.element("input");
         box.type = "checkbox"; box.setAttribute("type", "checkbox");
-        box.checked = Boolean(held.checked[key(row)]); box.disabled = busy;
+        box.checked = self.isChecked(row); box.disabled = busy;
         box.setAttribute("data-zone-path", key(row));
         box.addEventListener("change", function () {
-          held.checked[key(row)] = box.checked; held.filled = false; self.paint();
+          self.touch(row, box.checked); self.paint();
         });
         line.appendChild(box);
         line.appendChild(ui.element("span", "mech-zone-name", row.name || row.zone_id));
@@ -190,8 +206,10 @@ function (snapshot, ui, request) {
       held.status.textContent = ""; held.status.classList.remove("is-error", "is-filled");
     }
   };
+  /* Each Zone with the slot the user saw when they changed it, so a Zone changed since refuses. */
   Picker.prototype.targets = function (rows) {
-    return rows.map(function (row) { return { reference: row.reference, expected_values: row.slots }; });
+    var touched = this.held.touched;
+    return rows.map(function (row) { return { reference: row.reference, expected_values: touched[key(row)].base }; });
   };
   /* Assigns the newly checked Zones, then clears those left unchecked: two requests, one after the other, so the
      second reads the Model the first left. `replace` answers a mechanical.slot_filled refusal. */
@@ -217,7 +235,7 @@ function (snapshot, ui, request) {
     var outcome = this.requests.consume(state), held = this.held;
     if (!held) return;
     var record = (records || []).filter(function (entry) { return entry.id === held.record.id; })[0];
-    if (!record && !this.busy()) { this.close(false); return; }
+    if (!record && !this.busy()) { this.dismiss(); return; }
     if (record) held.record = record;
     held.state = state;
     if (outcome) this.settle(outcome);
@@ -227,12 +245,17 @@ function (snapshot, ui, request) {
     var held = this.held;
     if (outcome.status !== "completed") {
       held.filled = outcome.code === "mechanical.slot_filled";
-      held.status.textContent = snapshot.message(outcome, "The Zones were not changed.");
+      // A refused clear follows an assign that landed: say both, since that half stays written.
+      held.status.textContent = (held.step === "clear" && held.assigned ? "Assigned " +
+        plural(held.assigned, "Zone") + "; clearing the unchecked Zones was refused. " : "") +
+        snapshot.message(outcome, "The Zones were not changed.");
       held.status.classList.add("is-error");
       held.status.classList.toggle("is-filled", held.filled);
       return;
     }
     held.filled = false;
+    if (held.step === "assign") held.assigned = outcome.value && outcome.value.zone_ids ?
+      outcome.value.zone_ids.length : 1;
     var changes = this.changes();
     if (held.step === "assign" && changes.clear.length) {
       // The assign landed; the Zones left unchecked are cleared next, from the Model as the assign left it.
@@ -245,9 +268,17 @@ function (snapshot, ui, request) {
     this.close(true);
     if (this.options.notify) this.options.notify("Saved the Zones " + name + " serves.", "success");
   };
+  /* Drops the picker without writing: its item is gone, or its view is. */
+  Picker.prototype.dismiss = function () {
+    var held = this.held;
+    if (!held) return;
+    held.touched = Object.create(null);
+    held.bubble.close(false);
+    this.release();
+  };
   Picker.prototype.dispose = function () {
     this.requests.reset();
-    if (this.held) { this.held.bubble.close(false); this.release(); }
+    this.dismiss();
   };
 
   return { Picker: Picker, chips: chips, grouped: grouped };

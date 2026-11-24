@@ -14,6 +14,9 @@ module PhComposer
       module Balance
         # Supply and extract differ by more than this share of the larger.
         IMBALANCE_SHARE = 0.1
+        # Flows are compared to this many decimal places of m³/h, so a difference of exactly a tenth (57 and 51.3)
+        # is not out of balance through binary rounding.
+        PLACES = 6
         BY_PROGRAM = "by_program"
         UNSERVED = "It serves no Zone the export writes, so it moves no air."
 
@@ -54,7 +57,12 @@ module PhComposer
 
         def imbalanced?(supply, extract)
           larger = [supply, extract].max
-          larger.positive? && (supply - extract).abs > IMBALANCE_SHARE * larger
+          larger.positive? && (supply - extract).abs.round(PLACES) > (IMBALANCE_SHARE * larger).round(PLACES)
+        end
+
+        # Every item's row while the airflows cannot be read at all.
+        def unreadable(message)
+          unknown("The airflows cannot be read: #{message}")
         end
 
         def unknown(reason)

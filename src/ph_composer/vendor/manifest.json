@@ -176,14 +176,14 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/mechanical/mechanical.css": {
-      "bytes": 3117,
+      "bytes": 3810,
       "mime": "text/css; charset=utf-8",
-      "sha256": "2c5c7048f4dc96f439cf5002ac09609df375354a36b5f3ae0e1df117b1c022fa"
+      "sha256": "945d2d6222e8ec03ff371c9aecb71df33b6a1c3f7a1a09598c1733c0c87382f4"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 6990,
+      "bytes": 7524,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "c5ae2611b3fd6e009f274dd7b6081e8e9434fce1d048073c71caab3e1b4ee372"
+      "sha256": "c6f146101dc8162bd0b6a80d1371099a1cb20d6d188e3b3ca72428ad878fbb5d"
     },
     "html/features/mechanical/section.js": {
       "bytes": 4960,
@@ -191,9 +191,9 @@
       "sha256": "682e789c9c0dd4f3c16d0685ff77d04b1b14f153701f64876b5416225e96159d"
     },
     "html/features/mechanical/serves.js": {
-      "bytes": 13767,
+      "bytes": 15359,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ac597cce20f2c5cc0088fd041238c89213ac5e700e14b86048b92656611c8349"
+      "sha256": "66c0ec2b2877bc9fbac0787b8c344e703b68bf01199de447ba01355b720fd392"
     },
     "html/features/mechanical/systems.js": {
       "bytes": 2025,
@@ -201,9 +201,9 @@
       "sha256": "e96bd2c8e94a83789b7dc7e6c6d94881916c6c7ef158d2b806b584c2c6bfa01f"
     },
     "html/features/mechanical/ventilators.js": {
-      "bytes": 15452,
+      "bytes": 16780,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "905f4d531280c59e3d62dbeb73de9f3889e2e80487afd2a0dcb5711a9b785bdd"
+      "sha256": "986cd6ffd4ad0b491fdf23669e04a88225e3ccdf3e81c216cdc908223f0b8bbb"
     },
     "html/features/programs/airtightness.js": {
       "bytes": 6073,
@@ -516,9 +516,9 @@
       "sha256": "04c4c5ad718dee6ae62c4c65a162f7ed6209e7f350c2da9d53f6c1fadd43842b"
     },
     "html/inventory.js": {
-      "bytes": 15029,
+      "bytes": 15384,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "40d3a6d459716e14ca24975e64a75656ed0529e589d333bfef52f7b51d0af32a"
+      "sha256": "6e7af5d18ba90e442b63355c5bca713e9b92dbc05fb11f74b4810440e0297f76"
     },
     "html/inventory_forms.js": {
       "bytes": 23066,

@@ -39,6 +39,19 @@ class MechanicalBalanceTest < PhComposerTestCase
     assert_equal [40.0, 40.0, false], sums(BALANCE.call([detailed(40.0, 40.0)]))
     assert_equal [100.0, 90.0, false], sums(BALANCE.call([detailed(60.0, 50.0), detailed(40.0, 40.0)]))
     assert_equal [0.0, 0.0, false], sums(BALANCE.call([detailed(0.0, 0.0)]))
+    refute BALANCE.call([detailed(57.0, 51.3)]).fetch("imbalanced"), "a tenth exactly, in decimals"
+    assert BALANCE.call([detailed(57.0, 51.29)]).fetch("imbalanced")
+  end
+
+  # A Space no read can validate refuses the Spaces read; the Ventilators still read, their balance unknown.
+  def test_an_unreadable_space_leaves_the_ventilators_readable_with_the_balance_unknown
+    completed(assign(["Zone A"], "ERV-1"))
+    space = space_group_named("Zone A")
+    SPACES::SPACE_STORE.write(space, SPACES::SPACE_STORE.read(space).merge("schema_version" => 99))
+    refute_equal "completed", query("ph_composer.spaces.all").fetch("status")
+    balance = ventilator_rows.fetch("ERV-1").fetch("balance")
+    assert_equal [nil, nil, false], sums(balance)
+    assert_match(/The airflows cannot be read/, balance.fetch("missing"))
   end
 
   def test_a_by_program_zone_counts_its_program_flow_as_both_and_none_known_makes_a_dash

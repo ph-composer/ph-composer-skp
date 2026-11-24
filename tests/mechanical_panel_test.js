@@ -268,3 +268,99 @@ test("Duplicate asks for the copy's Tag and sends no datasheet choice", function
   assert.deepStrictEqual(clone(named(o, PREFIX + "ventilators.duplicate")[0].payload.params),
     { id: fixtures.ERV1.id, name: "ERV-1 (copy)" });
 });
+
+test("the picker's draft holds only the Zones the user changed, guarded by what they saw, and outlives a stray click",
+  function () {
+    var o = setup();
+    press(row(o, fixtures.ERV1.id).querySelector(".mech-serves-cell"));
+    var picker = o.ventilators().picker;
+    // Another client gives Zone C to ERV-1 while the picker is open and untouched: no edit appears.
+    var zones = o.state.sections[PREFIX + "serves"].value.zones;
+    zones[2].slots = { ventilator_id: fixtures.ERV1.id };
+    o.paint();
+    assert.strictEqual(picker.changes().count, 0, "a snapshot is not a draft");
+    var b = picker.held.list.querySelectorAll("input").filter(function (input) {
+      return input.getAttribute("data-zone-path") === JSON.stringify(fixtures.ZONES.B.zone_path);
+    })[0];
+    b.checked = true; b.listeners.change({});
+    // Zone B changes under the draft: the assign still carries the slot the user saw.
+    zones[1].slots = { ventilator_id: fixtures.ERV3.id };
+    o.paint();
+    assert.strictEqual(picker.held.bubble.close(false), false, "a click elsewhere keeps a changed draft");
+    assert.ok(picker.held);
+    press(picker.held.apply);
+    var assign = named(o, PREFIX + "serves.assign")[0];
+    assert.deepStrictEqual(clone(assign.payload.params.zones[0].expected_values), { ventilator_id: fixtures.ERV2.id });
+  });
+
+test("a clear refused after an assign landed says the assign stays written", function () {
+  var o = setup();
+  press(row(o, fixtures.ERV1.id).querySelector(".mech-serves-cell"));
+  var picker = o.ventilators().picker, inputs = picker.held.list.querySelectorAll("input");
+  function box(zone) {
+    return inputs.filter(function (input) { return input.getAttribute("data-zone-path") === JSON.stringify(zone); })[0];
+  }
+  var c = box(fixtures.ZONES.C.zone_path), a = box(fixtures.ZONES.A.zone_path);
+  c.checked = true; c.listeners.change({});
+  a.checked = false; a.listeners.change({});
+  press(picker.held.apply);
+  var zones = o.state.sections[PREFIX + "serves"].value.zones;
+  zones[2].slots = { ventilator_id: fixtures.ERV1.id };
+  answer(o, named(o, PREFIX + "serves.assign")[0], { status: "completed", value: { zone_ids: ["zon_C"] } });
+  answer(o, named(o, PREFIX + "serves.clear")[0], { status: "refused", code: "target.locked",
+    message: "Zone A is locked. Nothing was written." });
+  assert.match(picker.held.status.textContent, /^Assigned 1 Zone; clearing the unchecked Zones was refused\./);
+});
+
+test("an optional value's edit is guarded by the value it started from, and a vanished row sends nothing",
+  function () {
+    var o = setup();
+    var disclosure = row(o, fixtures.ERV2.id).querySelectorAll("button").filter(function (node) {
+      return /^Optional values of/.test(node.getAttribute("aria-label") || "");
+    })[0];
+    press(disclosure);
+    var optional = o.ventilators().optional, subsoil = optional.held.fields[0].unit;
+    subsoil.input.value = "0.35"; subsoil.input.listeners.input({});
+    o.state.sections[PREFIX + "ventilators"].value.records[1].values.subsoil_heat_exchange_efficiency = 0.25;
+    o.paint();
+    key(subsoil.input, "Enter");
+    assert.deepStrictEqual(clone(named(o, PREFIX + "ventilators.update")[0].payload.params.expected_values),
+      { subsoil_heat_exchange_efficiency: 0.2 });
+
+    var p = setup(), records;
+    press(row(p, fixtures.ERV2.id).querySelectorAll("button").filter(function (node) {
+      return /^Optional values of/.test(node.getAttribute("aria-label") || "");
+    })[0]);
+    var draft = p.ventilators().optional.held.fields[1].unit;
+    draft.input.value = "5"; draft.input.listeners.input({});
+    records = p.state.sections[PREFIX + "ventilators"].value.records;
+    records.splice(1, 1);
+    p.paint();
+    assert.strictEqual(named(p, PREFIX + "ventilators.update").length, 0, "the draft is dropped, not sent");
+    assert.strictEqual(p.ventilators().optional.held, null);
+  });
+
+test("pasted Yes and No reach the booleans, other text is refused, and an absent identity value is null",
+  function () {
+    var o = setup(), edits = o.ventilators().inventory.edits;
+    assert.strictEqual(edits.normalize("frost_protection_reqd", "Yes"), true);
+    assert.strictEqual(edits.normalize("in_conditioned_space", "no"), false);
+    assert.strictEqual(edits.normalize("frost_protection_reqd", "maybe").ok, false);
+    assert.strictEqual(edits.normalize("frost_protection_reqd", "").ok, false);
+    assert.strictEqual(cell(o, fixtures.ERV3.id + ":manufacturer").current, null);
+  });
+
+test("search reads the Tag, model and served Zones, and a Locate shows its rows past other filters", function () {
+  var o = setup(), inventory = o.ventilators().inventory;
+  inventory.controls.filter.value = "Q350"; inventory.controls.filter.listeners.input({});
+  assert.strictEqual(row(o, fixtures.ERV1.id).hidden, false);
+  assert.strictEqual(row(o, fixtures.ERV2.id).hidden, true);
+  inventory.controls.filter.value = "Zone B"; inventory.controls.filter.listeners.input({});
+  assert.strictEqual(row(o, fixtures.ERV2.id).hidden, false);
+  assert.strictEqual(row(o, fixtures.ERV1.id).hidden, true);
+  inventory.controls.filterColumn("in_conditioned_space", ["true"]);
+  o.navigate({ ventilator_ids: [fixtures.ERV2.id] });
+  assert.strictEqual(inventory.controls.columnFilter("in_conditioned_space"), null);
+  assert.strictEqual(inventory.controls.filter.value, "");
+  assert.strictEqual(row(o, fixtures.ERV2.id).hidden, false);
+});

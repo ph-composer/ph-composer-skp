@@ -75,15 +75,26 @@ function (panel, snapshot, ui, fields, units, preferences, RecordForm, inventori
     var stored = record.values[field];
     return BOOLEANS.indexOf(field) >= 0 ? String(stored !== false) : stored;
   }
-  /* Typed text as the update sends it: an integer quantity, a yes or no, a blank identity value removed. */
+  /* Typed or pasted text as the update sends it: an integer quantity, a yes or no (the choice's value or its label,
+     in any case), a blank identity value removed. Anything else is refused before it is sent. */
   function normalize(field, text) {
-    if (BOOLEANS.indexOf(field) >= 0) return text === "true";
+    if (BOOLEANS.indexOf(field) >= 0) {
+      var word = text.toLowerCase();
+      if (word === "true" || word === "yes") return true;
+      if (word === "false" || word === "no") return false;
+      return { ok: false, message: "Enter Yes or No." };
+    }
     if (field === "quantity") {
       return /^\d+$/.test(text) && Number(text) >= 1 ? Number(text) :
         { ok: false, message: "Enter a whole number of 1 or more." };
     }
     if (field === "manufacturer" || field === "model") return text === "" ? null : text;
     return undefined;
+  }
+  function searchText(record) {
+    var values = record.values;
+    return [values.name, values.manufacturer, values.model, values.notes].concat((record.zones || []).map(
+      function (zone) { return zone.name; })).filter(Boolean).join(" ");
   }
   function validate(field, entered) {
     if (FRACTIONS.indexOf(field) >= 0 && (entered < 0 || entered > 1)) return "Enter a fraction from 0 to 1.";
@@ -126,11 +137,17 @@ function (panel, snapshot, ui, fields, units, preferences, RecordForm, inventori
         supply_m3h: AIRFLOW, extract_m3h: AIRFLOW },
       selectFields: { frost_protection_reqd: YES_NO, in_conditioned_space: YES_NO },
       optionalColumns: IDENTITY, hiddenColumns: this.hidden, normalize: normalize, validate: validate,
+      // The Tag stays beside Actions while the table scrolls to Serves and the balance; search reads the Tag, the
+      // identity, the notes and the Zones served.
+      stickyWidths: { name: 180 }, placeholder: "Tag, model or Zone", search: searchText,
       defaultWidths: { name: 180, quantity: 84, sensible_heat_recovery: 132, latent_heat_recovery: 124,
         electric_efficiency_wh_m3: 168, frost_protection_reqd: 128, temperature_below_defrost_used_c: 140,
         in_conditioned_space: 160, serves: 220, supply_m3h: 112, extract_m3h: 112, manufacturer: 130, model: 130 },
+      // An absent optional value is null, so a range edit carries it as a value and as its guard.
       rawValue: function (row, field) {
-        return BOOLEANS.indexOf(field) >= 0 ? row.record.values[field] !== false : row.record.values[field];
+        var stored = row.record.values[field];
+        if (BOOLEANS.indexOf(field) >= 0) return stored !== false;
+        return stored === undefined ? null : stored;
       },
       columnMenus: { sort: ["name", "quantity", "sensible_heat_recovery", "latent_heat_recovery",
         "electric_efficiency_wh_m3", "temperature_below_defrost_used_c", "serves", "supply_m3h", "extract_m3h",
@@ -203,10 +220,16 @@ function (panel, snapshot, ui, fields, units, preferences, RecordForm, inventori
     if (!this.records.length) return;
     var names = this.records.filter(function (record) { return intent.ventilator_ids.indexOf(record.id) >= 0; })
       .map(function (record) { return record.values.name; });
-    if (!names.length) panel.notify("Those Ventilators are no longer in the Model.", "warning");
-    else if (!this.inventory.controls.filterColumn("name", names)) {
-      panel.notify(this.guard() || "The table cannot be narrowed now.", "warning");
-    }
+    if (!names.length) { panel.notify("Those Ventilators are no longer in the Model.", "warning"); return; }
+    // The Ventilators located show whatever narrowed the table before: other filters and the search give way to
+    // the Tag filter, which the Tag column's menu clears.
+    var controls = this.inventory.controls, reason = this.guard();
+    if (reason) { panel.notify(reason, "warning"); return; }
+    Object.keys(controls.columnFilters).forEach(function (field) {
+      if (field !== "name") controls.filterColumn(field, null);
+    });
+    controls.filter.value = "";
+    controls.filterColumn("name", names);
   };
   /* A row's disclosure action, as the table last drew it. */
   Ventilators.prototype.disclosure = function (id) {

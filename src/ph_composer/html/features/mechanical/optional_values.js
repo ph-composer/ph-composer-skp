@@ -15,6 +15,7 @@ function (ui, unitFields, units, preferences, request, snapshot) {
   "use strict";
 
   function present(value) { return value !== null && value !== undefined; }
+  function stored(record, key) { return present(record.values[key]) ? record.values[key] : null; }
 
   function OptionalValues(session, send, options) {
     this.options = options;
@@ -59,8 +60,13 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     var fields = this.options.fields.map(function (entry) {
       var label = ui.element("label", "mech-optional-field"), held = { key: entry.key };
       held.unit = new unitFields.UnitField({ field: entry.field, value: record.values[entry.key], commitOnBlur: true,
-        onCommit: function (value) { self.apply(held, value); } });
+        onCommit: function (value) { self.apply(held, value); },
+        onCancel: function () { held.base = undefined; } });
       held.unit.input.setAttribute("aria-label", entry.label);
+      // The value the draft started from is its guard, whatever a snapshot shows meanwhile.
+      held.unit.input.addEventListener("input", function () {
+        if (held.base === undefined && self.held) held.base = stored(self.held.record, entry.key);
+      });
       label.appendChild(ui.element("span", "", entry.label));
       label.appendChild(held.unit.root);
       held.label = label;
@@ -86,7 +92,8 @@ function (ui, unitFields, units, preferences, request, snapshot) {
   OptionalValues.prototype.apply = function (held, value) {
     var record = this.held.record, values = {}, expected = {};
     values[held.key] = value;
-    expected[held.key] = present(record.values[held.key]) ? record.values[held.key] : null;
+    expected[held.key] = held.base !== undefined ? held.base : stored(record, held.key);
+    held.base = undefined;
     this.pending = held;
     this.requests.run(this.options.action, { id: record.id, values: values, expected_values: expected });
     this.paint();
@@ -104,7 +111,7 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     if (outcome) this.pending = null;
     if (!held) return;
     var record = (records || []).filter(function (entry) { return entry.id === held.record.id; })[0];
-    if (!record && !this.busy()) { this.close(false); return; }
+    if (!record && !this.busy()) { this.dismiss(); return; }
     if (record) held.record = record;
     if (outcome && outcome.status !== "completed" && pending) {
       held.closing = false;
@@ -118,12 +125,15 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     this.paint();
     if (outcome && held.closing) this.close(true);
   };
-  /* A view that is gone sends nothing: a field's draft is dropped, not applied. */
-  OptionalValues.prototype.dispose = function () {
-    this.requests.reset();
+  /* A Ventilator or a view that is gone sends nothing: a field's draft is dropped, not applied. */
+  OptionalValues.prototype.dismiss = function () {
     if (!this.held) return;
     this.held.fields.forEach(function (entry) { entry.unit.editing = false; });
     this.release();
+  };
+  OptionalValues.prototype.dispose = function () {
+    this.requests.reset();
+    this.dismiss();
   };
   /* The row action the bubble hangs from is drawn again with its row; the open bubble follows it. */
   OptionalValues.prototype.retarget = function (trigger) {

@@ -2,6 +2,17 @@
    optional values bubble. The subtabs, the pill row and the tables are the shared kit's. */
 .mech-table { padding-top: 10px; }
 
+/* The Tag stays pinned beside Actions while the table scrolls to Serves and the balance (the kit's inventories
+   leave their name column free); a table with no hierarchy column takes none of its offset. As every table does,
+   it lets go below 900 px, where pinned columns would take the work surface. */
+.mech-ventilators-table .phc-table { --col-hierarchy-width: 0px; }
+.mech-ventilators-table .phc-table td.col-name { position: sticky; }
+.mech-ventilators-table .phc-table th.col-name { left: var(--col-actions-width); }
+@media (max-width: 900px) {
+  .mech-ventilators-table .phc-table td.col-name { position: static; }
+  .mech-ventilators-table .phc-table th.col-name { left: auto; }
+}
+
 /* Serves: the cell is one button holding the first Zones as chips; the row owns hover, so a chip never tints. */
 .phc-workspace .phc-table td.mech-serves { padding: 0 4px; }
 .phc-workspace button.mech-serves-cell { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0;
