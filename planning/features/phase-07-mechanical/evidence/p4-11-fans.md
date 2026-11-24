@@ -55,11 +55,12 @@ panel manifests refreshed. Host case `M11` added to `cases.json`.
 Read in PHX 1.59.4 (`from_HBJSON/create_variant.py`, `add_exhaust_vent_devices_from_hb_rooms`): PHX walks each Room's
 Spaces, adds each exhaust ventilator once by key to every simulated Zone and builds it with
 `create_hvac.build_phx_exhaust_vent_device` (display name, flow times 3600, runtime; not quantity). Proved by
-`tests/python/test_fans_phx_round_trip.py`: the reference's three pairs give two exhaust devices on the Zone, each once
-(a range hood with 250 m³/h and 10,950 min, a dryer with 100 m³/h and 6,000 min), and one supportive device, the hood's
-(type 10, quantity 2, 120 W, 0.1825 kh); WUFI XML names F-1 twice (exhaust and supportive device) and F-2 once. One
-record becomes two objects with Power and one without. With Zone B's Space removed, both fans still reach PHX once
-through Room A; a fan only on the Room with no Spaces gives no device.
+`tests/python/test_fans_phx_round_trip.py`: the reference's four pairs give three exhaust devices on the Zone, each once
+(a range hood with 250 m³/h and 10,950 min, a dryer with 100 m³/h and 6,000 min, a user-defined exhaust), and two
+supportive devices, the hood's (type 10, quantity 2, 120 W, 0.1825 kh) and F-3's with its named 2.5 kh; WUFI XML names
+F-1 twice (exhaust and supportive device) and F-2 once. One record becomes two objects with Power and one without.
+With Zone B's Space removed, every fan still reaches PHX once through Room A; a powered fan only on the Room with no
+Spaces gives neither object.
 
 ## Tests
 
@@ -68,8 +69,8 @@ through Room A; a fan only on the Room with no Spaces gives no device.
   removing the value; guarded edit with stale refusal, Undo and Redo; Duplicate with `user_data`; two Zones and two
   fans on one, Clear with `item_id`, an id of another kind; delete in use, with a replacement (kept once) as one Undo
   step that Undo restores, with null.
-- `tests/mechanical_fan_export_test.rb`: the reference (F-1 on A and B with Power and `user_data`, F-2 on A without)
-  gives three pairs, equal per fan, F-2's Power null, no notes and no preflight rows, owning
+- `tests/mechanical_fan_export_test.rb`: the reference (F-1 on A and B with Power and `user_data`, F-2 on A without,
+  F-3 on A with Power and a named operation) gives four pairs, equal per fan, F-2's Power null, F-3's 2.5 kh, no notes and no preflight rows, owning
   `tests/fixtures/mechanical/fan_extraction.json`; a fan on a Zone with no Space noted and still written, the same in
   the preflight; an unserved fan, two Segments and a left-out Zone; a missing fan blocks; an unreadable fan blocks as
   unreadable; a reserved `user_data` key; Locate; the privacy allowlist. `tests/mechanical_pump_export_test.rb` runs
@@ -104,6 +105,11 @@ only on a Room with no Spaces reaches neither PHX collection; a user-defined fan
 zeros through the reload (and the Ruby kind keeps them); the preflight matches the export notes after a Zone leaves its
 Building Segment.
 
+Codex gpt-6.2-sol cycle 2 on `617ab538`: 2 P2, both fixed in the next commit, which merges after the two-cycle cap
+unreviewed: the Operation field's value-when-blank is now its accessible description too (a hidden hint named by
+`aria-describedby` beside the error), not only its placeholder; the Ruby reference gains F-3, a powered user-defined
+fan with a named operation, so the override is proved from Ruby through the HBJSON reload and PHX.
+
 UI polish (rubric `.agents/skills/ph-composer-ui-polish/SKILL.md`): the table reuses `EquipmentTable` and the
 Mechanical disclosure with no new kit part; columns carry their unit once in the header; a blank Power shows the
 kit's dash; the disclosure's choice has no blank because the value is required; the 360 x 520 view scrolls inside the
@@ -124,3 +130,10 @@ Browser checks: `make ui-checks` ran all 39 scripts in `tools/ui-preview/`, exit
 
 PHX round trips: `uv run --group phx pytest tests/python -k phx_round_trip`: 24 passed, 0 skipped (3 of them the
 fans'); the whole Python suite under the `phx` group: 465 passed, 1 skipped (the map data skip above).
+
+Final head (after both review cycles): `make ci` on Ruby 2.7.2: "Ruby suite, 10 processes: 3450 runs, 48687
+assertions, 0 failures, 0 errors, 1 skips"; JavaScript 1214 of 1214; Python "466 passed, 1 skipped"; "RBZ verified: 786
+files, 8922210 bytes, 27461724 bytes installed", 538,276 under the ceiling; and on Ruby 3.2.2 chained into the final
+commit. `make ui-checks UI_CHECKS=tools/ui-preview/mechanical_checks.cjs` passes on the final panel code (the other 38
+scripts ran at `d1c69b7b`; the review fixes touched only `optional_values.js` and Fan tests). PHX round trips 24
+executed, 0 skipped.

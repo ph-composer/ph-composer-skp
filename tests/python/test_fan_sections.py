@@ -1,9 +1,10 @@
 """The Fan section (context/CONTRACTS.md, "Mechanical equipment") over the reference model
 tests/mechanical_fan_export_test.rb writes: Zones A and B in Building Segment Main, F-1 (two kitchen hoods, 250 m³/h for
-10,950 minutes a year, 120 W, with user_data) on both and F-2 (a dryer, 100 m³/h for 6,000 minutes, with no Power) on
-Zone A beside it. Each pair builds its own exhaust ventilator under its fan's id and, for F-1, a linked type 10
-`PhSupportiveDevice` under the same id: one Fan record, two honeybee-ph objects with Power and one without. The exact
-HBJSON reloads with Room A holding both fans and Room B one, and the section's conformance compares each reloaded Room
+10,950 minutes a year, 120 W, with user_data) on both, and F-2 (a dryer, 100 m³/h for 6,000 minutes, with no Power) and
+F-3 (a user-defined exhaust, 15 W, its operation named 2.5 kh) on Zone A beside it. Each pair builds its own exhaust
+ventilator under its fan's id and, for F-1 and F-3, a linked type 10 `PhSupportiveDevice` under the same id: one Fan
+record, two honeybee-ph objects with Power and one without. The exact HBJSON reloads with Room A holding the three fans
+and Room B one, and the section's conformance compares each reloaded Room
 with its own rows' digests."""
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ ZONE_A = "zon_AAAAAAAAAAAA"
 ZONE_B = "zon_BBBBBBBBBBBB"
 F_1 = "fan_FIXED0000001"
 F_2 = "fan_FIXED0000002"
+F_3 = "fan_FIXED0000003"
 
 
 def document() -> dict[str, Any]:
@@ -104,8 +106,8 @@ def test_the_reference_reloads_with_each_room_holding_every_fan_that_serves_it()
     by_room = rooms(result)
     exhausts = {room: by_id(hvac.exhaust_vent_devices) for room, hvac in by_room.items()}
     devices = {room: by_id(hvac.supportive_devices) for room, hvac in by_room.items()}
-    assert {room: sorted(found) for room, found in exhausts.items()} == {ZONE_A: [F_1, F_2], ZONE_B: [F_1]}
-    assert {room: sorted(found) for room, found in devices.items()} == {ZONE_A: [F_1], ZONE_B: [F_1]}
+    assert {room: sorted(found) for room, found in exhausts.items()} == {ZONE_A: [F_1, F_2, F_3], ZONE_B: [F_1]}
+    assert {room: sorted(found) for room, found in devices.items()} == {ZONE_A: [F_1, F_3], ZONE_B: [F_1]}
     for room in (ZONE_A, ZONE_B):
         hood, power = exhausts[room][F_1], devices[room][F_1]
         assert (hood.device_class_name, hood.quantity, hood.user_data) == (
@@ -115,11 +117,17 @@ def test_the_reference_reloads_with_each_room_holding_every_fan_that_serves_it()
         )
         assert (power.device_type, power.quantity, power.norm_energy_demand_W) == (10, 2, 120.0)
     assert exhausts[ZONE_A][F_2].device_class_name == "ExhaustVentDryer"
+    assert exhausts[ZONE_A][F_3].device_class_name == "ExhaustVentUserDefined"
+    assert (devices[ZONE_A][F_3].norm_energy_demand_W, devices[ZONE_A][F_3].annual_period_operation_khrs) == (
+        15.0,
+        2.5,
+    ), "the operation F-3 names, not its runtime's 0.5 kh"
     rows = result[FAN_SECTION_ID]["fans"]
     assert [(row["identifier"], row["zone_id"], row["zone_name"]) for row in rows] == [
         (F_1, ZONE_A, "Zone A"),
         (F_1, ZONE_B, "Zone B"),
         (F_2, ZONE_A, "Zone A"),
+        (F_3, ZONE_A, "Zone A"),
     ]
     assert (
         rows[0]["digest"] == rows[1]["digest"]

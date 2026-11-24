@@ -8,7 +8,8 @@ require_relative "support/zone_options"
 
 # The Fan export over ACCEPTANCE's reference model: Zone A (5 x 4 m) and Zone B (4 x 4 m), 3 m boxes in one Building
 # Segment, each with one Space. F-1 (two kitchen hoods, 250 m3/h for 10,950 minutes a year, 120 W, with user_data)
-# serves both Zones and F-2 (a dryer, 100 m3/h for 6,000 minutes, with no Power) serves Zone A beside it. The golden
+# serves both Zones; F-2 (a dryer, 100 m3/h for 6,000 minutes, with no Power) and F-3 (a user-defined exhaust, 40 m3/h
+# for 30,000 minutes, 15 W, its operation named 2.5 kh against the runtime's 0.5) serve Zone A beside it. The golden
 # feeds the Python section and the PHX round trip (tests/python/test_fan_sections.py, test_fans_phx_round_trip.py).
 class MechanicalFanExportTest < PhComposerTestCase
   include BoxZoneFixtures
@@ -42,9 +43,9 @@ class MechanicalFanExportTest < PhComposerTestCase
   def test_the_reference_exports_one_pair_per_fan_and_served_zone_and_owns_the_golden
     reference
     extraction = extract
-    one, two = @ids.values_at("F-1", "F-2")
+    one, two, three = @ids.values_at("F-1", "F-2", "F-3")
     pairs = fans(extraction)
-    assert_equal [[one, zone_id("A")], [one, zone_id("B")], [two, zone_id("A")]].sort,
+    assert_equal [[one, zone_id("A")], [one, zone_id("B")], [two, zone_id("A")], [three, zone_id("A")]].sort,
                  pairs.map { |row| row.values_at("item_id", "zone_id") }.sort
     a = pairs.find { |row| row.values_at("item_id", "zone_id") == [one, zone_id("A")] }
     assert_equal ["#{one}_#{zone_id('A')}", one, "F-1", "kitchen_hood", 2, 250.0, 10_950.0, 120.0, true, 0.1825,
@@ -63,6 +64,10 @@ class MechanicalFanExportTest < PhComposerTestCase
                   second.key?("user_data")],
                  "F-2 has no Power, so no supportive device"
     assert second.key?("norm_energy_demand_w"), "Power is null, not absent"
+    third = pairs.find { |row| row.fetch("item_id") == three }
+    assert_equal ["user_defined", 15.0, 2.5],
+                 third.values_at("exhaust_type", "norm_energy_demand_w", "annual_period_operation_khrs"),
+                 "the operation F-3 names, not its runtime's 0.5 kh"
     assert_empty notes(extraction)
     assert_empty preflight_rows
     write_or_compare(GOLDEN, stable(extraction.document))
@@ -179,8 +184,11 @@ class MechanicalFanExportTest < PhComposerTestCase
              "annual_runtime_minutes" => 10_950.0, "norm_energy_demand_w" => 120.0 }, USER_DATA)
     create("name" => "F-2", "exhaust_type" => "dryer", "exhaust_flow_rate_m3h" => 100.0,
            "annual_runtime_minutes" => 6_000.0, "in_conditioned_space" => false)
+    create("name" => "F-3", "exhaust_flow_rate_m3h" => 40.0, "annual_runtime_minutes" => 30_000.0,
+           "norm_energy_demand_w" => 15.0, "annual_period_operation_khrs" => 2.5)
     completed(assign(%w[A B], @ids.fetch("F-1")))
     completed(assign(%w[A], @ids.fetch("F-2")))
+    completed(assign(%w[A], @ids.fetch("F-3")))
   end
 
   def create(values, user_data = nil)

@@ -1,6 +1,7 @@
 """The PHX round trip of the Fan section (context/CONTRACTS.md, "Mechanical equipment"): the canonical HBJSON of the
 reference model tests/mechanical_fan_export_test.rb writes, Zones A and B in one Building Segment, each with its Space,
-F-1 (two kitchen hoods with Power) on both and F-2 (a dryer without Power) on Zone A, converted by the pinned PHX of the
+F-1 (two kitchen hoods with Power) on both, and F-2 (a dryer without Power) and F-3 (a user-defined exhaust with Power
+and a named operation) on Zone A, converted by the pinned PHX of the
 optional `phx` group. PHX merges the Segment's Rooms into one Variant and reads each Room's exhaust ventilators and
 supportive devices through its Spaces, keying each by identifier. So one Fan record with Power becomes two PHX objects,
 an exhaust device on the simulated Zone and a supportive device in the Variant's mechanical collection, and one without
@@ -57,7 +58,7 @@ def without_zone_b_spaces(value: dict[str, Any]) -> dict[str, Any]:
 def test_one_fan_with_power_becomes_two_phx_objects_and_one_without_becomes_one() -> None:
     project = converted(document())
     vents = exhausts(project)
-    assert sorted(vents) == ["F-1", "F-2"]
+    assert sorted(vents) == ["F-1", "F-2", "F-3"]
     hood, dryer = vents["F-1"], vents["F-2"]
     assert type(hood).__name__ == "PhxExhaustVentilatorRangeHood"
     assert hood.params.exhaust_flow_rate_m3h == pytest.approx(250.0)
@@ -66,7 +67,9 @@ def test_one_fan_with_power_becomes_two_phx_objects_and_one_without_becomes_one(
     assert (dryer.params.exhaust_flow_rate_m3h, dryer.params.annual_runtime_minutes) == (pytest.approx(100.0), 6000.0)
 
     devices = supportive(project)
-    assert sorted(devices) == ["F-1"], "F-2 has no Power, so no supportive device"
+    assert sorted(devices) == ["F-1", "F-3"], "F-2 has no Power, so no supportive device"
+    assert type(vents["F-3"]).__name__ == "PhxExhaustVentilatorUserDefined"
+    assert devices["F-3"].params.annual_period_operation_khrs == 2.5, "the operation F-3 names reaches PHX"
     power = devices["F-1"]
     assert (power.identifier, power.device_type.value, power.quantity) == (F_1, 10, 2)
     assert (
@@ -82,8 +85,8 @@ def test_one_fan_with_power_becomes_two_phx_objects_and_one_without_becomes_one(
 
 def test_a_fan_on_a_room_with_spaces_and_one_without_still_reaches_phx_once() -> None:
     project = converted(without_zone_b_spaces(document()))
-    assert sorted(exhausts(project)) == ["F-1", "F-2"]
-    assert sorted(supportive(project)) == ["F-1"]
+    assert sorted(exhausts(project)) == ["F-1", "F-2", "F-3"]
+    assert sorted(supportive(project)) == ["F-1", "F-3"]
 
 
 def test_a_fan_only_on_a_room_with_no_spaces_does_not_reach_phx() -> None:
@@ -93,5 +96,5 @@ def test_a_fan_only_on_a_room_with_no_spaces_does_not_reach_phx() -> None:
             row["zone_id"], row["id"] = ZONE_B, f"{F_2}_{ZONE_B}"
             row["norm_energy_demand_w"] = 30.0
     project = converted(value)
-    assert sorted(exhausts(project)) == ["F-1"]
-    assert sorted(supportive(project)) == ["F-1"], "neither of F-2's two objects reaches PHX"
+    assert sorted(exhausts(project)) == ["F-1", "F-3"]
+    assert sorted(supportive(project)) == ["F-1", "F-3"], "neither of F-2's two objects reaches PHX"

@@ -59,7 +59,7 @@
         {
           "category": "residential",
           "export_identifier": "bseg_eb814be3ca3b78c0",
-          "id": "bsg_FIXED0000003",
+          "id": "bsg_FIXED0000004",
           "program": "phius_2021_core",
           "status": "in_planning",
           "type": "new_construction",
@@ -144,6 +144,20 @@
           "norm_energy_demand_w": null,
           "quantity": 1,
           "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "annual_period_operation_khrs": 2.5,
+          "annual_runtime_minutes": 30000.0,
+          "display_name": "F-3",
+          "exhaust_flow_rate_m3h": 40.0,
+          "exhaust_type": "user_defined",
+          "id": "fan_FIXED0000003_zon_AAAAAAAAAAAA",
+          "identifier": "fan_FIXED0000003",
+          "in_conditioned_space": true,
+          "item_id": "fan_FIXED0000003",
+          "norm_energy_demand_w": 15.0,
+          "quantity": 1,
+          "zone_id": "zon_AAAAAAAAAAAA"
         }
       ],
       "version": 1
@@ -165,7 +179,7 @@
         {
           "daytime_window_ach": 0.0,
           "export_identifier": "bseg_eb814be3ca3b78c0",
-          "id": "bsg_FIXED0000003",
+          "id": "bsg_FIXED0000004",
           "mech_room_temp_c": 20.0,
           "mechanical_cooling": false,
           "name": "Main",
@@ -205,7 +219,7 @@
             "schedule_id": "sch_PHCDEFAULT05",
             "watts_per_area": 0.0
           },
-          "id": "pgm_PHCDEFAULT01-bsg_FIXED0000003",
+          "id": "pgm_PHCDEFAULT01-bsg_FIXED0000004",
           "infiltration": {
             "flow_per_exterior_area": 0.0003,
             "schedule_id": "sch_PHCDEFAULT05"
@@ -221,7 +235,7 @@
                 "reference_quantity": 6
               },
               "class": "PhPhiusLightingInterior",
-              "identifier": "pgm_PHCDEFAULT01-bsg_FIXED0000003-lighting_interior"
+              "identifier": "pgm_PHCDEFAULT01-bsg_FIXED0000004-lighting_interior"
             },
             "radiant_fraction": 0.32,
             "return_air_fraction": 0.0,
@@ -418,24 +432,24 @@
             }
           ],
           "dwelling": {
-            "identifier": "bsg_FIXED0000003",
+            "identifier": "bsg_FIXED0000004",
             "num_dwellings": 1
           },
           "id": "zon_AAAAAAAAAAAA",
           "number_bedrooms": 0.0,
           "number_people": 0.0,
-          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000003"
+          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000004"
         },
         {
           "devices": [],
           "dwelling": {
-            "identifier": "bsg_FIXED0000003",
+            "identifier": "bsg_FIXED0000004",
             "num_dwellings": 1
           },
           "id": "zon_BBBBBBBBBBBB",
           "number_bedrooms": 0.0,
           "number_people": 0.0,
-          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000003"
+          "program_type_id": "pgm_PHCDEFAULT01-bsg_FIXED0000004"
         }
       ],
       "version": 1
@@ -931,7 +945,7 @@
             }
           ],
           "export_identifier": "bseg_eb814be3ca3b78c0",
-          "id": "bsg_FIXED0000003",
+          "id": "bsg_FIXED0000004",
           "name": "Main",
           "summer_c": 25.0,
           "winter_c": 20.0
@@ -1329,7 +1343,7 @@
         {
           "building_segment": "Main",
           "building_segment_export_identifier": "bseg_eb814be3ca3b78c0",
-          "building_segment_id": "bsg_FIXED0000003",
+          "building_segment_id": "bsg_FIXED0000004",
           "face_ids": [
             "fac_A00000000001",
             "fac_A00000000002",
@@ -1345,7 +1359,7 @@
         {
           "building_segment": "Main",
           "building_segment_export_identifier": "bseg_eb814be3ca3b78c0",
-          "building_segment_id": "bsg_FIXED0000003",
+          "building_segment_id": "bsg_FIXED0000004",
           "face_ids": [
             "fac_B00000000001",
             "fac_B00000000002",

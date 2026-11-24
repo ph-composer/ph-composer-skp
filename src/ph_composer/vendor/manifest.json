@@ -226,9 +226,9 @@
       "sha256": "d57ac5852a9a3d65caf318416915099042209f203b33f07c05b375143fac901d"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 12837,
+      "bytes": 13362,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2921aaef9ef05b33a5c0b6a8282569caaeac23f08d05dba08619976e1914a43c"
+      "sha256": "6d55b4cc2f505a2fa471cecd1f6ce98a044f1dd132581f81fd5373a3d85f4cb0"
     },
     "html/features/mechanical/pumps.js": {
       "bytes": 9031,

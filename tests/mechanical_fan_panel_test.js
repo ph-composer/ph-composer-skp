@@ -153,6 +153,10 @@ test("the electric values sit behind the row's disclosure, the operation followi
     assert.strictEqual(space.input.value, "true");
     assert.strictEqual(operation.input.value, "", "no operation named: it follows the runtime");
     assert.strictEqual(operation.input.placeholder, "From runtime (0.18 kh/yr)");
+    var hint = held.fields[1].hint;
+    assert.deepStrictEqual(operation.input.getAttribute("aria-describedby").split(" "), [operation.error.id, hint.id],
+      "the value a blank stands for is described beside the error, not only shown as a placeholder");
+    assert.strictEqual(hint.textContent, "From runtime (0.18 kh/yr)");
 
     space.input.value = "false"; space.input.listeners.change({});
     var update = named(o, FANS + ".update")[0];
@@ -173,6 +177,7 @@ test("the electric values sit behind the row's disclosure, the operation followi
     assert.strictEqual(disclosure(o, FAN_1.id).getAttribute("aria-pressed"), "true");
     assert.match(disclosure(o, FAN_1.id).getAttribute("aria-label"), /Operation 2.5 kh\/yr/);
     assert.strictEqual(operation.input.placeholder, "From runtime (1 kh/yr)", "the placeholder follows the runtime");
+    assert.strictEqual(hint.textContent, "From runtime (1 kh/yr)", "and so does the description");
     operation.input.value = ""; operation.input.listeners.input({}); key(operation.input, "Enter");
     assert.deepStrictEqual(clone(named(o, FANS + ".update")[2].payload.params), { id: FAN_1.id,
       values: { annual_period_operation_khrs: null }, expected_values: { annual_period_operation_khrs: 2.5 } },
