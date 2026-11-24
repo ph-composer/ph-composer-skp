@@ -880,10 +880,37 @@ is written.
 Edit with `ph_composer.mechanical.ventilators.update`, copying `expected_values` from the values you
 read; null removes an optional value. `ph_composer.mechanical.ventilators.duplicate` makes a copy with
 its own id, a `source` of `derived` and the original's `user_data`.
-`ph_composer.mechanical.ventilators.delete` removes one; once Zones can name a Ventilator, it refuses
-one still in use. Each action is one Undo step. Rows carry `export_ready` and `export_blockers`; a
-Ventilator on its own blocks nothing. Its `user_data` and extension payloads are written with
-`ph_composer.records.update_metadata`.
+`ph_composer.mechanical.ventilators.delete` removes one. While a Zone names it, the delete is refused
+as `reference.in_use` and the message names the Zones; give `replacement_id` to move every Zone to
+another Ventilator, or `replacement_id: null` to leave those Zones served by nothing. Each action is one
+Undo step. Rows carry `export_ready` and `export_blockers`, the Zones each Ventilator serves under
+`zones`, and `findings`: `mechanical.item_unserved` when it serves no Zone. Its `user_data` and
+extension payloads are written with `ph_composer.records.update_metadata`.
+
+### Mechanical: what serves each Zone
+
+Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
+`ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
+(`ventilator_id`, null for none), the `items` the slots name with their names, and `findings`.
+A Zone served by nothing reads the same whether it stores no payload or an emptied one.
+
+Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
+`{reference, expected_values}`, where `reference` is the row's reference and `expected_values` its
+`slots` as you read them, then `slot` (`ventilator_id`) and `item_id`. A Zone has one Ventilator: if it
+already has another, the command is refused as `mechanical.slot_filled`, naming that Ventilator, and
+nothing is written; send it again with `replace: true` to replace it. Empty a slot with
+`ph_composer.mechanical.serves.clear`, giving `zones` and `slot`, or leave `slot` out to empty every
+slot. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
+locked Group, in a shared component or inside another Zone is refused with Zones' own codes
+(`target.locked`, `target.shared_definition`, `target.wrong_hierarchy`). Each command is one Undo step
+and leaves other features' data on the Zone, such as its Program, as it was. A copied Zone keeps
+what serves it.
+
+Findings: `mechanical.zone_unventilated` on a Zone in a Building Segment with no Ventilator,
+`mechanical.zone_left_out` on a served Zone in no Building Segment, whose Room the export leaves out,
+and `mechanical.item_missing` on a slot naming a Ventilator that is not in the Model, which only a
+Zone written outside these actions can carry; it is the one that blocks export. Assign with
+`replace: true`, or clear, to repair it.
 
 ### Library records
 

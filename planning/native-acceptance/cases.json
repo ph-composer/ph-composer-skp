@@ -5406,6 +5406,27 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "M03",
+      "label": "What serves each Zone, from a fresh process on the reference model with Zone B under a rotated wrapper: the walkthrough (tools/examples/authoring/ventilators_walkthrough.rb, serve) assigns ERV-1 to Zone A and ERV-2 to Zone B, replaces, clears and deletes ERV-1 with ERV-2 as its replacement through registered actions only, each one native Undo step; native Undo and Redo of the delete restore ERV-1 and every slot; Zone B copied natively keeps its slots with no Mechanical step in the copy's Undo step; save, fresh-process reopen and the same slots read back through serves.all",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/mechanical/codes.rb",
+        "src/ph_composer/features/mechanical/serves/*",
+        "src/ph_composer/features/mechanical/declarations/*",
+        "src/ph_composer/features/mechanical/ventilators/*",
+        "src/ph_composer/features/zones/extension_staging.rb",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/extension.rb",
+        "src/ph_composer/core/records/reference_resolution.rb",
+        "tools/examples/authoring/ventilators_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -3,7 +3,8 @@
 module PhComposer
   module Mechanical
     # What the Ventilator catalog registers: the kind, two reads, the panel's snapshot section and four actions.
-    # Every write goes through the record engine, one native Undo step each.
+    # Every write goes through the record engine, one native Undo step each. The reads add what each Ventilator
+    # serves, and the delete moves or clears the Zones naming it, from Serves.
     module VentilatorRegistration
       PREFIX = "#{FEATURE_ID}.ventilators".freeze
       KIND = Ventilators::KIND
@@ -15,14 +16,22 @@ module PhComposer
                 validation.failed].freeze
       DUPLICATE = %w[copy.rule_missing extension.invalid record.unreadable reference.invalid target.ambiguous
                      target.not_found validation.failed].freeze
-      # A delete scans every record for references to it, so an unreadable record anywhere refuses it.
-      DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.ambiguous target.changed
-                  target.not_found validation.failed].freeze
+      # A delete scans every record for references to it, so an unreadable record anywhere refuses it. It reads
+      # the Zones naming it, and the dispatcher adds the refusals of Zones' participant, which stages the moves.
+      DELETE = (%w[copy.rule_missing record.unreadable reference.in_use reference.invalid
+                   target.ambiguous target.changed target.not_found validation.failed] + Serves::State::REFUSES)
+               .uniq.sort.freeze
       EXISTS = ["The Ventilator exists and is readable."].freeze
       UNIQUE = "Its name, trimmed and in any case, is not another Ventilator's."
-      ROW = Shapes.row(KIND)
+      ROW = Shapes.with(Shapes.row(KIND), ServesRegistration::SERVED)
       LIST_PARAMS = DefinitionLists.params(ROW).tap do |params|
         params["properties"]["ids"]["items"] = Shapes.id(KIND.id_prefix, "A Ventilator id.")
+      end.freeze
+      DELETE_PARAMS = Shapes.delete(KIND).then do |params|
+        params["properties"]["replacement_id"] =
+          Shapes.id(KIND.id_prefix, "The #{KIND.label} that takes this one's place on every Zone, or null to empty " \
+                                    "those slots. Needed while a Zone names it.", :nullable => true)
+        params
       end.freeze
       CREATE_EXAMPLE = { "values" => { "name" => "ERV-1", "sensible_heat_recovery" => 0.85,
                                        "latent_heat_recovery" => 0.6, "electric_efficiency_wh_m3" => 0.45 } }.freeze
@@ -40,15 +49,19 @@ module PhComposer
       def install_reads(feature)
         list = Ventilators::Reads::LIST
         feature.query(list, :description => "One bounded page of Ventilators in id order, with export readiness.",
-                            :refuses => PAGE, :params => LIST_PARAMS,
+                            :refuses => PAGE + Serves::State::REFUSES, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
-                            :examples => LIST_EXAMPLES) { |request| Ventilators::Reads.list(request) }
-        feature.query("#{PREFIX}.all", :description => "Every Ventilator with its values and export readiness, for " \
-                                                       "the panel snapshot.",
+                            :examples => LIST_EXAMPLES) do |request|
+          Ventilators::Reads.list(request, :extra => Serves::Reads.usage(request, KIND.id))
+        end
+        feature.query("#{PREFIX}.all", :description => "Every Ventilator with its values, export readiness and the " \
+                                                       "Zones it serves, for the panel snapshot.",
                                        :response => { "bounded" => false, "prefer" => list },
-                                       :refuses => [], :params => Shapes::NONE,
+                                       :refuses => Serves::State::REFUSES, :params => Shapes::NONE,
                                        :result => DefinitionLists.result(ROW, :paged => false),
-                                       :examples => [{}]) { |request| Ventilators::Reads.all(request) }
+                                       :examples => [{}]) do |request|
+          Ventilators::Reads.all(request, :extra => Serves::Reads.usage(request, KIND.id))
+        end
         feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
       end
 
@@ -91,15 +104,27 @@ module PhComposer
                                                                :name => request.params["name"])
         end
         feature.action("#{PREFIX}.delete",
-                       :description => "Delete one #{KIND.label}; one still in use refuses as reference.in_use.",
-                       :refuses => DELETE, :params => Shapes.delete(KIND),
+                       :description => "Delete one #{KIND.label}. While a Zone names it, name a replacement_id, " \
+                                       "which takes its place on every Zone, or null, which empties those slots; " \
+                                       "without one it refuses as reference.in_use, naming the Zones.",
+                       :refuses => DELETE, :params => DELETE_PARAMS,
                        :result => Shapes.with_removed_user_data(Shapes::RESULT),
+                       :participants => [Serves::State::STAGE],
                        :undo_name => "Delete #{KIND.label}", :preconditions => EXISTS,
-                       :side_effects => "Deletes one definition and its metadata; Undo restores both.",
-                       :examples => [{ "id" => Shapes.example_id(KIND) }]) do |request, proposal|
+                       :side_effects => "Deletes one definition and its metadata, and rewrites the Zones that name " \
+                                        "it; Undo restores all of them.",
+                       :examples => [{ "id" => Shapes.example_id(KIND) },
+                                     { "id" => Shapes.example_id(KIND),
+                                       "replacement_id" => "vnt_Zy98Xw76Vu54" }]) do |request, proposal|
           params = request.params
-          Ventilators::Operations.delete(request, proposal, :id => params.fetch("id"),
-                                                            :expected_values => params.fetch("expected_values", {}))
+          id = params.fetch("id")
+          expected = params.fetch("expected_values", {})
+          replacement = params.fetch("replacement_id", Serves::Operations::KEEP)
+          Serves::Operations.delete(request, proposal, KIND.id, :id => id, :expected_values => expected,
+                                                                :replacement => replacement) do |plan|
+            Ventilators::Operations.delete(request, proposal, :id => id, :expected_values => expected,
+                                                              :reference_plan => plan)
+          end
         end
       end
     end

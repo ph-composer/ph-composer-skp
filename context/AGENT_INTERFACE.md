@@ -882,9 +882,14 @@ Mechanical (API 1.87) is one feature for the equipment families, `ph_composer.me
 Spaces. Its first family is the Ventilator kind (`ph_composer.mechanical.ventilator`, `vnt_`), a definition that
 names nothing: `ph_composer.mechanical.ventilators.create`, `update`, `duplicate` and `delete`, one Undo step each,
 with the bounded `ventilators.list` and the snapshot read `ventilators.all`, whose rows carry `export_ready` and
-`export_blockers` beside the record's view ([CONTRACTS.md](CONTRACTS.md), "Mechanical equipment"). The
-[Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
-[AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", is the recipe.
+`export_blockers` beside the record's view ([CONTRACTS.md](CONTRACTS.md), "Mechanical equipment"). Since API 1.88
+the Zones each item serves are a payload on the Zone record that Zones stages: `ph_composer.mechanical.serves.assign`
+and `serves.clear` take Zone references with `expected_values`, one Undo step each, refusing `mechanical.slot_filled`
+for a second Ventilator unless `replace`; `serves.list` and `serves.all` read each Zone occurrence's slots and
+findings; `ventilators.delete` takes `replacement_id`, an id or null, and without one refuses `reference.in_use`
+naming the Zones. The [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with
+the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators" and "Mechanical: what serves each
+Zone", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

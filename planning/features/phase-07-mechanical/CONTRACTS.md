@@ -160,8 +160,11 @@ participant `ph_composer.zones.stage_extension` (exists, `features/zones/extensi
 which checks it with the validator and stages one Zone update step in the caller's proposal. Zones
 owns the write: a locked Zone, a shared definition or a nested path refuses with Zones' `target.*`
 codes, and no mechanical code writes a Zone record. The generic metadata routes can store the
-payload too, so a rule the validator cannot see (a slot naming an item that is gone) is a finding
-there and a refusal only in the feature's own actions.
+payload too, so a rule the validator cannot see is a finding there and a refusal only in the
+feature's own actions. A slot naming an item that is gone is not such a rule: P4-03 found that
+every route through the engine, `update_metadata` included, refuses a declared reference to no
+stored record as `reference.invalid`, so only a Zone record written outside the engine, such as
+one pasted from another Model, can carry one, and the reads report it as `mechanical.item_missing`.
 
 **References and delete in use (D4-05).** The declared references put each named item in the
 engine's incoming-reference scan, so a plain delete refuses `reference.in_use` while a Zone names
@@ -197,6 +200,7 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | `serves.assign` | action | P4-03 | Zone references with `expected_values`, one slot and one item id; a filled single slot is replaced after a refusal names the current item (V1, hot water H6): the action refuses `mechanical.slot_filled` unless `replace: true`. Staged through `ph_composer.zones.stage_extension` |
 | `serves.clear` | action | P4-03 | Zone references and a slot, or every slot |
 | `serves.all` | query, snapshot section | P4-03 | Every Zone occurrence with its Serves slots, resolved item names, and findings |
+| `serves.list` | query | P4-03 | One bounded page of the same rows, in Zone id then occurrence path order. Serves rows grow with the Model, so the `all` read names it in `response:` |
 | `hot_water_systems.all`, `hot_water_systems` | query, snapshot section | P4-06 | Hot Water Systems with served Zones, heater/tank counts, read-only recirculation (from piping, D4-18) and Segment pooling note (D4-17, D4-23) |
 | `hot_water_systems.create`, `.update`, `.duplicate`, `.delete` | action | P4-06 | System record CRUD; guarded delete covers both Serves payloads and referencing Heaters/Tanks |
 | `hot_water_heaters.all`, `hot_water_heaters`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-06 | Flat Hot Water Heaters table (D4-17, D4-19), each naming its `hot_water_system_id` |
@@ -268,7 +272,7 @@ query and the Python sections.
 | `mechanical.item_unserved` | An item serves no Zone; not exported | no | Assign it, or leave it |
 | `mechanical.zone_unventilated` | A Zone with no Ventilator (V5) | no | Assign one |
 | `mechanical.zone_no_hot_water` | A Zone with no Hot Water System (hot water H6) | no | Assign one |
-| `mechanical.item_missing` | A Serves slot names an item that is not in the Model. The feature's own deletes cannot leave one (section 2); a payload stored through the generic metadata routes can | yes | Reassign or Clear |
+| `mechanical.item_missing` | A Serves slot names an item that is not in the Model. No route through the engine can leave one (section 2); a Zone record written outside it, such as one pasted from another Model, can | yes | Reassign with `replace`, or Clear |
 | `mechanical.item_across_segments` | An item serves Zones in more than one Building Segment (D4-23). Allowed, as honeybee-ph allows one object on any Rooms; each Segment's Variant carries the whole item | no | Informational; split the item if the Segments have separate plant |
 | `mechanical.zone_left_out` | The served Zone is in no Building Segment, so it is left out of the export (F28). Info, as `space.zone_left_out` is; the unserved-Zone findings above skip such a Zone | no; that Room is not written | Move the Zone into a Building Segment |
 | `mechanical.tank_unslotted` | More storage tanks than slots, or a second buffer or solar tank (D4-07) | no; the tank is omitted | Remove or re-role it |

@@ -7,8 +7,18 @@ require_relative "client"
 #   VentilatorsWalkthrough.verify   reads ventilators.all back against the expected catalog
 # Each action is one native Undo step, five in all; AuthoringExample.undo and .redo step through them in
 # separate bridge calls, and `state` shows the catalog between steps.
+#
+# Then, in a Model with Zones named "Zone A" and "Zone B" (one may sit in a turned Group, and a copy made
+# independent keeps its name, so every occurrence of each name is served):
+#   VentilatorsWalkthrough.serve          creates ERV-2 again, assigns ERV-1 to Zone A and ERV-2 to Zone B,
+#                                         replaces Zone A's with ERV-2, clears Zone B, assigns ERV-1 to it, and
+#                                         deletes ERV-1 with ERV-2 as its replacement: seven Undo steps
+#   VentilatorsWalkthrough.serve_verify   reads serves.all and the catalog back: every occurrence served by ERV-2
 module VentilatorsWalkthrough
   PREFIX = "ph_composer.mechanical.ventilators"
+  SERVES = "ph_composer.mechanical.serves"
+  ZONES = ["Zone A", "Zone B"].freeze
+  SERVE_STEPS = 7
 
   USER_DATA = { "walkthrough" => { "kept" => ["original"] } }.freeze
   # ERV-1 as `run` leaves it: every stored value, efficiency in Wh/m³ and temperatures in °C.
@@ -63,9 +73,69 @@ module VentilatorsWalkthrough
     { "passed" => found == EXPECTED, "state" => found }
   end
 
-  def invoke(client, steps, name, params)
-    result = client.invoke("#{PREFIX}.#{name}", params)
+  def invoke(client, steps, name, params, prefix = PREFIX)
+    result = client.invoke("#{prefix}.#{name}", params)
     steps << { "step" => name, "passed" => result["effect"] == "committed", "code" => result["code"] }
     result
+  end
+
+  # ---------------------------------------------------------------- what serves the Zones
+
+  def serve(names = ZONES)
+    client = AuthoringExample::Client.new
+    steps = []
+    zone_a, zone_b = names
+    erv1 = ventilator_id("ERV-1")
+    erv2 = invoke(client, steps, "create", "values" => { "name" => "ERV-2" }).dig("value", "id")
+    assign = lambda do |name, item, replace = false|
+      params = { "zones" => targets(name), "slot" => "ventilator_id", "item_id" => item }
+      params["replace"] = true if replace
+      invoke(client, steps, "assign", params, SERVES)
+    end
+    assign.call(zone_a, erv1)
+    assign.call(zone_b, erv2)
+    assign.call(zone_a, erv2, true)
+    invoke(client, steps, "clear", { "zones" => targets(zone_b) }, SERVES)
+    assign.call(zone_b, erv1)
+    invoke(client, steps, "delete", "id" => erv1, "replacement_id" => erv2)
+    steps << { "step" => "read back", "passed" => serve_verify(names).fetch("passed") }
+    { "passed" => steps.all? { |row| row["passed"] }, "steps" => steps }
+  end
+
+  # Each occurrence of the named Zones as [name, occurrence path, the name of its Ventilator or nil], and the
+  # catalog's names.
+  def serve_state(names = ZONES)
+    zones = serves_rows.select { |row| names.include?(row.fetch("name")) }.map do |row|
+      [row.fetch("name"), row.dig("reference", "zone_path"), row.fetch("items").first&.fetch("name")]
+    end
+    { "zones" => zones.sort_by { |name, path, _item| [name, path] },
+      "ventilators" => state.map { |values, _user_data| values.fetch("name") } }
+  end
+
+  def serve_verify(names = ZONES)
+    found = serve_state(names)
+    passed = names.all? { |name| found.fetch("zones").any? { |row| row.first == name } } &&
+             found.fetch("zones").all? { |row| row.last == "ERV-2" } &&
+             found.fetch("ventilators") == ["ERV-1 (copy)", "ERV-2"]
+    { "passed" => passed, "state" => found }
+  end
+
+  # Every occurrence of the Zone named `name`, with its slots as last read.
+  def targets(name)
+    serves_rows.select { |row| row.fetch("name") == name }.map do |row|
+      { "reference" => row.fetch("reference"), "expected_values" => row.fetch("slots") }
+    end
+  end
+
+  def serves_rows
+    result = AuthoringExample::Client.new.query("#{SERVES}.all")
+    raise "serves.all failed: #{result['code']}" unless result["status"] == "completed"
+
+    result.dig("value", "zones")
+  end
+
+  def ventilator_id(name)
+    result = AuthoringExample::Client.new.query("#{PREFIX}.all")
+    result.dig("value", "records").find { |row| row.dig("values", "name") == name }.fetch("id")
   end
 end
