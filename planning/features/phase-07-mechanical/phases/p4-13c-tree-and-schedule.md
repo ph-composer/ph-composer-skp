@@ -1,7 +1,7 @@
 # P4-13c: the chain rule in core, the tree and the schedule
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q6, Q7), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "The tree", "Recirculation", "Schedule" and "Validation rows". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13c` runs in the MS3 sitting (D4-31). Stronger review lane: it moves a shipped feature's rule into `core/`.
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13c`, on `main` after #577 merged; offline evidence in [p4-13c-tree-and-schedule](../evidence/p4-13c-tree-and-schedule.md), host case `M13c` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q6, Q7), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "The tree", "Recirculation", "Schedule" and "Validation rows". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13c` runs in the MS3 sitting (D4-31). Stronger review lane: it moves a shipped feature's rule into `core/`.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -161,6 +161,22 @@ reopen, not yet measured); the measurement in step 7; and the thermal-bridge cas
 
 Export (P4-13d). Screens, the Systems table's columns and Colour-by (P4-13e). Joining trees across Piping groups
 (P4-13, "Inferred in planning"). The recirculation heat loss coefficient (metr-export).
+
+## Recorded at implementation (2026-11-24)
+
+- Test 3 and M13c said "one recirculation run"; ACCEPTANCE's case table has two loop lines whose values differ (55 °C,
+  18 h and 50 °C, 24 h), and the run key includes the role values, so they are two runs, as the case's own "Expected"
+  line says. The test follows the case.
+- Test 5's "3.3 m and 1.7 m both at 24 h give 24" holds for one run of the two pipes. As two runs, honeybee-ph's own
+  `recirc_hours` gives 23 (79.19999999999999 / 3.3 is 23.999999999999996, truncated), checked on the pinned wheel in the
+  repository's Python 3.11; the Ruby read must equal the export, so it gives 23 too and the test pins both. Nesting
+  keeps 24 for the case's own loop and for runs of 0.1, 0.2 and 0.7 m; it cannot for every split.
+- The schedule gained `compact` and `ph_composer.piping.runs.members`, as thermal bridges' `schedule.list` has, so one
+  long run fits an agent's reply; names from user text and finding messages are cut and named in `truncated`.
+- `water_temp_c` on a pipe assignment is now 0 to 100: a stored temperature near the float limit made the
+  recirculation sum infinite, which no JSON reply carries. A record outside it reads as unreadable.
+- `ph_composer.piping.runs.locate` refuses `target.wrong_kind` for a path that does not end at a pipe in a Piping
+  group.
 
 ## Done when
 

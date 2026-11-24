@@ -194,12 +194,19 @@ and ERV ducting reuse these rules.
 - No observer watches Edges. Reads scan the Model when asked. The thermal-bridge schedule is one such
   read and registers no snapshot section: at 5,000 assigned Edges in a Model of 50,000 it costs about
   two seconds, so the panel asks for it on opening the Schedule and on Refresh, never on every refresh
-  (D3b-13, measured in P3b-04).
-- Runs are derived, never stored. The pure builder (`features/thermal_bridges/runs/`) joins Edges of
-  one Zone occurrence, type and quantity where they share a vertex, keyed on the Edge's container path
-  plus the vertex id, so two placements of one component never join; a run ends at a free end or a
-  vertex where the count of joining Edges is not two. The same function serves the live read and the
-  export, which feeds it the snapshot's `edge` entries.
+  (D3b-13, measured in P3b-04). Piping's schedule is read the same way. Its Systems read and the Pipe
+  Types' used length walk the Model on every refresh, as snapshot sections: they skip the findings and
+  Zones, and at 2,000 pipes in twenty groups in a stub Model of 50,000 Edges each costs about 55 ms
+  on Ruby 3.2 and 70 ms on 2.7, offline (P4-13c); the host figure is owed to its host case, and over
+  the 200 ms refresh target they leave the snapshot.
+- Runs are derived, never stored. The chain rule is the foundation's, `core/edge_runs.rb` (`EdgeRuns`): it
+  joins Edges of one caller's key where they share a vertex, keyed on the Edge's container path plus the
+  vertex id, so two placements of one component never join; a run ends at a free end or a vertex where
+  the count of joining Edges of its key is not two. It names no feature; each caller keys its facts,
+  reads its own item back from each run, and names and identifies the runs. Thermal bridges key by Zone
+  occurrence, type and quantity (`features/thermal_bridges/runs/chains.rb`), piping by group occurrence,
+  role, Pipe Type and role values (`features/piping/runs/tree.rb`). The same function serves the live
+  read and the export, which feeds it the snapshot's `edge` entries.
 - Each Zone holds its own Edge at a junction two Zones share, so coincidence is resolved before Edges
   chain (`runs/coincidence.rb`), for whole Edges across Zone occurrences within the 0.0254 mm tolerance.
   Edges alike in Building-Segment, type and quantity are one bridge: the Zone with the smallest path

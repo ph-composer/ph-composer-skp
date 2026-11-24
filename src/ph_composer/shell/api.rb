@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 99
+    MINOR = 100
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -615,7 +615,18 @@ module PhComposer
                     "the codes piping.outside_group, piping.group_in_zone and piping.group_nested. " \
                     "pipe_types.delete moves or nulls the pipes using a type. A Hot Water System delete with a " \
                     "replacement_id, or null, now also moves or clears every other feature's record naming it, " \
-                    "through the registered reference retargeters." }
+                    "through the registered reference retargeters." },
+      { "minor" => 100, "date" => "2026-11-24",
+        "change" => "ph_composer.piping adds the schedule: ph_composer.piping.schedule (runs by connection with " \
+                    "their parents, lengths and findings, totals, each Hot Water System's distribution and " \
+                    "recirculation and each Pipe Type's used length, with compact), " \
+                    "ph_composer.piping.schedule.details, ph_composer.piping.runs.members, " \
+                    "ph_composer.piping.systems and its snapshot section, and the view command " \
+                    "ph_composer.piping.runs.locate, with the codes " \
+                    "piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, " \
+                    "piping.trunk_without_branches, piping.parent_ambiguous, piping.shared_definition and " \
+                    "piping.hidden. pipe_types.list and pipe_types.all rows add used_length_m. A pipe's water_temp_c " \
+                    "is 0 to 100. The thermal-bridge chain rule moves to core unchanged." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

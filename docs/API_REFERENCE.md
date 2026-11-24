@@ -4193,8 +4193,10 @@ Values:
     },
     "water_temp_c": {
       "type": "number",
+      "minimum": 0,
+      "maximum": 100,
       "x-unit": "C",
-      "description": "A recirculation pipe only: its water temperature; 60 by default."
+      "description": "A recirculation pipe only: its water temperature, 0 to 100; 60 by default."
     },
     "daily_period": {
       "type": "number",
@@ -29659,7 +29661,7 @@ Example params:
 
 ### `ph_composer.piping.pipe_types.all`
 
-Every Pipe Type with its values and export readiness, for the panel snapshot. Owner: `ph_composer.piping`.
+Every Pipe Type with its values, export readiness and used length, for the panel snapshot. Owner: `ph_composer.piping`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.piping.pipe_types.list` instead.
 
@@ -29702,7 +29704,8 @@ Result:
           "extension_status",
           "display",
           "export_ready",
-          "export_blockers"
+          "export_blockers",
+          "used_length_m"
         ],
         "properties": {
           "id": {
@@ -29953,6 +29956,12 @@ Result:
               "type": "string"
             },
             "description": "The codes keeping it out of an export once a pipe uses it; empty when export_ready."
+          },
+          "used_length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "The drawn length of every pipe naming it, read by walking the Model; 0 when none does."
           }
         }
       }
@@ -29992,7 +30001,7 @@ Example params:
 
 ### `ph_composer.piping.pipe_types.list`
 
-One bounded page of Pipe Types in id order, with export readiness. Owner: `ph_composer.piping`.
+One bounded page of Pipe Types in id order, with export readiness and used length. Owner: `ph_composer.piping`.
 
 Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
 
@@ -30025,7 +30034,8 @@ Params:
           "extension_status",
           "display",
           "export_ready",
-          "export_blockers"
+          "export_blockers",
+          "used_length_m"
         ]
       },
       "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
@@ -30314,6 +30324,12 @@ Result:
               "type": "string"
             },
             "description": "The codes keeping it out of an export once a pipe uses it; empty when export_ready."
+          },
+          "used_length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "The drawn length of every pipe naming it, read by walking the Model; 0 when none does."
           }
         }
       }
@@ -30808,6 +30824,929 @@ Result:
     "ignored_total": {
       "type": "integer",
       "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.piping.runs.members`
+
+One bounded page of one run's pipes in run order, each with its path, or only those one of its findings names. Owner: `ph_composer.piping`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identifier"
+  ],
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "description": "The run's identifier from the schedule."
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The run's index from a compact schedule row; needed only when two runs share the identifier."
+    },
+    "finding": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Only the pipes of the run's finding at this index."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identifier",
+    "members",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "identifier": {
+      "type": "string"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "path"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Its place in the run."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "identifier": "pipe_0a1b2c3d4e5f6a7b"
+}
+```
+
+Example params:
+
+```json
+{
+  "identifier": "pipe_0a1b2c3d4e5f6a7b",
+  "finding": 0
+}
+```
+
+### `ph_composer.piping.schedule`
+
+One bounded page of hot water piping runs, each with its Hot Water System, group, role, parent, Pipe Type, drawn length, line count, role values and findings, with totals by role, each System's distribution and recirculation and each Pipe Type's used length. It walks the Model. Owner: `ph_composer.piping`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "compact": {
+      "type": "boolean",
+      "description": "Leave out each run's edge_paths and each finding's pipes, counted instead, and the System, Pipe Type and unreadable rows, which ph_composer.piping.schedule.details pages; ph_composer.piping.runs.members pages a run's pipes. Every page then fits one agent reply. False when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runs",
+    "totals",
+    "unreadable_total",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "display_name",
+          "role",
+          "hot_water_system_id",
+          "hot_water_system_name",
+          "group",
+          "parent",
+          "parent_name",
+          "pipe_type_id",
+          "pipe_type_name",
+          "length_m",
+          "line_count",
+          "values",
+          "closed",
+          "shared",
+          "findings"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "pipe_ and a digest of the group occurrence, role, Pipe Type, role values and points; derived, and it changes with the geometry."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "The role and a counter, numbered per Hot Water System."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "trunk",
+              "branch",
+              "twig",
+              "recirculation"
+            ]
+          },
+          "hot_water_system_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The group's Hot Water System, or null."
+          },
+          "hot_water_system_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the group names no existing System."
+          },
+          "group": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "name"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The identifier of the trunk a branch hangs from, or the branch a twig hangs from; null for a trunk, a recirculation run and an unconnected run."
+          },
+          "parent_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pipe_type_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pipe_type_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the Pipe Type no longer exists or is unset."
+          },
+          "length_m": {
+            "type": "number",
+            "description": "Drawn length; a trunk's multiplier is not applied."
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "values": {
+            "type": "object",
+            "description": "The role's values: a trunk's multiplier and demand_recirculation, a recirculation run's water_temp_c and daily_period, none for a branch or twig."
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "edge_paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "description": "The run's pipes in order; runs.locate takes them. Left out with compact."
+          },
+          "edge_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: how many pipes."
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: the run's place in the schedule, which names it to ph_composer.piping.runs.members when two runs share an identifier."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Whether any pipe is in storage another placement draws."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Cut to 512 characters."
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                },
+                "locate": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "edge_paths"
+                  ],
+                  "properties": {
+                    "edge_paths": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "description": "Root-to-Edge persistent-id paths."
+                    }
+                  },
+                  "description": "The pipes named, as runs.locate takes them; without compact."
+                },
+                "edge_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "With compact: how many pipes it names; ph_composer.piping.runs.members with finding pages them."
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "One page of runs in schedule order: by Hot Water System, group path, role and smallest point."
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "by_role",
+        "run_count",
+        "line_count",
+        "distribution_length_m",
+        "recirculation_length_m"
+      ],
+      "properties": {
+        "by_role": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "run_count",
+              "line_count",
+              "length_m"
+            ],
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "run_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "line_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "length_m": {
+                "type": "number"
+              }
+            }
+          },
+          "description": "Every role, zero with no run."
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "distribution_length_m": {
+          "type": "number"
+        },
+        "recirculation_length_m": {
+          "type": "number"
+        }
+      },
+      "description": "Over every run."
+    },
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hot_water_system_id",
+          "name",
+          "distribution_length_m",
+          "recirculation_length_m",
+          "recirculation_temperature_c",
+          "recirculation_hours",
+          "from_piping"
+        ],
+        "properties": {
+          "hot_water_system_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "distribution_length_m": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "trunk",
+              "branch",
+              "twig"
+            ],
+            "properties": {
+              "trunk": {
+                "type": "number"
+              },
+              "branch": {
+                "type": "number"
+              },
+              "twig": {
+                "type": "number"
+              }
+            },
+            "description": "Drawn length by distribution role in the groups linked to it."
+          },
+          "recirculation_length_m": {
+            "type": "number"
+          },
+          "recirculation_temperature_c": {
+            "type": "number",
+            "description": "Length-weighted, as honeybee-ph's recirc_temp; 60 with no recirculation pipe."
+          },
+          "recirculation_hours": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Length-weighted and truncated, as honeybee-ph's recirc_hours; 24 with no recirculation pipe."
+          },
+          "from_piping": {
+            "type": "boolean",
+            "description": "Whether a recirculation pipe sets the two values above."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "Every Hot Water System, one with no pipes included."
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pipe_type_id",
+          "name",
+          "used_length_m",
+          "line_count"
+        ],
+        "properties": {
+          "pipe_type_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "used_length_m": {
+            "type": "number"
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "Every Pipe Type with its used length."
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "The first 50 group and pipe records that cannot be read; not counted, and each blocks export."
+    },
+    "unreadable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "system_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With compact: how many Systems; ph_composer.piping.schedule.details pages them."
+    },
+    "type_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With compact: how many Pipe Types; ph_composer.piping.schedule.details pages them."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "compact": true
+}
+```
+
+### `ph_composer.piping.schedule.details`
+
+One bounded page of the schedule's System rows, Pipe Type rows or unreadable records, each name cut, for a compact read. Owner: `ph_composer.piping`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "part"
+  ],
+  "properties": {
+    "part": {
+      "type": "string",
+      "enum": [
+        "systems",
+        "types",
+        "unreadable"
+      ],
+      "description": "systems, types or unreadable: which of the schedule's lists to page."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hot_water_system_id",
+          "name",
+          "distribution_length_m",
+          "recirculation_length_m",
+          "recirculation_temperature_c",
+          "recirculation_hours",
+          "from_piping"
+        ],
+        "properties": {
+          "hot_water_system_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "distribution_length_m": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "trunk",
+              "branch",
+              "twig"
+            ],
+            "properties": {
+              "trunk": {
+                "type": "number"
+              },
+              "branch": {
+                "type": "number"
+              },
+              "twig": {
+                "type": "number"
+              }
+            },
+            "description": "Drawn length by distribution role in the groups linked to it."
+          },
+          "recirculation_length_m": {
+            "type": "number"
+          },
+          "recirculation_temperature_c": {
+            "type": "number",
+            "description": "Length-weighted, as honeybee-ph's recirc_temp; 60 with no recirculation pipe."
+          },
+          "recirculation_hours": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Length-weighted and truncated, as honeybee-ph's recirc_hours; 24 with no recirculation pipe."
+          },
+          "from_piping": {
+            "type": "boolean",
+            "description": "Whether a recirculation pipe sets the two values above."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "With part systems: System rows by id."
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pipe_type_id",
+          "name",
+          "used_length_m",
+          "line_count"
+        ],
+        "properties": {
+          "pipe_type_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "used_length_m": {
+            "type": "number"
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "With part types: Pipe Type rows by id."
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "With part unreadable: records by path."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "part": "systems"
+}
+```
+
+Example params:
+
+```json
+{
+  "part": "unreadable",
+  "limit": 20
+}
+```
+
+### `ph_composer.piping.systems`
+
+Every Hot Water System's drawn distribution length by role and its recirculation length, temperature and hours from its recirculation pipes, as honeybee-ph works them out; 60 and 24 with none. It walks the Model. Owner: `ph_composer.piping`.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "systems"
+  ],
+  "properties": {
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hot_water_system_id",
+          "name",
+          "distribution_length_m",
+          "recirculation_length_m",
+          "recirculation_temperature_c",
+          "recirculation_hours",
+          "from_piping"
+        ],
+        "properties": {
+          "hot_water_system_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "distribution_length_m": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "trunk",
+              "branch",
+              "twig"
+            ],
+            "properties": {
+              "trunk": {
+                "type": "number"
+              },
+              "branch": {
+                "type": "number"
+              },
+              "twig": {
+                "type": "number"
+              }
+            },
+            "description": "Drawn length by distribution role in the groups linked to it."
+          },
+          "recirculation_length_m": {
+            "type": "number"
+          },
+          "recirculation_temperature_c": {
+            "type": "number",
+            "description": "Length-weighted, as honeybee-ph's recirc_temp; 60 with no recirculation pipe."
+          },
+          "recirculation_hours": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Length-weighted and truncated, as honeybee-ph's recirc_hours; 24 with no recirculation pipe."
+          },
+          "from_piping": {
+            "type": "boolean",
+            "description": "Whether a recirculation pipe sets the two values above."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "Every Hot Water System, one with no pipes included."
     }
   }
 }
@@ -86453,8 +87392,10 @@ Params:
     },
     "water_temp_c": {
       "type": "number",
+      "minimum": 0,
+      "maximum": 100,
       "x-unit": "C",
-      "description": "A recirculation pipe only: its water temperature; 60 by default."
+      "description": "A recirculation pipe only: its water temperature, 0 to 100; 60 by default."
     },
     "daily_period": {
       "type": "number",
@@ -116697,6 +117638,85 @@ Example params:
 }
 ```
 
+### `ph_composer.piping.runs.locate`
+
+Select the pipes of one run and bring them into view, opening the Piping group that holds them. Owner: `ph_composer.piping`.
+
+Side effects: Selects and frames the pipes. Moves the edit path, which advances the Model revision. Leaving a Volume that was open and unprotected protects it again (Spaces locks it). No authored value changes; SketchUp itself records leaving a Group as an Undo entry, and undoing it reopens the Group.
+
+Before calling: Every pipe sits in one Piping group and none is hidden.
+
+Refuses: `piping.hidden`, `session.inactive`, `target.ambiguous`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_paths"
+  ],
+  "properties": {
+    "edge_paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "description": "The pipes of one run, or of one finding, as the schedule reads them.",
+      "minItems": 1,
+      "maxItems": 10000
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path",
+    "selected"
+  ],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The edit path afterwards."
+    },
+    "selected": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "edge_paths": [
+    [
+      1301,
+      1305
+    ],
+    [
+      1301,
+      1306
+    ]
+  ]
+}
+```
+
 ### `ph_composer.programs.locate`
 
 Open the Zones tab on the Programs view with the given Zones checked, and a Building Segment's settings dialog when one is named. Owner: `ph_composer.programs`.
@@ -123991,10 +125011,18 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `piping.branch_unconnected` | A branch run shares no vertex with a trunk run in its Piping group, so it cannot export. |
 | `piping.group_in_zone` | A Piping group sits inside a Zone; pipes live outside Zones. |
 | `piping.group_nested` | A Piping group sits inside another Piping group. |
+| `piping.group_unlinked` | A Piping group is linked to no Hot Water System, or to one that no longer exists, so its pipes cannot export. |
+| `piping.hidden` | A pipe to locate, or a Group holding it, is hidden or on a hidden tag. |
 | `piping.insulation_conductivity_missing` | A Pipe Type has insulation and no insulation conductivity, so a pipe using it cannot export. |
 | `piping.outside_group` | An Edge is not directly inside a Piping group, so it cannot be a pipe. |
+| `piping.parent_ambiguous` | A branch or twig touches two possible parents and hangs from the one whose identifier sorts first. |
+| `piping.shared_definition` | Pipes are reached through two placements of one Piping group's storage, and both count. |
+| `piping.trunk_without_branches` | A trunk run no branch touches. |
+| `piping.twig_unconnected` | A twig run shares no vertex with a branch run in its Piping group, so it cannot export. |
+| `piping.type_missing` | A pipe has no Pipe Type, or names one that no longer exists, so it cannot export. |
 
 ### `ph_composer.programs`
 
@@ -124305,3 +125333,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.97 | 2026-11-24 | ph_composer.mechanical.fans is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 6 with the fan_ids list slot. The export section ph_composer.mechanical.export.fans is new and ph_composer.mechanical.preflight adds its rows, mechanical.zone_without_spaces among them; ph_composer.mechanical.locate takes fan_ids. |
 | 1.98 | 2026-11-24 | ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, with the code piping.insulation_conductivity_missing. |
 | 1.99 | 2026-11-24 | ph_composer.piping adds Piping groups and pipes: the reference targets ph_composer.piping.group and ph_composer.piping.pipe, groups.create, groups.link, groups.unlink, groups.list, groups.all, pipes.assign, pipes.clear, pipes.selection, pipes.selection_all and its snapshot section, with the codes piping.outside_group, piping.group_in_zone and piping.group_nested. pipe_types.delete moves or nulls the pipes using a type. A Hot Water System delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |
+| 1.100 | 2026-11-24 | ph_composer.piping adds the schedule: ph_composer.piping.schedule (runs by connection with their parents, lengths and findings, totals, each Hot Water System's distribution and recirculation and each Pipe Type's used length, with compact), ph_composer.piping.schedule.details, ph_composer.piping.runs.members, ph_composer.piping.systems and its snapshot section, and the view command ph_composer.piping.runs.locate, with the codes piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, piping.trunk_without_branches, piping.parent_ambiguous, piping.shared_definition and piping.hidden. pipe_types.list and pipe_types.all rows add used_length_m. A pipe's water_temp_c is 0 to 100. The thermal-bridge chain rule moves to core unchanged. |

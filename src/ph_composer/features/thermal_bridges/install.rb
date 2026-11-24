@@ -7,7 +7,8 @@
 #   type/           the Thermal Bridge Type kind, its operations and reads; names no Edge, Zone or run
 #   assignment/     the record on an Edge, its reference target, assign, clear, the repair of what clear
 #                   cannot reach, the selection read and the path reads
-#   runs/           pure Ruby: chains of assigned Edges, the schedule and its findings, over detached facts
+#   runs/           pure Ruby: runs by the core chain rule (core/edge_runs.rb), the schedule and its findings,
+#                   over detached facts
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
 #   export.rb       the export section and its preflight, over the same runs as the schedule

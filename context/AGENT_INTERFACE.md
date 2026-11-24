@@ -929,8 +929,8 @@ pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mec
 "Mechanical: pumps", "Mechanical: the Pump export", "Mechanical: fans", "Mechanical: the Fan export" and "Mechanical
 settings", is the recipe.
 
-Hot water piping is the feature `ph_composer.piping` (API 1.98, groups and pipes 1.99), which requires Mechanical and
-Zones. Its Pipe Types
+Hot water piping is the feature `ph_composer.piping` (API 1.98, groups and pipes 1.99, the schedule 1.100), which
+requires Mechanical and Zones. Its Pipe Types
 are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapshot section, `create`, `update`,
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a row's `export_blockers` names
 `piping.insulation_conductivity_missing` for an insulated type with no conductivity. The
@@ -942,6 +942,11 @@ and pipes `ph_composer.piping.pipes` (`assign` and `clear` over explicit Edges, 
 `piping.group_in_zone` and `piping.group_nested`. The
 [piping assignment walkthrough](../tools/examples/authoring/piping_assignment_walkthrough.rb) creates a group, draws,
 assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
+The bounded read `ph_composer.piping.schedule` (with `compact`, `ph_composer.piping.schedule.details` for its System, Pipe
+Type and unreadable rows and `ph_composer.piping.runs.members` for one run's pipes) walks the Model for runs by connection, their parents, lengths and findings, with totals by role, each Hot Water System's distribution and recirculation (also
+`ph_composer.piping.systems`, the snapshot section `ph_composer.piping.piping_systems`) and each Pipe Type's used length,
+which `pipe_types.list` and `pipe_types.all` rows also carry as `used_length_m`. The view command
+`ph_composer.piping.runs.locate` selects a run's pipes through `ph_composer.context.open` and refuses `piping.hidden`.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

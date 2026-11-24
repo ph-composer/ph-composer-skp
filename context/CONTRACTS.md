@@ -1285,7 +1285,7 @@ pipe segment carries its pipe's.
 - **Pipe** (reference target `ph_composer.piping.pipe`, `features/piping/assignment/`): the assignment on an Edge,
   occurrence reference `{group_path, entity_path, entity_id}` with `entity_path` root-to-Edge. `role` is `trunk`,
   `branch`, `twig` or `recirculation`; a trunk carries `multiplier` (integer at least 1, default 1) and
-  `demand_recirculation` (default false), a recirculation pipe `water_temp_c` (default 60) and `daily_period` (hours,
+  `demand_recirculation` (default false), a recirculation pipe `water_temp_c` (0 to 100 from P4-13c, default 60) and `daily_period` (hours,
   0 to 24, default 24), a branch and a twig neither. A role's values are required for it and absent for the others;
   a value another role takes refuses `params.invalid`, and reassigning a role drops the old role's values.
   `pipes.assign` and `pipes.clear` take at most 250 explicit Edges and refuse as a whole for a stale target, an Edge
@@ -1297,6 +1297,48 @@ pipe segment carries its pipe's.
   in the delete's proposal; a pipe the rewrite cannot reach (outside a Piping group, locked or shared) refuses the
   whole delete as `reference.in_use`. A Hot Water System delete with an id or null moves or clears the Piping groups
   naming it through piping's retargeter `ph_composer.piping.groups.retarget_hot_water_system`.
+- **Runs and the tree** (`features/piping/runs/`, pure Ruby over detached facts; the live walk in
+  `features/piping/scan/`). Runs are derived, never stored. The core chain rule (`core/edge_runs.rb`) joins pipes of
+  one group occurrence, role, Pipe Type and role values where they share a vertex (a whole float compared as its integer); a run
+  ends at a free end or a vertex where its own pipes do not number two, so a branch passing a trunk tee is one branch
+  and a trunk changing type or multiplier is two. A branch's parent is the trunk run of its group occurrence sharing a
+  vertex with it, a twig's the branch run; of two, the one whose identifier sorts first. A tree lives in one Piping
+  group. A run's `identifier` is `pipe_` and 16 hex digits of the digest of its container path, role, type, role values
+  and micrometre-rounded points; a pipe's segment identifier is `pipe_seg_` and 16 hex digits of its Edge path and
+  sorted endpoints, so a split Edge, which shares its assignment id, is two segments. `display_name` is the role word
+  and a counter per Hot Water System and role, numbered by group path, then the run's smallest point. Schedule order
+  is System, group path, role, smallest point. Lengths are drawn length; a trunk's multiplier is never applied.
+- **Recirculation per Hot Water System** (`runs/recirculation.rb`): honeybee-ph's `recirc_temp` and `recirc_hours`
+  copied step for step, so the values equal the export's after reload: each recirculation run is one element, its
+  temperature and hours the length-weighted means of its pipes'; the System's are the length-weighted means of its
+  runs', the hours truncated toward zero as `int()` does, 60.0 and 24 with no recirculation pipe (`from_piping` false).
+  Segment lengths are ladybug-geometry's magnitude and every sum adds left to right, as CPython 3.11's `sum` does; runs
+  add in schedule order and pipes in run order, the order the export must write them in. Two runs of 3.3 m and 1.7 m at
+  24 h give 23, as honeybee-ph does; one run of both gives 24.
+- **The schedule** `ph_composer.piping.schedule` (bounded, `limit`, `cursor` and `compact`; refuses `record.unreadable` and
+  `validation.failed` for an unreadable Pipe Type or Hot Water System) walks the Model once, with no snapshot section,
+  and answers one page of runs, each with `hot_water_system_id` and name, `group`, `role`, `parent` and `parent_name`,
+  `pipe_type_id` and name, `length_m`, `line_count`, `values`, `closed`, `edge_paths`, `shared` and `findings`; beside
+  them `totals` (`by_role`, run and line counts, distribution and recirculation length), `systems` (every Hot Water
+  System's `distribution_length_m` by role and its recirculation sum), `types` (every Pipe Type's `used_length_m` and
+  line count) and the first 50 `unreadable` records with `unreadable_total`. Names from a user's text and finding
+  messages are cut and named in `truncated`. With `compact`, a run leaves out `edge_paths` and each finding its
+  `locate`, giving `edge_count` and the run's `index`, the `systems`, `types` and `unreadable` rows are left out with
+  `system_count` and `type_count`, and every page fits one agent reply; `ph_composer.piping.schedule.details` pages
+  those rows (`part`) and `ph_composer.piping.runs.members` one run's pipes, or one finding's. A pipe or group record that cannot be read, or fails its schema (a `water_temp_c` outside 0 to 100
+  included), is an `unreadable` row (`record.unreadable`), never a raise, and blocks export.
+  `ph_composer.piping.systems` answers the `systems` rows alone and is the snapshot section
+  `ph_composer.piping.piping_systems`; `pipe_types.list` and `pipe_types.all` add `used_length_m`. Both walk without
+  Zones' containment, so an unreadable Zone record does not refuse them.
+- **Findings** on a run, each `{code, message, blocks_export, locate: {edge_paths}}`: blocking
+  `piping.type_missing` (no or a deleted Pipe Type), `piping.group_unlinked` (no or a deleted System),
+  `piping.group_in_zone`, `piping.insulation_conductivity_missing`, `piping.branch_unconnected` and
+  `piping.twig_unconnected` (a twig touching only a trunk included); warnings `piping.trunk_without_branches`,
+  `piping.parent_ambiguous` and `piping.shared_definition`.
+- **`ph_composer.piping.runs.locate`** (view command) takes one run's or finding's `edge_paths` (at most 10,000, one
+  group occurrence, else `params.invalid`; a path not ending at a pipe in a Piping group refuses `target.wrong_kind`),
+  refuses `piping.hidden` for a hidden pipe, Group or tag, opens the group
+  through `ph_composer.context.open`, selects the pipes and frames them by world points.
 
 ## This computer's settings file
 
