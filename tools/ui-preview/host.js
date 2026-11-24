@@ -85,6 +85,8 @@
       outdoor_units: [], indoor_units: [], serves: {}, blended: null };
     // The Electric Heaters and each Zone's list of them.
     this.mechanical.electricHeaters = this.mechanical.electricHeaters || { heaters: [], serves: {} };
+    // The Pumps and each Zone's list of them.
+    this.mechanical.pumps = this.mechanical.pumps || { pumps: [], serves: {} };
     // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
     // for its geolocation; `climate.geolocation` stands in for the host read.
     this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
@@ -234,6 +236,7 @@
           records: this.heatPumpRows("indoor_units"), unreadable: [] } },
         [MECHANICAL + "electric_heaters"]: { status: "completed", value: { records: this.electricHeaterRows(),
           unreadable: [] } },
+        [MECHANICAL + "pumps"]: { status: "completed", value: { records: this.pumpRows(), unreadable: [] } },
         [MECHANICAL + "heat_pumps_blended"]: { status: "completed", value: JSON.parse(JSON.stringify(
           this.mechanical.heatPumps.blended || { climate: { state: "missing", reason: "No climate." },
             segments: [], findings: [] })) },
@@ -539,8 +542,9 @@
      rule (more than a tenth of the larger is out of balance). */
   Host.prototype.servesRows = function () {
     var data = this.mechanical, hotWater = data.hotWater, heatPumps = data.heatPumps, names = {}, segments = {};
-    var electric = data.electricHeaters;
-    data.ventilators.concat(hotWater.systems, heatPumps.indoor_units, electric.heaters).forEach(function (record) {
+    var electric = data.electricHeaters, pumps = data.pumps;
+    data.ventilators.concat(hotWater.systems, heatPumps.indoor_units, electric.heaters, pumps.pumps)
+      .forEach(function (record) {
       names[record.id] = record.values.name;
     });
     this.zoneOptions.building_segments.forEach(function (segment) { segments[segment.id] = segment.values.name; });
@@ -557,12 +561,15 @@
       heaters.forEach(function (heater) {
         items.push({ slot: "heater_ids", id: heater, name: names[heater] || null });
       });
+      var pumpIds = (pumps.serves[zone.id] || []).slice();
+      pumpIds.forEach(function (pump) { items.push({ slot: "pump_ids", id: pump, name: names[pump] || null }); });
       return { zone_id: zone.id, reference: zone.reference, name: zone.values.name,
         building_segment_id: segment,
         building_segment: segment ? segments[segment] || null : zone.values.building_segment || null,
-        slots: { ventilator_id: item, hot_water_system_id: system, hp_indoor_unit_ids: units, heater_ids: heaters },
-        payload_status: item || system || units.length || heaters.length ? "understood" : null, items: items,
-        findings: [] };
+        slots: { ventilator_id: item, hot_water_system_id: system, hp_indoor_unit_ids: units, heater_ids: heaters,
+          pump_ids: pumpIds },
+        payload_status: item || system || units.length || heaters.length || pumpIds.length ? "understood" : null,
+        items: items, findings: [] };
     });
   };
   /* Each Hot Water System with the Zones it serves, its Heater and Tank counts, honeybee-ph's recirculation
@@ -677,6 +684,22 @@
       }) });
     });
   };
+  /* Each Pump with the Zones it serves, the usage profile its type gives, and the host's finding for one that serves
+     none. */
+  var PUMP_PROFILES = { 4: 2, 6: 4, 7: 4, 10: 1 };
+  Host.prototype.pumpRows = function () {
+    var pumps = this.mechanical.pumps, zones = this.zones;
+    return pumps.pumps.map(function (record) {
+      var served = zones.filter(function (zone) { return (pumps.serves[zone.id] || []).indexOf(record.id) >= 0; });
+      return Object.assign(JSON.parse(JSON.stringify(record)), { findings: served.length ? [] :
+        [{ code: "mechanical.item_unserved", severity: "warning", blocks_export: false,
+          message: record.values.name + " serves no Zone, so nothing exports it." }],
+      ihg_usage_profile_default: PUMP_PROFILES[record.values.device_type],
+      zones: served.map(function (zone) {
+        return { zone_id: zone.id, reference: zone.reference, name: zone.values.name };
+      }) });
+    });
+  };
   Host.prototype.ventilatorRows = function () {
     var data = this.mechanical, zones = this.zones;
     return data.ventilators.map(function (record) {
@@ -728,7 +751,10 @@
       refs: { indoor_equipment_id: "indoor_equipment", outdoor_unit_id: "outdoor_units" },
       defaults: { quantity: 1, in_conditioned_space: true } },
     electric_heaters: { label: "Electric Heater", prefix: "ehr", kind: "electric_heater",
-      defaults: { percent_coverage: 1 } }
+      defaults: { percent_coverage: 1 } },
+    pumps: { label: "Pump", prefix: "pmp", kind: "pump", defaults: { device_type: 6, quantity: 1,
+      in_conditioned_space: true, norm_energy_demand_w: 0, annual_period_operation_khrs: 8.76,
+      ihg_utilization_factor: 1 } }
   };
   /* What names each heat pump collection's records, by collection and key. */
   var HEAT_PUMP_REFERRERS = { outdoor_equipment: [["outdoor_units", "outdoor_equipment_id"]],
@@ -759,9 +785,12 @@
       collection.slice("heat_pumps.".length) : null;
     var records = pumpCollection ? heatPumps[pumpCollection] : { ventilators: data.ventilators,
       hot_water_systems: hotWater.systems, hot_water_heaters: hotWater.heaters, hot_water_tanks: hotWater.tanks,
-      electric_heaters: data.electricHeaters.heaters }[collection];
+      electric_heaters: data.electricHeaters.heaters, pumps: data.pumps.pumps }[collection];
     // Each list slot's Zone lists: a Zone may hold several of its items.
-    var listSlots = { hp_indoor_unit_ids: heatPumps.serves, heater_ids: data.electricHeaters.serves };
+    var listSlots = { hp_indoor_unit_ids: heatPumps.serves, heater_ids: data.electricHeaters.serves,
+      pump_ids: data.pumps.serves };
+    // The flat catalogs whose items a list slot names, by collection.
+    var listed = { electric_heaters: data.electricHeaters.serves, pumps: data.pumps.serves };
     var target = records && records.filter(function (record) { return record.id === params.id; })[0];
     var zones = this.zones;
     function copy(value) { return JSON.parse(JSON.stringify(value)); }
@@ -827,17 +856,17 @@
         heatPumps.serves[zone] = list;
       });
       records.splice(records.indexOf(target), 1);
-    } else if (spec && verb === "delete" && collection === "electric_heaters") {
-      var heaterLists = data.electricHeaters.serves, heaterZones = Object.keys(heaterLists).filter(function (zone) {
-        return heaterLists[zone].indexOf(target.id) >= 0;
+    } else if (spec && verb === "delete" && listed[collection]) {
+      var itemLists = listed[collection], itemZones = Object.keys(itemLists).filter(function (zone) {
+        return itemLists[zone].indexOf(target.id) >= 0;
       });
-      if (params.replacement_id === undefined && heaterZones.length) {
+      if (params.replacement_id === undefined && itemZones.length) {
         return refused("reference.in_use", target.values.name + " is in use. " + NOTHING_WRITTEN, this.revision);
       }
-      heaterZones.forEach(function (zone) {
-        var list = heaterLists[zone].filter(function (id) { return id !== target.id; });
+      itemZones.forEach(function (zone) {
+        var list = itemLists[zone].filter(function (id) { return id !== target.id; });
         if (params.replacement_id && list.indexOf(params.replacement_id) < 0) list.push(params.replacement_id);
-        heaterLists[zone] = list;
+        itemLists[zone] = list;
       });
       records.splice(records.indexOf(target), 1);
     } else if (spec && verb === "delete") {
@@ -866,7 +895,8 @@
       if (params.zones.some(function (row, index) {
         var zone = chosen[index].id, expected = row.expected_values || {};
         var current = { ventilator_id: data.serves[zone] || null, hot_water_system_id: hotWater.serves[zone] || null,
-          hp_indoor_unit_ids: heatPumps.serves[zone] || [], heater_ids: data.electricHeaters.serves[zone] || [] };
+          hp_indoor_unit_ids: heatPumps.serves[zone] || [], heater_ids: data.electricHeaters.serves[zone] || [],
+          pump_ids: data.pumps.serves[zone] || [] };
         return Object.keys(expected).some(function (slot) {
           return JSON.stringify(expected[slot]) !== JSON.stringify(current[slot]);
         });

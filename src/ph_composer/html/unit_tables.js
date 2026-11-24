@@ -126,7 +126,12 @@ PhComposerUI.define("unit_tables", [], function () {
     ip: unit("pct", "%", ["percent"]) },
     /* A heat pump's rated capacity: kilowatts, or thousands of Btu per hour, as the Phius estimator takes it. */
     capacity: { label: "capacity", factor: BTU_H_PER_W, precision: { SI: 2, IP: 1 }, si: unit("kw", "kW"),
-    ip: unit("kbtu_h", "kBtu/h", ["kbtuh", "mbh"]) }
+    ip: unit("kbtu_h", "kBtu/h", ["kbtuh", "mbh"]) },
+    /* A pump's electrical input and the thousands of hours it runs a year: watts and kilohours in both systems, as
+       WUFI-Passive and METr take them, so only the regional number format applies. */
+    electric_power: { label: "power", factor: 1, precision: { SI: 1, IP: 1 }, si: unit("w", "W"), ip: unit("w", "W") },
+    kilohours: { label: "operation", factor: 1, precision: { SI: 2, IP: 2 }, si: unit("kh", "kh/yr"),
+    ip: unit("kh", "kh/yr") }
   };
 
   var DIMENSION_FORMATS = [

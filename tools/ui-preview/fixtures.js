@@ -1623,7 +1623,20 @@
           model: "Panel 750" }),
         heatPump("ehr_Dd44Ee55Ff66", "electric_heater", "EH-2 Bath", { percent_coverage: 1, notes: "Towel rail" }),
         heatPump("ehr_Gg77Hh88Ii99", "electric_heater", "EH-3 Spare", { percent_coverage: 1 })],
-      serves: { zon_apt1: ["ehr_Aa11Bb22Cc33", "ehr_Dd44Ee55Ff66"], zon_apt2: ["ehr_Aa11Bb22Cc33"] } }
+      serves: { zon_apt1: ["ehr_Aa11Bb22Cc33", "ehr_Dd44Ee55Ff66"], zon_apt2: ["ehr_Aa11Bb22Cc33"] } },
+    /* Pumps: P-HW recirculates hot water for both apartments, P-HC circulates heating water in Apt 1 with half its
+       energy a gain, and P-Spare, a storage load pump whose gain is named all year, serves nothing. */
+    pumps: {
+      pumps: [
+        heatPump("pmp_Aa11Bb22Cc33", "pump", "P-HW", { device_type: 6, quantity: 1, in_conditioned_space: true,
+          norm_energy_demand_w: 25, annual_period_operation_khrs: 8.76, ihg_utilization_factor: 1,
+          manufacturer: "Kaltwerk", model: "Circ 25" }),
+        heatPump("pmp_Dd44Ee55Ff66", "pump", "P-HC", { device_type: 4, quantity: 2, in_conditioned_space: true,
+          norm_energy_demand_w: 40, annual_period_operation_khrs: 5, ihg_utilization_factor: 0.5 }),
+        heatPump("pmp_Gg77Hh88Ii99", "pump", "P-Spare", { device_type: 7, quantity: 1, in_conditioned_space: false,
+          norm_energy_demand_w: 60, annual_period_operation_khrs: 2, ihg_utilization_factor: 1,
+          ihg_usage_profile: 1 })],
+      serves: { zon_apt1: ["pmp_Aa11Bb22Cc33", "pmp_Dd44Ee55Ff66"], zon_apt2: ["pmp_Aa11Bb22Cc33"] } }
   } });
 
   global.PhComposerPreviewFixtures = {

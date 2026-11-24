@@ -919,6 +919,17 @@ indoor unit's served `zones`, and the heat pump plan's `findings` about the reco
   (`mechanical.item_unserved`, `mechanical.zone_left_out`). Coverages are not added up or checked against each other or
   a heat pump's.
 
+- **Pumps** are one flat kind (`features/mechanical/pumps/`), the **Pump** (`ph_composer.mechanical.pump`, `pmp_`,
+  `schema_version` 1), honeybee-ph's `PhSupportiveDevice`: the shared name, notes, datasheet links and source,
+  `manufacturer` and `model`, `device_type` (4 heating circulation, 6 hot water circulation, 7 hot water storage load,
+  10 other; default 6), `quantity` (1), `in_conditioned_space` (true), `norm_energy_demand_w` (W, default 0, the
+  Grasshopper component's), `annual_period_operation_khrs` (kilohours a year, default 8.76), `ihg_utilization_factor`
+  (0 to 1, default 1.0) and `ihg_usage_profile` (1 all year, 2 winter, 3 summer, 4 none; absent by default). An absent
+  profile follows the type, as honeybee-ph re-seeds it and its Grasshopper component reads a blank one:
+  `Pumps.ihg_usage_profile` gives the stored profile or the type's (`DEFAULT_IHG_USAGE_PROFILE`: 4 gives 2, 6 and 7
+  give 4, 10 gives 1), and rows add the type's as `ihg_usage_profile_default`. Its operations are
+  `ph_composer.mechanical.pumps.*`, as the Electric Heater's over `pump_ids`.
+
 **The blend.** `HeatPumps::Blend` (`features/mechanical/heat_pumps/blend.rb`) is the Phius Heat Pump Performance
 Estimator's air-source arithmetic (v25.1.2), pure Ruby in its IP units: one row per outdoor model, its quantity the
 sum of its outdoor units'; each row's share of cooling capacity at 95 °F and of heating capacity at 17 °F and 47 °F;
@@ -946,12 +957,13 @@ splits for WUFI-Passive). `ph_composer.mechanical.heat_pumps.blended` (also the 
 its `object_id`. The live reads take the climate from `ph_composer.climate.climate.get` and
 `ph_composer.climate.design_temperatures.get`; the export from the Site export's projection.
 
-**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 4)
+**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 5)
 on the Zone record, as Programs keeps a Zone's assignment ("Occupancy"): no record, id or reference target of its
 own. Its payload holds one slot per family, `ventilator_id` (a `vnt_` id or null, a declared `one` reference to the
 Ventilator kind) and, since schema version 2, `hot_water_system_id` (an `hws_` id or null, `one`), and since schema
 version 3 `hp_indoor_unit_ids` (a list of `hiu_` ids, each once, `many`), and since schema version 4 `heater_ids` (a
-list of `ehr_` ids, each once, `many`); a later family adds its slot and moves the version.
+list of `ehr_` ids, each once, `many`), and since schema version 5 `pump_ids` (a list of `pmp_` ids, each once,
+`many`); a later family adds its slot and moves the version.
 The validator takes a whole payload: every slot present, each id of its slot's kind or null, no other key. It is
 `required`: the Ventilator export claims it (below), so a payload this version does not understand blocks the export.
 A Zone served by nothing stores no payload or one whose every slot is empty; the reads answer both alike.
@@ -1011,8 +1023,8 @@ the same mode over the `hot_water_system_id` slot.
 command `ph_composer.mechanical.locate` (`features/mechanical/locate.rb`), which maps each item kind's id prefix to its
 param: a Ventilator's `ventilator_ids`, a Hot Water System's `hot_water_system_ids`, a Heater's
 `hot_water_heater_ids`, a Tank's `hot_water_tank_ids`, the heat pump outdoor models', outdoor units' and indoor units'
-`hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` and `hp_indoor_unit_ids`, and an Electric Heater's
-`electric_heater_ids` open the Mechanical tab on that table, narrowed to them, one
+`hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` and `hp_indoor_unit_ids`, an Electric Heater's
+`electric_heater_ids` and a Pump's `pump_ids` open the Mechanical tab on that table, narrowed to them, one
 kind per request (two refuse `params.invalid`, since one table shows at a time); a Zone's `zones` open the Zones tab
 with them checked. Rows for an unreadable record, a metadata problem and a refused
 read carry none. The panel table that shows a kind accepts its param.
@@ -1054,6 +1066,13 @@ Electric Heating › Heaters (`electric_heaters.js`) is another: Tag, coverage i
 quantity, the Serves chips with the Zone picker over the `heater_ids` list (a heater is added beside a Zone's others
 and nothing is replaced; an unchecked Zone loses only this heater), then Manufacturer, Model and Notes; its delete
 offers a replacement or clearing for the Zones it serves.
+
+Pumps › Pumps (`pumps.js`) is another: Tag, Type (a choice of the four), Quantity, Power and Operation through the
+`electric_power` (W) and `kilohours` (kh/yr) quantities, the same unit in SI and IP and read in the regional number
+format (both unit registries carry them), In conditioned space, the Serves chips with the Zone picker over the `pump_ids` list, then
+Manufacturer, Model and Notes. The utilization factor and usage profile sit behind each row's disclosure
+(`optional_values.js`, which takes a choice field and a per-field default: the row action is pressed while a value
+differs from its default); the profile's first choice, "From type (...)", is null and names the type's profile.
 
 **Ventilator export.** `ph_composer.mechanical.export.ventilation` (section version 1, `features/mechanical/export.rb`)
 requires the Zones section and claims `ph_composer.mechanical.zone_serves` on the Zone record (`entity_projections`),
@@ -1144,6 +1163,24 @@ the last, so `conformance` compares each reloaded Room's heater with its own row
 heating system the run did not report. The preflight adds the heater rows under this section: a blocking row per
 unreadable heater and per metadata problem, then the plan's findings, a heater's carrying `locate` with
 `electric_heater_ids`.
+
+**Pump export.** `ph_composer.mechanical.export.pumps` (section version 1, `features/mechanical/pump_export.rb`)
+requires the Zones section, the Ventilator export (for the Zones) and the Spaces export, whose projection gives each
+exported Zone's `space_count`. Its records are `PumpPlan`'s pairs, pure Ruby: one per (Pump, exported Zone) whose
+`pump_ids` names it, id `<pmp id>_<zon id>`, `identifier` the pump's id, `display_name` its Tag, its values under the
+record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export,
+and notes `mechanical.zone_without_spaces` once per pump, naming each served exported Zone that no Space names
+(`ExportZones.spaceless_findings`, which takes a family's slot and label so another family PHX reads through Spaces
+reports the same): PHX reads supportive devices through a Room's Spaces, so such a Room carries the pump in the HBJSON
+and PHX reads it only through another Room it serves in the same Building Segment. The pair is still written. The preflight counts Spaces from
+`ph_composer.spaces.all` as the export does, each under the Zone it names unless it sits inside a left-out Zone, and
+reads it only while an exported Zone names a pump; a refused read skips the finding and keeps the pump rows. The Python section (`PumpSection`, required
+for export) builds each pair's own `PhSupportiveDevice`, setting the usage profile after the type (honeybee-ph's type
+setter re-seeds it), and adds every pump serving a Room with `add_supportive_device`. Its result rows (`pumps`) carry
+the pair's ids, the Zone's name, the identifier, the values and `digest`; `conformance` compares each reloaded Room's
+pump with its own row's digest, and no Room may hold a supportive device under a Pump id the run did not report
+(another section's supportive devices are not its to check). The preflight adds the pump rows under this section, a
+pump's carrying `locate` with `pump_ids`.
 
 **Building Segment mechanical settings.** Each Building Segment's mechanical settings are the structured extension
 `ph_composer.mechanical.segment` (schema version 1, required) on the Segment record, staged by Zones' settings Save
@@ -2083,7 +2120,10 @@ and a copy on each Space row; `ph_composer.spaces.clear_zone_airflows` (From Pro
 By Program in one Undo step. Room ventilation is never written from Space rates. A Zone exported with no
 Spaces is the preflight warning `space.zone_without_spaces`, which does not block. Its result fields
 total floor area, weighted area and net volume per Zone and per Building-Segment, and its
-conformance checks the reloaded Rooms' Spaces against the per-Zone totals.
+conformance checks the reloaded Rooms' Spaces against the per-Zone totals. Its `projection`, for another section
+that reads each exported Zone's Spaces (Programs' areas and volumes, the Pump export), is one row per exported Zone
+that holds a Space, `{zone_id, space_count, floor_area_m2, weighted_area_m2, net_volume_m3}`, the totals 0 for a
+Zone whose Spaces hold no Volume.
 
 Record maps follow the object each entity becomes. The Model's own map leaves in the foundation's section
 `ph_composer.model.export.model` (Ruby `shell/model_metadata.rb`, Python `model_metadata.py`, attached at

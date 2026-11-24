@@ -915,12 +915,15 @@ where a Segment's mechanical cooling switch disagrees with its blended heat pump
 are the catalog `ph_composer.mechanical.electric_heaters` (`list`, `all`, a snapshot section, `create`, `update`,
 `duplicate` and `delete` with `replacement_id`); they serve Zones through the list slot `heater_ids`, the export adds
 each to every Room it serves as a direct electric heating system, the preflight lists its findings, and `locate`
-takes `electric_heater_ids`. The
+takes `electric_heater_ids`. Since API 1.96 Pumps are the catalog `ph_composer.mechanical.pumps`, with the same
+operations; they serve Zones through the list slot `pump_ids`, the export adds each to every Room it serves as a
+supportive device, the preflight lists its findings with `mechanical.zone_without_spaces` for a served Zone with no
+Spaces, and `locate` takes `pump_ids`. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
 "Mechanical: the Ventilator export", "Mechanical: hot water", "Mechanical: the hot water export", "Mechanical: heat
-pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mechanical: the Electric Heater export"
-and "Mechanical settings", is the recipe.
+pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mechanical: the Electric Heater export",
+"Mechanical: pumps", "Mechanical: the Pump export" and "Mechanical settings", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

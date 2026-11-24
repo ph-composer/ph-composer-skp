@@ -112,7 +112,12 @@ module PhComposer
       # A Hot Water Tank's capacity: litres, or US gallons of 231 in³ each.
       "volume_l" => {
         :si_label => "L", :ip_label => "gal", :si_precision => 1, :ip_precision => 1, :factor => 1 / LITRES_PER_GALLON
-      }
+      },
+      # A pump's electrical input and the thousands of hours it runs a year, the same in both systems.
+      "electric_power" => { :si_label => "W", :ip_label => "W", :si_precision => 1, :ip_precision => 1,
+                            :factor => 1.0 },
+      "kilohours" => { :si_label => "kh/yr", :ip_label => "kh/yr", :si_precision => 2, :ip_precision => 2,
+                       :factor => 1.0 }
     }.freeze
 
     module_function

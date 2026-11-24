@@ -1,0 +1,18 @@
+{
+  "pumps": [
+    "id",
+    "item_id",
+    "zone_id",
+    "zone_name",
+    "display_name",
+    "identifier",
+    "device_type",
+    "quantity",
+    "in_conditioned_space",
+    "norm_energy_demand_w",
+    "annual_period_operation_khrs",
+    "ihg_utilization_factor",
+    "ihg_usage_profile",
+    "digest"
+  ]
+}

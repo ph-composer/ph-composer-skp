@@ -221,9 +221,14 @@
       "sha256": "d57ac5852a9a3d65caf318416915099042209f203b33f07c05b375143fac901d"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 8685,
+      "bytes": 12530,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "dda7fe04e8a796aa7ce1facccf921d1642899009c69346bba6b5c1e953a935b0"
+      "sha256": "f93245da5fc2db61470fbcb3bf90817960f63c63d13cc7f606e4fb43f496a442"
+    },
+    "html/features/mechanical/pumps.js": {
+      "bytes": 9031,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "3db586acad496d687900f54368274bfac7584758b51d675720f3ab5f58997456"
     },
     "html/features/mechanical/section.js": {
       "bytes": 4960,
@@ -546,9 +551,9 @@
       "sha256": "9698d795e2d2031afa9dac5732125f52c0292492eaab2721f6a77a3a7e3de74f"
     },
     "html/fields.js": {
-      "bytes": 2936,
+      "bytes": 3203,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8ab9433d4877586ce41e50c1125a0583ea3b72a73bbd4516200cc09194861675"
+      "sha256": "15dfd98d40814aa08c8beab8f18435b835f8734bdb88307c24d79ea8e1e2bf74"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -556,9 +561,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 11498,
+      "bytes": 11555,
       "mime": "text/html; charset=utf-8",
-      "sha256": "85af469d411dd555764e2fc9110d91079bad64ad13af2792dd9d9b657411c8ab"
+      "sha256": "c7682e3f342036663d8012149a10c566476e33ffe9b4c469e2474e046347c6ee"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -811,9 +816,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 15383,
+      "bytes": 15839,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "22e0c89a24b416a2df6efca51c82b80a7d414502ac239987a9e33596d0a255bd"
+      "sha256": "892d3913c5060ce9f734c6a5f760dc942c07b4b094d7ef8d2b83e675a18a22ba"
     },
     "html/units.js": {
       "bytes": 14458,
@@ -851,9 +856,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1907,
+      "bytes": 1964,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "e9fac701ab8d8d51d86f1e208a7c9c72b5034d0d8badf77c8fc657878a188557"
+      "sha256": "77d66c37183688e501027ee4603760957fb8b1633d7dff37a7fefaa7b28d7083"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -876,9 +881,9 @@
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
     },
     "python/ph_composer_translation/contract/mechanical_records.py": {
-      "bytes": 15436,
+      "bytes": 17871,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "4683ce3a6fdebd0dcac84afe901f5fb842e9353163d93fbedb0011c9ee64fc87"
+      "sha256": "ca700a2467d9eb84b7672b84531da99ac8f1e15a99c61e0e2efa5df61ba63bf3"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -921,9 +926,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/mechanical_sections.py": {
-      "bytes": 29265,
+      "bytes": 35354,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "156fedc2edf3683527d035f3b4f90ce40ed1597b513ea9a05e223269a9b50f4d"
+      "sha256": "5c2d466f16c39eb2e787054657291975538f931f53e8e0dd2507423e7e231a87"
     },
     "python/ph_composer_translation/mechanical_segment_sections.py": {
       "bytes": 6882,

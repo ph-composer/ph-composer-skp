@@ -29,6 +29,9 @@ PhComposerUI.define("fields", [], function () {
   var ELECTRIC_EFFICIENCY = descriptor("electric_efficiency", "wh_m3");
   var VOLUME_L = descriptor("volume_l", "l");
   var POWER_W = descriptor("power", "w");
+  /* A pump's electrical input in W and its operation in kilohours a year, unconverted under IP. */
+  var ELECTRIC_POWER_W = descriptor("electric_power", "w");
+  var KILOHOURS = descriptor("kilohours", "kh");
   /* A fraction from 0 to 1, read and entered as a percentage. */
   var PERCENT = descriptor("percent", "1");
   /* A heat pump's rated capacity in kW, shown kBtu/h under IP. */
@@ -45,6 +48,6 @@ PhComposerUI.define("fields", [], function () {
     TEMPERATURE_C: TEMPERATURE_C, TEMPERATURE_DIFFERENCE_K: TEMPERATURE_DIFFERENCE_K,
     IRRADIATION_KWH_M2: IRRADIATION_KWH_M2, IRRADIANCE_W_M2: IRRADIANCE_W_M2, WIND_SPEED_M_S: WIND_SPEED_M_S,
     DISTANCE_KM: DISTANCE_KM, ELECTRIC_EFFICIENCY: ELECTRIC_EFFICIENCY, VOLUME_L: VOLUME_L, POWER_W: POWER_W,
-    PERCENT: PERCENT, CAPACITY_KW: CAPACITY_KW,
+    PERCENT: PERCENT, CAPACITY_KW: CAPACITY_KW, ELECTRIC_POWER_W: ELECTRIC_POWER_W, KILOHOURS: KILOHOURS,
     with: withSettings };
 });

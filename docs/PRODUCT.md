@@ -316,7 +316,7 @@ Hot water flow stays in L/h per m².
 ## Add Ventilators and choose the Zones they serve
 
 1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation**, **Heat Pumps**,
-   **Hot Water** and **Electric Heating** now, and the pills beneath them pick one table of that system. The
+   **Hot Water**, **Pumps** and **Electric Heating** now, and the pills beneath them pick one table of that system. The
    tab remembers the subtab and table you last used on this computer.
 2. **+ New Ventilator** asks for a Tag; every other value starts at its default (0.55 Wh/m³, frost
    protection on below -5 °C, in conditioned space). Edit any value in its cell: Enter or leaving the cell
@@ -359,6 +359,23 @@ Hot water flow stays in L/h per m².
    no slot left is amber and the export leaves it out. **Capacity** reads in litres, or US gallons in IP.
 8. Deleting a System asks which System takes its place on its Zones, Heaters and Tanks. You can clear its
    Zones instead only when no Heater or Tank names it.
+
+## Add pumps
+
+1. Use **Mechanical > Pumps**. Its pill is **Pumps**.
+2. **+ New Pump** asks for a Tag. A new pump is one hot water circulation pump in conditioned space, at
+   0 W for 8.76 kh a year (the whole year). Choose its **Type** (heating circulation, hot water
+   circulation, hot water storage load or other) and enter its **Power** in W and its **Operation** in
+   kilohours a year.
+3. Its internal heat gains sit behind the row's arrow: the **Utilization factor**, the share of its energy
+   that becomes a gain inside the envelope (1 by default), and the **Usage profile**, the season the gain
+   lands in. The profile follows the Type (winter for a heating circulation pump, none for a hot water
+   pump, whose losses the hot water distribution counts, and all year for other) until you choose one;
+   **From type** returns to it. The arrow is filled while the factor is not 1 or a profile is chosen.
+4. Click a row's **Serves** cell to choose its Zones, as for a Ventilator. A Zone may have several pumps,
+   so assigning one never replaces another. PHX reads a pump through a Room's Spaces, so the Export pane
+   warns when a pump serves a Zone with no Spaces.
+5. Deleting a pump that serves Zones asks which pump takes its place on them, or clears it from them.
 
 ## Add electric heaters
 

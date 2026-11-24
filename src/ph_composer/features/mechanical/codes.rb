@@ -21,6 +21,7 @@ module PhComposer
       HP_EQUIPMENT_INCOMPLETE = "mechanical.hp_equipment_incomplete"
       HP_COOLING_OVER_200KW = "mechanical.hp_cooling_over_200kw"
       SEGMENT_COOLING_MISMATCH = "mechanical.segment_cooling_mismatch"
+      ZONE_WITHOUT_SPACES = "mechanical.zone_without_spaces"
 
       DESCRIPTIONS = {
         SLOT_FILLED => "The Zone's slot already names another item; assign with replace to use the new one.",
@@ -46,7 +47,10 @@ module PhComposer
         HP_COOLING_OVER_200KW => "A Building Segment's blended cooling is over 200 kW (682 kBtu/h); PH-Composer " \
                                  "exports it as one system and PHX splits it for WUFI-Passive.",
         SEGMENT_COOLING_MISMATCH => "A Building Segment's mechanical cooling switch disagrees with its blended heat " \
-                                    "pump: on with no heat pump cooling in its export, or off with a blend that cools."
+                                    "pump: on with no heat pump cooling in its export, or off with a blend that cools.",
+        ZONE_WITHOUT_SPACES => "An item PHX reads through a Room's Spaces (a Pump) serves an exported Zone with no " \
+                               "Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only " \
+                               "through another Room it serves in the same Building Segment."
       }.freeze
 
       module_function
