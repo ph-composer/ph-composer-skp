@@ -186,14 +186,14 @@
       "sha256": "84edf8e20dc77ba7a4b5b69da9be06246284a86e1b2e4f5d7ab0d4bd226d7b38"
     },
     "html/features/mechanical/heat_pump_units.js": {
-      "bytes": 11180,
+      "bytes": 11907,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "784b7f2a708e156bdaa18735015b96aa8d2716e11ba332ae2b189cdbead40149"
+      "sha256": "51aa6370c2a210f66773561fd9d94f773fa965ad7ee2d49de7ee27693b7ff943"
     },
     "html/features/mechanical/heat_pumps.js": {
-      "bytes": 12907,
+      "bytes": 14620,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "88f08ea33ec03f9ec28b25590e56ee71b9d42efe66ed27c2ca53710ff9cc4c0e"
+      "sha256": "3ac162c732fcc8709dbd478b3bee9427f70d21388208802b65b57e7ba84d7b55"
     },
     "html/features/mechanical/hot_water.js": {
       "bytes": 13002,

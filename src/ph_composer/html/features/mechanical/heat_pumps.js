@@ -67,6 +67,31 @@ function (panel, snapshot, ui, fields, systems, equipment) {
         table.choose(record, values, expected);
       } });
   }
+  /* Delete with a replacement for a record that others name (inventory_forms ReplacementForm): `referrers` are
+     [section, field, label] for each kind of record naming it, and `zones` counts the Zones a record serves. A
+     replacement takes its place on all of them; clearing is offered only while nothing names it through a required
+     reference (`clearable(record, state)`). */
+  function replacement(options) {
+    function usage(state, id) {
+      var named = [];
+      (options.referrers || []).forEach(function (referrer) {
+        records(state, referrer[0]).forEach(function (record) {
+          if (record.values[referrer[1]] === id) named.push(record.values.name);
+        });
+      });
+      var record = options.zones ? records(state, options.zones).filter(function (entry) {
+        return entry.id === id;
+      })[0] : null;
+      var zones = record ? (record.zones || []).map(function (zone) { return zone.name; }) : [];
+      var parts = [];
+      if (named.length) parts.push(named.sort(ui.compareText).join(", ") + (named.length === 1 ? " names it." :
+        " name it."));
+      if (zones.length) parts.push("Serves " + zones.join(", ") + ".");
+      return { count: named.length + zones.length, description: parts.join(" ") };
+    }
+    return { replacement: true, usedOn: options.usedOn, usage: usage,
+      allowClear: function (record) { return options.clearable(record); } };
+  }
   function heatingChoice(values) {
     if (values.heating_rating_mode !== "hspf") return "cop_pair";
     return values.hspf_version === "hspf" ? "hspf" : "hspf2";
@@ -97,6 +122,10 @@ function (panel, snapshot, ui, fields, systems, equipment) {
     var table = this.table = new equipment.EquipmentTable(root, context, {
       section: SECTION, label: LABEL, className: "mech-heat-pump-outdoor", locate: "hp_outdoor_equipment_ids",
       columns: columns, editable: CAPACITIES.concat(RATINGS),
+      // Outdoor units need their model, so a model they install is replaced, never cleared.
+      replacement: replacement({ usedOn: "outdoor unit",
+        referrers: [[SECTIONS.outdoorUnits, "outdoor_equipment_id"]],
+        clearable: function () { return false; } }),
       inventory: {
         quantities: CAPACITIES.concat(RATINGS).reduce(function (all, field) {
           all[field] = RATINGS.indexOf(field) >= 0 ? rating(LABELS[field]) : capacity(CAPACITY_LABELS[field]);
@@ -203,5 +232,5 @@ function (panel, snapshot, ui, fields, systems, equipment) {
   systems.table({ system: SYSTEM, id: SECTION, label: "Equipment · Outdoor", order: 10,
     build: function (surface, context) { return new OutdoorEquipment(surface, context); } });
   return { SYSTEM: SYSTEM, SECTIONS: SECTIONS, OutdoorEquipment: OutdoorEquipment, records: records, nameOf: nameOf,
-    referenceCell: referenceCell, missing: missing, HEATING: HEATING, COOLING: COOLING };
+    referenceCell: referenceCell, replacement: replacement, missing: missing, HEATING: HEATING, COOLING: COOLING };
 });

@@ -186,6 +186,29 @@ test("Units · Indoor sits under its outdoor unit, New names both parents, and i
       "an unchecked Zone gives up only this unit");
   });
 
+test("a delete in use asks for a replacement, and offers clearing only where nothing needs the record", function () {
+  var o = setup();
+  var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
+  form.open(models[0], models);
+  assert.strictEqual(form.inUse, true, "HP-1 installs ODU-A");
+  var values = function () { return clone(form.select.querySelectorAll("option").map(function (node) {
+    return node.value;
+  })); };
+  assert.deepStrictEqual(values(), ["", ODU_B.id], "an outdoor unit needs its model: no clearing");
+  form.select.value = ODU_B.id;
+  form.submit();
+  assert.deepStrictEqual(clone(named(o, OUTDOOR + ".delete")[0].payload.params), { id: ODU_A.id,
+    expected_values: { name: "ODU-A" }, replacement_id: ODU_B.id });
+
+  var p = setup(INDOOR_UNITS), units = p.state.sections[INDOOR_UNITS].value.records;
+  var unitForm = p.view(INDOOR_UNITS).table.replacement;
+  unitForm.open(units[0], units);
+  assert.strictEqual(unitForm.inUse, true, "HP-1.1 serves Zone A");
+  unitForm.select.value = "__clear__";
+  unitForm.submit();
+  assert.strictEqual(clone(named(p, INDOOR_UNITS + ".delete")[0].payload.params).replacement_id, null);
+});
+
 test("the Blended result shows each Segment's estimator sections and copies their rows", function () {
   var o = setup(BLENDED), view = o.view(BLENDED);
   assert.strictEqual(o.root._view.header.root.querySelector(".primary").textContent, "Copy for the estimator");

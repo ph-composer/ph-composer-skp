@@ -66,6 +66,11 @@ function (panel, ui, systems, serves, equipment, heatPumps) {
     this.table = new equipment.EquipmentTable(root, context, {
       section: SECTIONS.indoorEquipment, label: "Heat Pump Indoor Equipment", className: "mech-heat-pump-indoor",
       columns: [], editable: [],
+      // An outdoor model's pairing may be emptied; an indoor unit needs its model, so clearing waits until none does.
+      replacement: heatPumps.replacement({ usedOn: "outdoor model and indoor unit",
+        referrers: [[SECTIONS.outdoorEquipment, "paired_indoor_equipment_id"],
+          [SECTIONS.indoorUnits, "indoor_equipment_id"]],
+        clearable: function (record) { return !record.unit_count; } }),
       inventory: { columnMenus: { sort: ["name", "manufacturer", "model", "notes"],
         filter: ["name", "manufacturer", "model"] } } });
     this.inventory = this.table.inventory;
@@ -82,6 +87,8 @@ function (panel, ui, systems, serves, equipment, heatPumps) {
       section: SECTIONS.outdoorUnits, label: "Heat Pump Outdoor Unit", className: "mech-heat-pump-outdoor-units",
       locate: "hp_outdoor_unit_ids",
       parent: { key: "outdoor_equipment_id", label: "Outdoor equipment", section: SECTIONS.outdoorEquipment },
+      replacement: heatPumps.replacement({ usedOn: "indoor unit",
+        referrers: [[SECTIONS.indoorUnits, "outdoor_unit_id"]], clearable: function () { return false; } }),
       columns: [["outdoor_equipment_id", "Outdoor equipment"], ["quantity", "Quantity"],
         ["in_conditioned_space", "In conditioned space"], ["indoor_unit_count", "Indoor units"]],
       editable: ["quantity", "in_conditioned_space"],
@@ -135,6 +142,8 @@ function (panel, ui, systems, serves, equipment, heatPumps) {
       columns: [["indoor_equipment_id", "Indoor equipment"], [OUTDOOR_UNIT, "Outdoor unit"], ["serves", "Serves"],
         ["quantity", "Quantity"], ["in_conditioned_space", "In conditioned space"]],
       editable: ["quantity", "in_conditioned_space"],
+      replacement: heatPumps.replacement({ usedOn: "Zone", zones: SECTIONS.indoorUnits,
+        clearable: function () { return true; } }),
       parts: [this.picker], repainted: function () { self.repainted(); },
       inventory: Object.assign({}, UNIT_INVENTORY, {
         groups: [[OUTDOOR_UNIT, "Outdoor unit"]],
