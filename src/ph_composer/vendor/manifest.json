@@ -876,9 +876,9 @@
       "sha256": "2edd9370c79b197f92deda6696d8fa2383d31fcf999eff2c6dff0faa85cda47a"
     },
     "python/ph_composer_translation/stack.py": {
-      "bytes": 1361,
+      "bytes": 1451,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "1b73dab83dd4ee7d5b381d71d70e2a30a753b691f248b035903596f59ca6a740"
+      "sha256": "3b7cd84562072b822abf17b2afa9c22d1c16bf5fb433d9442af0f997a7ebe94b"
     },
     "python/ph_composer_translation/thermal_bridge_sections.py": {
       "bytes": 7682,

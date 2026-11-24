@@ -120,6 +120,39 @@ def test_every_planned_target_and_variable_exists_in_the_makefile() -> None:
             assert re.search(rf"^{variable} =", makefile, re.MULTILINE), variable
 
 
+def planning_ids() -> re.Pattern[str]:
+    """`PLANNING_IDS` as the Makefile declares it; Python's `re` reads the same constructs `git grep -P` does."""
+    makefile = MAKEFILE.read_text(encoding="utf-8")
+    declared = re.search(r"^PLANNING_IDS := (.+)$", makefile, re.MULTILINE)
+    assert declared
+    return re.compile(declared.group(1))
+
+
+# Built by joining, so this file carries none of them: the lint reads tests too.
+PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "D" + "4-01", "P3b" + "-01", "M" + "3a"]
+
+
+@pytest.mark.parametrize("text", [f"# Follows {planted}, as agreed." for planted in PLANTED])
+def test_the_citation_lint_catches_stage_and_register_ids(text: str) -> None:
+    assert planning_ids().search(text)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '<path d="M12 4v16M4 12h16"/>',
+        '<path d="M18.992 12H2.041"/>',
+        '<path d="M10 3h10v18H10M3 12h12m-4-4"/>',
+        "M14-4",
+        "# REVIEW F05 keeps this.",
+        "Phase 4 module",
+        "ph_composer.mechanical",
+    ],
+)
+def test_the_citation_lint_passes_svg_paths_and_review_findings(text: str) -> None:
+    assert not planning_ids().search(text)
+
+
 @pytest.mark.parametrize(
     ("message", "signed"),
     [

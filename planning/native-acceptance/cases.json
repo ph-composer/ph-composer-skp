@@ -5375,6 +5375,20 @@
         "src/ph_composer/python/ph_composer_translation/*"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "M01",
+      "label": "The mechanical stack seam on the installed RBZ from a fresh process, the panel closed: an export of a synthetic two-Zone Model whose translation loads honeybee_phhvac through stack.load after honeybee_ph, and a Room carrying ph_hvac properties in the export runtime the host boots. The same probe in the shipped Pyodide page under Chromium 88 (tools/runtime/browser_check.py --translation) is offline evidence, not this case",
+      "mode": "bridge",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/python/ph_composer_translation/stack.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "src/ph_composer/html/runtime/*",
+        "src/ph_composer/runtime/*",
+        "src/ph_composer/vendor/manifest.json"
+      ],
+      "native_control_required": false
     }
   ]
 }

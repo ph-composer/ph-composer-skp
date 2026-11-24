@@ -152,7 +152,8 @@ Scoped on 2026-11-15, including the Building Segment work it stands on and the P
 
 The [Phase 4 coordinating packet](features/phase-07-mechanical/README.md) was planned in detail on
 2026-10-21: stages P4-01 to P4-15, decisions D4-01 to D4-12 answered as recommended, register M01 to M15. Families 3
-to 7, piping and ducting are gate stubs until their interviews. No stage authorized.
+to 7, piping and ducting were gate stubs until their interviews. Ed authorized every stage on 2026-11-23, run through
+the pr-loop with merge on green and host gates batched by milestone; P4-01 is in review.
 
 Reviewed on 2026-11-22 after Phase 6 Programs
 ([DECISIONS, Part 4](features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22)):
@@ -286,3 +287,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-11-22 | Programs (Phase 6) P4a-01 to P4a-12 merged (PRs #539 to #552); the batched host sitting of 2026-11-21 (#553) and its fixes in #554 to #557, the last two pinning PHX 1.59.3 and 1.59.4 for PH-Tools/PHX#171 and PH-Tools/PHX#175 (last `e0be139d`); PG01 to PG12 pass on the host, and Ed approved the host UI polish for PG02, PG09, PG11 and PG11b. The packet is archived at `archive/phase-06-program/`; its deferred follow-ups stay in the master STATUS row. Not released. |
 | 2026-11-22 | Phase 7 Mechanical reviewed against `main` at `8c710412` after Programs was archived: the packet's stale Phase 3b gates, pins, composition order, Spaces read names, units and export rules corrected; stage P4-08b and register row M16 added for the Building Segment's mechanical settings; decisions D4-21 to D4-27 opened and unanswered. Planning only; nothing authorized. |
 | 2026-11-22 | Ed answered Phase 7's D4-21 to D4-27, all as recommended; the packet's CONTRACTS, ACCEPTANCE, PLAN and stage documents are re-bound to them. The feature is `ph_composer.mechanical`, Serves is a payload on the Zone record, and each export stage adds a PHX round trip. Planning only; nothing authorized. |
+| 2026-11-23 | Ed authorized implementation of Phase 7 Mechanical, every stage through the pr-loop with merge on green; host cases go to the milestone sittings MS1, MS2 and MS3. P4-01 (contracts, lint and the Pyodide seam) in review. |

@@ -15,7 +15,16 @@ from types import ModuleType
 
 #: The top-level packages this seam serves. Anything else is imported where it is used.
 PACKAGES = frozenset(
-    {"honeybee", "honeybee_energy", "honeybee_ph", "honeybee_energy_ph", "ladybug", "ladybug_geometry", "PHX"}
+    {
+        "honeybee",
+        "honeybee_energy",
+        "honeybee_ph",
+        "honeybee_phhvac",
+        "honeybee_energy_ph",
+        "ladybug",
+        "ladybug_geometry",
+        "PHX",
+    }
 )
 
 

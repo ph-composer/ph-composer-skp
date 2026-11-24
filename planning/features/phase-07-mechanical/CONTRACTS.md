@@ -1,7 +1,7 @@
 # Phase 4 contract bindings: mechanical equipment
 
 DATE: 2026-10-21
-STATUS: Scoped. Re-bound on 2026-11-23 to the wireframe decisions (D4-13 to D4-20), the Programs review (D4-21 to D4-27) and the kickoff review (D4-28 to D4-37). P4-01 confirms the questions in section 7 by test and runs the architecture review before any feature stage starts. Families 4 to 6, Segment mechanical settings, piping and ducting are interviewed (D4-32 to D4-37) and bind their exact field tables when their stage documents are written in full.
+STATUS: Scoped. Re-bound on 2026-11-23 to the wireframe decisions (D4-13 to D4-20), the Programs review (D4-21 to D4-27) and the kickoff review (D4-28 to D4-37). P4-01 answered the questions in section 7 by test on 2026-11-23 and recorded the answers, the corrections they made and the architecture review in section 8. Families 4 to 6, Segment mechanical settings, piping and ducting are interviewed (D4-32 to D4-37) and bind their exact field tables when their stage documents are written in full.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -21,8 +21,8 @@ Paths below are relative to `src/ph_composer/`.
 
 Rows marked **new** do not exist yet. Rows marked **exists** were read in source at `420c783a`;
 the ones this file's 2026-11-22 corrections touch were re-read at `8c710412`.
-Names are proposals until P4-01 closes; a stage may rename one only by editing this file in the
-same change.
+P4-01 confirmed the names against the code on 2026-11-23 (section 8); a stage may rename one only by editing this
+file in the same change.
 
 ## 1. Feature and composition
 
@@ -69,7 +69,9 @@ Every record this feature adds meets the metadata obligation `context/EXTENSIBIL
 mechanical entities ("Metadata and structured extension data"): a `user_data` map, read with
 `extension_data` and `extension_status`, written through one guarded route, kept through
 Duplicate, Undo and a Zone copy, and at export either carried to the record's own honeybee-ph
-object or left out with `export.metadata_omitted`; and a row in `docs/USER_DATA.md` (F36).
+object or left out with `export.metadata_omitted`; and a row in `docs/USER_DATA.md` (F36). At the pinned 1.33.68
+`PhHotWaterSystem` has no `user_data`, so a Hot Water System's map is left out with that finding; the Ventilator,
+its system, the heaters, the tanks and the heat pump classes carry one (section 8).
 
 ## 2. Records
 
@@ -108,7 +110,7 @@ D4-17 replaces the single nested record with three flat catalog kinds: **Hot Wat
 
 **Hot Water Heater (`hwh_`):** `Fields.common` (`name` shown as `Tag`), `manufacturer` (string or null), `model` (string or null), `hot_water_system_id` (declared `one` reference to `ph_composer.mechanical.hot_water_system`, required), `variant` (enum `electric`, `heat_pump_annual`, `heat_pump_monthly`, `heat_pump_inside`; H2), `percent_coverage` (number 0 to 1, default 1.0), `in_conditioned_space` (boolean, default true), and the variant's efficiency fields (D4-19): `total_system_perf_ratio` (annual), `cop_1`, `ambient_temp_1_c`, `cop_2`, `ambient_temp_2_c` (monthly), `annual_energy_factor` (inside), none for `electric`. A variant's fields are required for that variant and must be absent for the others.
 
-**Hot Water Tank (`hwt_`):** `Fields.common` (`name` shown as `Tag`), `manufacturer` (string or null), `model` (string or null), `hot_water_system_id` (declared `one` reference to `ph_composer.mechanical.hot_water_system`, required), `role` (enum `storage`, `buffer`, `solar`; D4-07), `tank_type` (enum `0-NO STORAGE TANK`, `1-DHW AND HEATING`, `2-DHW ONLY`; default `2-DHW ONLY`), `quantity` (integer >= 1, default 1), `in_conditioned_space` (boolean, default true), `solar_connection` (boolean, default false), `solar_losses_w` (number >= 0, default 0.0), `storage_loss_rate_w` (number >= 0, default 0.0), `storage_capacity_l` (number >= 0, `x-unit` `L`, default 300), `standby_losses_w_k` (`x-unit` `W/K`, default 4.0), `standby_fraction` (0 to 1, default 0.3), `room_temp_c` (`x-unit` `C`, default 20), `water_temp_c` (`x-unit` `C`, default 60). Units of `solar_losses` and `storage_loss_rate` are confirmed against honeybee-ph's docstrings in P4-06.
+**Hot Water Tank (`hwt_`):** `Fields.common` (`name` shown as `Tag`), `manufacturer` (string or null), `model` (string or null), `hot_water_system_id` (declared `one` reference to `ph_composer.mechanical.hot_water_system`, required), `role` (enum `storage`, `buffer`, `solar`; D4-07), `tank_type` (enum `0-NO STORAGE TANK`, `1-DHW AND HEATING`, `2-DHW ONLY`; default `2-DHW ONLY`), `quantity` (integer >= 1, default 1), `in_conditioned_space` (boolean, default true), `solar_connection` (boolean, default false), `solar_losses_w` (number >= 0, default 0.0), `storage_loss_rate_w_k` (number >= 0, `x-unit` `W/K`, default 0.0), `storage_capacity_l` (number >= 0, `x-unit` `L`, default 300), `standby_losses_w_k` (`x-unit` `W/K`, default 4.0), `standby_fraction` (0 to 1, default 0.3), `room_temp_c` (`x-unit` `C`, default 20), `water_temp_c` (`x-unit` `C`, default 60). The units are honeybee-ph's docstrings at 1.33.68: `solar_losses` in W, `storage_loss_rate` and `standby_losses` in W/K (section 8).
 
 Deleting a Hot Water System follows `reference.in_use` for both Serves payloads and referencing Heaters and Tanks (refuse in use, or rewrite with `replacement_id`).
 
@@ -166,8 +168,11 @@ engine's incoming-reference scan, so a plain delete refuses `reference.in_use` w
 it, as a Program a Zone names does. Delete with `replacement_id` moves each payload naming the
 item to the replacement through `stage_extension` in the same proposal, and delete with an
 explicit null stages the slot emptied, each one Undo step, as Programs' deletes do (API 1.84). The
-`many` slots are the first `many` reference in a payload (F26); section 7's first question proves
-the scan and the move over one.
+`many` slots are the first `many` reference in a payload (F26); P4-01 proved the scan, the move and the copy over
+one (section 8). The engine does the scan; the move is this feature's code, as it is Programs': read the Zones
+through `ph_composer.zones.all`, stage each changed payload through `stage_extension`, and hand the returned
+`zone_entries` to `propose_delete` as a `Records::ReferencePlan`. A list that already holds the replacement keeps it
+once, since the validator refuses an id twice. Like Programs', the move reads the stored payloads; a delete that writes the same payload earlier in its own proposal builds the move from that write instead.
 
 **A copied Zone (D4-04).** The payload is part of the Zone record and travels with a native copy,
 so the copy keeps what serves it. The feature declares no transition contributor and re-issues
@@ -197,7 +202,7 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | `hot_water_tanks.all`, `hot_water_tanks`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-06 | Flat Hot Water Tanks table (D4-17), each naming its `hot_water_system_id`, `role` and computed export slot (D4-07) |
 | `hp_outdoor_equipment.*`, `hp_indoor_equipment.*`, `hp_outdoor_units.*`, `hp_indoor_units.*` | query, snapshot section, action | P4-08 | Four flat Heat Pumps tables (D4-14, D4-28): `all`, snapshot section, `create`, `update`, `duplicate`, `delete` |
 | `heat_pumps.blended`, `heat_pumps_blended` | query, snapshot section | P4-08 | Read-only blended heat pump result per Building Segment in the Phius estimator's layout (D4-15, D4-16, D4-23) |
-| `by_ventilator`, `by_hot_water_system` | colour mode | P4-05, P4-07 | `entity_kind: "zone"`: each Zone in its serving item's colour; unserved Zones uncoloured; the legend row counts Zones |
+| `by_ventilator`, `by_hot_water_system` | colour mode | P4-05, P4-07 | `entity_kind: "zone"`: each Zone in its serving item's colour; unserved Zones uncoloured; the legend row counts Zones. The projection keys each row of `ph_composer.zones.all` by Zone id and resolves its `reference.zone_path` with the core `OccurrencePath.resolve` for the entity and world transform, naming nothing of Zones' (section 8) |
 | `preflight` | query | P4-04 | The export preflight rows, passed to `export_contributor(preflight:)` |
 
 Codes are declared once with `feature.code` in `features/mechanical/codes.rb` under the noun
@@ -240,10 +245,10 @@ tests.
 
 | # | Addition | Where | Stage |
 | --- | --- | --- | --- |
-| A1 | `honeybee_phhvac` and `honeybee_energy_ph.properties.load` reachable through the stack seam: add `honeybee_phhvac` to `stack.PACKAGES`; `tests/python/test_imports.py` iterates that set and needs no change beyond the runtime probe that the package imports in Pyodide | `python/ph_composer_translation/stack.py`, `tools/runtime/` probe | P4-01 |
+| A1 | `honeybee_phhvac` and `honeybee_energy_ph.properties.load` reachable through the stack seam: add `honeybee_phhvac` to `stack.PACKAGES`; `tests/python/test_imports.py` iterates that set and needs no change beyond the runtime probe that the package imports in Pyodide | `python/ph_composer_translation/stack.py`, `tools/runtime/browser_check.py` probe | P4-01, done (section 8) |
 | A2 | The reserved Systems button becomes the live Mechanical tab (D4-13): the disabled button in `html/index.html`, last in the shipped row after Export (F32), moves to sit after Thermal Bridges and before Library (D4-27) and becomes `data-tab="mechanical"` with a `data-pane="mechanical"`. The row then reads Climate, Zones, Programs, Assemblies, Window Types, Thermal Bridges, Mechanical, Library, Export. Inside Mechanical, subtabs are by system (`Ventilation`, `Heat Pumps`, `Hot Water`, `Pumps`, `Fans`, `Electric Heating`) with a shared pill row beneath them for each system's tables (D4-13) | `html/index.html`, `html/pill_row.js` (or kit part), generated script list | P4-05 |
 | A3 | Units: `electric_efficiency` (Wh/m³ to W/cfm, V4) and `volume_l` (litres to US gallons), in Ruby `core/units.rb` where a report shows them and in `html/unit_tables.js` with vectors; recorded in the units packet as its Q3 outcome. `temperature` and `power` exist in both registries (F31) | `core/units.rb`, `html/unit_tables.js`, `tests/support/units_vectors.json` | P4-05 (efficiency), P4-07 (litres) |
-| A4 | `PLANNING_IDS` matches this packet's ids: a stage `P4-01`, a lettered stage `P4-08b`, and a register row `M01` to `M16`. None is caught today (F22) | `Makefile` | P4-01 |
+| A4 | `PLANNING_IDS` matches this packet's ids: a stage `P4-01`, a lettered stage `P4-08b`, and a register row `M01` to `M16`, but not an SVG path's move command (`M12 4v16`) | `Makefile`, `tests/python/test_githooks.py` | P4-01, done (section 8) |
 | A5 | Not needed. Zones' `stage_extension` participant exists and is the one route Serves writes by (D4-21). Kept so numbering stays stable | none | none |
 
 `tools/ui-preview/host.js` publishes a fixed map of section names in its synthetic snapshot. Every
@@ -274,9 +279,9 @@ query and the Python sections.
 
 | Section id | Object | Requires | Notes |
 | --- | --- | --- | --- |
-| `ph_composer.mechanical.export.ventilation` (new) | One `PhVentilationSystem` per (Ventilator, served Zone) pair, `sys_type` 1, holding a `Ventilator` with the record's values; identifiers derive from the item id so every Room an item serves carries the same ids (D4-01) | `ph_composer.zones.export.zones` | Attaches at `ROOM`, keyed by the Zone's Room identifier; `attach` calls `set_ventilation_system`. `required_for_export = True` (D4-06). Result fields: one row per (item, Zone) with identifiers and values; `conformance` checks each reloaded Room's `ph_hvac.ventilation_system.ventilation_unit` against them and that the same item carries one identifier across Rooms |
-| `ph_composer.mechanical.export.hot_water` (new) | One `PhHotWaterSystem` per (system, served Zone) pair built from the flat System, Heater and Tank records (D4-17): tanks slotted by `slotting.rb` (D4-07) into `tank_1`, `tank_2`, `tank_buffer`, `tank_solar`; heaters through `add_heater`; `number_tap_points` set; `recirc_temp`/`recirc_hours` left to honeybee-ph's read-only piping properties (F17, D4-18); `piping_calc_method` only when the loaded class accepts it (D4-12) | `ph_composer.zones.export.zones` | Attaches at `ROOM` through `set_hot_water_system`. `required_for_export = True`. Result fields: the systems with their slot assignment and omitted tanks; `conformance` reads back each slot's identifier and capacity |
-| `ph_composer.mechanical.export.heat_pumps` (new) | One blended `PhHeatPumpRatedMonthly` (with `PhHeatPumpCoolingParams_Recirculation`, `min_coil_temp = 12.0 °C`, full blended capacity with no > 200 kW split per D4-29) per exported Building Segment, computed in pure Ruby (`blend.rb`, F35) and attached to every served Room in that Segment with shared identifiers per Segment (D4-01, D4-15, D4-23) | `ph_composer.zones.export.zones`, `ph_composer.climate.export.climate` (or Ruby-carried climate values from `ph_composer.climate`) | Attaches at `ROOM` through `add_heat_pump_system`. `required_for_export = True`. Result fields: per-Segment blended COPs, cooling capacity, airflow and annual COP; `conformance` reads back each served Room's `ph_hvac.heat_pump_systems` |
+| `ph_composer.mechanical.export.ventilation` (new) | One `PhVentilationSystem` per (Ventilator, served Zone) pair, `sys_type` 1, holding a `Ventilator` with the record's values; identifiers derive from the item id so every Room an item serves carries the same ids (D4-01) | `ph_composer.zones.export.zones` | Attaches at `ROOM`, keyed by the Zone's Room identifier; `attach` calls `set_ventilation_system`. `required_for_export = True` (D4-06). Result fields: one row per (item, Zone) with identifiers and values; `conformance` checks each reloaded Room's `ph_hvac.ventilation_system.ventilation_unit` against them and that the same item carries one identifier across Rooms. Every (item, Zone) object of one item must be equal, ducts included (D4-09): honeybee-ph refuses to reload two ventilation systems that share an identifier and differ (section 8) |
+| `ph_composer.mechanical.export.hot_water` (new) | One `PhHotWaterSystem` per (system, served Zone) pair built from the flat System, Heater and Tank records (D4-17): tanks slotted by `slotting.rb` (D4-07) into `tank_1`, `tank_2`, `tank_buffer`, `tank_solar`; heaters through `add_heater`; `number_tap_points` set; `recirc_temp`/`recirc_hours` left to honeybee-ph's read-only piping properties (F17, D4-18); `piping_calc_method` only when the loaded class accepts it (D4-12) | `ph_composer.zones.export.zones` | Attaches at `ROOM` through `set_hot_water_system`. `required_for_export = True`. Result fields: the systems with their slot assignment and omitted tanks; `conformance` reads back each slot's identifier and capacity, and checks that every Room the System serves reloads an equal system: honeybee-ph keeps the last of two hot water systems that share an identifier and differ, without a word (section 8) |
+| `ph_composer.mechanical.export.heat_pumps` (new) | One blended `PhHeatPumpRatedMonthly` (with `PhHeatPumpCoolingParams_Recirculation`, `min_coil_temp = 12.0 °C`, full blended capacity with no > 200 kW split per D4-29) per exported Building Segment, computed in pure Ruby (`blend.rb`, F35) and attached to every served Room in that Segment with shared identifiers per Segment (D4-01, D4-15, D4-23) | `ph_composer.zones.export.zones`, `ph_composer.climate.export.climate` (or Ruby-carried climate values from `ph_composer.climate`) | Attaches at `ROOM` through `add_heat_pump_system`. `required_for_export = True`. Result fields: per-Segment blended COPs, cooling capacity, airflow and annual COP; `conformance` reads back each served Room's `ph_hvac.heat_pump_systems` and checks they are equal across the Segment, as for hot water (section 8) |
 
 PHX merges a Building Segment's Rooms and writes one Variant per Segment (F28), so the Building
 Segment is "the building" wherever this packet says so (D4-23): the hot water pooling note of
@@ -312,3 +317,42 @@ a fixture both Ruby and Python read (`tests/fixtures/mechanical/`), as the other
 4. Does `honeybee_phhvac` import in the installed Pyodide runtime, with `honeybee_phhvac.properties`
    extending `Room.properties.ph_hvac` once `honeybee_ph` is loaded (`assembly.py` loads
    `honeybee_ph` today)?
+
+## 8. What P4-01 found
+
+Answered on 2026-11-23 against `main` at `2c0e13c2` with honeybee-ph 1.33.68 and PHX 1.59.4. The evidence, with
+the commands and counts, is [p4-01-contracts.md](evidence/p4-01-contracts.md).
+
+| Question (section 7) | Answer | Evidence | Correction made |
+| --- | --- | --- | --- |
+| 1. A `many` reference in a Zone payload | Yes. A test-only feature with a `one` and a `many` reference in a payload staged through `ph_composer.zones.stage_extension` shows: a plain delete of an item named only in the list refuses `reference.in_use`, as one named in the single slot does; a delete with a replacement moves both slots of two Zones in one Undo step, and Undo restores both; a list already holding the replacement keeps it once; a copy of the Zone Group carrying its attribute dictionaries, as a native copy does, made independent keeps the payload, and its list still blocks a delete (the native gesture itself is a host check, P4-03's); a locked Zone refuses the write and the replacement delete, writing nothing and adding no operation. The engine proves the scan (`Extension.referenced_ids` reads an array), the projected delete and the copy; the move is feature code (section 2). Breaking the array scan fails two of the six tests | `tests/zone_payload_references_test.rb`, `tests/support/zone_payload_probe.rb` | Section 2, "References and delete in use": the move's shape and the de-duplication. No engine change |
+| 2. One object per (item, Zone) pair sharing identifiers | Yes, both halves. Two Rooms each given their own `PhVentilationSystem` and `Ventilator` with equal identifiers write equal HBJSON, and honeybee-ph reloads them onto one system object whose unit carries the record's values. PHX makes one ventilation device, named once in WUFI XML and once in METr JSON, and both Rooms' Spaces point at it. Two such systems that differ do not reload: honeybee-ph refuses `Conflicting ventilation systems share identifier`. Read, not run: its hot water and heat pump reloads key by identifier with no such check, so the last Room's object wins | `tests/python/test_shared_ventilator.py`, `tests/python/test_shared_ventilator_phx_round_trip.py` (`phx` group) | Section 6: every (item, Zone) object of one item is equal, ducts and pipes included (D4-09), and the hot water and heat pump conformance checks the equality honeybee-ph does not |
+| 3. A Zone-keyed Colour-by projection from a read | Yes. A projection over `read.query("ph_composer.zones.all")` that resolves each row's `reference.zone_path` with the core `OccurrencePath.resolve` reaches the same entities, paths and world transforms as Zones' `by_zone`, a Zone inside a moved Group included, and the service counts its legend rows. Colours and legend order are the mode's own (`by_zone` spreads its ramp; P4-05 chooses) | `tests/zone_payload_references_test.rb` | Section 3, `by_ventilator`: bound to that shape |
+| 4. `honeybee_phhvac` in the Pyodide runtime | Yes, offline. `honeybee_ph` already imports `honeybee_phhvac` (its `__init__` extends the Room), so the seam change admits the package to `stack.load` and loads nothing new. In the shipped runtime page under Chromium 88, after a translation installs the wheels, `stack.load("honeybee_phhvac")` loads after `honeybee_ph`, a Room's `properties.ph_hvac` is `RoomPhHvacProperties` and takes a `PhVentilationSystem`. The installed host case is owed to MS1 | `tools/runtime/browser_check.py --translation` (`hvac_seam: true`); case `M01` in `planning/native-acceptance/cases.json` | Section 5, A1: done |
+
+The wheel re-read (step 0), against the fields sections 2 and 6 bind:
+
+| Class at 1.33.68 | Finding | Correction made |
+| --- | --- | --- |
+| `Ventilator`, `PhVentilationSystem` | Every field in section 2 is present, with the defaults bound there (quantity 1, 0.55 Wh/m³, frost protection on, -5 °C, both optional fields `None`); `sys_type` defaults to 1. Both carry `user_data` | None |
+| `PhHotWaterSystem` | `tank_1`, `tank_2`, `tank_buffer`, `tank_solar` are plain attributes; `number_tap_points` has a setter; `recirc_temp` and `recirc_hours` have none (F23 holds). No calculation-method field (D4-12 holds). **No `user_data`** | Section 1: a Hot Water System's map is left out with `export.metadata_omitted` |
+| `PhHvacHotWaterTank` | Defaults as bound. `storage_loss_rate` is W/K, not W; `solar_losses` is W | Section 2: `storage_loss_rate_w_k` |
+| Hot water heaters | Electric, `HeatPump_Annual` (`total_system_perf_ratio`, `annual_COP`), `HeatPump_Monthly` (`COP_1`, `COP_2`, `ambient_temp_1`, `ambient_temp_2`), `HeatPump_Inside` (`annual_energy_factor`, `annual_COP`, `total_system_perf_ratio`); `percent_coverage` defaults to 1.0. PHX copies whatever attribute names its heater classes share | None: D4-19 binds one input per Type. P4-06's PHX round trip shows which field WUFI XML and METr read for the annual and inside kinds |
+| `PhHeatPumpRatedMonthly`, `PhHeatPumpCoolingParams_Recirculation` | `COP_1`, `COP_2`, `ambient_temp_1`, `ambient_temp_2`; the recirculation parameters `used`, `annual_COP`, `capacity`, `flow_rate_m3_hr`, `flow_rate_variable`, `min_coil_temp` (default 12.0, D4-29), `single_speed` | None |
+| `RoomPhHvacProperties` | `set_ventilation_system`, `set_hot_water_system`, `add_heating_system`, `add_heat_pump_system`, `add_supportive_device`, `add_exhaust_vent_device`, `add_renewable_device`, as F12 lists | None |
+
+Architecture review of the corrected bindings (the repo's `ph-composer-architecture-review` rubric, with the Ruby
+quality criteria for the test-only payload feature), recorded in the evidence file. No blocking finding; three
+notes carried to the stages:
+
+- P4-03 writes the replacement move itself, as Programs' `Assignments.retarget` does; nothing in Zones or the
+  engine changes, and a third payload owner may later justify a shared helper.
+- P4-05: `OccurrencePath.resolve` walks each path from the Model root, so the projection costs a walk per Zone on
+  top of `zones.all`'s own. Measure it on a large Model before the Colour-by mode ships.
+- P4-04, P4-06 and the drawn packets: equal identifiers must mean equal objects (question 2), so a section that adds
+  ducts or pipes adds them to every (item, Zone) object of the item.
+
+The installed size on `main` at `2c0e13c2` is 26,841,808 bytes (`make rbz-check`, 708 files, RBZ 8,721,080 bytes):
+747,849 over the 26,093,959-byte baseline, inside the 2,500,000-byte growth allowance, and 1,158,192 under the
+28,000,000-byte ceiling, which binds first (F37). This stage changes the size by the manifest's own few bytes.
+
