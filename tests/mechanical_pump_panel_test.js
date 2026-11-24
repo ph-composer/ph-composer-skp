@@ -140,8 +140,21 @@ test("the internal heat gains sit behind the row's disclosure, the profile follo
     assert.strictEqual(profile.error.textContent, "The Pump changed.");
     assert.strictEqual(profile.input.value, "", "a choice shows the Model's value again");
 
-    factor.input.value = "0.5"; factor.input.listeners.input({}); key(factor.input, "Enter");
+    var records = o.state.sections[PUMPS].value.records;
+    records[0].values.ihg_usage_profile = 3;
+    records[0].values.device_type = 6;
+    records[0].ihg_usage_profile_default = 4;
+    o.paint();
+    assert.strictEqual(profile.input.value, "3", "after a refusal the choice still follows a newer snapshot");
+    assert.strictEqual(profile.input.querySelectorAll("option")[0].textContent, "From type (None (hot water))");
+    profile.input.value = ""; profile.input.listeners.change({});
     assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[1].payload.params), { id: P1.id,
+      values: { ihg_usage_profile: null }, expected_values: { ihg_usage_profile: 3 } },
+    "the next write is guarded by the value shown");
+    answer(o, named(o, PUMPS + ".update")[1], { status: "completed", value: {} });
+
+    factor.input.value = "0.5"; factor.input.listeners.input({}); key(factor.input, "Enter");
+    assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[2].payload.params), { id: P1.id,
       values: { ihg_utilization_factor: 0.5 }, expected_values: { ihg_utilization_factor: 1 } });
 
     var p = setup();

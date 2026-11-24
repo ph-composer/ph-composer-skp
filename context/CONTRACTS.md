@@ -1168,11 +1168,12 @@ requires the Zones section, the Ventilator export (for the Zones) and the Spaces
 exported Zone's `space_count`. Its records are `PumpPlan`'s pairs, pure Ruby: one per (Pump, exported Zone) whose
 `pump_ids` names it, id `<pmp id>_<zon id>`, `identifier` the pump's id, `display_name` its Tag, its values under the
 record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export,
-and notes `mechanical.zone_without_spaces` for each served exported Zone that no Space names
+and notes `mechanical.zone_without_spaces` once per pump, naming each served exported Zone that no Space names
 (`ExportZones.spaceless_findings`, which takes a family's slot and label so another family PHX reads through Spaces
 reports the same): PHX reads supportive devices through a Room's Spaces, so such a Room carries the pump in the HBJSON
 and PHX reads it only through another Room it serves. The pair is still written. The preflight counts Spaces from
-`ph_composer.spaces.all`, read only while an exported Zone names a pump. The Python section (`PumpSection`, required
+`ph_composer.spaces.all` as the export does, each under the Zone it names unless it sits inside a left-out Zone, and
+reads it only while an exported Zone names a pump; a refused read skips the finding and keeps the pump rows. The Python section (`PumpSection`, required
 for export) builds each pair's own `PhSupportiveDevice`, setting the usage profile after the type (honeybee-ph's type
 setter re-seeds it), and adds every pump serving a Room with `add_supportive_device`. Its result rows (`pumps`) carry
 the pair's ids, the Zone's name, the identifier, the values and `digest`; `conformance` compares each reloaded Room's

@@ -110,4 +110,9 @@ docs' arrow wording and the guide's row findings; the Pump id pattern matches wh
 owed. Declined: the preflight and export counting Spaces by different keys; they differ only for a Space whose stored
 Zone is stale, which Spaces blocks as `space.zone_missing` or `space.outside_zone`.
 
-Codex gpt-6.2-sol: pending.
+Codex gpt-6.2-sol cycle 1 on `2ff8a47d` ([review](https://github.com/ph-composer/ph-composer-skp/pull/574#pullrequestreview-6042810257)):
+1 P1, 3 P2, all fixed in the next commit. Fixed: a choice in the disclosure now always shows the latest snapshot after a
+refusal, so the next write is guarded by the value shown (panel test reproducing the stale guard); the preflight counts
+Spaces as the export does, a Space inside a left-out Zone leaving with it (Ruby test reproducing the miss); the
+no-Spaces finding is one per pump naming each Zone, so same-named Zones cannot collapse into one note; delete with
+clearing asserts one Undo step that restores the pump and both Zones' lists.

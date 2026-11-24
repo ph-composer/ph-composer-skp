@@ -168,12 +168,12 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     if (!held) return;
     held.fields.forEach(function (entry) {
       entry.unit.setDisabled(self.busy());
-      // A refusal stays on its field, with what the user typed, until they edit or cancel it.
       // The value being written shows until its answer arrives.
-      if (!entry.unit.editing && !entry.refused && !(self.pending === entry && self.busy())) {
-        if (entry.entry.choices) entry.unit.paint(held.record);
-        else entry.unit.setValue(held.record.values[entry.key]);
-      }
+      if (self.pending === entry && self.busy()) return;
+      // A choice holds no draft, so it always shows the Model's value; its refusal message stays beside it.
+      if (entry.entry.choices) { entry.unit.paint(held.record); return; }
+      // A refusal stays on a unit field, with what the user typed, until they edit or cancel it.
+      if (!entry.unit.editing && !entry.refused) entry.unit.setValue(held.record.values[entry.key]);
     });
   };
   OptionalValues.prototype.refresh = function (state, records) {

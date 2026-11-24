@@ -145,8 +145,18 @@ class MechanicalPumpTest < PhComposerTestCase
 
     completed(invoke("#{PUMPS}.delete", "id" => one, "replacement_id" => spare))
     assert_equal [spare, two].sort, slots("Apt 1").fetch(SLOT).sort
+    completed(assign(["Apt 2"], two))
+    operations = @model.operations.length
     completed(invoke("#{PUMPS}.delete", "id" => two, "replacement_id" => nil))
+    assert_equal operations + 1, @model.operations.length
     assert_equal [spare], slots("Apt 1").fetch(SLOT), "null takes it out of each Zone's list"
+    assert_equal [spare], slots("Apt 2").fetch(SLOT)
+    @model.undo
+    assert_equal [spare, two].sort, slots("Apt 1").fetch(SLOT).sort
+    assert_equal [spare, two].sort, slots("Apt 2").fetch(SLOT).sort
+    assert rows.key?("P-2"), "one Undo restores the pump and both Zones' lists"
+    @model.redo
+    assert_equal [spare], slots("Apt 1").fetch(SLOT)
     completed(invoke("#{PUMPS}.delete", "id" => spare, "replacement_id" => nil))
     assert_empty slots("Apt 1").fetch(SLOT)
     assert_empty slots("Apt 2").fetch(SLOT)

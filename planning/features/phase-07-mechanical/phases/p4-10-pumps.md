@@ -82,11 +82,11 @@ pattern, honeybee-ph or its Grasshopper component.
 - Type labels follow the glossary's "hot water" for DHW: Heating circulation pump (4), Hot water circulation pump
   (6, the default), Hot water storage load pump (7), Other (10). Profile labels: All year (1), Winter (2), Summer (3),
   None (hot water) (4).
-- **The finding** is `mechanical.zone_without_spaces`, a warning, one per (item, exported Zone with no Space) on the
-  item's row, from a helper in `ExportZones` that takes the family's slot and label, so Fans call it with theirs. A
+- **The finding** is `mechanical.zone_without_spaces`, a warning, one per item naming each exported Zone it serves
+  that no Space names (one per pump after review: two Zones sharing a name would collapse as two notes), from a helper in `ExportZones` that takes the family's slot and label, so Fans call it with theirs. A
   Zone has no Spaces when no Space record names it, which is what PHX walks (a Space with no Volume still exports a
   honeybee-ph Space, with Spaces' own `space.empty`). The preflight counts Spaces from `ph_composer.spaces.all`
-  (`space_count`); the export reads Spaces' projection, which gains `space_count` and a row for every exported Zone
+  (its Space rows, as the export counts them: a Space inside a left-out Zone leaves with it); the export reads Spaces' projection, which gains `space_count` and a row for every exported Zone
   holding a Space, Volume or not. Programs reads that projection's totals with zero defaults, so a row with no Volume
   reads as before.
 - The pill is **Pumps**; the subtab's order is 40, after Hot Water (30) and before Fans (50) and Electric Heating (60),
@@ -124,8 +124,8 @@ pattern, honeybee-ph or its Grasshopper component.
    the profile resolved, under the pump id (D4-01); the shared item findings; a Zone naming a pump not in the Model
    (`mechanical.item_missing`, blocking); and `ExportZones.spaceless_findings` over the exported Zones with no Spaces.
 5. **The no-Spaces finding.** `codes.rb` gains `mechanical.zone_without_spaces`. `ExportZones.spaceless_findings
-   (exported, items, slot, label, spaced)` gives one non-blocking finding per (item, served exported Zone not in
-   `spaced`). Spaces' projection (`features/spaces/export.rb`, `zone_totals`) gains `space_count` and a row for every
+   (exported, items, slot, label, spaced)` gives one non-blocking finding per item naming its served exported Zones
+   not in `spaced`. Spaces' projection (`features/spaces/export.rb`, `zone_totals`) gains `space_count` and a row for every
    exported Zone holding a Space.
 6. **Export, preflight and Locate.** `pump_export.rb`: the contributor, requiring the Zones section, the Ventilator
    export and Spaces' section, its notes and blocking findings as the Electric Heater export's, `preflight_rows`

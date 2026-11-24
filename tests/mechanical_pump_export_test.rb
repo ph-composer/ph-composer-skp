@@ -89,13 +89,42 @@ class MechanicalPumpExportTest < PhComposerTestCase
     assert_empty preflight_rows
   end
 
+  def test_a_space_that_leaves_with_its_left_out_parent_does_not_count_for_the_zone_it_names
+    @model.entities << box(1000, "A", "Zone A", "Main", [0, 5, 0, 4]) << zone_c_group(false)
+    stray = space_group(2050, space_record("D", :number => "9", :name => "Stray").merge("zone_id" => zone_id("C")), [])
+    left_out = box(2000, "B", "Zone B", "Main", [6, 10, 0, 4], :space => false)
+    left_out.entities << stray
+    @model.entities << left_out
+    adopt_zone_options
+    completed(invoke("ph_composer.zones.update_field", "field" => "building_segment", "value" => nil,
+                                                       "targets" => [zone_target("Zone B")]))
+    create("name" => "P-2")
+    completed(assign(%w[C], @ids.fetch("P-2")))
+    found = ["mechanical.zone_without_spaces", @ids.fetch("P-2")]
+    assert_includes notes(extract), found, "the Space inside left-out Zone B leaves with it"
+    assert_includes preflight_rows.map { |row| row.values_at("code", "object_id") }, found,
+                    "the preflight counts Spaces as the export does"
+  end
+
+  def test_one_finding_names_every_zone_with_no_spaces_a_pump_serves
+    zone = ->(letter) do
+      M::ExportZones::Zone.new(:id => zone_id(letter), :name => "Flat", :segment => "Main",
+                               :segment_id => "bsg_AAAAAAAAAAAA", :exported => true,
+                               :values => M::Serves::EMPTY.merge(SLOT => ["pmp_AAAAAAAAAAAA"]))
+    end
+    pumps = { "pmp_AAAAAAAAAAAA" => { "name" => "P-1", "device_type" => 6 } }
+    findings = M::PumpPlan.call(:zones => [zone.call("C"), zone.call("D")], :pumps => pumps, :spaced => []).findings
+    assert_equal ["mechanical.zone_without_spaces"], findings.map(&:code), "one per pump, so no two notes collapse"
+    assert_match(/P-1 serves Zones Flat, Flat, which have no Spaces/, findings.first.message)
+  end
+
   def test_a_spaces_read_that_refuses_skips_the_no_spaces_finding_and_keeps_the_pump_rows
     zone = M::ExportZones::Zone.new(:id => zone_id("C"), :name => "Zone C", :segment => "Main",
                                     :segment_id => "bsg_AAAAAAAAAAAA", :exported => true,
                                     :values => M::Serves::EMPTY.merge(SLOT => ["pmp_AAAAAAAAAAAA"]))
     refusing = Object.new
     refusing.define_singleton_method(:query) { |_name| raise PhComposer::CodedError.new("record.unreadable", "x") }
-    assert_nil X.spaced(refusing, [zone])
+    assert_nil X.spaced(refusing, [zone], {})
     pumps = { "pmp_AAAAAAAAAAAA" => { "name" => "P-1", "device_type" => 6 } }
     assert_equal ["mechanical.zone_without_spaces"],
                  M::PumpPlan.call(:zones => [zone], :pumps => pumps, :spaced => []).findings.map(&:code)

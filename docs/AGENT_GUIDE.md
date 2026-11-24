@@ -1178,8 +1178,8 @@ Building Segment it serves; a Room with no Spaces gives it none.
    their `section`. `mechanical.item_missing` blocks: a Zone the export writes names a pump that is not
    in the Model. `mechanical.item_unserved` names a pump that serves no Zone, `mechanical.zone_left_out`
    a served Zone in no Building Segment, `mechanical.item_across_segments` a pump on Zones in two
-   Building Segments, and `mechanical.zone_without_spaces` a served Zone with no Spaces, whose Room
-   carries the pump in the HBJSON while PHX reads it only through another Room it serves; none of these
+   Building Segments, and `mechanical.zone_without_spaces` the served Zones with no Spaces, once per pump,
+   whose Rooms carry it in the HBJSON while PHX reads it only through another Room it serves; none of these
    blocks. A row about a pump carries `locate` with `pump_ids`.
 2. Export, then read back. The result gives `pumps`, one row per (pump, Zone) pair: `identifier`,
    `display_name`, the values under the record's names, the exported `ihg_usage_profile` and `digest`.
