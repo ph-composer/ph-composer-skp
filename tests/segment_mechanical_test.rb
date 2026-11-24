@@ -115,6 +115,8 @@ class SegmentMechanicalTest < PhComposerTestCase
     records = extraction.document.dig("sections", SECTION, "records")
     by_name = records.to_h { |row| [row.fetch("name"), row] }
     assert_equal %w[Annex Main], by_name.keys.sort, "Spare names no exported Zone"
+    identifiers = records.map { |row| row.fetch("export_identifier") }
+    assert_equal identifiers.sort, identifiers, "in export identifier order"
     assert_equal MAIN, by_name.fetch("Main").slice(*S::FIELDS)
     assert_equal S::DEFAULTS, by_name.fetch("Annex").slice(*S::FIELDS), "no settings, the defaults"
     refute_includes JSON.generate(extraction.document.dig("sections", SECTION)), "30.0"

@@ -21,7 +21,7 @@ var CHOICES = JSON.parse(fs.readFileSync(path.join(root, "tests/fixtures/segment
 var STORED = { mechanical_cooling: true, mech_room_temp_c: 18.5, summer_bypass_mode: "temperature_controlled",
   ventilation_system_ach: 0.3, daytime_window_ach: 0.5, nighttime_window_ach: 1.2 };
 
-function load(system) {
+function load(system, decimal) {
   var sent = [];
   var context = {
     document: dom.buildDocument(panelSource.markup("index.html")), Intl: Intl,
@@ -34,12 +34,12 @@ function load(system) {
     "features/mechanical/segment_settings"]);
   var p = { context: context, panel: modules.panel, modules: modules, sent: sent };
   p.actions = function () { return sent.filter(function (message) { return message.type === "action.invoke"; }); };
-  p.panel.receive({ type: "panel.snapshot", payload: snapshot(system || "SI") });
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot(system || "SI", decimal) });
   return p;
 }
 
 /* House holds Zone A and has no settings; Annex holds Zone B and has mechanical settings. */
-function snapshot(system) {
+function snapshot(system, decimal) {
   var zones = fixture.zones();
   [["Zone A", "bsg_house"], ["Zone B", "bsg_annex"]].forEach(function (pair, index) {
     zones[index].schema_version = 3;
@@ -48,7 +48,7 @@ function snapshot(system) {
   var envelope = { schema_version: 1, payload: STORED, references: [], export_relevance: "required" };
   return {
     product: "PH-Composer", version: "0.1.0-dev", session: "session-a", revision: 4, file_name: "house.skp",
-    edit_path: [], preferences: { unit_system: system, dimension_formats: {}, number_format: { decimal: ".",
+    edit_path: [], preferences: { unit_system: system, dimension_formats: {}, number_format: { decimal: decimal || ".",
       locale: "en-US" }, table_views: { "ph_composer.zones": "ph_composer.zones.faces" } },
     sections: {
       "ph_composer.zones.faces.palette": { status: "completed", value: { active: false, palette: {},
@@ -168,9 +168,9 @@ test("a blank or unreadable value holds Save with the reason", function () {
   var p = load();
   var section = spec(p);
   assert.deepStrictEqual(plain(section.validate(STORED)), []);
-  assert.deepStrictEqual(plain(section.validate(Object.assign({}, STORED, { ventilation_system_ach: "" }))), [],
+  assert.deepStrictEqual(plain(section.validate(Object.assign({}, STORED, { ventilation_system_ach: null }))), [],
     "the ventilation system may be blank");
-  assert.deepStrictEqual(plain(section.validate(Object.assign({}, STORED, { daytime_window_ach: "" }))),
+  assert.deepStrictEqual(plain(section.validate(Object.assign({}, STORED, { daytime_window_ach: null }))),
     ["Enter the windows, daytime air changes as a number of at least 0."]);
   ["-1", "two", "1,5"].forEach(function (text) {
     assert.strictEqual(section.validate(Object.assign({}, STORED, { nighttime_window_ach: text })).length, 1, text);
@@ -186,4 +186,27 @@ test("a blank or unreadable value holds Save with the reason", function () {
   assert.match(dialog.querySelector(".phc-form-status").textContent, /Mechanical: Enter the windows, daytime/);
   shown.day.value = "0"; shown.day.listeners.input({});
   assert.strictEqual(saveButton(dialog).disabled, false);
+});
+
+test("a typed value keeps the unit it was typed in when the preferences change before Save", function () {
+  var p = load("IP");
+  var dialog = settings(p, "Annex"), shown = fields(dialog);
+  shown.room.value = "68"; shown.room.listeners.input({});
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot("SI") });
+  click(saveButton(dialog));
+  var payload = plain(p.actions()[0].payload.params.extension_payloads)[NAMESPACE];
+  assert.ok(Math.abs(payload.mech_room_temp_c - 20) < 1e-9, "68 °F, not 68 °C: " + payload.mech_room_temp_c);
+});
+
+test("the air changes are shown and read in the number format's decimal", function () {
+  var p = load("SI", ",");
+  var dialog = settings(p, "Annex"), shown = fields(dialog);
+  assert.deepStrictEqual([shown.system.value, shown.day.value, shown.night.value], ["0,3", "0,5", "1,2"]);
+  shown.day.value = "0,75"; shown.day.listeners.input({});
+  shown.system.value = ""; shown.system.listeners.input({});
+  assert.strictEqual(saveButton(dialog).disabled, false);
+  click(saveButton(dialog));
+  var payload = plain(p.actions()[0].payload.params.extension_payloads)[NAMESPACE];
+  assert.deepStrictEqual([payload.ventilation_system_ach, payload.daytime_window_ach, payload.nighttime_window_ach],
+    [null, 0.75, 1.2]);
 });

@@ -226,9 +226,9 @@
       "sha256": "682e789c9c0dd4f3c16d0685ff77d04b1b14f153701f64876b5416225e96159d"
     },
     "html/features/mechanical/segment_settings.js": {
-      "bytes": 8213,
+      "bytes": 8864,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b8ec1b8eb129be6c3771d1f06e3a326c0193cbdc4a7f14f13cfce6351ab1f4ee"
+      "sha256": "4b4938310f8ecd75accd3caa8763d100cd3bf0a7fd39d1ddb15baec3f133bc14"
     },
     "html/features/mechanical/serves.js": {
       "bytes": 16811,

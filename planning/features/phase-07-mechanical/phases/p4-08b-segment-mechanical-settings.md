@@ -90,7 +90,8 @@ None of these is a choice of behavior the sources leave open; each follows the p
    same code, section and object (the Segment id).
 3. **Export (CONTRACTS section 6).** `features/mechanical/segment_export.rb`: `ph_composer.mechanical.export.segments`,
    claiming the namespace on `Zones::Options::SEGMENT_KIND` from `ph_composer.zones.export.zones`, one record
-   per exported Segment record in id order: `{id, export_identifier, name, mechanical_cooling, mech_room_temp_c,
+   per exported Segment record in export identifier order (it follows from the Segment's name, so goldens hold
+   from run to run; ids are minted per run): `{id, export_identifier, name, mechanical_cooling, mech_room_temp_c,
    summer_bypass_mode, ventilation_system_ach, daytime_window_ach, nighttime_window_ach}` with the defaults
    where none is stored. A legacy Zone names no Segment record and gets no record. Its `projection` is the
    records. The heat pump section gains a `projection`, each exported blend's Segment and whether it cools,

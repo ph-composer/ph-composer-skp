@@ -73,7 +73,8 @@ manifests refreshed.
   and `IndoorTemperature` in the WUFI XML and `mechRT` and `sumHRec` in the METr JSON.
 - `tests/mechanical_segment_panel_test.js`: the section's values and order against Ruby's golden; the defaults, the
   units and the Summer ventilation line; one Save carrying six values with 68 °F sent as 20 °C; the problems that
-  hold Save.
+  hold Save; a typed temperature kept in its unit when the preferences change before Save; air changes in a
+  decimal-comma format.
 - `tools/ui-preview/segment_rows_checks.cjs`: Mechanical listed after Comfort; each number beside its unit on one
   line; the dialog fitting at 1280 x 800, 420 x 732 and 360 x 520; six values in one Save.
 
@@ -98,4 +99,13 @@ says so), a warning beside an unreadable payload in the preflight, a heat pump r
 section, the Summer ventilation grouping in the panel, and the missing climate-absent case with preflight and export
 parity. The evidence file (this one) was owed. Declined: the Annex defaults test (no stored settings is the case
 under test, and Main proves the section runs), extra keys in the Python record (Ruby's validator is the gate, as for
-certification), and re-reading typed text after a unit switch with the dialog open (an unverified edge, not reproduced; noted).
+certification), and re-reading typed text after a unit switch with the dialog open (not reproduced then; Codex
+reproduced it, below).
+
+Codex gpt-6.2-sol cycle 1 on `87b09829` ([review](https://github.com/ph-composer/ph-composer-skp/pull/572#pullrequestreview-6039785886)):
+1 P1, 2 P2, 1 P3, all fixed in the next commit. P1: a room temperature typed under IP was reread in °C when a
+preferences snapshot arrived before Save; each typed value is now read as it arrives, in the unit and number format
+its field was drawn with, and the draft holds numbers (JS regression test). P2: the air changes now show and read the
+number format's decimal (JS test with a decimal comma). P2: the PHX round trip asserts the WUFI XML and METr values by
+named Variant. P3: the stage doc now states the export identifier order, and the Ruby test asserts it before the golden
+normalises.

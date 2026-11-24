@@ -9,6 +9,7 @@ Skipped without the group: `uv run --group phx pytest tests/python/test_mechanic
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import pytest
@@ -53,11 +54,20 @@ def test_each_variant_carries_its_segments_mechanical_settings() -> None:
         assert (data.setpoints.winter, data.setpoints.summer) == (19.0, 26.0), name
 
     xml, metr = convert(result)
-    assert sorted(float(value) for value in wufi(xml, "MechanicalRoomTemperature")) == [18.5, 20.0]
-    assert sorted(int(value) for value in wufi(xml, "SummerHRVHumidityRecovery")) == [2, 4]
-    assert sorted(float(value) for value in wufi(xml, "IndoorTemperature")) == [19.0, 19.0]
-    blocks = [block for variant in metr["lVariant"] for block in _with(variant, "mechRT")]
-    assert sorted((block["mechRT"], block["sumHRec"]) for block in blocks) == [(18.5, 2), (20.0, 4)]
+    wufi_variants = {}
+    for block in re.findall(r"<Variant index=\"\d+\">(.*?)</Variant>", xml, re.S):
+        name = re.search(r"<Name>([^<]*)</Name>", block)
+        assert name is not None
+        wufi_variants[name.group(1)] = tuple(
+            float(wufi(block, tag)[0])
+            for tag in ("MechanicalRoomTemperature", "SummerHRVHumidityRecovery", "IndoorTemperature")
+        )
+    assert wufi_variants == {"Main": (18.5, 2.0, 19.0), "Annex": (20.0, 4.0, 19.0)}
+    metr_variants = {}
+    for variant in metr["lVariant"]:
+        [block] = _with(variant, "mechRT")
+        metr_variants[variant["n"]] = (block["mechRT"], block["sumHRec"])
+    assert metr_variants == {"Main": (18.5, 2), "Annex": (20.0, 4)}
 
 
 def _reloaded(result: dict[str, Any]) -> Any:

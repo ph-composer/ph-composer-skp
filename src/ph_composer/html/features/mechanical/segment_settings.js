@@ -4,11 +4,12 @@
    sends with the dialog's other sections in one Undo step; the mechanical feature's validator checks it there too. A
    Segment with no settings shows the defaults, and Save sends all six once the user changes one. The values and
    defaults are Ruby's (features/mechanical/segment/settings.rb); this file labels them, shows the room temperature in
-   the unit preference's temperature unit and reads the typed numbers. Whether the cooling switch agrees with the
-   heat pumps is the export preflight's warning. */
+   the unit preference's temperature unit and the numbers in its number format, and reads each typed value as it
+   arrives, in the unit and format the field was drawn with, so a preference that changes while the dialog is open
+   never rereads it. Whether the cooling switch agrees with the heat pumps is the export preflight's warning. */
 PhComposerUI.define("features/mechanical/segment_settings", ["panel", "workspace", "units", "unit_preferences",
-  "fields"],
-function (panel, ui, units, preferences, fields) {
+  "unit_numbers", "fields"],
+function (panel, ui, units, preferences, numbers, fields) {
   "use strict";
   var NAMESPACE = "ph_composer.mechanical.segment";
   var BYPASS_MODES = [["none", "None"], ["temperature_controlled", "Temperature controlled"],
@@ -19,7 +20,6 @@ function (panel, ui, units, preferences, fields) {
   var RATES = [["ventilation_system_ach", "Ventilation system", true],
     ["daytime_window_ach", "Windows, daytime", false], ["nighttime_window_ach", "Windows, nighttime", false]];
   var TEMPERATURE = fields.TEMPERATURE_C;
-  var DECIMAL = /^\+?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i;
   var COOLING = "The building has mechanical cooling.";
   var SUMMER = "Summer ventilation. The extract system and night flush values export at their defaults.";
 
@@ -27,24 +27,35 @@ function (panel, ui, units, preferences, fields) {
     return BYPASS_MODES.some(function (pair) { return pair[0] === value; });
   }
 
-  /* A typed air change rate: null when blank, the number when it is a decimal of at least 0, else undefined. A
-     stored number is kept as it is. */
+  /* The draft holds numbers, null for a blank rate, or the text typed where it could not be read, which holds
+     Save. */
   function rate(value) {
     if (value === null || value === undefined) return null;
-    if (typeof value === "number") return isFinite(value) && value >= 0 ? value : undefined;
-    var text = String(value).trim();
-    if (text === "") return null;
-    var number = DECIMAL.test(text) ? Number(text) : NaN;
-    return isFinite(number) ? number : undefined;
+    return typeof value === "number" && isFinite(value) && value >= 0 ? value : undefined;
   }
 
-  /* The room temperature in °C: a stored number as it is, typed text read in the unit preference's temperature
-     unit, else undefined. */
   function temperature(value) {
-    if (typeof value === "number") return isFinite(value) ? value : undefined;
-    var settings = units.profile(TEMPERATURE, preferences.current());
-    var parsed = units.parse(value, TEMPERATURE, units.parseContext(TEMPERATURE, settings));
-    return parsed.ok && typeof parsed.value === "number" ? parsed.value : undefined;
+    return typeof value === "number" && isFinite(value) ? value : undefined;
+  }
+
+  /* Typed air changes in the profile's number format: null when blank, the number when it is at least 0, else the
+     text as typed. */
+  function readRate(text, settings) {
+    if (String(text).trim() === "") return null;
+    var parsed = numbers.parseRegionalNumber(text, numbers.normalizeNumberFormat(settings.numberFormat));
+    return parsed.ok && parsed.value >= 0 ? parsed.value : text;
+  }
+
+  /* A typed room temperature in the profile's temperature unit, as °C, else the text as typed. */
+  function readTemperature(text, settings) {
+    var parsed = units.parse(text, TEMPERATURE, units.parseContext(TEMPERATURE, settings));
+    return parsed.ok && typeof parsed.value === "number" ? parsed.value : text;
+  }
+
+  function shownRate(value, settings) {
+    if (value === null || value === undefined) return "";
+    if (typeof value !== "number") return String(value);
+    return String(value).replace(".", numbers.normalizeNumberFormat(settings.numberFormat).decimal);
   }
 
   function row(label, content) {
@@ -98,12 +109,13 @@ function (panel, ui, units, preferences, fields) {
       label.appendChild(ui.element("span", "", COOLING));
       part.appendChild(row("Mechanical cooling", label));
 
+      // The profile these fields are drawn in, which reads what is typed into them.
       var settings = units.profile(TEMPERATURE, preferences.current());
       var room = typeof draft.mech_room_temp_c === "number" ?
         units.formatEdit(draft.mech_room_temp_c, TEMPERATURE, settings) : String(draft.mech_room_temp_c);
       part.appendChild(row("Mechanical room", number("Mechanical room temperature", room,
         units.displayUnit(TEMPERATURE, settings), disabled, function (text) {
-          draft.mech_room_temp_c = text; context.changed();
+          draft.mech_room_temp_c = readTemperature(text, settings); context.changed();
         })));
 
       part.appendChild(ui.element("p", "phc-zone-option-help", SUMMER));
@@ -121,8 +133,8 @@ function (panel, ui, units, preferences, fields) {
 
       RATES.forEach(function (entry) {
         var key = entry[0], value = draft[key];
-        part.appendChild(row(entry[1], number(entry[1] + " air changes", value === null ? "" : String(value), "1/h",
-          disabled, function (text) { draft[key] = text; context.changed(); })));
+        part.appendChild(row(entry[1], number(entry[1] + " air changes", shownRate(value, settings), "1/h",
+          disabled, function (text) { draft[key] = readRate(text, settings); context.changed(); })));
       });
       return part;
     },
