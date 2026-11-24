@@ -27,7 +27,10 @@ module PhComposer
                                                            "Whether a pipe using this type can export."),
                         "export_blockers" => Shapes.described(Shapes.list(Shapes::TEXT),
                                                               "The codes keeping it out of an export once a pipe " \
-                                                              "uses it; empty when export_ready."))
+                                                              "uses it; empty when export_ready."),
+                        "used_length_m" => Shapes.described({ "type" => "number", "minimum" => 0, "x-unit" => "m" },
+                                                            "The drawn length of every pipe naming it, read by " \
+                                                            "walking the Model; 0 when none does."))
       LIST_PARAMS = DefinitionLists.params(ROW).tap do |params|
         params["properties"]["ids"]["items"] = Shapes.id(KIND.id_prefix, "A Pipe Type id.")
       end.freeze
@@ -57,16 +60,21 @@ module PhComposer
 
       def install_reads(feature)
         list = PipeType::Reads::LIST
-        feature.query(list, :description => "One bounded page of Pipe Types in id order, with export readiness.",
+        feature.query(list, :description => "One bounded page of Pipe Types in id order, with export readiness and " \
+                                            "used length.",
                             :refuses => PAGE, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
-                            :examples => LIST_EXAMPLES) { |request| PipeType::Reads.list(request) }
-        feature.query("#{PREFIX}.all", :description => "Every Pipe Type with its values and export readiness, " \
-                                                       "for the panel snapshot.",
+                            :examples => LIST_EXAMPLES) do |request|
+          PipeType::Reads.list(request, Scan.used_lengths(request))
+        end
+        feature.query("#{PREFIX}.all", :description => "Every Pipe Type with its values, export readiness and used " \
+                                                       "length, for the panel snapshot.",
                                        :response => { "bounded" => false, "prefer" => list },
                                        :refuses => [], :params => Shapes::NONE,
                                        :result => DefinitionLists.result(ROW, :paged => false),
-                                       :examples => [{}]) { |request| PipeType::Reads.all(request) }
+                                       :examples => [{}]) do |request|
+          PipeType::Reads.all(request, Scan.used_lengths(request))
+        end
         feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
       end
 

@@ -1281,12 +1281,32 @@ read `ph_composer.piping.pipes.selection`: each Edge's `reference`, its `group` 
 reads `reason` `outside_group`. Assign with `ph_composer.piping.pipes.assign`, sending the rows'
 references with their `values` as `expected_values`, a `pipe_type_id` and a `role`: `trunk`, `branch`,
 `twig` or `recirculation`. A trunk also takes `multiplier` (a whole number, 1 when absent) and
-`demand_recirculation` (false when absent); a recirculation pipe takes `water_temp_c` (60 when absent)
-and `daily_period`, hours a day from 0 to 24 (24 when absent). A branch and a twig take neither. A value
+`demand_recirculation` (false when absent); a recirculation pipe takes `water_temp_c`, 0 to 100 (60
+when absent), and `daily_period`, hours a day from 0 to 24 (24 when absent). A branch and a twig take neither. A value
 another role takes is refused as `params.invalid`; giving a pipe a new role drops the values of its old
 one. `ph_composer.piping.pipes.clear` removes the assignment. Each command takes at most 250 Edges, is
 refused whole if one target is stale or unwritable, and is one Undo step. A split line keeps one
 assignment on both halves, read as `copied`.
+
+Read the tree with `ph_composer.piping.schedule`, a bounded page of runs at a time; it walks the Model,
+so read it again after drawing. A run is the connected pipes of one role, Pipe Type and role values in
+one Piping group: lines join where they share a vertex, and a run ends where a third line of its kind
+meets it. A branch hangs from the trunk run it touches and a twig from the branch run it touches, named
+by `parent`; one touching none is `piping.branch_unconnected` or `piping.twig_unconnected`, and one
+touching two takes the first with the warning `piping.parent_ambiguous`. A tree lives in one Piping
+group: a branch in another group reaches no trunk. Each run gives its `length_m` as drawn (a trunk's
+`multiplier` is not applied), `line_count`, `values` and `findings`; `blocks_export` marks those that
+keep it from the export (`piping.type_missing`, `piping.group_unlinked`, `piping.group_in_zone`,
+`piping.insulation_conductivity_missing`, the two unconnected codes, and an unreadable record in
+`unreadable`). Beside the runs are `totals` by role, one `systems` row per Hot Water System with its
+distribution length by role and its recirculation length, temperature and hours, worked out as
+honeybee-ph does (60 and 24 with no recirculation pipe), and one `types` row per Pipe Type with its
+`used_length_m`, which `pipe_types.list` also gives. `ph_composer.piping.systems` reads the `systems`
+rows alone. Identifiers (`pipe_` and a digest) follow the geometry; never store one. Pass `compact`
+true to leave out each run's `edge_paths` and each finding's pipes, counted instead, and page one run's
+pipes with `ph_composer.piping.runs.members` (its `identifier`, the row's `index`, and `finding` for
+only a finding's pipes). Pass a run's or a finding's `edge_paths` to `ph_composer.piping.runs.locate`
+to select those pipes, opening their group; a hidden pipe or group refuses `piping.hidden`.
 
 ### Library records
 

@@ -58,35 +58,35 @@ class ThermalBridgeRunsTest < Minitest::Test
     RUNS::Chains.build(facts, :type_names => { PARAPET => "Parapet" })
   end
 
-  def test_a_u_is_one_open_run_a_square_one_closed_run_and_a_t_three_runs
-    u = build(chain(ZONE_A, PARAPET, [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]))
-    assert_equal [[false, 4]], u.map { |run| [run.closed, run.points_m.length] }
+  # The chain rule itself is core's (tests/edge_runs_test.rb). The adapter keys by Zone occurrence, type and quantity
+  # and keeps core's runs whole: the same points, Edges and closure, with each run's Zone, type and quantity read
+  # back, and two placements of one component two runs with distinct identifiers.
+  def test_the_adapter_gives_the_chain_rules_runs_per_zone_type_and_quantity
+    facts = chain(ZONE_A, PARAPET, [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 0]]) +
+            [fact(ZONE_A, PARAPET, [5, 0, 0], [6, 0, 0]), fact(ZONE_A, PARAPET, [6, 0, 0], [7, 0, 0]),
+             fact(ZONE_A, PARAPET, [6, 0, 0], [6, 1, 0]), fact(ZONE_A, PARAPET, [7, 0, 0], [8, 0, 0], :quantity => 2),
+             fact(ZONE_A, PARAPET, [9, 0, 0], [10, 0, 0], :container => [100, 300])]
+    core = PhComposer::EdgeRuns.build(facts.map do |one|
+      PhComposer::EdgeRuns::Fact.new(:path => one.path, :key => [one.zone.fetch("zone_path"), one.type_id,
+                                                                 one.quantity.to_f],
+                                     :vertex_ids => one.vertex_ids, :points_m => one.points_m)
+    end)
+    shape = ->(runs) {
+      runs.map { |run|
+        [run.points_m, run.edge_paths, run.closed, run.container_path]
+      }.sort_by(&:to_s)
+    }
+    runs = build(facts)
+    assert_equal shape.call(core), shape.call(runs)
+    assert_equal [[ZONE_A, PARAPET]] * 6, runs.map { |run| [run.zone, run.type_id] }
+    assert_equal [1, 1, 1, 1, 1, 2], runs.map(&:quantity).sort
+    runs.each { |run| assert_equal run.edge_paths, run.facts.map(&:path) }
 
-    square = build(chain(ZONE_A, PARAPET, [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 0]]))
-    assert_equal [[true, 5]], square.map { |run| [run.closed, run.points_m.length] }
-    assert_equal square.first.points_m.first, square.first.points_m.last
-    assert_in_delta 4.0, square.first.length_m, 1e-9
-
-    t = build([fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0]), fact(ZONE_A, PARAPET, [1, 0, 0], [2, 0, 0]),
-               fact(ZONE_A, PARAPET, [1, 0, 0], [1, 1, 0])])
-    assert_equal [2, 2, 2], t.map { |run| run.points_m.length }
-  end
-
-  def test_edges_join_by_vertex_within_one_container_and_never_across_containers
-    joined = build(chain(ZONE_A, PARAPET, [[0, 0, 0], [1, 0, 0], [2, 0, 0]]))
-    assert_equal 1, joined.length
-
-    nested = [fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0]),
-              fact(ZONE_A, PARAPET, [1, 0, 0], [2, 0, 0], :container => [100, 300])]
-    assert_equal 2, build(nested).length
-
-    # Two placements of one component in one Zone: the same vertex ids, the same points, two containers.
+    setup
     placed = [140, 141].map do |placement|
       fact(ZONE_A, PARAPET, [0, 0, 1.5], [4, 0, 1.5], :container => [100, placement], :vertex_ids => [7, 8])
     end
-    runs = build(placed)
-    assert_equal 2, runs.length
-    assert_equal 2, runs.map(&:identifier).uniq.length
+    assert_equal 2, build(placed).map(&:identifier).uniq.length
   end
 
   def test_two_quantities_on_one_chain_are_two_runs
@@ -336,6 +336,8 @@ class ThermalBridgeRunsTest < Minitest::Test
     facts = [fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0], :quantity => 1),
              fact(ZONE_A, PARAPET, [1, 0, 0], [2, 0, 0], :quantity => 1.0)]
     assert_equal 1, build(facts).length
+    # The run reads its quantity from its first Edge in run order, whichever order the facts arrive in.
+    assert_equal [Integer, Integer], [build(facts), build(facts.reverse)].map { |runs| runs.first.quantity.class }
   end
 
   def test_coincidence_is_found_across_a_lookup_cell_boundary_and_not_past_the_tolerance

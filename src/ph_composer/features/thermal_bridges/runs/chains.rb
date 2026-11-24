@@ -34,116 +34,40 @@ module PhComposer
         end
       end
 
-      # The chain rule (context/TECH_STACK.md, "Edge-owned assignments"). Edges join where they share a
-      # vertex, keyed on the Edge's container path plus the vertex id: inside one Entities collection
-      # SketchUp has already merged endpoints within 0.0254 mm, so the id is exact, and two placements of
-      # one component carry the same vertex ids in different containers, so they never join. A run ends at
-      # a free end and at a vertex where the count of joining Edges is not two, so a T is three runs; a
-      # chain with no end is one closed run.
+      # Thermal bridges' runs by the chain rule in `core/edge_runs.rb`: Edges join within one Zone occurrence, type
+      # and quantity. This adapter keys the facts, reads each run's Zone, type and quantity back from its first Edge,
+      # and names and identifies the runs.
       module Chains
-        # Points are compared and digested at a micrometre, so float noise from a transform cannot reorder
-        # a run or change its identifier.
-        DIGITS = 6
-
         module_function
 
         # Runs from facts that each have a Zone, in a deterministic order, named and identified.
         # `type_names` maps a type id to its name; a type id with no name keeps the id.
         def build(facts, type_names:)
           # A quantity of 1 and one of 1.0 are one quantity, whichever a caller wrote.
-          groups = facts.group_by { |fact| [fact.zone.fetch("zone_path"), fact.type_id, fact.quantity.to_f] }
-          runs = groups.keys.sort_by(&:to_s).flat_map { |key| chains(groups.fetch(key)) }
+          keyed = facts.map do |fact|
+            EdgeRuns::Fact.new(:path => fact.path, :key => [fact.zone.fetch("zone_path"), fact.type_id,
+                                                            fact.quantity.to_f],
+                               :vertex_ids => fact.vertex_ids, :points_m => fact.points_m, :item => fact)
+          end
+          runs = EdgeRuns.build(keyed).map do |run|
+            sample = run.facts.first.item
+            Run.new(:zone => sample.zone, :type_id => sample.type_id, :quantity => sample.quantity,
+                    :container_path => run.container_path, :closed => run.closed, :points_m => run.points_m,
+                    :edge_paths => run.edge_paths, :facts => run.items)
+          end
           name(runs, type_names)
         end
 
         def distance(start, finish)
-          Math.sqrt(start.zip(finish).sum { |a, b| (a - b)**2 })
+          EdgeRuns.distance(start, finish)
         end
 
-        # Adding 0.0 turns a -0.0 from rounding into 0.0, which would otherwise digest differently.
         def key(point)
-          point.map { |value| value.round(DIGITS) + 0.0 }
-        end
-
-        def before?(point, other)
-          (key(point) <=> key(other)).negative?
+          EdgeRuns.point_key(point)
         end
 
         def keys(points)
-          points.map { |point| key(point) }
-        end
-
-        # The chains in one group, open ones from every vertex that is not a pass-through, then the loops
-        # that are left.
-        def chains(facts)
-          at = Hash.new { |hash, node| hash[node] = [] }
-          facts.each_with_index do |fact, index|
-            nodes(fact).each { |node| at[node] << index }
-          end
-          used = Array.new(facts.length, false)
-          runs = []
-          at.keys.sort_by(&:to_s).each do |node|
-            next if at.fetch(node).length == 2
-
-            at.fetch(node).each do |index|
-              runs << walk(facts, at, used, node, index, :closed => false) unless used[index]
-            end
-          end
-          facts.each_index do |index|
-            runs << walk(facts, at, used, nodes(facts[index]).first, index, :closed => true) unless used[index]
-          end
-          runs
-        end
-
-        def nodes(fact)
-          fact.vertex_ids.map { |id| [fact.container_path, id] }
-        end
-
-        # Follows Edges from `node` through `index` while the next vertex passes straight through.
-        def walk(facts, at, used, node, index, closed:)
-          points = [facts[index].points_m[nodes(facts[index]).index(node)]]
-          order = []
-          loop do
-            used[index] = true
-            fact = facts[index]
-            order << fact
-            node = (nodes(fact) - [node]).first || node
-            points << fact.points_m[nodes(fact).index(node)]
-            following = at.fetch(node)
-            break unless following.length == 2
-
-            index = (following - [index]).first
-            break if index.nil? || used[index]
-          end
-          canonical(order.first, order, points, closed)
-        end
-
-        # Open runs start at their lexicographically smaller end, and where the ends meet (a loop hung from a
-        # junction) run the way whose points sort first. A closed run starts at its smallest point and
-        # turns toward the smaller of that point's neighbours. So two scans of one geometry agree.
-        def canonical(sample, order, points, closed)
-          paths = order.map(&:path)
-          if closed
-            points = points[0...-1]
-            start = (0...points.length).min_by { |i| key(points[i]) }
-            points = points.rotate(start)
-            paths = paths.rotate(start)
-            order = order.rotate(start)
-            # Edge i joins points i and i + 1, so turning the other way reverses the Edges outright.
-            if before?(points.last, points[1])
-              points = [points.first] + points[1..-1].reverse
-              paths = paths.reverse
-              order = order.reverse
-            end
-            points += [points.first]
-          elsif (keys(points.reverse) <=> keys(points)).negative?
-            points = points.reverse
-            paths = paths.reverse
-            order = order.reverse
-          end
-          Run.new(:zone => sample.zone, :type_id => sample.type_id, :quantity => sample.quantity,
-                  :container_path => sample.container_path, :closed => closed, :points_m => points,
-                  :edge_paths => paths, :facts => order)
+          EdgeRuns.point_keys(points)
         end
 
         # A run's name is the type name and a counter, numbered per type across the Model by Building-Segment,

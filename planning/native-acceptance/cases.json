@@ -4232,7 +4232,8 @@
         "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb",
         "tools/examples/authoring/thermal_bridge_measurement.rb",
         "tools/examples/authoring/thermal_bridge_reference_model.rb",
-        "tools/examples/authoring/client.rb"
+        "tools/examples/authoring/client.rb",
+        "src/ph_composer/core/edge_runs.rb"
       ],
       "native_control_required": true
     },
@@ -4304,7 +4305,8 @@
         "src/ph_composer/python/ph_composer_translation/thermal_bridge_sections.py",
         "src/ph_composer/python/ph_composer_translation/contract/thermal_bridge_records.py",
         "src/ph_composer/python/ph_composer_translation/assembly.py",
-        "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb"
+        "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb",
+        "src/ph_composer/core/edge_runs.rb"
       ],
       "native_control_required": false
     },
@@ -4320,7 +4322,8 @@
         "src/ph_composer/features/zones/export.rb",
         "src/ph_composer/features/windows/units/outlines.rb",
         "src/ph_composer/colour_by/*",
-        "tools/examples/authoring/thermal_bridge_reference_model.rb"
+        "tools/examples/authoring/thermal_bridge_reference_model.rb",
+        "src/ph_composer/core/edge_runs.rb"
       ],
       "native_control_required": true
     },
@@ -5678,6 +5681,33 @@
         "src/ph_composer/core/records/entity_store.rb",
         "src/ph_composer/core/operations/entity_scope.rb",
         "tools/examples/authoring/piping_assignment_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "M13c",
+      "label": "The piping schedule with the panel closed, from a fresh process on the installed RBZ and the reference model carrying ACCEPTANCE's hot water piping case in PG-1, linked to HWS-1: ph_composer.piping.schedule read and compared with the hand measurement (one trunk of 9.000 m with multiplier 12, three branches under it, two twigs under each, two recirculation runs, HWS-1 at 11.000 m, 54.09 C and 19 h); Floor 2's first line moved to start at (1.05,1,6) gives piping.branch_unconnected on it alone; runs.locate into PG-1 placed inside a wrapper Group selects the run and opens PG-1; save, fresh-process reopen and the same run identifiers and segment identifiers (vertex ids of a faceless Group across reopen, not yet measured); the schedule, ph_composer.piping.systems and pipe_types.all timed on a Model of 50,000 Edges with 2,000 pipes in twenty Piping groups against the 200 ms refresh target; and the thermal-bridge cases the chain rule's move to core/edge_runs.rb names (T04, T08, T09) repeated",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/core/edge_runs.rb",
+        "src/ph_composer/features/piping/install.rb",
+        "src/ph_composer/features/piping/codes.rb",
+        "src/ph_composer/features/piping/runs/*",
+        "src/ph_composer/features/piping/scan/*",
+        "src/ph_composer/features/piping/run_locate.rb",
+        "src/ph_composer/features/piping/type/reads.rb",
+        "src/ph_composer/features/piping/group/*",
+        "src/ph_composer/features/piping/assignment/schema.rb",
+        "src/ph_composer/features/piping/declarations/*",
+        "src/ph_composer/features/zones/zone/index.rb",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/features/zones/zone/operations.rb",
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/core/view_framing.rb",
+        "src/ph_composer/core/face_capture.rb",
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true

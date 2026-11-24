@@ -1,7 +1,7 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: In progress: P4-13a merged (#576); P4-13b in review. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
+STATUS: In progress: P4-13a merged (#576); P4-13b in review (#577); P4-13c in review, stacked on it. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -26,8 +26,9 @@ This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
 ## Next step
 
 [P4-13a](../phases/p4-13a-pipe-types.md), the piping feature and Pipe Types, is merged (#576), and
-[P4-13b](../phases/p4-13b-piping-groups-and-assignment.md), Piping groups and the pipe assignment, is in review; then
-P4-13c to P4-13e in order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
+[P4-13b](../phases/p4-13b-piping-groups-and-assignment.md), Piping groups and the pipe assignment, is in review, with
+[P4-13c](../phases/p4-13c-tree-and-schedule.md), the chain rule in `core/`, the tree and the schedule, in review on it;
+then P4-13d and P4-13e in order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
 [phase ledger](../STATUS.md).
 
 ## Blockers
@@ -46,12 +47,13 @@ P4-13c to P4-13e in order ([the parent index](../phases/p4-13-hot-water-piping.m
 | Item | Source | Disposition here |
 | --- | --- | --- |
 | A Model-level edge registry for identity-bearing assignments (B4's registry question) | D3b-01, handed over by Phase 3b P3b-09 | Answered: none. Q1 chose the tree by connection (D4-36), so no assignment carries a parent; recorded in [P4-13b](../phases/p4-13b-piping-groups-and-assignment.md) |
-| Moving the run builder to `core/` | 3b STATUS, "Deferred out of this plan" | [P4-13c](../phases/p4-13c-tree-and-schedule.md), step 1: the chain rule to `core/edge_runs.rb` with 3b's chain-rule tests, the thermal-bridge goldens unchanged |
+| Moving the run builder to `core/` | 3b STATUS, "Deferred out of this plan" | Done in [P4-13c](../phases/p4-13c-tree-and-schedule.md) (in review): the chain rule is `core/edge_runs.rb` with 3b's chain-rule tests in `tests/edge_runs_test.rb`, the thermal-bridge goldens unchanged |
 
 ## Verification
 
 P4-13a offline: [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md). P4-13b offline:
-[p4-13b-piping-groups-and-assignment](../evidence/p4-13b-piping-groups-and-assignment.md). No host evidence yet; the host cases run in MS3.
+[p4-13b-piping-groups-and-assignment](../evidence/p4-13b-piping-groups-and-assignment.md). P4-13c offline:
+[p4-13c-tree-and-schedule](../evidence/p4-13c-tree-and-schedule.md). No host evidence yet; the host cases run in MS3.
 
 ## Ledger
 
@@ -66,3 +68,4 @@ P4-13a offline: [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md). P4-13b of
 | 2026-11-24 | Planned in full as P4-13a to P4-13e in the phase packet; the registry question answered "none" and the run builder's move allocated to P4-13c. No implementation. |
 | 2026-11-24 | P4-13a implemented on `feat/phase-07-mechanical-p4-13a` and in review (#576): the `ph_composer.piping` feature and the Pipe Type kind, panel closed; host case `M13a` owed to MS3. |
 | 2026-11-24 | P4-13b implemented on `feat/phase-07-mechanical-p4-13b` and in review: Piping groups and the pipe assignment, panel closed; the Hot Water System delete routes other features' referrers through the engine's retargeters; host case `M13b` owed to MS3. |
+| 2026-11-24 | P4-13c implemented on `feat/phase-07-mechanical-p4-13c` and in review, stacked on P4-13b: the chain rule moved to `core/edge_runs.rb`, the tree by connection, the recirculation sum, findings and the schedule; host case `M13c` owed to MS3. |

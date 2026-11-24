@@ -29,8 +29,9 @@ module PhComposer
         "demand_recirculation" => { "type" => "boolean",
                                     "description" => "A trunk only: whether it has demand recirculation; false by " \
                                                      "default." },
-        "water_temp_c" => { "type" => "number", "x-unit" => "C",
-                            "description" => "A recirculation pipe only: its water temperature; 60 by default." },
+        "water_temp_c" => { "type" => "number", "minimum" => 0, "maximum" => 100, "x-unit" => "C",
+                            "description" => "A recirculation pipe only: its water temperature, 0 to 100; 60 by " \
+                                             "default." },
         "daily_period" => { "type" => "number", "minimum" => 0, "maximum" => 24, "x-unit" => "h",
                             "description" => "A recirculation pipe only: hours a day it runs, 0 to 24; 24 by " \
                                              "default." }
