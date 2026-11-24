@@ -90,8 +90,11 @@ PhComposerUI.define("sections/export", ["panel", "request", "workspace"], functi
     if (finding.object_id) text = text.split(" " + finding.object_id).join("");
     return text.replace(RECORD_ID, "");
   }
-  function cause(finding) { return String(finding.code || "") + "|" + sentence(finding); }
-  /* One group per cause: the same code and the same sentence once its record id is taken out. */
+  function cause(finding) {
+    return String(finding.section || "") + "|" + String(finding.code || "") + "|" + sentence(finding);
+  }
+  /* One group per cause: the same section, the same code and the same sentence once its record id is taken out, so
+     one group's Locate names one kind of record (a Ventilator and a Hot Water System sharing a Tag stay apart). */
   function grouped(rows) {
     var list = [], byKey = Object.create(null);
     rows.forEach(function (finding) {

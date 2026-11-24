@@ -3,7 +3,8 @@
    values, of which only those its Type takes are live: an annual heat pump its performance ratio, a monthly one
    two COPs at two rating temperatures, one inside the envelope its energy factor, an electric heater none
    (context/CONTRACTS.md, "Mechanical equipment"). The others read as a dash and are read only, so a typed edit or a
-   paste across them is refused whole. Coverage is stored as a fraction and shown and entered as a percentage.
+   paste across them is refused whole. Coverage is stored as a fraction and shown and entered as a percentage (the
+   `percent` quantity), so its drafts, guards and readback stay in the stored fraction.
 
    A Type is changed in the shared form dialog, since the new Type needs its own values and the old Type's values
    go: the dialog asks for the new ones, names what goes, and sends one guarded update with both, one Undo step. */
@@ -37,8 +38,8 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     heat_pump_inside: ["annual_energy_factor"] };
   var EFFICIENCY_FIELDS = Object.keys(EFFICIENCY);
   var POSITIVE = ["total_system_perf_ratio", "cop_1", "cop_2", "annual_energy_factor"];
-  var COVERAGE = fields.with(FRACTION, { label: "Coverage" });
-  var columns = [["hot_water_system_id", "System"], ["variant", "Type"], ["percent_coverage", "Coverage %"],
+  var COVERAGE = fields.with(fields.PERCENT, { label: "Coverage" });
+  var columns = [["hot_water_system_id", "System"], ["variant", "Type"], ["percent_coverage", "Coverage"],
     ["in_conditioned_space", "In conditioned space"]].concat(EFFICIENCY_FIELDS.map(function (field) {
     return [field, EFFICIENCY[field].label];
   }));
@@ -52,21 +53,7 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
   function inactive(record, field) {
     return Boolean(EFFICIENCY[field]) && (TYPE_FIELDS[record.values.variant] || []).indexOf(field) < 0;
   }
-  /* Coverage as the cell shows it: the stored fraction as a percentage, rounded clear of binary noise. */
-  function percent(fraction) { return present(fraction) ? Math.round(fraction * 1e8) / 1e6 : null; }
-  /* A cell's update, coverage sent as the fraction it is stored as and guarded by the stored value the cell showed. */
-  function cellChange(cell, value, shown) {
-    var held = cell.row.record.values, values = {}, expected = {};
-    var stored = present(held[cell.field]) ? held[cell.field] : null;
-    if (cell.field === "percent_coverage") {
-      values[cell.field] = value / 100;
-      expected[cell.field] = percent(stored) === shown ? stored : shown / 100;
-    } else {
-      values[cell.field] = value;
-      expected[cell.field] = shown === undefined ? null : shown;
-    }
-    return { id: cell.row.record.id, values: values, expected_values: expected };
-  }
+
   /* The one update a Type change sends: the new Type and its values, a null for each value of the old Type, each
      guarded by what the row showed. */
   function typeChange(record, variant, entered) {
@@ -97,7 +84,7 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
   TypeForm.prototype.open = function (record, variant) {
     if (!this.enabled) return;
     var self = this;
-    this.record = record; this.variant = variant;
+    this.record = record; this.variant = variant; this.stale = false; this.from = record.values.variant;
     this.release();
     this.title.textContent = "Change " + record.values.name + " to " + typeLabel(variant);
     var going = EFFICIENCY_FIELDS.filter(function (field) {
@@ -126,7 +113,7 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     if (this.units.length) this.units[0].unit.input.focus(); else this.submitButton.focus();
   };
   TypeForm.prototype.updateButton = function () {
-    this.submitButton.disabled = !this.enabled || this.busy();
+    this.submitButton.disabled = !this.enabled || this.busy() || Boolean(this.stale);
   };
   /* Each value read as typed, or the first field's reason it cannot be. */
   TypeForm.prototype.entered = function () {
@@ -154,10 +141,18 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     var outcome = forms.refreshForm(this, state, SECTION);
     if (outcome && outcome.status === "completed") { this.hide(); this.release(); return; }
     var record = this.record, records = (snapshot.value(state, SECTION) || {}).records || [];
-    // The Heater went, or changed its Type elsewhere: the change no longer means what it said.
-    if (!this.root.hidden && record && !this.busy() && !records.some(function (entry) {
-      return entry.id === record.id && entry.values.variant === record.values.variant;
-    })) { this.hide(); this.release(); }
+    var now = record && records.filter(function (entry) { return entry.id === record.id; })[0];
+    if (!this.root.hidden && record && !this.busy()) {
+      // The Heater went: nothing is left to change.
+      if (!now) { this.hide(); this.release(); return; }
+      // Its Type changed elsewhere: the change no longer means what it said. The typed values and any refusal stay
+      // in view; Change Type is held, and Cancel lets the user choose again from the Type now shown.
+      if (now.values.variant !== this.from && !this.stale) {
+        this.stale = true;
+        this.error.textContent = (this.error.textContent ? this.error.textContent + " " : "") +
+          record.values.name + " is now " + typeLabel(now.values.variant) + "; cancel and choose its Type again.";
+      }
+    }
     this.updateButton();
   };
   TypeForm.prototype.release = function () {
@@ -185,7 +180,7 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
           return field === "in_conditioned_space" ? equipment.yesNo(text) : undefined;
         },
         validate: function (field, entered) {
-          if (field === "percent_coverage" && (entered < 0 || entered > 100)) {
+          if (field === "percent_coverage" && (entered < 0 || entered > 1)) {
             return "Enter a percentage from 0 to 100.";
           }
           if (POSITIVE.indexOf(field) >= 0 && !(entered > 0)) return "Enter a number above 0.";
@@ -193,14 +188,9 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
         },
         rawValue: function (row, field) {
           if (field === "in_conditioned_space") return row.record.values[field] !== false;
-          if (field === "percent_coverage") return percent(row.record.values[field]);
           return equipment.stored(row.record, field);
         },
         readOnly: function (cell) { return inactive(cell.row.record, cell.field); },
-        send: function (cell) {
-          return { action: SECTION + ".update", params: cellChange(cell, cell.submitted, cell.baseline) };
-        },
-        changeFor: function (cell, value) { return cellChange(cell, value, cell.current); },
         afterCell: function (td, row, field) { self.inactiveCell(td, row.record, field); },
         defaultWidths: { hot_water_system_id: 150, variant: 170, percent_coverage: 104, in_conditioned_space: 160,
           total_system_perf_ratio: 140, cop_1: 84, ambient_temp_1_c: 168, cop_2: 84, ambient_temp_2_c: 168,

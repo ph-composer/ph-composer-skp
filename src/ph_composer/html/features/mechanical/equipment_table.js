@@ -249,6 +249,7 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
   EquipmentTable.prototype.render = function (state) {
     var self = this, payload = snapshot.value(state, this.spec.section);
     this.records = payload ? payload.records : [];
+    this.loaded = Boolean(payload);
     this.state = state;
     this.forms.forEach(function (form) { form.refresh(state); });
     var outcome = this.cells.consume(state);
@@ -261,16 +262,16 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.inventory.render(state);
     // A repaint draws every row again; an open part follows the cell or action it was opened from.
     if (this.spec.repainted) this.spec.repainted();
-    if (this.located && this.records.length) this.navigate(this.located);
+    if (this.located && this.loaded) this.navigate(this.located);
     this.create.disabled = !payload || this.inventory.busy();
   };
   /* A Locate from Export names this table's records. */
   EquipmentTable.prototype.accepts = function (intent) { return Boolean(intent[this.spec.locate]); };
   EquipmentTable.prototype.navigate = function (intent) {
     var ids = intent[this.spec.locate];
-    // A Locate that arrives before the records are read waits for them.
-    this.located = this.records.length ? null : intent;
-    if (!this.records.length) return;
+    // A Locate that arrives before the records are read waits for them; an empty catalog read is an answer.
+    this.located = this.loaded ? null : intent;
+    if (!this.loaded) return;
     var names = this.records.filter(function (record) { return ids.indexOf(record.id) >= 0; })
       .map(function (record) { return record.values.name; });
     if (!names.length) {

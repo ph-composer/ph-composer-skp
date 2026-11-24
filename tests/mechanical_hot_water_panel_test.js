@@ -262,6 +262,50 @@ test("the Type pill is kept across repaints, and a New form's chosen System that
     assert.strictEqual(form.submitButton.disabled, true);
   });
 
+test("coverage keeps its drafts, guards and readback in the stored fraction", function () {
+  var o = setup(HEATERS), coverage = cell(o, HEATERS, fixtures.HHP.id + ":percent_coverage");
+  assert.strictEqual(coverage.input.value, "70");
+  type(coverage.input, "42.1234567"); key(coverage.input, "Enter");
+  var update = named(o, HEATERS + ".update")[0];
+  assert.deepStrictEqual(clone(update.payload.params), { id: fixtures.HHP.id,
+    values: { percent_coverage: 0.421234567 }, expected_values: { percent_coverage: 0.7 } });
+  records(o, HEATERS)[1].values.percent_coverage = 0.421234567;
+  answer(o, update, { status: "completed", value: {} });
+  assert.strictEqual(coverage.status, "clean", "the saved value reads back as saved");
+  assert.strictEqual(o.root._view.guard(), null);
+  type(coverage.input, "50");
+  records(o, HEATERS)[1].values.percent_coverage = 0.421234568;
+  o.paint();
+  assert.strictEqual(coverage.status, "error", "a newer value under the draft stops it, however close");
+});
+
+test("a Type change refused after the Type changed elsewhere keeps its values and refusal, and holds Change Type",
+  function () {
+    var o = setup(HEATERS), form = o.view(HEATERS).typeForm;
+    var select = row(o, fixtures.HHP.id).querySelector(".col-variant").querySelector("select");
+    select.value = "heat_pump_inside"; select.listeners.change({});
+    type(form.units[0].unit.input, "3.2");
+    form.submit();
+    var change = named(o, HEATERS + ".update")[0];
+    var heater = records(o, HEATERS)[1].values;
+    heater.variant = "electric"; delete heater.total_system_perf_ratio;
+    answer(o, change, { status: "refused", code: "target.changed", message: "The Hot Water Heater changed." });
+    assert.strictEqual(form.root.hidden, false, "the dialog stays");
+    assert.strictEqual(form.units[0].unit.input.value, "3.2", "with what was typed");
+    assert.match(form.error.textContent, /^The Hot Water Heater changed\. H-HP is now Electric; cancel and choose/);
+    assert.strictEqual(form.submitButton.disabled, true);
+  });
+
+test("a Locate for a record that is gone, in a catalog read empty, says so at once", function () {
+  var o = setup();
+  o.state.sections[TANKS].value.records = [];
+  o.paint();
+  o.navigate({ hot_water_tank_ids: [fixtures.T4.id] });
+  assert.strictEqual(o.pills.active, TANKS);
+  assert.match(o.notices[o.notices.length - 1].message, /no longer in the Model/);
+  assert.strictEqual(o.view(TANKS).table.located, null, "nothing waits");
+});
+
 test("capacity shows litres under SI and US gallons under IP, and a draft keeps its unit through a switch",
   function () {
     var o = setup(TANKS), capacity = cell(o, TANKS, fixtures.T1.id + ":storage_capacity_l");

@@ -968,8 +968,11 @@ only while no Heater or Tank names it (`ReplacementForm`'s `allowClear` as a fun
 System is chosen in place, one guarded update; its Type is changed in the shared form dialog, which asks for the new
 Type's efficiency values and sends one update with them, nulls for the old Type's and both guarded; the other
 efficiency cells stay drawn but read only (the kit `Inventory`'s `readOnly`), so a typed edit or a paste across them
-is refused whole. Coverage is stored as a fraction and shown and entered as a percentage, sent and guarded as the
-stored fraction. A Tank's export slot is the row's `slot`, read only, amber with
+is refused whole. Coverage is stored as a fraction and shown and entered as a percentage through the panel's
+`percent` quantity (a `scale` of 100 in either unit system), so its drafts, guards and readback stay in the stored
+fraction. A Type change refused after the Type changed elsewhere keeps its typed values and the refusal and holds
+Change Type until the user cancels. A Locate that reaches a table whose catalog is read empty answers at once that the
+records are gone. A Tank's export slot is the row's `slot`, read only, amber with
 the `mechanical.tank_unslotted` finding when null. A Tank's capacity is the `volume_l` quantity, litres stored and US
 gallons under IP, in both unit registries. `HotWater::Systems::METHOD_EXPORTED` is the Ruby mirror of whether the
 pinned honeybee-ph writes a calculation method; `tests/fixtures/mechanical/hot_water_method.json` holds it equal to
