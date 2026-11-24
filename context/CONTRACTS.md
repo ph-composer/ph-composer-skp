@@ -880,6 +880,9 @@ values with no recirculation piping, `from_piping` false) and `findings`: `mecha
 `hot_water_systems.delete` without `replacement_id` refuses `reference.in_use` while a Zone, Heater or Tank names the
 System; with an id, the Zones' slots move through Serves and each Heater and Tank is a guarded edit to the
 replacement, in one proposal; with null the Zones' slots empty, and a Heater or Tank still naming the System refuses.
+With an id or null, every other feature's record naming the System (a Piping group's `hot_water_system_id`) moves or
+clears through the registered reference retargeters (`request.retarget_references`, "A definition delete handler"),
+whose plan joins Serves' in the same proposal; Mechanical names none of them.
 
 - **Heat pumps** are four flat kinds (`features/mechanical/heat_pumps/`), each with the shared name, notes, datasheet
   links and source, `manufacturer` and `model`, `schema_version` 1. An **outdoor model**
@@ -1267,6 +1270,34 @@ and no conductivity, which blocks the export only of a pipe that uses it; a bare
 `user_data` is written with `ph_composer.records.update_metadata`; the export leaves a Pipe Type's map out, since each
 pipe segment carries its pipe's.
 
+- **Piping group** (reference target `ph_composer.piping.group`, `features/piping/group/`): the record in the
+  storage table on a SketchUp Group, its occurrence reference `{group_id, group_path}` (root-to-Group persistent ids).
+  Membership is the direct parent: an Edge is a pipe only when its parent Group carries this record, so an Edge in a
+  plain Group inside a Piping group is not one. A Piping group sits at the Model root or in plain Groups (Q13):
+  `groups.link`, `groups.unlink`, `pipes.assign` and `pipes.clear` refuse `piping.group_in_zone` where
+  `ph_composer.zones.containment` says a Zone holds the group, and `piping.group_nested` inside another Piping group.
+  A Pipe Type or Hot Water System delete still rewrites a group a Zone holds, so no reference is left dangling. `groups.create` adds an empty
+  Group at the root with a new record naming an existing System and opens it through `EditContext.enter`, in one Undo
+  step; whether the host keeps an empty Group through the commit is owed to the host case M13b. `groups.all` and the
+  bounded `groups.list` give every occurrence in path order with `values`, `pipe_count` (Edges directly inside with a
+  pipe record), `copied`, `findings` (the two placement codes) and `write_refusal`. No Model-level registry lists
+  groups or pipes (Q1).
+- **Pipe** (reference target `ph_composer.piping.pipe`, `features/piping/assignment/`): the assignment on an Edge,
+  occurrence reference `{group_path, entity_path, entity_id}` with `entity_path` root-to-Edge. `role` is `trunk`,
+  `branch`, `twig` or `recirculation`; a trunk carries `multiplier` (integer at least 1, default 1) and
+  `demand_recirculation` (default false), a recirculation pipe `water_temp_c` (default 60) and `daily_period` (hours,
+  0 to 24, default 24), a branch and a twig neither. A role's values are required for it and absent for the others;
+  a value another role takes refuses `params.invalid`, and reassigning a role drops the old role's values.
+  `pipes.assign` and `pipes.clear` take at most 250 explicit Edges and refuse as a whole for a stale target, an Edge
+  outside a Piping group (`piping.outside_group`), a misplaced group, a locked or shared step or one Edge too many
+  (`gesture.too_large`), one Undo step each. `pipes.selection` (bounded), `pipes.selection_all` and its snapshot
+  section `ph_composer.piping.pipes.selected` read the native selection under the active path, each Edge with its
+  group and System, values, `copied` and `write_refusal`; anything not an Edge is listed as ignored.
+  `pipe_types.delete` with `replacement_id` rewrites every pipe naming the type, with null nulls its `pipe_type_id`,
+  in the delete's proposal; a pipe the rewrite cannot reach (outside a Piping group, locked or shared) refuses the
+  whole delete as `reference.in_use`. A Hot Water System delete with an id or null moves or clears the Piping groups
+  naming it through piping's retargeter `ph_composer.piping.groups.retarget_hot_water_system`.
+
 ## This computer's settings file
 
 Settings that belong to the computer and not to a Model, and that every SketchUp version must read,
@@ -1368,6 +1399,8 @@ access and never fall back to selection, display name, proximity or the active M
 | Floor Segment | `ph_composer.floor_segment` | A Face directly inside a Volume | `fsg_` id; `display_name`, `weighting_factor` and `net_area_factor`, each 0 to 1 |
 | Spaces settings | `ph_composer.spaces_settings` | Model | None; `last_height_m`, the height new Spaces take, null until entered |
 | Primary definition index | `ph_composer.window_definitions`, key `index` | Model | None; `{ "schema_version": 1, "definitions": { "wnt_...": persistent_id } }` |
+| Piping group | `ph_composer.piping.group` | A Group at the Model root or in plain Groups, outside every Zone and Piping group | `ppg_` id; `hot_water_system_id` (a core reference to `ph_composer.mechanical.hot_water_system`, null while unlinked). Claims its Group. A paste carries the id, which reads mark `copied` (see "Hot water piping") |
+| Pipe assignment | `ph_composer.piping` | A `Sketchup::Edge` directly inside a Piping group | `ppe_` id; `pipe_type_id` (a core reference to `ph_composer.piping.pipe_type`, null after a type delete with null), `role` and the role's values. A split or copy carries the id, which reads mark `copied` |
 | Shading mark | `ph_composer.shading` | A Face, Group or ComponentInstance, inside a Zone or not | None; `{ "schema_version": 1 }` with optional `user_data` and `extension_data`. Claims nothing; excludes from the envelope (see "The shading mark") |
 
 The Face values include an optional `assembly_id` reference to

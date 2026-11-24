@@ -5,7 +5,8 @@ module PhComposer
     # What the hot water catalogs register: the three kinds, and for each a bounded list, the all read with its
     # snapshot section, and create, update, duplicate and delete. Every write goes through the record engine, one
     # native Undo step each. A System's rows add the Zones it serves, its findings and its Heater and Tank counts; its
-    # delete moves or clears the Zones naming it, from Serves, and moves its Heaters and Tanks to a replacement.
+    # delete moves or clears the Zones naming it, from Serves, moves its Heaters and Tanks to a replacement, and hands
+    # every other referrer to the foundation's reference retargeting, which names no feature.
     module HotWaterRegistration
       SYSTEMS = HotWater::Systems::KIND
       HEATERS = HotWater::Heaters::KIND
@@ -224,9 +225,10 @@ module PhComposer
       def install_system_delete(feature)
         params = Shapes.delete(SYSTEMS).then do |schema|
           schema["properties"]["replacement_id"] =
-            Shapes.id(SYSTEMS.id_prefix, "The Hot Water System that takes this one's place on every Zone, Heater and " \
-                                         "Tank, or null to empty the Zones' slots. Needed while a Zone, Heater or " \
-                                         "Tank names it; null leaves Heaters and Tanks in use.", :nullable => true)
+            Shapes.id(SYSTEMS.id_prefix, "The Hot Water System that takes this one's place on every Zone, Heater, " \
+                                         "Tank and other record naming it, or null to empty the Zones' slots and " \
+                                         "clear other features' records. Needed while anything names it; null " \
+                                         "leaves Heaters and Tanks in use.", :nullable => true)
           schema
         end
         feature.action("#{PREFIXES.fetch(SYSTEMS.id)}.delete",
@@ -239,7 +241,8 @@ module PhComposer
                        :participants => [Serves::State::STAGE], :undo_name => "Delete Hot Water System",
                        :preconditions => ["The Hot Water System exists and is readable."],
                        :side_effects => "Deletes one definition and its metadata, and rewrites the Zones, Heaters " \
-                                        "and Tanks that name it; Undo restores all of them.",
+                                        "and Tanks that name it and, with replacement_id or null, any other " \
+                                        "feature's records that name it; Undo restores all of them.",
                        :examples => [{ "id" => Shapes.example_id(SYSTEMS) },
                                      { "id" => Shapes.example_id(SYSTEMS),
                                        "replacement_id" => "hws_Zy98Xw76Vu54" }]) do |request, proposal|
@@ -251,6 +254,9 @@ module PhComposer
                                                                    :replacement => replacement) do |plan|
             if replacement.is_a?(String)
               HotWater::Operations.move_members(request, proposal, :from => id, :to => replacement)
+            end
+            unless replacement.equal?(Serves::Operations::KEEP)
+              plan = HotWater::Operations.with_retargeted(request, plan, :from => id, :to => replacement)
             end
             HotWater::Operations.delete(request, proposal, SYSTEMS.id, :id => id, :expected_values => expected,
                                                                        :reference_plan => plan)

@@ -68,7 +68,8 @@ module PhComposer
         return if incoming.empty?
 
         source = incoming.first
-        message = "#{source.kind} #{source.record.fetch('id')} still refers to #{kind_id} #{id}."
+        # A referrer with no id is named by its occurrence key, so a malformed one still refuses as reference.in_use.
+        message = "#{source.kind} #{source.record['id'] || source.key.inspect} still refers to #{kind_id} #{id}."
         raise CodedError.new("reference.in_use", message, "target_kind" => kind_id, "id" => id)
       end
 

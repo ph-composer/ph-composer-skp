@@ -1,7 +1,7 @@
 # P4-13a: the piping feature and Pipe Types
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13a` (#576); offline evidence in [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md), host case `M13a` owed to MS3. Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q3, Q4, Q9, Q10), D4-20, D4-31 and the [piping PRD](../hot-water-piping/PRD.md), "Records" and "Pipe Types". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13a` runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-24 (#576, squash `99a712a8`); offline evidence in [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md), host case `M13a` owed to MS3. Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q3, Q4, Q9, Q10), D4-20, D4-31 and the [piping PRD](../hot-water-piping/PRD.md), "Records" and "Pipe Types". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13a` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

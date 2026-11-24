@@ -1,7 +1,7 @@
 # P4-13b: Piping groups and the pipe assignment
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q2, Q3, Q6, Q7, Q8, Q13), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "Draw" and "Assign". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13b` runs in the MS3 sitting (D4-31), and carries the Line tool cases nothing has measured.
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13b`, on `main` after #576 merged; offline evidence in [p4-13b-piping-groups-and-assignment](../evidence/p4-13b-piping-groups-and-assignment.md), host case `M13b` owed to MS3. Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q2, Q3, Q6, Q7, Q8, Q13), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "Draw" and "Assign". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13b` runs in the MS3 sitting (D4-31), and carries the Line tool cases nothing has measured.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -84,6 +84,25 @@ Paths are relative to `src/ph_composer/`.
 - **Selection.** `pipes.selection` and the `pipes.selected` snapshot section: the native selection under the active
   path, Edges only, each as a reference with its group, System, current assignment and write refusal; anything else is
   reported as ignored. A long-lived selection client in the shape thermal bridges use serves P4-13e's assign bar.
+
+## Inferred in implementation
+
+- **The Hot Water System delete did not route foreign referrers (for Ed).** The stop condition above was met:
+  Mechanical's System delete rewrote only Zones, Heaters and Tanks, so with a Piping group naming System A,
+  `hot_water_systems.delete` refused `reference.in_use` with a `replacement_id`, and with null, as without one
+  (probe run 2026-11-24). The stage stopped and reported. The conductor chose the generic seam: the System delete now
+  calls `request.retarget_references` (the documented definition-delete contract that Assemblies, Programs and Windows
+  use) when given an id or null and joins that plan to Serves', naming no feature; piping registers the retargeter
+  `ph_composer.piping.groups.retarget_hot_water_system`. `tests/mechanical_hot_water_test.rb` proves it with a probe
+  feature, `tests/piping_group_test.rb` with a Piping group. No piping branch is in Mechanical.
+- **Stores.** Each record's `EntityStore` sits in its `schema.rb`, as thermal bridges' does, so there is no
+  `store.rb`.
+- **A same-role reassign keeps its values.** Reassigning a trunk with only a new type keeps its `multiplier`; the
+  defaults apply on a first assignment or a role change.
+- **No repair route.** An Edge or group whose stored text is not a JSON object refuses every write
+  (`record.unreadable`); unreadable text names nothing, so deletes pass over it, as thermal bridges' do.
+- **`groups.create`** does not check that the Model is shown or that no tool is active, as `ph_composer.context.open`
+  does; H1 measures the path change inside the operation.
 
 ## Steps
 

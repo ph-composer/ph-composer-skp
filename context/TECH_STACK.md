@@ -206,6 +206,9 @@ and ERV ducting reuse these rules.
   keeps its Edge, reading the Faces of the Edges it stands for, and no finding is raised. Edges that
   differ in any of those raise the non-blocking `thermal_bridge.coincident_conflict`, and both count
   until the user clears one.
+- Piping's Edges live directly in Piping groups at the Model root or in plain Groups, never inside a Zone, so Zones
+  does not hold them and its resolver does not apply: piping's `locate:` walks the root-to-Edge path itself, and
+  `ph_composer.zones.containment` is read only to refuse a Piping group a Zone holds.
 - An Edge carries at most one assignment of each kind; a thermal bridge Edge is envelope geometry
   and a pipe or duct is a loose line in its own Group, so the two never share an Edge.
 
