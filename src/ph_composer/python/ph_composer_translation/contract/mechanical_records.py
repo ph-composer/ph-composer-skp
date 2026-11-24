@@ -3,7 +3,8 @@
 Ventilation: one (Ventilator, Zone) pair with the identifiers Ruby derived from the Ventilator's id and the unit's
 values as the record stores them. Hot water: one (Hot Water System, Zone) pair with the System's values, its Tanks in
 the slots Ruby worked out and its Heaters, each Tank and Heater under its own record's id. Electric heating: one
-(Electric Heater, Zone) pair under the heater's id. Pumps: one (Pump, Zone) pair under the pump's id."""
+(Electric Heater, Zone) pair under the heater's id. Pumps: one (Pump, Zone) pair under the pump's id. Fans: one
+(Fan, Zone) pair under the fan's id, its Power absent when it has none."""
 
 from __future__ import annotations
 
@@ -426,5 +427,64 @@ class PumpRecord:
             non_negative(raw.get("annual_period_operation_khrs"), f"{label} annual_period_operation_khrs"),
             fraction(raw.get("ihg_utilization_factor"), f"{label} ihg_utilization_factor"),
             profile,
+            user_data(raw.get("user_data"), label),
+        )
+
+
+# -- Fans ---------------------------------------------------------------------
+
+#: honeybee-ph's exhaust ventilator class for each type a Fan stores; Ruby's `Fans::EXHAUST_TYPES`.
+EXHAUST_CLASSES = {
+    "kitchen_hood": "ExhaustVentKitchenHood",
+    "dryer": "ExhaustVentDryer",
+    "user_defined": "ExhaustVentUserDefined",
+}
+
+
+@dataclass(frozen=True)
+class FanRecord:
+    """One (Fan, Zone) pair: the fan's identifier (its record id) and Tag, which every pair of one fan shares, its
+    exhaust ventilator's values (flow in m³/h, runtime in minutes a year) and, when `norm_energy_demand_w` is present,
+    its supportive device's (W, the kilohours a year Ruby resolved, in conditioned space), and its `user_data`
+    (`FanPlan`)."""
+
+    id: str
+    item_id: str
+    zone_id: str
+    identifier: str
+    display_name: str
+    exhaust_type: str
+    quantity: int
+    exhaust_flow_rate_m3h: float
+    annual_runtime_minutes: float
+    norm_energy_demand_w: float | None
+    in_conditioned_space: bool
+    annual_period_operation_khrs: float
+    user_data: JSONObject
+
+    @classmethod
+    def read(cls, raw: Mapping[str, object]) -> FanRecord:
+        identifier = as_text(raw.get("id"), "fan id")
+        label = f"fan {identifier}"
+        exhaust_type = raw.get("exhaust_type")
+        if not isinstance(exhaust_type, str) or exhaust_type not in EXHAUST_CLASSES:
+            raise RecordError(f"{label} exhaust_type must be one of {', '.join(EXHAUST_CLASSES)}")
+        quantity = optional_whole(raw.get("quantity"), f"{label} quantity", 1, None)
+        if quantity is None:
+            raise RecordError(f"{label} needs its quantity")
+        power = raw.get("norm_energy_demand_w")
+        return cls(
+            identifier,
+            as_text(raw.get("item_id"), f"{label} item_id"),
+            as_text(raw.get("zone_id"), f"{label} zone_id"),
+            as_text(raw.get("identifier"), f"{label} identifier"),
+            as_text(raw.get("display_name"), f"{label} display_name"),
+            exhaust_type,
+            quantity,
+            non_negative(raw.get("exhaust_flow_rate_m3h"), f"{label} exhaust_flow_rate_m3h"),
+            non_negative(raw.get("annual_runtime_minutes"), f"{label} annual_runtime_minutes"),
+            None if power is None else non_negative(power, f"{label} norm_energy_demand_w"),
+            flag(raw.get("in_conditioned_space"), f"{label} in_conditioned_space"),
+            non_negative(raw.get("annual_period_operation_khrs"), f"{label} annual_period_operation_khrs"),
             user_data(raw.get("user_data"), label),
         )

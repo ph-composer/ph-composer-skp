@@ -17,6 +17,7 @@ from ph_composer_translation.coordinator import translate
 from ph_composer_translation.material_sources import MaterialSourcesSection
 from ph_composer_translation.mechanical_sections import (
     ElectricHeaterSection,
+    FanSection,
     HeatPumpSection,
     HotWaterSection,
     PumpSection,
@@ -150,6 +151,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             HeatPumpSection(),
             ElectricHeaterSection(),
             PumpSection(),
+            FanSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -190,6 +192,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             HeatPumpSection(),
             ElectricHeaterSection(),
             PumpSection(),
+            FanSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -236,6 +239,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             HeatPumpSection(),
             ElectricHeaterSection(),
             PumpSection(),
+            FanSection(),
             MechanicalSegmentSection(),
         ),
     ).to_document()
@@ -310,6 +314,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             HeatPumpSection(),
             ElectricHeaterSection(),
             PumpSection(),
+            FanSection(),
             MechanicalSegmentSection(),
         ),
     )
@@ -367,6 +372,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 HeatPumpSection(),
                 ElectricHeaterSection(),
                 PumpSection(),
+                FanSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -431,6 +437,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 HeatPumpSection(),
                 ElectricHeaterSection(),
                 PumpSection(),
+                FanSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -469,6 +476,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 HeatPumpSection(),
                 ElectricHeaterSection(),
                 PumpSection(),
+                FanSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),
@@ -509,6 +517,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 HeatPumpSection(),
                 ElectricHeaterSection(),
                 PumpSection(),
+                FanSection(),
                 MechanicalSegmentSection(),
             ),
         ).to_document(),

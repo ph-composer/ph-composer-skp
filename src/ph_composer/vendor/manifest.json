@@ -185,6 +185,11 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "49acb05a12fa752d46d19f46a1a30f54d28df8b35f73005727db6116a72dc056"
     },
+    "html/features/mechanical/fans.js": {
+      "bytes": 8575,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "715c94cf4663261b2c4955c2bf59e976effeb91c5ba9f863a61b408633aa5808"
+    },
     "html/features/mechanical/heat_pump_blended.js": {
       "bytes": 12322,
       "mime": "text/javascript; charset=utf-8",
@@ -221,9 +226,9 @@
       "sha256": "d57ac5852a9a3d65caf318416915099042209f203b33f07c05b375143fac901d"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 12530,
+      "bytes": 12837,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "f93245da5fc2db61470fbcb3bf90817960f63c63d13cc7f606e4fb43f496a442"
+      "sha256": "2921aaef9ef05b33a5c0b6a8282569caaeac23f08d05dba08619976e1914a43c"
     },
     "html/features/mechanical/pumps.js": {
       "bytes": 9031,
@@ -551,9 +556,9 @@
       "sha256": "9698d795e2d2031afa9dac5732125f52c0292492eaab2721f6a77a3a7e3de74f"
     },
     "html/fields.js": {
-      "bytes": 3203,
+      "bytes": 3364,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "15dfd98d40814aa08c8beab8f18435b835f8734bdb88307c24d79ea8e1e2bf74"
+      "sha256": "a29f74a71e881db6d2d4f38a4cb8ca03b4f71d188ac7eaa981416723578137f6"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -561,9 +566,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 11555,
+      "bytes": 11611,
       "mime": "text/html; charset=utf-8",
-      "sha256": "c7682e3f342036663d8012149a10c566476e33ffe9b4c469e2474e046347c6ee"
+      "sha256": "e88de52efa7c6bcae3a77e9a7ab8bc7c91a79bf4fd0d94baf88cfc6ae94e601f"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -816,9 +821,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 15839,
+      "bytes": 16091,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "892d3913c5060ce9f734c6a5f760dc942c07b4b094d7ef8d2b83e675a18a22ba"
+      "sha256": "e1b8fa7c3997aa522c74f281b72e924d67beff9e4f0fda7bd58d139f975f4aee"
     },
     "html/units.js": {
       "bytes": 14458,
@@ -856,9 +861,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1964,
+      "bytes": 1998,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "77d66c37183688e501027ee4603760957fb8b1633d7dff37a7fefaa7b28d7083"
+      "sha256": "b7be6ff9c3e0047824c1f28c3eb4a0e42492d2e196ec29ce7a9154fd1f0566ae"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -881,9 +886,9 @@
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
     },
     "python/ph_composer_translation/contract/mechanical_records.py": {
-      "bytes": 17871,
+      "bytes": 20534,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "ca700a2467d9eb84b7672b84531da99ac8f1e15a99c61e0e2efa5df61ba63bf3"
+      "sha256": "3dc0a67c9bcd0f0357c3fca8e8114eb32a7f06b2b78a60f698586f5728c612eb"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -926,9 +931,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/mechanical_sections.py": {
-      "bytes": 35354,
+      "bytes": 43426,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "5c2d466f16c39eb2e787054657291975538f931f53e8e0dd2507423e7e231a87"
+      "sha256": "a41ea8b7c4cfd95229dc10f97872475e105975da74e93c22ba03446323a37227"
     },
     "python/ph_composer_translation/mechanical_segment_sections.py": {
       "bytes": 6882,

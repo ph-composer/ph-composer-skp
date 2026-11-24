@@ -117,7 +117,10 @@ module PhComposer
       "electric_power" => { :si_label => "W", :ip_label => "W", :si_precision => 1, :ip_precision => 1,
                             :factor => 1.0 },
       "kilohours" => { :si_label => "kh/yr", :ip_label => "kh/yr", :si_precision => 2, :ip_precision => 2,
-                       :factor => 1.0 }
+                       :factor => 1.0 },
+      # A fan's runtime in minutes a year, the same in both systems, as honeybee-ph and WUFI-Passive take it.
+      "annual_minutes" => { :si_label => "min/yr", :ip_label => "min/yr", :si_precision => 1, :ip_precision => 1,
+                            :factor => 1.0 }
     }.freeze
 
     module_function

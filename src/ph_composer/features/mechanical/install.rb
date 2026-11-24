@@ -16,6 +16,8 @@
 #   electric_heaters/  the Electric Heater kind and its reads (its operations are the shared catalog's)
 #   pumps/          the Pump kind, the usage profile its type gives, and its reads (its operations are the shared
 #                   catalog's)
+#   fans/           the Fan kind, the operation its runtime gives, and its reads (its operations are the shared
+#                   catalog's)
 #   serves/         what serves each Zone: a payload on the Zone record that Zones stages, Assign and Clear, the
 #                   Zone half of an item's delete, the reads with their findings and the airflow balance
 #   codes.rb        the `mechanical` noun's codes
@@ -32,6 +34,8 @@
 #   electric_heater_export.rb  the Electric Heater export section
 #   pump_plan.rb         the Pump export worked out in pure Ruby: its pairs and findings
 #   pump_export.rb       the Pump export section
+#   fan_plan.rb          the Fan export worked out in pure Ruby: its pairs and findings
+#   fan_export.rb        the Fan export section
 #   segment/             a Building Segment's mechanical settings: the extension on the Segment record, its
 #                        defaults and read, and whether its cooling switch agrees with its blended heat pump
 #   segment_export.rb    the Segment settings export section, and its findings
@@ -56,6 +60,8 @@ require_relative "electric_heaters/schema"
 require_relative "electric_heaters/reads"
 require_relative "pumps/schema"
 require_relative "pumps/reads"
+require_relative "fans/schema"
+require_relative "fans/reads"
 require_relative "codes"
 require_relative "serves/payload"
 require_relative "serves/state"
@@ -82,6 +88,9 @@ require_relative "electric_heater_export"
 require_relative "declarations/pumps"
 require_relative "pump_plan"
 require_relative "pump_export"
+require_relative "declarations/fans"
+require_relative "fan_plan"
+require_relative "fan_export"
 require_relative "segment/settings"
 require_relative "segment/cooling"
 require_relative "declarations/segment"
@@ -109,6 +118,8 @@ module PhComposer
       ElectricHeaterExport.install(feature)
       PumpRegistration.install(feature)
       PumpExport.install(feature)
+      FanRegistration.install(feature)
+      FanExport.install(feature)
       SegmentRegistration.install(feature)
       SegmentExport.install(feature)
       Locate.install(feature)

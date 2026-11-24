@@ -32,6 +32,12 @@ its Tag, values and `user_data`, so every Room one pump serves carries an equal 
 Room holds every pump that serves it. honeybee-ph reloads supportive devices sharing an identifier by keeping the
 last, so each row records its pump's digest. PHX reads supportive devices through a Room's Spaces; Ruby notes a
 served Zone with none.
+
+Fans: one record per (Fan, served Zone) pair. Each becomes its own exhaust ventilator of the fan's type under the
+fan's id, with its Tag, values and `user_data`, and, when the fan has Power, a linked type 10 `PhSupportiveDevice`
+under the same id: one Fan record, two honeybee-ph objects. honeybee-ph and PHX keep the two in separate collections,
+each keyed by identifier, so they never collide, and every Room one fan serves carries equal objects. Each row records
+both digests. PHX reads both through a Room's Spaces; Ruby notes a served Zone with none.
 """
 
 from __future__ import annotations
@@ -46,9 +52,11 @@ from typing import Any
 from . import stack
 from .contract import JSONValue, RecordError
 from .contract.mechanical_records import (
+    EXHAUST_CLASSES,
     TANK_SLOTS,
     UNIT_FIELDS,
     ElectricHeaterRecord,
+    FanRecord,
     HeaterValues,
     HeatPumpRecord,
     HotWaterRecord,
@@ -68,6 +76,10 @@ PUMP_SECTION_ID = "ph_composer.mechanical.export.pumps"
 #: A Pump's record id, which its supportive device carries: a Room's other supportive devices (a Fan's) belong to
 #: other sections.
 PUMP_ID = re.compile(r"pmp_[A-Za-z0-9]{12}")
+FAN_SECTION_ID = "ph_composer.mechanical.export.fans"
+#: A Fan's record id, which its exhaust ventilator and supportive device carry: a Room's other supportive devices (a
+#: Pump's) belong to other sections.
+FAN_ID = re.compile(r"fan_[A-Za-z0-9]{12}")
 #: The honeybee-ph heating type this section writes; a Room's other heating systems belong to other sections.
 DIRECT_ELECTRIC = "PhHeatingDirectElectric"
 ZONES = Requirement(ZONE_SECTION_ID, TranslatedZone)
@@ -748,4 +760,152 @@ def pump_row(item: TranslatedPump) -> dict[str, JSONValue]:
         "zone_name": item.zone_name,
         "display_name": record.display_name,
         **pump_fields(item.device),
+    }
+
+
+# -- Fans ---------------------------------------------------------------------
+
+#: Seconds in an hour: a Fan stores its flow in m³/h and honeybee-ph's exhaust ventilator holds m³/s.
+SECONDS_PER_HOUR = 3600.0
+
+
+@dataclass(frozen=True)
+class TranslatedFan:
+    source: FanRecord
+    zone_name: str
+    exhaust: Any
+    device: Any | None
+
+    @property
+    def zone_id(self) -> str:
+        return self.source.zone_id
+
+
+def fan_exhaust(record: FanRecord) -> Any:
+    """The pair's exhaust ventilator, of the class its type names, built fresh so every pair of one fan builds an
+    equal object."""
+    ventilation = stack.load("honeybee_phhvac.ventilation")
+    exhaust = getattr(ventilation, EXHAUST_CLASSES[record.exhaust_type])()
+    exhaust.identifier, exhaust.display_name = record.identifier, record.display_name
+    exhaust.quantity = record.quantity
+    exhaust.exhaust_flow_rate_m3s = record.exhaust_flow_rate_m3h / SECONDS_PER_HOUR
+    exhaust.annual_runtime_minutes = record.annual_runtime_minutes
+    exhaust.user_data = dict(record.user_data)
+    return exhaust
+
+
+def fan_device(record: FanRecord) -> Any | None:
+    """The pair's linked supportive device, type 10 under the fan's identifier, when the fan has Power; its
+    utilization factor and usage profile stay at the class's (1.0, all year)."""
+    if record.norm_energy_demand_w is None:
+        return None
+    device = stack.load("honeybee_phhvac.supportive_device").PhSupportiveDevice()
+    device.identifier, device.display_name = record.identifier, record.display_name
+    device.device_type = 10
+    device.quantity = record.quantity
+    device.in_conditioned_space = record.in_conditioned_space
+    device.norm_energy_demand_W = record.norm_energy_demand_w
+    device.annual_period_operation_khrs = record.annual_period_operation_khrs
+    device.user_data = dict(record.user_data)
+    return device
+
+
+class FanSection(Section[FanRecord, TranslatedFan]):
+    id = FAN_SECTION_ID
+    versions = frozenset({1})
+    object_type = TranslatedFan
+    requires = (ZONES,)
+    attaches = Attachment(ROOM, lambda item: item.zone_id)
+
+    def read(self, raw: Mapping[str, object]) -> FanRecord:
+        return FanRecord.read(raw)
+
+    def translate(self, record: FanRecord, inputs: Inputs) -> TranslatedFan:
+        zone = inputs.get(ZONES, record.zone_id)
+        return TranslatedFan(record, zone.source.name, fan_exhaust(record), fan_device(record))
+
+    def attach(self, host: Any, objects: Sequence[TranslatedFan]) -> None:
+        """A Room holds each fan that serves it, each once, which Ruby's list of fan ids per Zone makes structural:
+        its exhaust ventilator and, with Power, its supportive device."""
+        identifiers = [item.exhaust.identifier for item in objects]
+        if len(set(identifiers)) != len(identifiers):
+            raise RecordError(f"Room {host.identifier} holds one fan twice")
+        hvac = host.properties.ph_hvac
+        for item in objects:
+            hvac.add_exhaust_vent_device(item.exhaust)
+            if item.device is not None:
+                hvac.add_supportive_device(item.device)
+
+    def result_fields(self, objects: Mapping[str, TranslatedFan]) -> Mapping[str, JSONValue]:
+        rows: list[JSONValue] = [fan_row(item) for _identifier, item in sorted(objects.items())]
+        return {"fans": rows}
+
+    def conformance(self, model: Any, fields: Mapping[str, JSONValue]) -> None:
+        """Each reported pair's Room holds an exhaust ventilator with the row's identifier, values and the digest its
+        own fan had as translated, and a supportive device under that identifier exactly when the row has Power, with
+        its values and digest; and no Room holds a Fan's exhaust ventilator or supportive device the run did not
+        report. Other sections' supportive devices (a Pump's) are not this section's to check."""
+        rooms = {room.identifier: room for room in model.rooms}
+        reported = fields.get("fans")
+        rows = [item for item in (reported if isinstance(reported, list) else []) if isinstance(item, dict)]
+        exhausts: dict[str, set[str]] = {}
+        devices: dict[str, set[str]] = {}
+        for item in rows:
+            room = rooms.get(str(item.get("zone_id")))
+            if room is None:
+                raise ValueError(f"Room {item.get('zone_id')} is not in the model")
+            hvac = room.properties.ph_hvac
+            identifier = str(item.get("identifier"))
+            held = {exhaust.identifier: exhaust for exhaust in hvac.exhaust_vent_devices}
+            if identifier not in held:
+                raise ValueError(f"Room {room.identifier} lost fan {identifier}")
+            supportive = {device.identifier: device for device in hvac.supportive_devices}.get(identifier)
+            found = fan_fields(held[identifier], supportive)
+            expected = {key: item.get(key) for key in found}
+            if found != expected:
+                raise ValueError(f"Room {room.identifier} fan is {found}, the run reported {expected}")
+            exhausts.setdefault(room.identifier, set()).add(identifier)
+            if supportive is not None:
+                devices.setdefault(room.identifier, set()).add(identifier)
+        if extra := sorted(
+            room.identifier
+            for room in model.rooms
+            if fan_ids(room.properties.ph_hvac.exhaust_vent_devices) - exhausts.get(room.identifier, set())
+            or fan_ids(room.properties.ph_hvac.supportive_devices) - devices.get(room.identifier, set())
+        ):
+            raise ValueError(f"Room {', '.join(extra)} holds a fan the run did not report")
+
+
+def fan_ids(objects: Any) -> set[str]:
+    return {item.identifier for item in objects if FAN_ID.fullmatch(item.identifier)}
+
+
+def fan_fields(exhaust: Any, device: Any | None) -> dict[str, JSONValue]:
+    """What a row reports of its fan and conformance reads back: its identifier, its exhaust ventilator's values under
+    the record's names (the flow in m³/s, as honeybee-ph holds it), its supportive device's (null without Power), and
+    the digest of each whole, which carries its name and `user_data`."""
+    exhaust_type = {name: key for key, name in EXHAUST_CLASSES.items()}.get(exhaust.device_class_name)
+    return {
+        "identifier": exhaust.identifier,
+        "exhaust_type": exhaust_type,
+        "quantity": exhaust.quantity,
+        "exhaust_flow_rate_m3s": exhaust.exhaust_flow_rate_m3s,
+        "annual_runtime_minutes": exhaust.annual_runtime_minutes,
+        "norm_energy_demand_w": None if device is None else device.norm_energy_demand_W,
+        "in_conditioned_space": None if device is None else device.in_conditioned_space,
+        "annual_period_operation_khrs": None if device is None else device.annual_period_operation_khrs,
+        "digest": digest(exhaust),
+        "supportive_device_digest": None if device is None else digest(device),
+    }
+
+
+def fan_row(item: TranslatedFan) -> dict[str, JSONValue]:
+    record = item.source
+    return {
+        "id": record.id,
+        "item_id": record.item_id,
+        "zone_id": record.zone_id,
+        "zone_name": item.zone_name,
+        "display_name": record.display_name,
+        **fan_fields(item.exhaust, item.device),
     }

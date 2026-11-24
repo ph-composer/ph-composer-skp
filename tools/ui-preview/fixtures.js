@@ -1636,7 +1636,20 @@
         heatPump("pmp_Gg77Hh88Ii99", "pump", "P-Spare", { device_type: 7, quantity: 1, in_conditioned_space: false,
           norm_energy_demand_w: 60, annual_period_operation_khrs: 2, ihg_utilization_factor: 1,
           ihg_usage_profile: 1 })],
-      serves: { zon_apt1: ["pmp_Aa11Bb22Cc33", "pmp_Dd44Ee55Ff66"], zon_apt2: ["pmp_Aa11Bb22Cc33"] } }
+      serves: { zon_apt1: ["pmp_Aa11Bb22Cc33", "pmp_Dd44Ee55Ff66"], zon_apt2: ["pmp_Aa11Bb22Cc33"] } },
+    /* Fans: F-Hood is Apt 1's kitchen hood with a known draw, F-Dryer exhausts both apartments' dryer with no Power,
+       and F-Bath, a user-defined exhaust whose operation is set by hand, serves nothing. */
+    fans: {
+      fans: [
+        heatPump("fan_Aa11Bb22Cc33", "fan", "F-Hood", { exhaust_type: "kitchen_hood", quantity: 1,
+          exhaust_flow_rate_m3h: 250, annual_runtime_minutes: 10950, norm_energy_demand_w: 120,
+          in_conditioned_space: true, manufacturer: "Kaltwerk", model: "Hood 60" }),
+        heatPump("fan_Dd44Ee55Ff66", "fan", "F-Dryer", { exhaust_type: "dryer", quantity: 2,
+          exhaust_flow_rate_m3h: 100, annual_runtime_minutes: 6000, in_conditioned_space: true }),
+        heatPump("fan_Gg77Hh88Ii99", "fan", "F-Bath", { exhaust_type: "user_defined", quantity: 1,
+          exhaust_flow_rate_m3h: 40, annual_runtime_minutes: 30000, norm_energy_demand_w: 8,
+          in_conditioned_space: false, annual_period_operation_khrs: 2 })],
+      serves: { zon_apt1: ["fan_Aa11Bb22Cc33", "fan_Dd44Ee55Ff66"], zon_apt2: ["fan_Dd44Ee55Ff66"] } }
   } });
 
   global.PhComposerPreviewFixtures = {

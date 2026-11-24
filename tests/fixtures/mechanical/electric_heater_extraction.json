@@ -126,6 +126,10 @@
       ],
       "version": 1
     },
+    "ph_composer.mechanical.export.fans": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.mechanical.export.heat_pumps": {
       "records": [],
       "version": 1

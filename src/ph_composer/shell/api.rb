@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 96
+    MINOR = 97
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -596,7 +596,13 @@ module PhComposer
                     "list slot. The export section ph_composer.mechanical.export.pumps is new and " \
                     "ph_composer.mechanical.preflight adds its rows, with the new code " \
                     "mechanical.zone_without_spaces; ph_composer.mechanical.locate takes pump_ids. The Spaces " \
-                    "export's projection gives each Zone's space_count, with a row for every Zone holding a Space." }
+                    "export's projection gives each Zone's space_count, with a row for every Zone holding a Space." },
+      { "minor" => 97, "date" => "2026-11-24",
+        "change" => "ph_composer.mechanical.fans is new, with list, all, a snapshot section, create, update, " \
+                    "duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 6 with the fan_ids " \
+                    "list slot. The export section ph_composer.mechanical.export.fans is new and " \
+                    "ph_composer.mechanical.preflight adds its rows, mechanical.zone_without_spaces among them; " \
+                    "ph_composer.mechanical.locate takes fan_ids." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

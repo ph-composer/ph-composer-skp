@@ -15,6 +15,7 @@ from .exporters import Exporter
 from .material_sources import MaterialSourcesSection
 from .mechanical_sections import (
     ElectricHeaterSection,
+    FanSection,
     HeatPumpSection,
     HotWaterSection,
     PumpSection,
@@ -55,5 +56,6 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     HeatPumpSection(),
     ElectricHeaterSection(),
     PumpSection(),
+    FanSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

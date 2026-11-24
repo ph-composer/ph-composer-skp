@@ -33,10 +33,8 @@ module PhComposer
       # The pairs, once the plan finds nothing blocking; every other finding is a note.
       def records(reader)
         pumps = reader.records(PUMP_KIND, :user_data => true).to_h { |row| [row.fetch("id"), row] }
-        spaced = reader.section(SPACES).select { |row| row.fetch("space_count").positive? }
-                       .map { |row| row.fetch("zone_id") }
         plan = PumpPlan.call(:zones => reader.section(VentilationExport::SECTION), :pumps => pumps,
-                             :spaced => spaced)
+                             :spaced => ExportZones.spaced(reader))
         VentilationExport.raise_blocking!(plan.findings)
         plan.findings.each { |finding| reader.note(finding.code, finding.record_id, finding.message) }
         plan.pairs
@@ -54,30 +52,13 @@ module PhComposer
         end
         rows.concat(Export::MetadataCheck.findings(request, records, :section => SECTION, :user_data => true))
         pumps = records.to_h { |record| [record.fetch("id"), record] }
-        plan = PumpPlan.call(:zones => zones, :pumps => pumps, :spaced => spaced(request, zones, references),
+        spaced = ExportZones.live_spaced(request, zones, references, PumpPlan::SLOT)
+        plan = PumpPlan.call(:zones => zones, :pumps => pumps, :spaced => spaced,
                              :unreadable => unreadable.map { |row| row.fetch("id") })
         rows + plan.findings.map do |found|
           Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,
                         Locate.row_locate(found.record_id, references))
         end
-      end
-
-      # The ids of the Zones a Space names, as the Spaces export counts them: each Space read under the Zone it
-      # names, except one that sits inside a Zone the export leaves out, which leaves with that Zone. Read only while
-      # an exported Zone names a pump. A Spaces read that refuses gives nil, so the plan skips the no-Spaces finding
-      # and the pump rows stand: the Spaces preflight reports that refusal under its own section.
-      def spaced(request, zones, references)
-        return [] unless zones.any? { |zone| zone.exported && !zone.slot(PumpPlan::SLOT).empty? }
-
-        gone = zones.reject(&:exported).filter_map { |zone| references[zone.id]&.fetch("zone_path") }
-        request.query(Serves::Reads::SPACES).fetch("spaces").filter_map do |space|
-          path = Array(space.dig("reference", "entity_path"))
-          next if gone.any? { |zone_path| path.length > zone_path.length && path[0, zone_path.length] == zone_path }
-
-          space.dig("zone", "zone_id")
-        end.uniq
-      rescue CodedError
-        nil
       end
     end
   end

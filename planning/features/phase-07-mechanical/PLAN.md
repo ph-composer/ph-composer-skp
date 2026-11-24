@@ -58,8 +58,8 @@ the rows below are corrected to it.
 ## Stages
 
 Sixteen stages, one of them superseded. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
-steps, source, tests to write first, the host gate and the done condition; P4-08, P4-08b, P4-09 and P4-10 were
-written in full before their runs (2026-11-23, 2026-11-24). P4-11 to P4-14 are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
+steps, source, tests to write first, the host gate and the done condition; P4-08, P4-08b, P4-09, P4-10 and P4-11 were
+written in full before their runs (2026-11-23, 2026-11-24). P4-13 and P4-14 are gate stubs: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
@@ -74,7 +74,7 @@ written in full before their runs (2026-11-23, 2026-11-24). P4-11 to P4-14 are g
 | [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation as a Building Segment settings section with its `SEGMENT` export (Phase 6 handoff, F30) | P4-02, P4-08; the summer ventilation interview (D4-32) | mechanical, export | Save in one Undo step with the other sections; PHX reads the values on each Variant (MS3) |
 | [P4-09](phases/p4-09-electric-heaters.md) | Family 4: the Electric Heater kind, the `heater_ids` list slot, the `PhHeatingDirectElectric` export with its PHX round trip, the Electric Heating subtab | P4-07; its interview (D4-33) | mechanical, export, UI | Batched in MS3 |
 | [P4-10](phases/p4-10-pumps.md) | Family 5: the Pump kind, the `pump_ids` list slot, the `PhSupportiveDevice` export with its PHX round trip and the no-Spaces finding, the Pumps subtab | P4-07; its interview (D4-34) | mechanical, export, UI | Batched in MS3 |
-| [P4-11](phases/p4-11-fans.md) | Family 6: exhaust ventilator plus linked supportive device (Q6) | P4-10; its interview | mechanical | Stub |
+| [P4-11](phases/p4-11-fans.md) | Family 6: the Fan kind, the `fan_ids` list slot, the exhaust ventilator export with a linked type 10 `PhSupportiveDevice` when Power is filled and its PHX round trip, the no-Spaces finding, the Fans subtab | P4-10; its interview (D4-35) | mechanical, export, UI | Batched in MS3 |
 | [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../../archive/phase-06-program/README.md) owns appliances (Q4a-03) | mechanical | Superseded |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4, planned in detail after its interview | P4-06; the piping interview (Phase 3b's edge stages are merged) | piping | Stub |
 | [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; the ducting interview | ducting | Stub |

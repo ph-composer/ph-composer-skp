@@ -131,7 +131,10 @@ PhComposerUI.define("unit_tables", [], function () {
        WUFI-Passive and METr take them, so only the regional number format applies. */
     electric_power: { label: "power", factor: 1, precision: { SI: 1, IP: 1 }, si: unit("w", "W"), ip: unit("w", "W") },
     kilohours: { label: "operation", factor: 1, precision: { SI: 2, IP: 2 }, si: unit("kh", "kh/yr"),
-    ip: unit("kh", "kh/yr") }
+    ip: unit("kh", "kh/yr") },
+    /* A fan's runtime in minutes a year, the same in both systems, as honeybee-ph and WUFI-Passive take it. */
+    annual_minutes: { label: "runtime", factor: 1, precision: { SI: 1, IP: 1 }, si: unit("min", "min/yr"),
+    ip: unit("min", "min/yr") }
   };
 
   var DIMENSION_FORMATS = [
