@@ -126,6 +126,23 @@ class PipingPipeTypeTest < PhComposerTestCase
     assert_equal({ "firm" => { "tag" => "a" } }, copied.fetch("user_data"))
   end
 
+  def test_the_bounded_list_pages_filters_and_projects_and_the_snapshot_section_is_the_all_read
+    first = create("name" => "PT-1")
+    second = create("name" => "PT-2", "insulation_conductivity_w_mk" => nil)
+    assert_equal query("all"), PhComposer::Snapshot.build(@context).fetch("sections").dig(PREFIX, "value")
+    page = query("list", "limit" => 1, "fields" => ["export_ready"])
+    rest = query("list", "limit" => 1, "fields" => ["export_ready"], "cursor" => page.fetch("next_cursor"))
+    rows = (page.fetch("records") + rest.fetch("records")).to_h { |row| [row.fetch("id"), row] }
+    assert_equal [first, second].sort, rows.keys.sort
+    assert_equal [[KIND.id, 1, true], [KIND.id, 1, false]],
+                 [first, second].map { |id| rows.fetch(id).values_at("kind", "schema_version", "export_ready") }
+    refute rows.fetch(first).key?("values"), "fields leaves the values out"
+    assert_equal [second], query("list", "ids" => [second]).fetch("records").map { |row| row.fetch("id") }
+    assert_empty query("list", "ids" => ["ppt_AAAAAAAAAAAA"]).fetch("records"), "a well-formed absent id"
+    wrong = API.query(:context => @context, :name => "#{PREFIX}.list", :params => { "ids" => ["fan_AAAAAAAAAAAA"] })
+    assert_equal %w[refused params.invalid], wrong.values_at("status", "code"), "another kind's id"
+  end
+
   def test_user_data_is_written_through_the_guarded_core_route
     id = create("name" => "PT-1")
     row = rows.fetch("PT-1")

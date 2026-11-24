@@ -13,8 +13,8 @@ module PhComposer
       EXPECTED = "Any of the record's values as last read; if one changed since, the edit is refused as " \
                  "target.changed. {} skips the check."
       USER_DATA = { "type" => "object",
-                    "description" => "Local JSON metadata kept with the record in the Model. Export needs an " \
-                                     "explicit mapping; arbitrary metadata is left out with a finding." }.freeze
+                    "description" => "Local JSON metadata kept with the record in the Model. No export writes a " \
+                                     "Pipe Type's map." }.freeze
 
       module_function
 

@@ -84357,7 +84357,7 @@ Params:
     },
     "user_data": {
       "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+      "description": "Local JSON metadata kept with the record in the Model. No export writes a Pipe Type's map."
     }
   }
 }
