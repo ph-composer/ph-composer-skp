@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Re-planned 2026-11-22 to D4-21: Serves is a structured extension on the Zone record, staged through Zones, in place of the record, reference target and Zone-copy contributor first planned. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry and scope
 

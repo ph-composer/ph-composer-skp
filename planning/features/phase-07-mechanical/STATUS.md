@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Interviewed (shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; D4-01 to D4-12 answered as recommended the same day; nothing authorized or implemented. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered, revising D4-08 and five interview answers; CONTRACTS, ACCEPTANCE and stages P4-05 to P4-11 owe re-planning; Climate's entry gate for the heat pumps met 2026-11-18. Reviewed 2026-11-22 after Phase 6 Programs: stale gates and facts corrected, stage P4-08b added; D4-21 to D4-27 answered the same day, all as recommended, and the bindings re-bound to them.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 This is the one place Phase 4 completeness is read from. Update it in the same change as any
 stage's state. The three feature packets ([equipment](equipment/STATUS.md),
@@ -26,14 +26,8 @@ Phase 6 (P4-12 superseded), heat pumps were settled at the wireframe review, and
 
 ## Next step
 
-1. Re-bind before any go on P4-05 to P4-08: CONTRACTS, ACCEPTANCE and those stage documents are
-   re-planned against the wireframe decisions D4-13 to D4-20 ("Owed after the wireframe review",
-   below), and the four items still open in
-   [DECISIONS, Part 3](DECISIONS.md#part-3-wireframe-review-2026-11-15) are put to Ed. D4-21 to
-   D4-27 are answered and already bound.
-2. Ed creates the phase issue and says go on P4-01. Nothing blocks it: Phase 3b closed on
-   2026-10-26. P4-02 first needs one row of the wireframe re-plan, the Ventilator's Manufacturer
-   and Model fields (D4-20), bound in CONTRACTS section 2; P4-03 and P4-04 wait on nothing else.
+1. Ed authorizes implementation (e.g. `P4-01` alone, or `P4-01` to `P4-04` through `MS1`). Every open decision (`D4-01`–`D4-37`) and interview across the phase is answered, the Phase 7 GitHub issue ([#562](https://github.com/ph-composer/ph-composer-skp/issues/562)) is created and wired into headers, `CONTRACTS`, `ACCEPTANCE` and `P4-05`–`P4-08` are re-bound, and host gates are batched by milestone (`MS1`, `MS2`, `MS3`, D4-31).
+2. Stub stages `P4-08b`, `P4-09`–`P4-11`, `P4-13` and `P4-14` are all interviewed and ready to be expanded into full stage docs before their respective runs.
 
 ## Entry gates
 
@@ -41,15 +35,15 @@ Phase 6 (P4-12 superseded), heat pumps were settled at the wireframe review, and
 | --- | --- |
 | The equipment shared shape, Ventilators and hot water interviewed | Done 2026-10-21 |
 | Ed answers D4-01 to D4-12 | Done 2026-10-21, all as recommended |
-| A Phase 4 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Open. Create on Ed's say |
+| A Phase 7 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Done 2026-11-23: [#562](https://github.com/ph-composer/ph-composer-skp/issues/562) |
 | Ed authorizes implementation, stage by stage or for a run of stages | Open |
 | Ed answers D4-21 to D4-27 | Done 2026-11-22, all as recommended |
 | P3b-01 merged before P4-01 (both edit the `PLANNING_IDS` line) | Met: Phase 3b closed 2026-10-26, P3b-01 to P3b-09 merged |
 | The other shared files (`extension.rb`, `index.html`, `composition.py`, `assembly.py`, `api.rb`, the agent guide) are never open on two branches at once | No other phase is in progress on 2026-11-22; the rule now holds between this phase's own parallel stages (PLAN, "Order and parallel work") |
-| Families 3 to 6 interviewed before P4-08 to P4-11 (family 7, appliances, is Programs') | Heat pumps settled at the wireframe review, 2026-11-15 (D4-14 to D4-16). Pumps, Fans and Electric Heating: table shape and columns only (D4-13, D4-20), interviews otherwise open |
+| Families 3 to 6 interviewed before P4-08 to P4-11 (family 7, appliances, is Programs') | Done: Heat pumps settled 2026-11-15 (D4-14 to D4-16, D4-28, D4-29); Electric heaters (D4-33), Pumps (D4-34) and Fans (D4-35) interviewed 2026-11-23 |
 | Climate supplies a location or design temperatures and monthly values, before P4-08 (D4-15) | Met 2026-11-18 by the Climate phase: `ph_composer.climate.climate.get` gives the twelve monthly mean air temperatures and `ph_composer.climate.design_temperatures.get` the two design temperatures with their state, read back on the host in Climate's integrated run ([CM12 evidence](../../archive/phase-04-climate/evidence/cm12-20261118.md), [contract](../../archive/phase-04-climate/CONTRACTS.md#9-what-other-features-read)). This authorizes nothing here |
-| Phase 3b P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 merged, then the piping and ducting interviews, before P4-13 and P4-14 | The Phase 3b stages are met (2026-10-26). The two interviews are open |
-| Summer ventilation interviewed before P4-08b | Open. D4-26 was answered on 2026-11-22 |
+| Phase 3b P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 merged, then the piping and ducting interviews, before P4-13 and P4-14 | Met: Phase 3b stages merged 2026-10-26; piping (D4-36) and ducting (D4-37) interviewed 2026-11-23 |
+| Summer ventilation interviewed before P4-08b | Done 2026-11-23 (D4-32); D4-26 answered 2026-11-22 |
 
 ## Stage ledger
 
@@ -60,20 +54,20 @@ only when all three are done and its evidence file exists.
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Equipment contracts, lint and the Pyodide seam | Scoped | Ed's go | | | | architecture review | | M01 |
-| [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The equipment feature and the Ventilator kind | Scoped | P4-01; the Ventilator's D4-20 fields bound | | | | ordinary | | M02 |
+| [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The equipment feature and the Ventilator kind | Scoped | P4-01 | | | | ordinary | | M02 |
 | [P4-03](phases/p4-03-serves-assignment.md) | Serves: the assignment payload on the Zone | Scoped | P4-02 | | | | strong | | M03 |
 | [P4-04](phases/p4-04-ventilator-export.md) | Ventilator export | Scoped | P4-03 | | | | strong | | M04 |
-| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Systems tab and the Ventilators view | Scoped | P4-04; the wireframe re-plan | | | | ordinary, UI | | M05 |
-| [P4-06](phases/p4-06-hot-water-records-and-export.md) | Hot Water System records and export | Scoped | P4-03; the wireframe re-plan | | | | strong | | M06 |
-| [P4-07](phases/p4-07-hot-water-view.md) | The Hot water view | Scoped | P4-05, P4-06 | | | | ordinary, UI | | M07 |
-| [P4-08](phases/p4-08-heat-pumps.md) | Heat pumps | Requested | P4-07; the full document | | | | | | M08 |
-| [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Building Segment mechanical settings | Requested | P4-02, P4-08; the summer ventilation interview | | | | | | M16 |
-| [P4-09](phases/p4-09-electric-heaters.md) | Electric heaters | Requested | P4-07; the interview | | | | | | M09 |
-| [P4-10](phases/p4-10-pumps.md) | Pumps | Requested | P4-07; the interview | | | | | | M10 |
-| [P4-11](phases/p4-11-fans.md) | Fans | Requested | P4-10; the interview | | | | | | M11 |
+| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Mechanical tab and the Ventilators view | Scoped | P4-04 | | | | ordinary, UI | | M05 |
+| [P4-06](phases/p4-06-hot-water-records-and-export.md) | Hot Water System, Heater and Tank records and export | Scoped | P4-03 | | | | strong | | M06 |
+| [P4-07](phases/p4-07-hot-water-view.md) | The Hot Water subtab (Systems, Heaters, Tanks) | Scoped | P4-05, P4-06 | | | | ordinary, UI | | M07 |
+| [P4-08](phases/p4-08-heat-pumps.md) | Heat pumps | Scoped | P4-07 | | | | strong, UI | | M08 |
+| [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Building Segment mechanical settings | Scoped | P4-02, P4-08; full stage doc | | | | | | M16 |
+| [P4-09](phases/p4-09-electric-heaters.md) | Electric heaters | Scoped | P4-07; full stage doc | | | | | | M09 |
+| [P4-10](phases/p4-10-pumps.md) | Pumps | Scoped | P4-07; full stage doc | | | | | | M10 |
+| [P4-11](phases/p4-11-fans.md) | Fans | Scoped | P4-10; full stage doc | | | | | | M11 |
 | [P4-12](phases/p4-12-appliances.md) | Appliances | Superseded by [Phase 4a](../../archive/phase-06-program/README.md) (Q4a-03) | n/a | | | | | | M12 |
-| [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping | Requested | P4-06; the interview | | | | | | M13 |
-| [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting | Requested | P4-04, P4-13; the interview | | | | | | M14 |
+| [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping | Scoped | P4-06; full stage doc | | | | | | M13 |
+| [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting | Scoped | P4-04, P4-13; full stage doc | | | | | | M14 |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Acceptance and handoff | Scoped | all stages | | | | integration | | M15 |
 
 ## Milestones
@@ -115,6 +109,16 @@ only when all three are done and its evidence file exists.
 | D4-25 | Scope | A PHX round trip in each of this phase's export stages | P4-04, P4-06, later export stages | Answered 2026-11-22 |
 | D4-26 | Code, UI | Mechanical cooling entered on the Building Segment, off by default | P4-08b | Answered 2026-11-22 |
 | D4-27 | UI | The Mechanical tab sits after Thermal Bridges, before Library | P4-05 | Answered 2026-11-22 |
+| D4-28 | UI, Code | `Equipment · Indoor` keeps identity columns only (`Tag`, `Manufacturer`, `Model`, `Notes`) | P4-08 | Answered 2026-11-23 |
+| D4-29 | Code | `min_coil_temp = 12.0 °C` default; no > 200 kW split in HBJSON (PHX handles WUFI split; METr unsplit) | P4-08 | Answered 2026-11-23 |
+| D4-30 | UI | Skip extra wireframes for undrawn UI details; build from shipped UI kit patterns | P4-05, P4-07, P4-08 | Answered 2026-11-23 |
+| D4-31 | Scope | Batch SketchUp host gates by milestone (`MS1`, `MS2`, `MS3`); offline `make ci` + PHX round trips per PR | P4-01 to P4-15 | Answered 2026-11-23 |
+| D4-32 | UI, Code | Summer ventilation: 4 core fields in UI (honeybee-ph defaults); 7 extract/night-flush fields omitted in v1 UI, exported as defaults | P4-08b | Answered 2026-11-23 |
+| D4-33 | UI, Code | Electric heaters: `percent_coverage` default `100%` (`0–100%`), `many` Serves slot, no cross-family coverage-sum validation | P4-09 | Answered 2026-11-23 |
+| D4-34 | UI, Code | Pumps: all 4 `device_type` values (default `6`), IHG fields behind per-row disclosure, non-blocking finding if served Zone has no Spaces | P4-10 | Answered 2026-11-23 |
+| D4-35 | UI, Code | Fans: `User-defined` default, `Power (W)` on row, auto-derived `khrs` + disclosure for `in_conditioned_space`/override, non-blocking finding if served Zone has no Spaces | P4-11 | Answered 2026-11-23 |
+| D4-36 | Code, UI | Hot water piping (Q1–Q13): tree by connection (no edge registry), nominal diameter list, `Twig` + `Pipe-Segment`, Piping groups outside Zones, native Line tool, trunk multiplier | P4-13 | Answered 2026-11-23 |
+| D4-37 | Code, UI | ERV ducting (Q1–Q9): two cold runs only, `Outdoor air` / `Exhaust air` labels, direction on line, group copy + run `quantity`, Ducting groups outside Zones, length columns via `table_contributions.js` | P4-14 | Answered 2026-11-23 |
 
 ## Owed from elsewhere, allocated here
 
@@ -139,19 +143,15 @@ only when all three are done and its evidence file exists.
 
 ## Owed after the wireframe review
 
-Nothing below is done. Each row is re-planned before its stage is authorized.
+Re-bound on 2026-11-23 (`CONTRACTS`, `ACCEPTANCE`, `P4-02`, `P4-05` to `P4-08`, `PLAN`, and the piping/ducting interviews). Only the full stage documents for the later interviewed stubs (`P4-08b`, `P4-09`–`P4-11`, `P4-13`, `P4-14`) remain to be expanded before their respective runs.
 
-| Document | Owes | Decisions |
+| Document | State | Decisions |
 | --- | --- | --- |
-| [CONTRACTS](CONTRACTS.md) section 2 | Ventilator gains manufacturer and model. Hot Water System loses its nested tanks and heaters and its recirculation fields; Heater and Tank become kinds that reference a System. Four heat pump kinds. The Serves slots follow: a heat pump slot names indoor units | D4-14, D4-15, D4-17, D4-18, D4-20 |
-| CONTRACTS sections 3, 5 and 6 | Operations and snapshot sections per table (A2 already names the Mechanical tab and its place, bound 2026-11-22); findings for an unpaired or unserved unit, a tank with no slot and pooled Systems; the blended heat pump section and its climate requirement | D4-13 to D4-18 |
-| [ACCEPTANCE](ACCEPTANCE.md) M05 to M08 and the reference model | Gestures and expected HBJSON for the new tables and the blended heat pump | D4-13 to D4-19 |
-| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Mechanical tab, system subtabs and the pill row in place of the Equipment subtab and family select | D4-13, D4-20 |
-| [P4-06](phases/p4-06-hot-water-records-and-export.md), [P4-07](phases/p4-07-hot-water-view.md) | Three kinds and three tables in place of one kind with child rows; recirculation read-only | D4-17 to D4-19 |
-| [P4-08](phases/p4-08-heat-pumps.md) | Written in full: four kinds, the blend, the result view, the Climate gate | D4-14 to D4-16 |
-| P4-09 to P4-11 | Each a flat table in its own subtab; interviews still owed | D4-13, D4-20 |
-| The piping and ducting PRDs | Where each lives: a pill under Hot Water and under Ventilation | D4-13 |
-| [UI baseline](../../ui-baseline/README.md), `context/UBIQUITOUS_LANGUAGE.md` | Noted on 2026-11-15; the shared pill row is a new kit part for the UI polish review | D4-13 |
+| [CONTRACTS](CONTRACTS.md) sections 1–6 | Done 2026-11-23 | D4-13 to D4-20, D4-28 to D4-30 |
+| [ACCEPTANCE](ACCEPTANCE.md) M05 to M08 and reference model | Done 2026-11-23 | D4-13 to D4-20, D4-28 to D4-31 |
+| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md), [P4-06](phases/p4-06-hot-water-records-and-export.md), [P4-07](phases/p4-07-hot-water-view.md), [P4-08](phases/p4-08-heat-pumps.md) | Done 2026-11-23 (`P4-08` written in full) | D4-13 to D4-20, D4-28 to D4-31 |
+| P4-08b, P4-09 to P4-11, P4-13, P4-14 | Interviewed 2026-11-23 (D4-32 to D4-37); full stage docs expanded before each run | D4-13, D4-20, D4-32 to D4-37 |
+| [UI baseline](../../ui-baseline/README.md), `context/UBIQUITOUS_LANGUAGE.md` | Noted on 2026-11-15; updated at P4-05 / P4-15 | D4-13 |
 
 ## Bound after the Programs review
 
@@ -198,3 +198,4 @@ pinned wheels on 2026-11-22 or read.
 | 2026-11-18 | Climate's entry gate for P4-08 met: Climate P4c-12's integrated run read `climate.get` and `design_temperatures.get` on the host with a complete, an incomplete and no climate, and set, incomplete and unset design temperatures, as Climate CONTRACTS section 9 says. Nothing authorized. |
 | 2026-11-22 | Reviewed against `main` at `8c710412` after Phase 6 Programs was archived ([DECISIONS, Part 4](DECISIONS.md#part-4-review-after-programs-2026-11-22)): findings F21 to F39. Applied: the Phase 3b gates are met, the pins, composition order, Spaces read names, units, export hosts and the left-out Zone rule are corrected across the packet, M12 is superseded, and the Phase 6 handoff is allocated to a new stage P4-08b with register row M16. Opened, unanswered: D4-21 to D4-27. Nothing authorized. |
 | 2026-11-22 | Ed answered D4-21 to D4-27, all as recommended. Bound the same day ("Bound after the Programs review"): Serves is a payload on the Zone record, the feature is `ph_composer.mechanical`, the Building Segment scopes the blend and the pooling, the balance reads Programs' flow for a By Program Zone, each export stage gains a PHX round trip, mechanical cooling is entered, and the tab sits after Thermal Bridges. P4-01 to P4-04 lose their decision blockers. Nothing authorized. |
+| 2026-11-23 | Kickoff review and all remaining interviews complete (DECISIONS Part 5, F40, D4-28 to D4-37): Part 3 open items closed (`Equipment · Indoor` identity-only, `min_coil_temp = 12.0 °C` and no > 200 kW HBJSON split since PHX splits for WUFI and METr has no cap, skip extra wireframes), host gates batched by milestone (`MS1`, `MS2`, `MS3`), and all remaining stub interviews completed (summer ventilation, electric heaters, pumps, fans, hot water piping and ERV ducting). Ready for wireframe re-binding, phase issue creation and P4-01 authorization. |

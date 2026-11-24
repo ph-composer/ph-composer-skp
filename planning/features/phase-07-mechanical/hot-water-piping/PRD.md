@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged, and the tab and hosts have moved (see the note under "What main and Phase 3b supply").
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Problem
 
@@ -200,7 +200,7 @@ same shape.
 
 ## Decisions for the interview
 
-Recommendations changed on 2026-10-21 are marked; Ed has answered none of them.
+Recommendations changed on 2026-10-21 are marked. **Interviewed 2026-11-23 ([D4-36](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23)):** Ed confirmed all recommendations (Q5/Q12 already settled by H5/D4-12 and D4-13).
 
 | # | Question | Recommendation |
 | --- | --- | --- |

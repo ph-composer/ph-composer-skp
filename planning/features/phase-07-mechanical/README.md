@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; no stage authorized. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning. Reviewed 2026-11-22 after Phase 6 Programs: the packet is corrected to the code as built, stage P4-08b is added, and D4-21 to D4-27 are answered as recommended (DECISIONS Part 4) and bound.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4-, D4-, M, roadmap 4.1 to 4.6): this was Phase 4, and its documents still say so. It now follows [Phase 4: climate](../../archive/phase-04-climate/README.md), which its heat pump stage needs, [Phase 5: shading](../../archive/phase-05-shading/README.md) and [Phase 6: Programs](../../archive/phase-06-program/README.md).
 

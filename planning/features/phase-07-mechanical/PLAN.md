@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Stages P4-01 to P4-15 planned from the equipment shared-shape, Ventilators and hot water interviews of 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; none authorized. Reviewed 2026-11-22 after Phase 6 Programs: the Phase 3b gates are met, the supply table is re-read at `8c710412`, stage P4-08b is added, and D4-21 to D4-27 are answered as recommended and bound.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Outcome and scope
 
@@ -67,10 +67,10 @@ P4-08b are gate stubs: entry gates, what the stage owns and reuses, and the inte
 | [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The feature; the Ventilator kind, operations and reads, panel closed | P4-01 | mechanical | Panel-closed script, Undo/Redo, reopen |
 | [P4-03](phases/p4-03-serves-assignment.md) | The Serves payload on the Zone record, staged through Zones (D4-21): assign and clear, one per Zone, delete with replacement, the unserved-Zone finding | P4-02 | mechanical, (zones: none) | Assign in nested and copied Zones, Undo/Redo, reopen |
 | [P4-04](phases/p4-04-ventilator-export.md) | The contributor, preflight, Python section, conformance, a PHX round trip; the B4 HBJSON proof | P4-03 | export, mechanical | Normal RBZ exports; exact HBJSON reloads with both Rooms' systems |
-| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Systems tab, the Equipment subtab, the family selector, the Ventilators table with Serves and balance, `By ventilator`, the W/cfm quantity | P4-04 | mechanical, UI, colour_by, units | Panel gestures with Ed |
-| [P4-06](phases/p4-06-hot-water-records-and-export.md) | The Hot Water System kind with tank and heater children, operations, the system values, its section with tank slotting | P4-03 | mechanical, export | Panel-closed script; exact HBJSON reloads with slots and heaters |
-| [P4-07](phases/p4-07-hot-water-view.md) | The Hot water family view: system rows, tank and heater child rows, `By hot water system`, litres | P4-05, P4-06 | mechanical, UI | Panel gestures with Ed |
-| [P4-08](phases/p4-08-heat-pumps.md) | Family 3: records, section, view | P4-07; the heat pumps interview | mechanical | Stub |
+| [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md) | The Mechanical tab (after Thermal Bridges), system subtabs, shared pill row, Ventilators table with Serves and balance, `By ventilator`, W/cfm | P4-04 | mechanical, UI, colour_by, units | Batched in MS2 |
+| [P4-06](phases/p4-06-hot-water-records-and-export.md) | Flat Hot Water System, Heater and Tank kinds, operations, pure slotting, export section and PHX round trip | P4-03 | mechanical, export | Batched in MS2 |
+| [P4-07](phases/p4-07-hot-water-view.md) | The Hot Water subtab (`Systems`, `Heaters`, `Tanks` pills), `By hot water system`, litres (`volume_l`) | P4-05, P4-06 | mechanical, UI | MS2 sitting (M05–M07) |
+| [P4-08](phases/p4-08-heat-pumps.md) | Family 3: four flat Heat Pump kinds, pure Ruby per-Segment blend, five-pill subtab with `Blended result`, export section and PHX round trip | P4-07 | mechanical, export, UI | Batched in MS3 |
 | [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation as a Building Segment settings section with its `SEGMENT` export (Phase 6 handoff, F30) | P4-02, P4-08; the summer ventilation interview | mechanical, export | Stub |
 | [P4-09](phases/p4-09-electric-heaters.md) | Family 4 | P4-07; its interview | mechanical | Stub |
 | [P4-10](phases/p4-10-pumps.md) | Family 5 | P4-07; its interview | mechanical | Stub |
@@ -163,9 +163,7 @@ P4-06 change a payload on another feature's record, the shared translation or a 
 get the stronger independent pass. P4-01 gets the architecture review on its confirmed bindings.
 P4-05 and P4-07 apply the UI polish skill in their review. The rest get one diff-focused review.
 
-Phase 6 ran its offline gates stage by stage and its host cases in one batched sitting at the
-end, on Ed's authorization of the whole run. Whether this phase does the same, or keeps a host
-gate per stage as written here, is Ed's to say when he authorizes it.
+Ed decided on 2026-11-23 (D4-31) to batch SketchUp host gates by milestone (`MS1` after P4-04, `MS2` after P4-07, `MS3` after P4-14/P4-15), while running full offline `make ci` (both Rubies, browser checks) and PHX round trips on every stage PR.
 
 Add each stage's native cases to [`native-acceptance/cases.json`](../../native-acceptance/cases.json)
 when the stage is implemented, with dependency patterns for the files it adds, and record observed

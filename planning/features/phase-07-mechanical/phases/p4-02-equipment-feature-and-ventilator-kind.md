@@ -3,14 +3,11 @@
 DATE: 2026-10-21
 STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: composition order, the metadata step. Renamed the same day to `ph_composer.mechanical` (D4-22). See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry and scope
 
-Requires P4-01, D4-02, D4-05 and D4-22, and the Ventilators interview (V1 to V6). Before it
-starts, CONTRACTS section 2's Ventilator gains the Manufacturer and Model fields D4-20 answered,
-which the wireframe re-plan still owes. Owns the feature's folder and registration and the first family
-kind, with its operations and reads, panel closed. No Zone, no Serves, no screen.
+Requires P4-01, D4-02, D4-05, D4-20 and D4-22, and the Ventilators interview (V1 to V6). CONTRACTS section 2 binds the Ventilator's `manufacturer` and `model` fields (D4-20). Owns the feature's folder and registration and the first family kind, with its operations and reads, panel closed. No Zone, no Serves, no screen.
 
 Behavior owner: the [equipment PRD](../equipment/PRD.md), "The shared shape" and "Family 1".
 Names: [CONTRACTS](../CONTRACTS.md) sections 1 to 3. Pattern: the Window product kinds and the

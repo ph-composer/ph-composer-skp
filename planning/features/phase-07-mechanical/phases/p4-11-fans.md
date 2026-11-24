@@ -1,9 +1,9 @@
 # P4-11: fans
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview. Table shape and columns settled 2026-11-15 (D4-13, D4-20); the interview is otherwise open. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
+STATUS: Requested. A gate stub: table shape and columns settled 2026-11-15 (D4-13, D4-20) and interview completed 2026-11-23 (D4-35); ready to be written in full. See [DECISIONS, Part 5](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry gates
 

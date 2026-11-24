@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 The [equipment PRD](equipment/PRD.md) is the interview record: its decisions table (Q1 to Q12),
 family 1 (V1 to V6) and family 2 (hot water H1 to H7) hold Ed's answers of 2026-10-21. This file
@@ -243,7 +243,32 @@ What the answers leave to the stages, none of it a new question for Ed:
 
 ### Part 3's open items, restated
 
-Items 2 and 6 are closed by F34 and F33. Items 1, 3, 4 and 5 stay open as written.
+All six items from Part 3 are now closed: items 2 and 6 on 2026-11-22 (F34, F33), items 1, 3 and 4 on 2026-11-23 (D4-28 to D4-30), and item 5 on 2026-11-23 (D4-33 to D4-35).
+
+## Part 5: kickoff review and remaining interviews, 2026-11-23
+
+Answered by Ed on 2026-11-23 before kickoff. Findings continue from F39 and decisions from D4-27.
+
+### Findings
+
+| # | Finding | Consequence |
+| --- | --- | --- |
+| F40 | Run at PHX 1.59.4 (`PHX/to_WUFI_XML/_bug_fixes.py:10`, `split_cooling_into_multiple_systems`, called from `hbjson_to_wufi_xml.py:265`): PHX already splits cooling capacity above WUFI-Passive's 200 kW per-device cap when writing WUFI XML; METr has no such cap | PH-Composer exports one blended `PhHeatPumpRatedMonthly` per Building Segment with the full cooling capacity and never splits it (D4-29) |
+
+### Decisions
+
+| ID | Kind | Question | Answer, 2026-11-23 | Blocks |
+| --- | --- | --- | --- | --- |
+| D4-28 | UI, Code | `Heat Pumps › Equipment · Indoor` columns (Part 3 open item 1) | Identity columns only (`Tag`, `Manufacturer`, `Model`, `Notes`) for v1, consistent with D4-20 and F15 | P4-08 |
+| D4-29 | Code | Heat pump blend edge cases: `min_coil_temp` and cooling > 682 kBtu/h (200 kW) (Part 3 open item 3) | Fixed default `min_coil_temp = 12.0 °C` in v1 (verified against the estimator in the private test). No split above 200 kW in PH-Composer or HBJSON: export one blended system per Building Segment with full capacity and let PHX handle the WUFI-XML split downstream (F40), with an optional non-blocking info note on export | P4-08 |
+| D4-30 | UI | Undrawn UI details (`Units · Outdoor` columns, row actions, New-record forms, Ventilator optional-field disclosure, 360 × 520 layout; Part 3 open item 4) | Skip additional static wireframes; build directly from the shipped UI kit patterns (`inventory.js`, `record_form.js`, collapsed per-row disclosure, responsive kit rules) and verify under `ph-composer-ui-polish` | P4-05, P4-07, P4-08 |
+| D4-31 | Scope | Host-gate cadence (`PLAN.md`) | Batch SketchUp host gates by milestone (`MS1` after P4-04, `MS2` after P4-07, `MS3` after P4-14/P4-15), with full offline `make ci` and PHX round trips on every stage PR | P4-01 to P4-15 |
+| D4-32 | UI, Code | `P4-08b` Summer ventilation fields on Building Segment | Expose the 4 core fields (`summer_bypass_mode` default `4-Always`, `ventilation_system_ach` default blank/`None`, `daytime_window_ach` default `0.0`, `nighttime_window_ach` default `0.0`). Omit the 7 extract-system/night-flush fields from the v1 UI and export honeybee-ph defaults | P4-08b |
+| D4-33 | UI, Code | `P4-09` Electric heaters (Family 4) | `Tag`, `Coverage (%)` (`0.0–1.0` stored, `0–100%` displayed, default `100%`), `Serves` (`many` slot `heater_ids`), hideable `Manufacturer`, `Model`, `Notes`. No cross-family heating-coverage-sum validation in v1 | P4-09 |
+| D4-34 | UI, Code | `P4-10` Pumps (Family 5, `PhSupportiveDevice`) | Offer all four `device_type` values (`4` heat circ, `6` DHW circ [default], `7` DHW storage load, `10` other). Keep `ihg_utilization_factor` (`1.0`) and `ihg_usage_profile` (auto-seeded from `device_type`) editable behind a collapsed per-row disclosure. Emit a non-blocking finding if a Pump serves a Zone with no Spaces | P4-10 |
+| D4-35 | UI, Code | `P4-11` Fans (Family 6, exhaust ventilator + linked supportive device) | Default `Type` to `User-defined` (all three kinds offered: `Kitchen hood`, `Dryer`, `User-defined`). Put `Power (W)` on the row (blank = no linked supportive device), auto-derive `annual_period_operation_khrs` from `annual_runtime_minutes / 60,000`, and tuck `In conditioned space` (default `true`) + optional runtime override (`khrs`) behind a collapsed per-row disclosure. Emit a non-blocking finding if a Fan serves a Zone with no Spaces | P4-11 |
+| D4-36 | Code, UI | `P4-13` Hot water piping interview (`hot-water-piping/PRD.md`, Q1–Q13) | Confirmed all as recommended: tree by vertex connection (no edge registry), native Line tool in Piping groups (outside Zone groups, multiple groups per Hot Water System), Pipe Type = spec only (with insulation, Model-local), nominal METr diameter dropdown (`diameter_mm`), `Pipe-Segment` and `Twig` on screen, trunk `multiplier` exposed; Q5/Q12 already settled by H5/D4-12 and D4-13 | P4-13 |
+| D4-37 | Code, UI | `P4-14` ERV ducting interview (`erv-ducting/PRD.md`, Q1–Q9) | Confirmed all as recommended: two cold runs only (between ventilator and exterior, labeled clearly), `Outdoor air` / `Exhaust air` labels on screen, direction on the edge/line, repeated units by both group copy and run `quantity`, native Line tool in Ducting groups outside Zone groups, Duct Types Model-local, two cold-duct length columns contributed to the Ventilators table via `table_contributions.js`; Q8 already settled by D4-13 | P4-14 |
 
 ## Ledger
 
@@ -255,3 +280,4 @@ Items 2 and 6 are closed by F34 and F33. Items 1, 3, 4 and 5 stay open as writte
 | 2026-11-17 | F20 recorded (what the estimator reads from climate) and the tab row's order noted, both from the [Climate packet](../../archive/phase-04-climate/PRD.md), which is now Phase 4 and precedes this phase. |
 | 2026-11-22 | Reviewed against `main` at `8c710412` after Phase 6 was archived (Part 4): findings F21 to F39, the settled ones applied to the packet; decisions D4-21 to D4-27 opened, none answered. Part 3's open items 2 and 6 closed. |
 | 2026-11-22 | Ed answered D4-21 to D4-27, all as recommended. CONTRACTS, ACCEPTANCE, PLAN and the stage documents re-bound to them: Serves as a payload on the Zone record, the feature renamed `ph_composer.mechanical`, the Building Segment as the scope of the blend, the balance reading Programs' flow, PHX round trips in the export stages, mechanical cooling entered, the tab after Thermal Bridges. |
+| 2026-11-23 | Kickoff review and remaining interviews (Part 5): F40 verified in PHX 1.59.4; Ed answered D4-28 to D4-37 (Part 3 open items closed, host gates batched by milestone, and all remaining interviews complete: summer ventilation, electric heaters, pumps, fans, hot water piping and ERV ducting). |

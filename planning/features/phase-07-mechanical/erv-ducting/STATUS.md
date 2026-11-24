@@ -1,9 +1,9 @@
 # ERV ducting: status
 
 DATE: 2026-10-21
-STATUS: Requested
+STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); ready to be planned in full for P4-14.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## State
 

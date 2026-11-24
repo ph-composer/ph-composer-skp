@@ -1,9 +1,9 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: Requested
+STATUS: Scoped. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); ready to be planned in full for P4-13.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## State
 
