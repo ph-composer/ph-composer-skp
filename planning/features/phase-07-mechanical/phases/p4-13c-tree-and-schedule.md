@@ -1,7 +1,7 @@
 # P4-13c: the chain rule in core, the tree and the schedule
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13c`, stacked on P4-13b (#577); offline evidence in [p4-13c-tree-and-schedule](../evidence/p4-13c-tree-and-schedule.md), host case `M13c` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q6, Q7), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "The tree", "Recirculation", "Schedule" and "Validation rows". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13c` runs in the MS3 sitting (D4-31). Stronger review lane: it moves a shipped feature's rule into `core/`.
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13c`, on `main` after #577 merged; offline evidence in [p4-13c-tree-and-schedule](../evidence/p4-13c-tree-and-schedule.md), host case `M13c` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q6, Q7), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "The tree", "Recirculation", "Schedule" and "Validation rows". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13c` runs in the MS3 sitting (D4-31). Stronger review lane: it moves a shipped feature's rule into `core/`.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

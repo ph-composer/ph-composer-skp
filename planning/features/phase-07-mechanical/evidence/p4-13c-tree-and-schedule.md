@@ -3,7 +3,8 @@
 DATE: 2026-11-24
 Register row: [M13c](../ACCEPTANCE.md). Stage: [P4-13c](../phases/p4-13c-tree-and-schedule.md), under the parent index
 [P4-13](../phases/p4-13-hot-water-piping.md).
-Base: `feat/phase-07-mechanical-p4-13b` at `7b84423c` (PR #577, open when this branch started).
+Base: built on `feat/phase-07-mechanical-p4-13b` at `7b84423c`, rebased onto `main` at `2f360b5b` after #577 merged
+(identical tree).
 
 Offline evidence only. No SketchUp process was started. The host case `M13c` (in
 `planning/native-acceptance/cases.json`: the schedule against the hand measurement, a broken branch, `runs.locate` into
