@@ -312,8 +312,8 @@ Hot water flow stays in L/h per m².
 
 ## Add Ventilators and choose the Zones they serve
 
-1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation** now, and the
-   pills beneath them pick one table of that system, **Ventilators** now. The tab remembers the subtab and
+1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation** and **Hot Water**
+   now, and the pills beneath them pick one table of that system. The tab remembers the subtab and
    table you last used on this computer.
 2. **+ New Ventilator** asks for a Tag; every other value starts at its default (0.55 Wh/m³, frost
    protection on below -5 °C, in conditioned space). Edit any value in its cell: Enter or leaving the cell
@@ -331,6 +331,31 @@ Hot water flow stays in L/h per m².
 6. **Columns** hides Manufacturer, Model and Notes. The palette in the **Serves** header colours each Zone
    in the model by its Ventilator; a Zone with none stays uncoloured. **Duplicate** copies a Ventilator,
    and **Delete** asks which Ventilator takes its place on its Zones, or clears them.
+
+## Add hot water systems, heaters and tanks
+
+1. Use **Mechanical > Hot Water**. Its pills are **Systems**, **Heaters** and **Tanks**. A Hot Water System
+   is what serves Zones; each Heater and Tank names the System it belongs to.
+2. **+ New Hot Water System** asks for a Tag. Enter its **Tap points**, or leave them blank for the piping
+   to count them. Click its **Serves** cell to choose its Zones, as for a Ventilator; each Zone has one
+   System. The palette in the **Serves** header colours each Zone by its System.
+3. **Recirculation** temperature and hours are read only. They come from the recirculation piping, and
+   read 60 °C and 24 h, muted, until piping is drawn. A **Calculation method** is stored with the System;
+   the info mark beside it says when the export cannot carry it yet.
+4. When two Systems serve one Building Segment, a note under the table says that WUFI-Passive and METr add
+   their tanks and heaters together and keep one tap point count.
+5. **+ New Hot Water Heater** and **+ New Hot Water Tank** ask for a Tag and the System. Choose another
+   System in a row's **System** cell.
+6. A Heater's **Type** decides which efficiency values it takes: a performance ratio for an annual heat
+   pump, two COPs at two rating temperatures for a monthly one, an energy factor for one inside the
+   envelope, and none for an electric heater. The others read as a dash and cannot be typed or pasted
+   into. Changing the Type opens a form for the new Type's values and names the values that go.
+   **Coverage** is the share of the System's hot water the Heater makes, in percent.
+7. A Tank's **Role** (Storage, Buffer or Solar) and Tag decide its **Export slot**: storage Tanks fill
+   Tank 1 and Tank 2 in Tag order, a buffer Tank the buffer slot, a solar Tank the solar slot. A Tank with
+   no slot left is amber and the export leaves it out. **Capacity** reads in litres, or US gallons in IP.
+8. Deleting a System asks which System takes its place on its Zones, Heaters and Tanks. You can clear its
+   Zones instead only when no Heater or Tank names it.
 
 ## Reuse library definitions
 

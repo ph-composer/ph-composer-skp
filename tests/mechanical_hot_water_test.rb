@@ -224,6 +224,36 @@ class MechanicalHotWaterTest < PhComposerTestCase
     end
   end
 
+  # A calculation method the pinned honeybee-ph cannot carry is noted on its System's row, as info, while it is set.
+  def test_a_piping_calculation_method_is_noted_on_its_systems_row_while_set
+    hws = create(SYSTEMS, "name" => "HWS-1", "piping_calc_method" => 2)
+    completed(assign(["Apt 1"], hws))
+    found = rows(SYSTEMS).fetch("HWS-1").fetch("findings")
+    assert_equal [["mechanical.method_not_exported", "info", false]],
+                 found.map { |row| row.values_at("code", "severity", "blocks_export") }
+    assert_match(/HWS-1 sets piping calculation method 2, and the pinned honeybee-ph has no field/,
+                 found.first.fetch("message"))
+    completed(invoke("#{SYSTEMS}.update", "id" => hws, "values" => { "piping_calc_method" => nil },
+                                          "expected_values" => { "piping_calc_method" => 2 }))
+    assert_empty codes(rows(SYSTEMS).fetch("HWS-1"))
+  end
+
+  # By hot water system colours each Zone its System serves in that System's colour; an unserved Zone has no entry,
+  # and the legend counts Zones.
+  def test_by_hot_water_system_gives_one_entry_per_served_zone_and_leaves_an_unserved_zone_out
+    one = create(SYSTEMS, "name" => "HWS-1")
+    two = create(SYSTEMS, "name" => "HWS-2")
+    completed(assign(["Apt 1"], one))
+    declaration = PhComposer::Registry.current.colour_modes.fetch(M::ColourModes::BY_HOT_WATER_SYSTEM)
+    assert_equal ["Hot Water System", "zone"], [declaration.label, declaration.entity_kind]
+    read = PhComposer::HandlerRequest.for(@session, :owner => declaration.owner, :name => declaration.name)
+    assert_equal [[[1000], one, "HWS-1"]],
+                 Array(declaration.projection.call(read)).map { |entry| [entry.path, entry.value, entry.label] }
+    completed(assign(["Apt 2"], two))
+    service = PhComposer::ColourBy.for(@session).activate(M::ColourModes::BY_HOT_WATER_SYSTEM)
+    assert_equal({ "HWS-1" => 1, "HWS-2" => 1 }, service.rows.to_h { |row| [row.label, row.count] })
+  end
+
   def test_deleting_a_system_in_use_refuses_and_a_replacement_moves_zones_heaters_and_tanks_in_one_undo_step
     one = create(SYSTEMS, "name" => "HWS-1")
     two = create(SYSTEMS, "name" => "HWS-2")

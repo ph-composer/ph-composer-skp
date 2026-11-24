@@ -80,6 +80,13 @@ Programs, Assemblies, Window Types, Thermal Bridges, Mechanical, Library, Export
 gone. Mechanical opens on one page header, the Ventilation subtab and its Ventilators pill; the pill row is the kit
 part `html/pill_row.js`, and later families register their subtabs and pills without editing the tab.
 
+Built by P4-07 on 2026-11-24 (offline; the host review is owed to the MS2 sitting): the Hot Water subtab follows
+Ventilation with its Systems, Heaters and Tanks pills (Piping joins with P4-13). Every equipment table is one shared
+part, `html/features/mechanical/equipment_table.js`, which the Ventilators table now uses too: Tag pinned first, the
+family's columns, Manufacturer, Model and Notes behind Columns, New in the page header, Duplicate and Delete in the
+shared dialog. Read-only values (recirculation, a Tank's export slot) are plain cells, muted while they are
+honeybee-ph's defaults; a Heater's Type changes in the shared form dialog, since the new Type needs its own values.
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the

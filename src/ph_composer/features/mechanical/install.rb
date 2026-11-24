@@ -19,6 +19,7 @@
 #   export.rb            the Ventilator export section, which claims the Serves payload for the feature, and its report
 #   hot_water_plan.rb    the hot water export worked out in pure Ruby: its pairs, tank slots and findings
 #   hot_water_export.rb  the hot water export section
+#   locate.rb            the Locate view command, which opens the Mechanical tab on an item's table or the Zones tab
 #   preflight.rb         the one preflight query, each family's rows from its own plan
 #   colour_modes.rb      By ventilator: each served Zone in its item's colour
 require_relative "ventilators/schema"
@@ -45,6 +46,7 @@ require_relative "ventilation_plan"
 require_relative "export"
 require_relative "hot_water_plan"
 require_relative "hot_water_export"
+require_relative "locate"
 require_relative "preflight"
 require_relative "colour_modes"
 
@@ -61,6 +63,7 @@ module PhComposer
       HotWaterRegistration.install(feature)
       VentilationExport.install(feature)
       HotWaterExport.install(feature)
+      Locate.install(feature)
       Preflight.install(feature)
       ColourModes.install(feature)
     end

@@ -17698,7 +17698,7 @@ Example params:
 
 ### `ph_composer.mechanical.hot_water_systems.all`
 
-Every Hot Water System, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, the Building Segment pooling note among them, for the panel snapshot. Owner: `ph_composer.mechanical`.
+Every Hot Water System, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, among them the Building Segment pooling note and a piping calculation method the export leaves out, for the panel snapshot. Owner: `ph_composer.mechanical`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.hot_water_systems.list` instead.
 
@@ -18087,7 +18087,7 @@ Example params:
 
 ### `ph_composer.mechanical.hot_water_systems.list`
 
-One bounded page of Hot Water Systems in id order, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, the Building Segment pooling note among them. Owner: `ph_composer.mechanical`.
+One bounded page of Hot Water Systems in id order, with export readiness, the Zones each serves, its Heater and Tank counts, its read-only recirculation and findings, among them the Building Segment pooling note and a piping calculation method the export leaves out. Owner: `ph_composer.mechanical`.
 
 Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
@@ -98280,7 +98280,7 @@ Example params:
 
 ### `ph_composer.mechanical.locate`
 
-Open where a Mechanical finding is fixed: the Mechanical tab with its Ventilators narrowed to ventilator_ids, or, without them, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
+Open where a Mechanical finding is fixed: the Mechanical tab on the table of the items named (ventilator_ids, hot_water_system_ids, hot_water_heater_ids or hot_water_tank_ids; one kind per request), narrowed to them, or, with none, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
 
 Side effects: Opens or raises the panel on the Mechanical or the Zones tab.
 
@@ -98301,7 +98301,37 @@ Params:
         "pattern": "^vnt_[A-Za-z0-9]{12}$",
         "description": "A Ventilator id."
       },
-      "description": "Ventilators to show on the Mechanical tab, its Ventilators narrowed to them.",
+      "description": "Ventilators to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hot_water_system_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hws_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water System id."
+      },
+      "description": "Hot Water Systems to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hot_water_heater_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hwh_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water Heater id."
+      },
+      "description": "Hot Water Heaters to show on the Mechanical tab, their table narrowed to them.",
+      "maxItems": 500
+    },
+    "hot_water_tank_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hwt_[A-Za-z0-9]{12}$",
+        "description": "A Hot Water Tank id."
+      },
+      "description": "Hot Water Tanks to show on the Mechanical tab, their table narrowed to them.",
       "maxItems": 500
     },
     "zones": {
@@ -98325,7 +98355,7 @@ Params:
           }
         }
       },
-      "description": "Zones to check on the Zones tab, when no ventilator_ids are given.",
+      "description": "Zones to check on the Zones tab, when no item ids are given.",
       "maxItems": 500
     }
   }
@@ -98355,6 +98385,16 @@ Example params:
 {
   "ventilator_ids": [
     "vnt_Ab12Cd34Ef56"
+  ]
+}
+```
+
+Example params:
+
+```json
+{
+  "hot_water_tank_ids": [
+    "hwt_Ab12Cd34Ef56"
   ]
 }
 ```
@@ -105959,3 +105999,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.89 | 2026-11-24 | The Ventilator export: the section ph_composer.mechanical.export.ventilation writes one ventilation system per served Zone and claims ph_composer.mechanical.zone_serves, now required for export. ph_composer.mechanical.preflight is new; mechanical.item_missing blocks export and mechanical.item_across_segments is a new code. |
 | 1.90 | 2026-11-24 | ph_composer.mechanical.ventilators.all and .list rows gain balance, the airflow balance over the Zones each Ventilator serves, and ph_composer.mechanical requires ph_composer.programs. ph_composer.mechanical.serves rows gain building_segment, the Segment's name. ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a Ventilator or a Zone carry locate. |
 | 1.91 | 2026-11-24 | ph_composer.mechanical.hot_water_systems, hot_water_heaters and hot_water_tanks are new, each with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 2 with the hot_water_system_id slot, and serves rows gain mechanical.zone_no_hot_water. The export section ph_composer.mechanical.export.hot_water is new, and ph_composer.mechanical.preflight adds its rows: mechanical.tank_unslotted, mechanical.hot_water_pooled and the hot water item findings. |
+| 1.92 | 2026-11-24 | ph_composer.mechanical.locate takes hot_water_system_ids, hot_water_heater_ids and hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's hot water item rows carry it; Hot Water System rows add mechanical.method_not_exported while a piping calculation method is set; the colour mode ph_composer.mechanical.by_hot_water_system is new. |

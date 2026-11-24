@@ -27,6 +27,10 @@ PhComposerUI.define("fields", [], function () {
   var WIND_SPEED_M_S = descriptor("wind_speed", "m_s");
   var DISTANCE_KM = descriptor("distance", "km");
   var ELECTRIC_EFFICIENCY = descriptor("electric_efficiency", "wh_m3");
+  var VOLUME_L = descriptor("volume_l", "l");
+  var POWER_W = descriptor("power", "w");
+  /* A fraction from 0 to 1, read and entered as a percentage. */
+  var PERCENT = descriptor("percent", "1");
 
   /* A copy of a descriptor with a screen's own settings (label, scope, allowBlank, allowZero). */
   function withSettings(base, settings) {
@@ -38,5 +42,7 @@ PhComposerUI.define("fields", [], function () {
     LINEAR_PSI: LINEAR_PSI, HEAT_LOSS: HEAT_LOSS, DENSITY: DENSITY, SPECIFIC_HEAT: SPECIFIC_HEAT,
     TEMPERATURE_C: TEMPERATURE_C, TEMPERATURE_DIFFERENCE_K: TEMPERATURE_DIFFERENCE_K,
     IRRADIATION_KWH_M2: IRRADIATION_KWH_M2, IRRADIANCE_W_M2: IRRADIANCE_W_M2, WIND_SPEED_M_S: WIND_SPEED_M_S,
-    DISTANCE_KM: DISTANCE_KM, ELECTRIC_EFFICIENCY: ELECTRIC_EFFICIENCY, with: withSettings };
+    DISTANCE_KM: DISTANCE_KM, ELECTRIC_EFFICIENCY: ELECTRIC_EFFICIENCY, VOLUME_L: VOLUME_L, POWER_W: POWER_W,
+    PERCENT: PERCENT,
+    with: withSettings };
 });

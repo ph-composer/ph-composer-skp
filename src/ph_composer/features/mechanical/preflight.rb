@@ -54,14 +54,7 @@ module PhComposer
                .fetch(zone.status, "extension.schema_unsupported")
         row(code, VentilationExport::SECTION, zone.id, "What serves Zone #{zone.name || zone.id} is #{zone.status}, " \
                                                        "so the Model cannot be exported.", true,
-            zone_locate(zone.id, zone.id => zone.reference))
-      end
-
-      # A Zone's finding opens the Zones tab with it checked; any other object has no Locate here.
-      def zone_locate(object_id, references)
-        reference = references[object_id]
-        reference && { "name" => VentilationExport::LOCATE,
-                       "params" => { "zones" => [reference.slice("zone_id", "zone_path")] } }
+            Locate.row_locate(zone.id, zone.id => zone.reference))
       end
 
       def row(code, section, object_id, message, blocks, locate = nil)

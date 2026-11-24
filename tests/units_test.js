@@ -59,7 +59,7 @@ test("the registry lists every quantity in its published order", function () {
     "linear_psi", "heat_loss_rate", "density", "specific_heat", "airflow", "temperature",
     "temperature_difference", "air_permeance", "vapor_sd", "vapor_diffusion_resistance", "irradiation",
     "irradiance", "wind_speed", "distance", "power", "power_per_area", "people_per_area", "airflow_per_person",
-    "airflow_per_area", "electric_efficiency"
+    "airflow_per_area", "electric_efficiency", "volume_l", "percent"
   ]);
 });
 
@@ -113,6 +113,25 @@ test("the climate quantities read back what they display", function () {
   });
   parsed("50 miles", field("distance", "km"), "km", 80.4672);
   parsed("-10 °F", field("temperature", "c"), "c", -23.333333333);
+});
+
+test("a tank's litres read back from US gallons, and either unit typed reads as litres", function () {
+  var litres = field("volume_l", "l");
+  close(units.toDisplay(300, litres, "IP"), 79.2516157, 1e-6, "300 L in US gallons");
+  parsed(String(units.toDisplay(300, litres, "IP")), litres, "gal", 300);
+  parsed("80 gal", litres, "l", 302.83294272);
+  parsed("80 gallons", litres, "l", 302.83294272);
+  parsed("300 L", litres, "gal", 300);
+  assert.strictEqual(units.format(300, litres, units.profile(litres, { unitSystem: "IP" })), "79.3 gal");
+});
+
+test("a percentage reads and enters a stored fraction the same way in either system", function () {
+  var share = field("percent", "1");
+  close(units.toDisplay(0.85, share, "SI"), 85, 1e-9, "SI");
+  close(units.toDisplay(0.85, share, "IP"), 85, 1e-9, "IP");
+  parsed("42.1234567", share, "pct", 0.421234567);
+  parsed("85 %", share, "pct", 0.85);
+  assert.strictEqual(units.format(0.85, share, units.profile(share, { unitSystem: "IP" })), "85 %");
 });
 
 test("a length expression carries its units through the arithmetic", function () {

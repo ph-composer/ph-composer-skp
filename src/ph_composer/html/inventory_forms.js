@@ -42,8 +42,11 @@ function (RecordForm, request, snapshot, ui) {
   ReplacementForm.prototype.updateButton = function () {
     this.submitButton.disabled = !this.enabled || this.busy() || (this.inUse && !this.select.value);
   };
+  /* `allowClear` may be a function of the record: clearing is offered only while it answers true. */
   ReplacementForm.prototype.reconcile = function (record, records) {
     this.record = record;
+    var clear = typeof this.options.allowClear === "function" ? this.options.allowClear(record) :
+      Boolean(this.options.allowClear);
     var source = this.options.usage || usageSources[this.options.section];
     var usage = source ? source(this.state, record.id) : null;
     this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
@@ -52,7 +55,7 @@ function (RecordForm, request, snapshot, ui) {
     this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count));
     this.explanation.textContent = this.explanation.hidden ? "" : "Moves every " + this.options.usedOn + " that uses " +
       record.values.name + " to the " + this.options.label + " you choose" +
-      (this.options.allowClear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
+      (clear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
     var uses = (record.uses || []).map(function (use) { return use.name; }).join(", ");
     this.uses.textContent = this.inUse ? (usage && usage.count ? usage.description : uses ? "Used by: " + uses :
       "Choose a replacement or clear existing uses.") :
@@ -61,11 +64,11 @@ function (RecordForm, request, snapshot, ui) {
     var selected = this.select.value;
     this.select.setAttribute("aria-label", "Replacement " + this.options.label.toLowerCase());
     this.select.replaceChildren(ui.option("", "Choose a replacement"));
-    if (this.options.allowClear) this.select.appendChild(ui.option("__clear__", "Clear existing uses"));
+    if (clear) this.select.appendChild(ui.option("__clear__", "Clear existing uses"));
     records.filter(function (candidate) { return candidate.id !== record.id; }).forEach(function (candidate) {
       this.select.appendChild(ui.option(candidate.id, candidate.values.name));
     }, this);
-    this.select.value = (selected === "__clear__" && this.options.allowClear) || records.some(function (candidate) {
+    this.select.value = (selected === "__clear__" && clear) || records.some(function (candidate) {
       return candidate.id === selected;
     }) ? selected : "";
     this.submitButton.textContent = this.inUse ? "Replace and delete" : "Delete";

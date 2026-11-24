@@ -2,15 +2,15 @@
    optional values bubble. The subtabs, the pill row and the tables are the shared kit's. */
 .mech-table { padding-top: 10px; }
 
-/* The Tag stays pinned beside Actions while the table scrolls to Serves and the balance (the kit's inventories
-   leave their name column free); a table with no hierarchy column takes none of its offset. As every table does,
-   it lets go below 900 px, where pinned columns would take the work surface. */
-.mech-ventilators-table .phc-table { --col-hierarchy-width: 0px; }
-.mech-ventilators-table .phc-table td.col-name { position: sticky; }
-.mech-ventilators-table .phc-table th.col-name { left: var(--col-actions-width); }
+/* Every equipment table pins its Tag beside Actions while it scrolls sideways (the kit's inventories leave their
+   name column free); a table with no hierarchy column takes none of its offset. As every table does, it lets go
+   below 900 px, where pinned columns would take the work surface. */
+.mech-equipment-table .phc-table { --col-hierarchy-width: 0px; }
+.mech-equipment-table .phc-table td.col-name { position: sticky; }
+.mech-equipment-table .phc-table th.col-name { left: var(--col-actions-width); }
 @media (max-width: 900px) {
-  .mech-ventilators-table .phc-table td.col-name { position: static; }
-  .mech-ventilators-table .phc-table th.col-name { left: auto; }
+  .mech-equipment-table .phc-table td.col-name { position: static; }
+  .mech-equipment-table .phc-table th.col-name { left: auto; }
 }
 
 /* Serves: the cell is one button holding the first Zones as chips; the row owns hover, so a chip never tints. */
@@ -53,3 +53,27 @@
 
 /* The optional values: label over field, one per value. */
 .phc-workspace .mech-optional-field { display: grid; gap: 4px; margin: 0 0 10px; }
+
+/* Read-only cells (a System's recirculation, a Tank's export slot) and the efficiency values a Heater's Type does not
+   take: plain text in the grid, numbers from the right, the inactive ones muted. */
+.phc-workspace .phc-table td.mech-read-only { color: var(--ink); }
+.phc-workspace .phc-table td.col-recirculation_temperature_c,
+.phc-workspace .phc-table td.col-recirculation_hours { text-align: right; }
+.phc-workspace .phc-table td.mech-inactive { color: var(--muted-faint); text-align: right; }
+.phc-workspace .phc-table td.mech-muted { color: var(--muted); }
+/* A Tank its Role has no free slot for: amber, as a value the user must act on. */
+.phc-workspace .phc-table td.is-unslotted { background: var(--warning-surface); color: var(--warning-ink); }
+
+/* A cell's info badge (a calculation method the export leaves out) sits inside the cell's right edge, before the
+   choice's chevron, so the row never grows. */
+.phc-workspace .phc-table td.has-badge { position: relative; }
+.phc-workspace .phc-table td.has-badge .phc-enum-cell { padding-right: 44px; }
+.mech-cell-badge { position: absolute; top: 50%; right: 28px; display: inline-flex; color: var(--muted);
+  transform: translateY(-50%); }
+
+/* Beneath the Systems table: each Building Segment's pooling note, once. */
+.mech-table-note { margin: 10px 0 0; color: var(--muted); font-size: var(--text-sm); }
+.mech-table-note[hidden] { display: none; }
+
+/* Change Type: label over field, one per value the new Type takes. */
+.phc-workspace .mech-type-field { display: grid; gap: 4px; margin: 0 0 10px; }

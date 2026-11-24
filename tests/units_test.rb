@@ -69,7 +69,8 @@ class UnitsTest < PhComposerTestCase
       [100, "irradiation", "100 kWh/m²", "31.7 kBtu/ft²"],
       [500, "irradiance", "500 W/m²", "158.5 Btu/(h ft²)"],
       [4, "wind_speed", "4 m/s", "8.9 mph"],
-      [80.4672, "distance", "80.5 km", "50 mi"]
+      [80.4672, "distance", "80.5 km", "50 mi"],
+      [300, "volume_l", "300 L", "79.3 gal"]
     ].each do |value, quantity, si, ip|
       assert_equal si, Units.format(value, :quantity => quantity, :system => "SI")
       assert_equal ip, Units.format(value, :quantity => quantity, :system => "IP")

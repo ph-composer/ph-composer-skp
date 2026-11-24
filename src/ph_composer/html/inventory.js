@@ -12,7 +12,8 @@
  * `config.optionalColumns` ([[field, label]]) are columns the user may hide from a Columns menu in the control
  * row; `config.hiddenColumns` ({ field: true }) is the session state that holds which are hidden, owned by the
  * feature so a rebuilt view keeps it. A held cell draft keeps every column where it is, and hiding a column clears
- * its filter. */
+ * its filter. `config.readOnly(cell)` keeps a cell drawn but closed to typing and range edits (a value its row
+ * does not take); a draft it holds can still be cancelled. */
 PhComposerUI.define("inventory", ["request", "snapshot", "workspace", "table", "view_controls", "record_edits",
   "inventory_grid", "units", "unit_preferences", "column_menu"],
 function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences, columnMenus) {
@@ -64,7 +65,7 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.ranges = new RangeEdits(session, send, config.action, notice, changed);
     this.edits = new RecordEdits(session, send, notice, { action: config.action, fields: config.editable,
       quantities: config.quantities, selectFields: config.selectFields, requiredFields: ["name"],
-      normalize: config.normalize, validate: config.validate, navigateOnCommit: false,
+      normalize: config.normalize, validate: config.validate, navigateOnCommit: false, readOnly: config.readOnly,
       rawValue: config.rawValue, send: config.send,
       enabled: function (state) { return Boolean(snapshot.value(state, config.section)) &&
           !self.ranges.busy() && !self.externalBusy; },

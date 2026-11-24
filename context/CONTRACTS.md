@@ -934,12 +934,16 @@ null only a balance that needs a By Program flow, each with the refusal in `miss
 `entity_kind` `zone`) gives one entry per row of `ph_composer.zones.occurrences`, which leaves Faces out, so an
 unreadable Face record does not turn it off: each Zone occurrence whose slot names a Ventilator, coloured by it from
 the spread ramp and labelled with its name; an unserved Zone gets no entry and stays uncoloured; a slot naming no
-stored Ventilator is incomplete. The legend counts Zone occurrences.
+stored Ventilator is incomplete. The legend counts Zone occurrences. `ph_composer.mechanical.by_hot_water_system` is
+the same mode over the `hot_water_system_id` slot.
 
-**Locate.** A `ph_composer.mechanical.preflight` row about a stored Ventilator or a Zone carries `locate`, naming the
-view command `ph_composer.mechanical.locate`: a Ventilator's `ventilator_ids` open the Mechanical tab with its
-Ventilators narrowed to them, a Zone's `zones` open the Zones tab with them checked. Rows for an unreadable
-Ventilator, a metadata problem and a refused read carry none.
+**Locate.** A `ph_composer.mechanical.preflight` row about a stored item or a Zone carries `locate`, naming the view
+command `ph_composer.mechanical.locate` (`features/mechanical/locate.rb`), which maps each item kind's id prefix to its
+param: a Ventilator's `ventilator_ids`, a Hot Water System's `hot_water_system_ids`, a Heater's
+`hot_water_heater_ids` and a Tank's `hot_water_tank_ids` open the Mechanical tab on that table, narrowed to them, one
+kind per request (two refuse `params.invalid`, since one table shows at a time); a Zone's `zones` open the Zones tab
+with them checked. Rows for an unreadable record, a metadata problem and a refused
+read carry none. The panel table that shows a kind accepts its param.
 
 **The Mechanical tab** (`html/features/mechanical/`). One page header over a subtab per system and a pill row
 (`html/pill_row.js`) picking one table of it; each family registers its system and tables in
@@ -951,6 +955,28 @@ and extract from `balance`, then Manufacturer, Model and Notes, which its Column
 sit behind each row's disclosure (`features/mechanical/optional_values.js`). Electric efficiency is the
 `electric_efficiency` quantity, Wh/m³ stored and W/cfm under IP, in both unit registries; the export report shows it
 in its display units.
+
+Every equipment table is one `EquipmentTable` (`features/mechanical/equipment_table.js`): the kit `Inventory` with Tag
+pinned first, the family's columns, then Manufacturer, Model and Notes behind the Columns menu; New in the page header
+(a form asking for the Tag and, for a kind that names a parent record, that record); Duplicate and Delete as row
+actions in the shared form dialog; and Locate's narrowing by Tag. Hot Water › Systems, Heaters and Tanks
+(`hot_water.js`, `hot_water_heaters.js`, `hot_water_tanks.js`) are three of them. A System row shows its Serves
+chips, tap points, the Tags of the Heaters and Tanks naming it, its `recirculation` read only (muted while
+`from_piping` is false), its `piping_calc_method` with an info badge carrying `mechanical.method_not_exported`, and
+beneath the table each Building Segment's `mechanical.hot_water_pooled` note once. A System's delete offers clearing
+only while no Heater or Tank names it (`ReplacementForm`'s `allowClear` as a function of the record). A Heater's
+System is chosen in place, one guarded update; its Type is changed in the shared form dialog, which asks for the new
+Type's efficiency values and sends one update with them, nulls for the old Type's and both guarded; the other
+efficiency cells stay drawn but read only (the kit `Inventory`'s `readOnly`), so a typed edit or a paste across them
+is refused whole. Coverage is stored as a fraction and shown and entered as a percentage through the panel's
+`percent` quantity (a `scale` of 100 in either unit system), so its drafts, guards and readback stay in the stored
+fraction. A Type change refused after the Type changed elsewhere keeps its typed values and the refusal and holds
+Change Type until the user cancels. A Locate that reaches a table whose catalog is read empty answers at once that the
+records are gone. A Tank's export slot is the row's `slot`, read only, amber with
+the `mechanical.tank_unslotted` finding when null. A Tank's capacity is the `volume_l` quantity, litres stored and US
+gallons under IP, in both unit registries. `HotWater::Systems::METHOD_EXPORTED` is the Ruby mirror of whether the
+pinned honeybee-ph writes a calculation method; `tests/fixtures/mechanical/hot_water_method.json` holds it equal to
+the Python section's check on the loaded class.
 
 **Ventilator export.** `ph_composer.mechanical.export.ventilation` (section version 1, `features/mechanical/export.rb`)
 requires the Zones section and claims `ph_composer.mechanical.zone_serves` on the Zone record (`entity_projections`),

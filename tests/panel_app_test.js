@@ -762,6 +762,24 @@ test("Export states each cause once, without record ids, with one Locate and a w
   assert.strictEqual(p.panel.state.ui.activeTab, "overview");
 });
 
+test("Export keeps one cause from two export sections apart, so each group's Locate names one kind", function () {
+  var p = page();
+  function unserved(section, id, param) {
+    var params = {};
+    params[param] = [id];
+    return { code: "mechanical.item_unserved", section: section, object_id: id, blocks_export: false,
+      message: "Spare serves no Zone, so nothing exports it.",
+      locate: { name: "ph_composer.mechanical.locate", params: params } };
+  }
+  p.receive("panel.snapshot", snapshot("session-a", 1));
+  enterExport(p, [unserved("ph_composer.mechanical.export.ventilation", "vnt_Aa11Bb22Cc33", "ventilator_ids"),
+    unserved("ph_composer.mechanical.export.hot_water", "hws_Aa11Bb22Cc33", "hot_water_system_ids")]);
+  var rows = p.query("[data-section='export']").querySelectorAll("li");
+  assert.strictEqual(rows.length, 2, "the same sentence from two sections is two causes");
+  rows[1].querySelectorAll("button")[0].listeners.click({});
+  assert.deepStrictEqual(Object.keys(p.sent[p.sent.length - 1].payload.params), ["hot_water_system_ids"]);
+});
+
 test("Export lists what its line counts after an earlier export, keeps a typed name, and says when ready", function () {
   var p = page(), blocker = { code: "zone.invalid", section: "ph_composer.zones.export.zones",
     object_id: "zon_abcdef123456", blocks_export: true, message: "Zone top_floor12345 has no Faces." };

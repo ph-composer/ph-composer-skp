@@ -986,7 +986,10 @@ System rows carry the Zones each serves, `heater_count`, `tank_count`, and `reci
 (`temperature_c`, `hours`), read-only: honeybee-ph works them out from recirculation piping, and
 gives 60 °C and 24 h while there is none, which is what the export carries. Their `findings` add
 `mechanical.hot_water_pooled`, info, when two served Systems share a Building Segment: WUFI-Passive
-and METr pool their tanks and heaters and keep one tap point count. A System's `user_data` is not
+and METr pool their tanks and heaters and keep one tap point count; and `mechanical.method_not_exported`,
+info, while the System sets a `piping_calc_method` (1 to 4) that the pinned honeybee-ph has no field
+for. The Colour-by mode By hot water system colours each Zone by the System serving it. A System's
+`user_data` is not
 exported, since honeybee-ph's hot water system has none; a Tank's and a Heater's ride on their
 objects.
 
@@ -1004,7 +1007,10 @@ once.
    served Zone in no Building Segment, `mechanical.item_across_segments` a System on Zones in two
    Building Segments, `mechanical.tank_unslotted` a Tank left out and
    `mechanical.hot_water_pooled` two Systems in one Building Segment. None of these blocks. A row
-   about a Zone carries `locate` to the Zones tab.
+   about a Zone carries `locate` to the Zones tab; a row about a System, Heater or Tank carries
+   `locate` with `hot_water_system_ids`, `hot_water_heater_ids` or `hot_water_tank_ids`, which opens
+   that table on the Mechanical tab narrowed to it. Name one item kind per Locate; two are refused as
+   `params.invalid`.
 2. Export, then read back. The result gives `hot_water`, one row per (System, Zone) pair:
    `system_identifier`, `number_tap_points`, `heater_identifiers`, each slot's tank identifier and
    capacity in litres, and `digest`. In the HBJSON each of those Rooms has

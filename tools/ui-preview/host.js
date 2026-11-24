@@ -79,6 +79,7 @@
     this.edgeTool = { active: false, thermal_bridge_type_id: null, quantity: 1, gesture_limit: 250 };
     // The Mechanical tab's Ventilators, what serves each Zone, and each Zone's supply and extract.
     this.mechanical = JSON.parse(JSON.stringify(settings.mechanical || { ventilators: [], serves: {}, flows: {} }));
+    this.mechanical.hotWater = this.mechanical.hotWater || { systems: [], heaters: [], tanks: [], serves: {} };
     // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
     // for its geolocation; `climate.geolocation` stands in for the host read.
     this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
@@ -212,6 +213,12 @@
         [MECHANICAL + "ventilators"]: { status: "completed", value: { records: this.ventilatorRows(),
           unreadable: [] } },
         [MECHANICAL + "serves"]: { status: "completed", value: { zones: this.servesRows() } },
+        [MECHANICAL + "hot_water_systems"]: { status: "completed", value: { records: this.hotWaterSystemRows(),
+          unreadable: [] } },
+        [MECHANICAL + "hot_water_heaters"]: { status: "completed", value: { records: JSON.parse(JSON.stringify(
+          this.mechanical.hotWater.heaters)), unreadable: [] } },
+        [MECHANICAL + "hot_water_tanks"]: { status: "completed", value: { records: this.hotWaterTankRows(),
+          unreadable: [] } },
         [CLIMATE + "site"]: { status: "completed", value: this.climateSite() },
         [CLIMATE + "design_temperatures"]: { status: "completed", value: this.climateDesign() },
         [CLIMATE + "summary"]: { status: "completed", value: { site: this.climateSite().state,
@@ -275,7 +282,9 @@
         { name: "ph_composer.thermal_bridges.by_type", label: "Thermal Bridge Type", entity_kind: "edge", group: null },
         { name: "ph_composer.thermal_bridges.by_group", label: "Thermal bridge group", entity_kind: "edge",
           group: null },
-        { name: "ph_composer.mechanical.by_ventilator", label: "Ventilator", entity_kind: "zone", group: null }],
+        { name: "ph_composer.mechanical.by_ventilator", label: "Ventilator", entity_kind: "zone", group: null },
+        { name: "ph_composer.mechanical.by_hot_water_system", label: "Hot Water System", entity_kind: "zone",
+          group: null }],
       readouts: [["ph_composer.spaces.show", "Show Spaces", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],
@@ -507,20 +516,92 @@
       value: { id: id }, affected: [], findings: [], detail: null };
   };
 
-  /* The Mechanical reads as features/mechanical/ answers them: each Zone occurrence with its slot, and each
+  /* The Mechanical reads as features/mechanical/ answers them: each Zone occurrence with its slots, and each
      Ventilator with the Zones it serves and the balance over them, summed from the fixture's flows by the host's
      rule (more than a tenth of the larger is out of balance). */
   Host.prototype.servesRows = function () {
-    var data = this.mechanical, names = {}, segments = {};
-    data.ventilators.forEach(function (record) { names[record.id] = record.values.name; });
+    var data = this.mechanical, hotWater = data.hotWater, names = {}, segments = {};
+    data.ventilators.concat(hotWater.systems).forEach(function (record) { names[record.id] = record.values.name; });
     this.zoneOptions.building_segments.forEach(function (segment) { segments[segment.id] = segment.values.name; });
     return this.zones.map(function (zone) {
-      var item = data.serves[zone.id] || null, segment = zone.values.building_segment_id || null;
+      var item = data.serves[zone.id] || null, system = hotWater.serves[zone.id] || null;
+      var segment = zone.values.building_segment_id || null, items = [];
+      if (item) items.push({ slot: "ventilator_id", id: item, name: names[item] || null });
+      if (system) items.push({ slot: "hot_water_system_id", id: system, name: names[system] || null });
       return { zone_id: zone.id, reference: zone.reference, name: zone.values.name,
         building_segment_id: segment,
         building_segment: segment ? segments[segment] || null : zone.values.building_segment || null,
-        slots: { ventilator_id: item, hot_water_system_id: null }, payload_status: item ? "understood" : null,
-        items: item ? [{ slot: "ventilator_id", id: item, name: names[item] || null }] : [], findings: [] };
+        slots: { ventilator_id: item, hot_water_system_id: system },
+        payload_status: item || system ? "understood" : null, items: items, findings: [] };
+    });
+  };
+  /* Each Hot Water System with the Zones it serves, its Heater and Tank counts, honeybee-ph's recirculation
+     defaults and the host's findings: serving nothing, a calculation method the pinned honeybee-ph cannot carry,
+     and two Systems serving one Building Segment. */
+  Host.prototype.hotWaterSystemRows = function () {
+    var hotWater = this.mechanical.hotWater, zones = this.zones, segments = {};
+    this.zoneOptions.building_segments.forEach(function (segment) { segments[segment.id] = segment.values.name; });
+    var bySegment = {};
+    zones.forEach(function (zone) {
+      var system = hotWater.serves[zone.id], segment = zone.values.building_segment_id;
+      if (!system || !segment) return;
+      bySegment[segment] = bySegment[segment] || [];
+      if (bySegment[segment].indexOf(system) < 0) bySegment[segment].push(system);
+    });
+    function named(id) {
+      return hotWater.systems.filter(function (record) { return record.id === id; })[0].values.name;
+    }
+    function finding(code, severity, message) {
+      return { code: code, severity: severity, message: message, blocks_export: severity === "error" };
+    }
+    return hotWater.systems.map(function (record) {
+      var served = zones.filter(function (zone) { return hotWater.serves[zone.id] === record.id; });
+      var count = function (rows) {
+        return rows.filter(function (row) { return row.values.hot_water_system_id === record.id; }).length;
+      };
+      var found = [];
+      if (!served.length) found.push(finding("mechanical.item_unserved", "warning",
+        record.values.name + " serves no Zone, so nothing exports it."));
+      Object.keys(bySegment).sort().forEach(function (segment) {
+        var ids = bySegment[segment];
+        if (ids.length < 2 || ids.indexOf(record.id) < 0) return;
+        found.push(finding("mechanical.hot_water_pooled", "info", ids.map(named).sort().join(", ") +
+          " serve Building Segment " + segments[segment] + "; WUFI-Passive and METr pool their tanks and heaters " +
+          "and keep one tap point count."));
+      });
+      if (record.values.piping_calc_method !== undefined && record.values.piping_calc_method !== null) {
+        found.push(finding("mechanical.method_not_exported", "info", record.values.name + " sets piping " +
+          "calculation method " + record.values.piping_calc_method + ", and the pinned honeybee-ph has no field " +
+          "for it, so the export leaves it out."));
+      }
+      return Object.assign(JSON.parse(JSON.stringify(record)), { findings: found,
+        heater_count: count(hotWater.heaters), tank_count: count(hotWater.tanks),
+        recirculation: { temperature_c: 60, hours: 24, from_piping: false },
+        zones: served.map(function (zone) {
+          return { zone_id: zone.id, reference: zone.reference, name: zone.values.name };
+        }) });
+    });
+  };
+  /* Each Tank with the slot the host's slotting gives it: storage Tanks fill tank 1 then tank 2, a buffer Tank the
+     buffer slot, a solar Tank the solar slot, each role's Tanks in name order; the rest have none. */
+  Host.prototype.hotWaterTankRows = function () {
+    var tanks = this.mechanical.hotWater.tanks, slots = {};
+    var ROLES = { storage: ["tank_1", "tank_2"], buffer: ["tank_buffer"], solar: ["tank_solar"] };
+    tanks.slice().sort(function (a, b) {
+      var left = a.values.name.toLowerCase(), right = b.values.name.toLowerCase();
+      return left < right ? -1 : left > right ? 1 : a.id < b.id ? -1 : 1;
+    }).forEach(function (record) {
+      var taken = slots[record.values.hot_water_system_id] = slots[record.values.hot_water_system_id] || {};
+      var free = ROLES[record.values.role].filter(function (slot) { return !taken[slot]; })[0];
+      if (free) taken[free] = record.id;
+    });
+    return tanks.map(function (record) {
+      var taken = slots[record.values.hot_water_system_id] || {}, slot = null;
+      Object.keys(taken).forEach(function (key) { if (taken[key] === record.id) slot = key; });
+      return Object.assign(JSON.parse(JSON.stringify(record)), { slot: slot, findings: slot ? [] : [{
+        code: "mechanical.tank_unslotted", severity: "warning", blocks_export: false,
+        message: record.values.name + " is a " + record.values.role + " tank with no free " + record.values.role +
+          " slot on its System, so the export leaves it out." }] });
     });
   };
   Host.prototype.ventilatorRows = function () {
@@ -548,11 +629,46 @@
       }) });
     });
   };
-  /* The Ventilator actions and Assign and Clear, with their guards: a changed expected value, and a Zone another
-     Ventilator serves without `replace`, refuse and write nothing. */
+  /* The equipment actions and Assign and Clear, with their guards: a changed expected value, a Zone another item
+     fills without `replace`, a Heater whose Type and efficiency values disagree, and a System still named by a Zone,
+     Heater or Tank all refuse and write nothing. The kinds' own range and enum checks are not repeated here; the
+     panel's tests and the Ruby suite cover them. */
+  var MECHANICAL_KINDS = {
+    ventilators: { label: "Ventilator", prefix: "vnt", kind: "ventilator", defaults: { quantity: 1,
+      sensible_heat_recovery: 0, latent_heat_recovery: 0, electric_efficiency_wh_m3: 0.55,
+      frost_protection_reqd: true, temperature_below_defrost_used_c: -5, in_conditioned_space: true } },
+    hot_water_systems: { label: "Hot Water System", prefix: "hws", kind: "hot_water_system", defaults: {} },
+    hot_water_heaters: { label: "Hot Water Heater", prefix: "hwh", kind: "hot_water_heater", parent: true,
+      defaults: { variant: "electric", percent_coverage: 1, in_conditioned_space: true } },
+    hot_water_tanks: { label: "Hot Water Tank", prefix: "hwt", kind: "hot_water_tank", parent: true,
+      defaults: { role: "storage", tank_type: "2-DHW ONLY", quantity: 1, in_conditioned_space: true,
+        solar_connection: false, solar_losses_w: 0, storage_loss_rate_w_k: 0, storage_capacity_l: 300,
+        standby_losses_w_k: 4, standby_fraction: 0.3, room_temp_c: 20, water_temp_c: 60 } }
+  };
+  var HEATER_FIELDS = { electric: [], heat_pump_annual: ["total_system_perf_ratio"],
+    heat_pump_monthly: ["cop_1", "ambient_temp_1_c", "cop_2", "ambient_temp_2_c"],
+    heat_pump_inside: ["annual_energy_factor"] };
+  /* A Heater's Type rule, as the kind validates it: its own values numbers, every other Type's absent. */
+  function heaterProblem(values) {
+    var own = HEATER_FIELDS[values.variant] || [], problem = "";
+    Object.keys(HEATER_FIELDS).forEach(function (variant) {
+      HEATER_FIELDS[variant].forEach(function (field) {
+        var mine = own.indexOf(field) >= 0;
+        if (mine && typeof values[field] !== "number") problem = problem || "A " + values.variant + " heater needs " +
+          field + ".";
+        if (!mine && values[field] !== undefined) problem = problem || "A " + values.variant + " heater takes no " +
+          field + ".";
+      });
+    });
+    return problem;
+  }
   Host.prototype.mechanicalAction = function (payload) {
-    var data = this.mechanical, params = payload.params, name = payload.name.slice(MECHANICAL.length), id;
-    var target = data.ventilators.filter(function (record) { return record.id === params.id; })[0];
+    var data = this.mechanical, hotWater = data.hotWater, params = payload.params;
+    var name = payload.name.slice(MECHANICAL.length), id, dot = name.lastIndexOf(".");
+    var collection = name.slice(0, dot), verb = name.slice(dot + 1), spec = MECHANICAL_KINDS[collection];
+    var records = { ventilators: data.ventilators, hot_water_systems: hotWater.systems,
+      hot_water_heaters: hotWater.heaters, hot_water_tanks: hotWater.tanks }[collection];
+    var target = records && records.filter(function (record) { return record.id === params.id; })[0];
     var zones = this.zones;
     function copy(value) { return JSON.parse(JSON.stringify(value)); }
     function zoneOf(row) {
@@ -560,62 +676,78 @@
         return JSON.stringify(zone.reference) === JSON.stringify(row.reference);
       })[0];
     }
-    if (params.id && !target) return refused("target.not_found", "That Ventilator is unavailable.", this.revision);
+    if (spec && params.id && !target) {
+      return refused("target.not_found", "That " + spec.label + " is unavailable.", this.revision);
+    }
     if (target && params.expected_values && Object.keys(params.expected_values).some(function (field) {
       var current = target.values[field];
       return JSON.stringify(current === undefined ? null : current) !== JSON.stringify(params.expected_values[field]);
-    })) return refused("target.changed", "The Ventilator changed. " + NOTHING_WRITTEN, this.revision);
-    if (name === "ventilators.create" || name === "ventilators.duplicate") {
-      id = "vnt_preview" + String(++this.sequence).padStart(5, "0");
-      var values = name === "ventilators.create" ? copy(params.values) :
+    })) return refused("target.changed", "The " + spec.label + " changed. " + NOTHING_WRITTEN, this.revision);
+    if (spec && (verb === "create" || verb === "duplicate")) {
+      var values = verb === "create" ? copy(params.values) :
         Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
-      var made = { id: id, kind: MECHANICAL + "ventilator", schema_version: 1, user_data: {}, extension_data: {},
+      if (spec.parent && !hotWater.systems.some(function (system) {
+        return system.id === values.hot_water_system_id;
+      })) return refused("reference.invalid", "Choose an existing Hot Water System. " + NOTHING_WRITTEN, this.revision);
+      id = spec.prefix + "_preview" + String(++this.sequence).padStart(5, "0");
+      var made = { id: id, kind: MECHANICAL + spec.kind, schema_version: 1, user_data: {}, extension_data: {},
         extension_status: {}, export_ready: true, export_blockers: [], findings: [], zones: [], balance: null,
-        values: Object.assign({ notes: "", datasheet_links: [], source: { kind: "manual" }, quantity: 1,
-          sensible_heat_recovery: 0, latent_heat_recovery: 0, electric_efficiency_wh_m3: 0.55,
-          frost_protection_reqd: true, temperature_below_defrost_used_c: -5, in_conditioned_space: true }, values) };
-      data.ventilators.push(made);
-    } else if (name === "ventilators.update") {
+        values: Object.assign({ notes: "", datasheet_links: [], source: { kind: "manual" } }, spec.defaults, values) };
+      records.push(made);
+    } else if (spec && verb === "update") {
+      var next = copy(target.values);
       Object.keys(params.values).forEach(function (field) {
-        if (params.values[field] === null) delete target.values[field];
-        else target.values[field] = params.values[field];
+        if (params.values[field] === null) delete next[field]; else next[field] = params.values[field];
       });
-    } else if (name === "ventilators.delete") {
-      var using = Object.keys(data.serves).filter(function (zone) { return data.serves[zone] === target.id; });
-      if (using.length && params.replacement_id === undefined) {
-        return refused("reference.in_use", target.values.name + " serves Zones. " + NOTHING_WRITTEN, this.revision);
+      var problem = collection === "hot_water_heaters" ? heaterProblem(next) : "";
+      if (problem) return refused("validation.failed", problem + " " + NOTHING_WRITTEN, this.revision);
+      target.values = next;
+    } else if (spec && verb === "delete") {
+      var served = collection === "hot_water_systems" ? hotWater.serves : data.serves;
+      var using = Object.keys(served).filter(function (zone) { return served[zone] === target.id; });
+      var members = collection === "hot_water_systems" ? hotWater.heaters.concat(hotWater.tanks).filter(
+        function (member) { return member.values.hot_water_system_id === target.id; }) : [];
+      if ((using.length || members.length) && params.replacement_id === undefined) {
+        return refused("reference.in_use", target.values.name + " is in use. " + NOTHING_WRITTEN, this.revision);
+      }
+      if (members.length && !params.replacement_id) {
+        return refused("reference.in_use", members.map(function (member) { return member.values.name; }).join(", ") +
+          " name " + target.values.name + ". " + NOTHING_WRITTEN, this.revision);
       }
       using.forEach(function (zone) {
-        if (params.replacement_id) data.serves[zone] = params.replacement_id; else delete data.serves[zone];
+        if (params.replacement_id) served[zone] = params.replacement_id; else delete served[zone];
       });
-      data.ventilators.splice(data.ventilators.indexOf(target), 1);
+      members.forEach(function (member) { member.values.hot_water_system_id = params.replacement_id; });
+      records.splice(records.indexOf(target), 1);
     } else if (name === "serves.assign" || name === "serves.clear") {
+      var slot = params.slot, map = slot === "hot_water_system_id" ? hotWater.serves : data.serves;
+      var items = slot === "hot_water_system_id" ? hotWater.systems : data.ventilators;
       var picked = params.zones.map(zoneOf);
       if (picked.some(function (zone) { return !zone; })) {
         return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
       }
       if (params.zones.some(function (row, index) {
-        return (row.expected_values || {}).ventilator_id !== undefined &&
-          (data.serves[picked[index].id] || null) !== row.expected_values.ventilator_id;
+        return (row.expected_values || {})[slot] !== undefined &&
+          (map[picked[index].id] || null) !== row.expected_values[slot];
       })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
       if (name === "serves.assign" && !params.replace) {
         var filled = picked.filter(function (zone) {
-          return data.serves[zone.id] && data.serves[zone.id] !== params.item_id;
+          return map[zone.id] && map[zone.id] !== params.item_id;
         })[0];
         if (filled) {
-          var other = data.ventilators.filter(function (record) { return record.id === data.serves[filled.id]; })[0];
+          var other = items.filter(function (record) { return record.id === map[filled.id]; })[0];
           return refused("mechanical.slot_filled", "Zone " + filled.values.name + " is served by " +
-            (other ? other.values.name : "another Ventilator") + ". Replace it to assign. " + NOTHING_WRITTEN,
+            (other ? other.values.name : "another item") + ". Replace it to assign. " + NOTHING_WRITTEN,
           this.revision);
         }
       }
       picked.forEach(function (zone) {
-        if (name === "serves.assign") data.serves[zone.id] = params.item_id; else delete data.serves[zone.id];
+        if (name === "serves.assign") map[zone.id] = params.item_id; else delete map[zone.id];
       });
     } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
     this.revision += 1;
     return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
-      value: { id: id }, affected: [], findings: [], detail: null };
+      value: { id: id || params.id }, affected: [], findings: [], detail: null };
   };
 
   /* Synthetic Window outcomes exercise panel transport only; thermal values are fixture projections. */

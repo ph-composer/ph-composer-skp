@@ -15,18 +15,6 @@ module PhComposer
     # the findings the run reported against this section.
     module VentilationExport
       SECTION = "#{FEATURE_ID}.export.ventilation"
-      LOCATE = "#{FEATURE_ID}.locate"
-      # A Locate names at most this many Zones or Ventilators, as the Export pane caps a group's.
-      LOCATE_LIMIT = 500
-      LOCATE_PARAMS = Shapes.object({
-        "ventilator_ids" => Shapes.list(Shapes.id(Ventilators::KIND.id_prefix, "A Ventilator id."),
-                                        :description => "Ventilators to show on the Mechanical tab, its " \
-                                                        "Ventilators narrowed to them.")
-                                  .merge("maxItems" => LOCATE_LIMIT),
-        "zones" => Shapes.list(Zones::ZONE_REFERENCE, :description => "Zones to check on the Zones tab, when no " \
-                                                                      "ventilator_ids are given.")
-                         .merge("maxItems" => LOCATE_LIMIT)
-      }, :optional => %w[ventilator_ids zones]).freeze
       ZONES = Zones::ExportProjection::SECTION
       CLAIM = { "namespace" => Serves::NAMESPACE, "target_kind" => Zones::REFERENCE_KIND, "source_section" => ZONES,
                 "fields" => Serves::KEYS }.freeze
@@ -49,27 +37,6 @@ module PhComposer
                                             :preflight => Preflight::NAME, :entity_projections => [CLAIM],
                                             :projection => method(:zones),
                                             :report => method(:report)) { |reader| records(reader) }
-        feature.view_command(LOCATE, :description => "Open where a Mechanical finding is fixed: the Mechanical " \
-                                                     "tab with its Ventilators narrowed to ventilator_ids, or, " \
-                                                     "without them, the Zones tab with zones checked.",
-                                     :refuses => %w[session.inactive], :params => LOCATE_PARAMS,
-                                     :side_effects => "Opens or raises the panel on the Mechanical or the Zones tab.",
-                                     :result => Shapes.object({ "opened" => { "type" => "boolean" } }),
-                                     :examples => [{ "ventilator_ids" => [Shapes.example_id(Ventilators::KIND)] },
-                                                   { "zones" => [{ "zone_id" => "zon_Ab12Cd34Ef56",
-                                                                   "zone_path" => [1201] }] }]) do |request|
-          locate(request)
-        end
-      end
-
-      def locate(request)
-        ids = request.params.fetch("ventilator_ids", [])
-        if ids.empty?
-          request.session.open_in_panel("ph_composer.zones", "zones" => request.params.fetch("zones", []))
-        else
-          request.session.open_in_panel(FEATURE_ID, "ventilator_ids" => ids)
-        end
-        { "opened" => true }
       end
 
       # The pairs, once the plan finds nothing blocking; every other finding but the preflight's own is a note.
@@ -121,16 +88,8 @@ module PhComposer
                                     :unreadable => unreadable.map { |row| row.fetch("id") })
         rows + plan.findings.map do |found|
           Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,
-                        locate_for(found.record_id, references))
+                        Locate.row_locate(found.record_id, references))
         end
-      end
-
-      # Where a finding's object is fixed: a Ventilator on the Mechanical tab, a Zone checked on the Zones tab.
-      def locate_for(object_id, references)
-        return Preflight.zone_locate(object_id, references) unless
-          object_id.to_s.start_with?("#{Ventilators::KIND.id_prefix}_")
-
-        { "name" => LOCATE, "params" => { "ventilator_ids" => [object_id] } }
       end
 
       # ---------------------------------------------------------------- the report

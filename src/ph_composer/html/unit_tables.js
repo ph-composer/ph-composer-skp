@@ -14,6 +14,7 @@ PhComposerUI.define("unit_tables", [], function () {
   var U_FACTOR = BTU_H_PER_W / FT2_PER_M2 / F_PER_K;
   var CONDUCTIVITY_FACTOR = BTU_H_PER_W * METRES_PER_FOOT / F_PER_K;
   var METRES_PER_MILE = 1609.344;
+  var LITRES_PER_GALLON = 3.785411784;
   /* Radiation per square foot. kWh to kBtu is the same ratio as Wh to Btu, so monthly irradiation and peak
      irradiance share it. */
   var RADIATION_FACTOR = BTU_H_PER_W / FT2_PER_M2;
@@ -114,7 +115,15 @@ PhComposerUI.define("unit_tables", [], function () {
     si: unit("m3_h_m2", "m³/h per m²"), ip: unit("cfm_ft2", "cfm/ft²") },
     /* A Ventilator's electric efficiency: watt-hours per cubic metre moved, or watts per cfm, airflow's inverse. */
     electric_efficiency: { label: "electric efficiency", factor: 60 / FT3_PER_M3, precision: { SI: 2, IP: 2 },
-    si: unit("wh_m3", "Wh/m³"), ip: unit("w_cfm", "W/cfm") }
+    si: unit("wh_m3", "Wh/m³"), ip: unit("w_cfm", "W/cfm") },
+    /* A Hot Water Tank's capacity: litres, or US gallons of 231 in³ each. */
+    volume_l: { label: "liquid volume", factor: 1 / LITRES_PER_GALLON, precision: { SI: 1, IP: 1 },
+    si: unit("l", "L", ["litre", "litres", "liter", "liters"]),
+    ip: unit("gal", "gal", ["gallon", "gallons", "usgal"]) },
+    /* A share stored as a fraction from 0 to 1 and read and entered as a percentage in either system (a Hot Water
+       Heater's coverage): `scale` applies in both, where `factor` applies under IP only. */
+    percent: { label: "percentage", scale: 100, precision: { SI: 1, IP: 1 }, si: unit("pct", "%", ["percent"]),
+    ip: unit("pct", "%", ["percent"]) }
   };
 
   var DIMENSION_FORMATS = [
@@ -175,11 +184,13 @@ PhComposerUI.define("unit_tables", [], function () {
 
   function baseToUnit(base, definition, system) {
     if (definition.length) return base / LENGTH_UNITS[(system === "IP" ? definition.ip : definition.si).id].metres;
+    if (definition.scale) return base * definition.scale;
     if (system !== "IP") return base;
     if (definition.reciprocal) return definition.reciprocal / base;
     return base * definition.factor + (definition.offset || 0);
   }
   function unitToBase(value, definition, system) {
+    if (definition.scale) return value / definition.scale;
     if (system !== "IP") return value;
     if (definition.reciprocal) return definition.reciprocal / value;
     return (value - (definition.offset || 0)) / definition.factor;
