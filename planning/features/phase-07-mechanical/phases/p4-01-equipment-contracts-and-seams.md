@@ -1,7 +1,7 @@
 # P4-01: equipment contracts, lint and the Pyodide seam
 
 DATE: 2026-10-21
-STATUS: In review (authorized 2026-11-23; offline evidence in [p4-01-contracts](../evidence/p4-01-contracts.md), host case M01 owed to MS1). Corrected 2026-11-22 after Phase 6 Programs: the Phase 3b gate is met, an entry check is added, and steps 1 and 2 follow D4-21, D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: Merged to main (#564, `73936d2a`, 2026-11-23; offline evidence in [p4-01-contracts](../evidence/p4-01-contracts.md), host case M01 owed to MS1). Corrected 2026-11-22 after Phase 6 Programs: the Phase 3b gate is met, an entry check is added, and steps 1 and 2 follow D4-21, D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

@@ -2,7 +2,8 @@
 
 DATE: 2026-11-23
 Register row: [M02](../ACCEPTANCE.md). Stage: [P4-02](../phases/p4-02-equipment-feature-and-ventilator-kind.md).
-Base: `feat/phase-07-mechanical-p4-01` at `dd8a3ad7` (PR #564, not yet merged). Branch `feat/phase-07-mechanical-p4-02`.
+Base: `feat/phase-07-mechanical-p4-01` at `dd8a3ad7`; after #564 merged as `73936d2a` (identical tree), rebased onto
+`main`. Branch `feat/phase-07-mechanical-p4-02`.
 
 Offline evidence only. No SketchUp process was started. The host case `M02` (fresh process, the walkthrough through
 `API.invoke` with the panel closed, native Undo and Redo of each step, save, reopen and read-back) is owed to the MS1
@@ -60,7 +61,24 @@ Ventilator.
 
 ## Gate
 
-Recorded after the commit's gate in a follow-up ledger commit.
+`make ci` on the staged change, chained into the commit `001644f7` (before the rebase onto `main`, whose tree for
+P4-01 is identical):
+
+```
+Ruby syntax: 882 files OK
+883 files inspected, no offenses detected
+lint-citations: ok
+Ruby suite, 10 processes: 3312 runs, 43661 assertions, 0 failures, 0 errors, 1 skips
+364 passed, 1 skipped in 6.04s
+48 runs, 268 assertions, 0 failures, 0 errors, 0 skips   (hostkit)
+All checks passed!
+```
+
+The local suite runs Ruby 3.2.2; CI's 2.7 job runs the floor. The three new test files pass on Ruby 2.7.2 locally
+(`$(rbenv prefix 2.7.2)/bin/ruby -Itests ...`: 10 runs, 133 assertions; 3 runs, 27; 1 run, 10; no failures). Two
+earlier gate runs failed on literals this stage had to move and were fixed before the commit: the shipped kind count
+in `tests/agent_access_discovery_test.rb` (16 to 17) and the feature list in
+`tools/hostkit/tests/host_helpers_test.rb`.
 
 ## Review
 
