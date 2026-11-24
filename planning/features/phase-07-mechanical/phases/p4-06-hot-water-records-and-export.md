@@ -1,7 +1,7 @@
 # P4-06: Hot Water System, Heater and Tank records and export
 
 DATE: 2026-10-21
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-06` (#569); offline evidence in [p4-06-hot-water-records](../evidence/p4-06-hot-water-records.md), host case `M06` owed to MS2. Re-bound 2026-11-23 to D4-17 to D4-20, D4-23, D4-25 and D4-31: Systems, Heaters and Tanks are three flat catalog kinds; recirculation temperature and hours are read-only from piping (not stored on System); PHX round trip included; host gate runs in the MS2 sitting after P4-07.
+STATUS: Merged to main 2026-11-24 (#569, squash `3ed91973`); offline evidence in [p4-06-hot-water-records](../evidence/p4-06-hot-water-records.md), host case `M06` owed to MS2. Re-bound 2026-11-23 to D4-17 to D4-20, D4-23, D4-25 and D4-31: Systems, Heaters and Tanks are three flat catalog kinds; recirculation temperature and hours are read-only from piping (not stored on System); PHX round trip included; host gate runs in the MS2 sitting after P4-07.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
