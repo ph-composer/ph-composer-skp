@@ -51,7 +51,7 @@ Paths are relative to `src/ph_composer/`.
 1. Schema round trips for all four kinds; `hp_indoor_equipment` accepts identity-only fields; guarded deletes enforce `reference.in_use` across equipment -> units -> Serves.
 2. Pure Ruby `blend.rb` synthetic test cases: COP-pair weighted average, HSPF/HSPF2 climate-derated conversion, cooling blend with `min_coil_temp = 12.0 °C`, missing Climate -> `mechanical.hp_climate_missing`, > 200 kW -> single unsplit system + `mechanical.hp_cooling_over_200kw`, multi-Segment -> one blend per Segment + `mechanical.item_across_segments`.
 3. Optional private workbook comparison test (skips cleanly when `_private/` workbook is absent).
-4. Python section + `conformance` + PHX round trip (`test_heat_pumps_phx_round_trip.py`): two Rooms in one Segment yield one blended heat pump in PHX.
+4. Python section + `conformance` + PHX round trip (`test_heat_pumps_phx_round_trip.py`): two Rooms in one Segment yield one blended heat pump in PHX; `conformance` refuses when two Rooms' heat pumps under one identifier were translated unequal (each row's digest, CONTRACTS section 6).
 5. UI preview checks across all five pills (including copy action on `Blended result` and 360 × 520 layout).
 
 ## Host gate

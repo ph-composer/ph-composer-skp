@@ -36,7 +36,7 @@ Paths are relative to `src/ph_composer/`.
 1. Schema round trip for System, Heater and Tank; a Heater with another variant's field refuses (D4-19); a Heater or Tank referencing a missing System refuses.
 2. Deleting a System referenced by Zones, Heaters or Tanks refuses `reference.in_use`; delete with `replacement_id` retargets all referrers in one Undo step.
 3. Slotting on the reference system (T1 -> `tank_1`, T2 -> `tank_2`, T3 -> `tank_buffer`); a fourth storage tank and a second buffer raise `mechanical.tank_unslotted`; empty list gives four empty slots.
-4. The section builds slots and heaters; two Rooms served by one System carry one identifier; `conformance` reads back capacity and identifier per slot; PHX round trip finds tanks and heaters once per Segment.
+4. The section builds slots and heaters; two Rooms served by one System carry one identifier; `conformance` reads back capacity and identifier per slot, and refuses when two Rooms' systems under one identifier were translated unequal (each row's digest, CONTRACTS section 6); PHX round trip finds tanks and heaters once per Segment.
 5. `piping_calc_method` set: no field in the dict on the pinned wheel and `mechanical.method_not_exported`; a stub class with the attribute receives it.
 6. Two served Systems in one Building Segment raise `mechanical.hot_water_pooled`; an unserved System raises `mechanical.item_unserved` only; one System serving two Segments raises `mechanical.item_across_segments`.
 7. The Serves slot: assign, replace, clear, delete with replacement for a Hot Water System.

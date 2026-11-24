@@ -66,6 +66,22 @@ class ZonePayloadReferencesTest < PhComposerTestCase
     assert_includes item_ids, first
   end
 
+  # A payload the installed validator refuses is never rebuilt: the replacement delete leaves it as stored, and the
+  # engine refuses the delete, since that payload's references cannot be established.
+  def test_a_replacement_delete_leaves_an_invalid_payload_as_stored_and_refuses
+    first, third = @items.values_at("First", "Third")
+    group = zone_group_named("Apt 1")
+    record = ZONES::ZONE_STORE.read(group)
+    invalid = PROBE::EXTENSION.envelope("single_id" => first, "multiple_ids" => [first], "note" => "kept")
+    ZONES::ZONE_STORE.write(group, record.merge("extension_data" => { PROBE::NAMESPACE => invalid }))
+    revision = @session.revision
+
+    refused(delete(first, :replacement => third), "copy.rule_missing")
+    assert_equal revision, @session.revision
+    assert_equal invalid, ZONES::ZONE_STORE.read(group).dig("extension_data", PROBE::NAMESPACE)
+    assert_includes item_ids, first
+  end
+
   def test_a_replacement_already_in_the_list_is_held_once
     first, second = @items.values_at("First", "Second")
     completed(assign("Apt 1" => { "single_id" => nil, "multiple_ids" => [first, second] }))

@@ -15,7 +15,7 @@ module ZonePayloadProbe
   ASSIGN = "#{ID}.assign"
   DELETE = "#{ID}.delete"
   BY_SINGLE = "#{ID}.by_single"
-  STAGE = PhComposer::Zones::ExtensionStaging::NAME
+  STAGE = "ph_composer.zones.stage_extension"
   SLOTS = %w[single_id multiple_ids].freeze
   EMPTY = { "single_id" => nil, "multiple_ids" => [] }.freeze
   OBJECT = { "type" => "object" }.freeze
@@ -50,7 +50,8 @@ module ZonePayloadProbe
     :validate => ->(payload) { problems(payload) }
   )
 
-  REFUSES = (PhComposer::Zones::ExtensionStaging::REFUSES + %w[reference.in_use]).uniq.freeze
+  # Its own refusals; the dispatcher adds the declared refusals of the participant each action names.
+  REFUSES = %w[reference.in_use copy.rule_missing validation.failed].freeze
 
   def install(registry)
     feature = registry.feature(ID, :contract_version => 1, :requires => ["ph_composer.zones"])
@@ -104,9 +105,12 @@ module ZonePayloadProbe
   # Every Zone payload naming `from` names `to` instead, staged through Zones; the plan projects those Zones as
   # the proposal leaves them, so the delete's incoming-reference check reads the moved payloads.
   def retarget(request, from, to)
+    installed = request.registry.catalog.extension(NAMESPACE)
     zones = request.query("ph_composer.zones.all").fetch("zones").filter_map do |row|
-      payload = row.fetch("extension_data", {}).dig(NAMESPACE, "payload")
-      moved = payload && renamed(payload, from, to)
+      envelope = row.fetch("extension_data", {})[NAMESPACE]
+      # Only an understood payload is moved; any other stays as stored, and the delete's incoming check refuses.
+      understood = envelope && R::Extension.status(envelope, installed) == "understood"
+      moved = understood && renamed(envelope.fetch("payload"), from, to)
       { "reference" => row.fetch("reference"), "payload" => moved } if moved
     end
     entries = zones.empty? ? [] : request.participate(STAGE, "namespace" => NAMESPACE, "zones" => zones)

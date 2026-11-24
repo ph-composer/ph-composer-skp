@@ -700,7 +700,8 @@ payload names, in either form, refuses a plain delete as `reference.in_use`, and
 payload and so names the same records. A delete with a replacement is the owning feature's code, as Programs' is:
 it reads the Zones through `ph_composer.zones.all`, stages each changed payload through
 `ph_composer.zones.stage_extension` in the delete's proposal, and passes the returned `zone_entries` to
-`propose_delete` as a `Records::ReferencePlan`, so the incoming check reads the moved payloads. A list that already
+`propose_delete` as a `Records::ReferencePlan`, so the incoming check reads the moved payloads. It moves only a
+payload whose status is `understood`; any other stays as stored, and the incoming check refuses the delete. A list that already
 holds the replacement keeps it once. A locked Zone refuses the whole delete. `tests/zone_payload_references_test.rb`
 runs each of these over a test-only feature, `tests/support/zone_payload_probe.rb`.
 
