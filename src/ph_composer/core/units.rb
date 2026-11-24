@@ -18,6 +18,7 @@ module PhComposer
     BTU_H_PER_W = 3600.0 / JOULES_PER_BTU
     U_FACTOR = BTU_H_PER_W / FT2_PER_M2 / F_PER_K
     METRES_PER_MILE = 1609.344
+    LITRES_PER_GALLON = 3.785411784
     LENGTH_METRES = { "mm" => 0.001, "m" => 1.0, "in" => INCH_TO_M, "ft" => METRES_PER_FOOT }.freeze
     CONDUCTIVITY = {
       :si_label => "W/(m K)", :ip_label => "Btu/(h ft °F)", :si_precision => 3, :ip_precision => 3,
@@ -107,6 +108,10 @@ module PhComposer
       "electric_efficiency" => {
         :si_label => "Wh/m³", :ip_label => "W/cfm", :si_precision => 2, :ip_precision => 2,
         :factor => 60 / FT3_PER_M3
+      },
+      # A Hot Water Tank's capacity: litres, or US gallons of 231 in³ each.
+      "volume_l" => {
+        :si_label => "L", :ip_label => "gal", :si_precision => 1, :ip_precision => 1, :factor => 1 / LITRES_PER_GALLON
       }
     }.freeze
 

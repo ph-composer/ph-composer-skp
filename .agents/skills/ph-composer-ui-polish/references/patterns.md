@@ -67,6 +67,21 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
   open. The Ventilators table pins its Tag beside Actions (`stickyWidths`, with the inventories' unpinning overridden
   in `mechanical.css`) and its search reads Tag, identity, notes and served Zones (`Inventory` `search` and
   `placeholder`).
+- Mechanical equipment tables (P4-07, offline; host review owed to MS2): every family's table is one
+  `EquipmentTable` (`features/mechanical/equipment_table.js`) over the kit `Inventory`, so a family gives only its
+  columns and its own cells. A value chosen from another table's records (a Heater's or Tank's System) is a
+  `choiceCell`, an enum pill applied at once as one guarded update, a refusal a warning notice and the cell back at
+  the Model's value. A choice that needs new values and discards old ones (a Heater's Type) does not apply from the
+  pill: it opens the shared form dialog titled with the change ("Change HPWH-1 to Heat pump · annual"), names what
+  goes, asks for each new value with its unit, and sends one update. Values the row's choice does not take read as a
+  muted dash with the reason as tooltip and take no edit, typed or pasted. A read-only value the host works out (a
+  recirculation default, a Tank's export slot) is a plain cell, muted with its source in the tooltip while it is a
+  default; one the user must act on (no slot left) is amber with the finding as tooltip. A finding about a cell's
+  value that is information, not a warning (a calculation method the export cannot carry), is an info glyph inside
+  the cell's right edge. A note about a group of rows (two Systems pooled in one Building Segment) is one muted line
+  under the table, once per message. New for a kind that names a parent asks for it in the form, preselecting the
+  only one, and says "Create a <parent> first" when there is none; Delete offers clearing only while the record
+  allows it (`ReplacementForm` `allowClear` as a function of the record).
 - A tree row with nothing under it keeps the chevron's place but offers nothing to open: give the table `expandable(row)`. A value a row still needs is flagged on its own cell: the enum pill turns amber, reads "?", and its accessible name says what to set ("Set Wall 2 boundary"). There is no separate State column: anything else the row needs (a stale adjacency, a missing Attached zone record) is flagged amber on the cell where it is fixed, with the reason in its tooltip.
 - An enum cell is `select.phc-enum-cell` (`table.css`): a compact 24px pill with a chevron on every screen, neutral unless the value has a colour of its own through `--category-fill`. A value that cannot be chosen there (a paired Surface) is the same pill read only, `span.phc-enum-pill`, with what sets it in its tooltip. Face types and boundary conditions take a light tint of honeybee's display hue, the one the viewport's Colour-by modes draw: `face_words.fill(field, value)` or a `fill` on a `selectFields` choice, never a feature-local palette. Never style a select by its column name.
 - A cell under a header that names a unit holds the number alone: `units.format(..., { showUnit: false })`.

@@ -3,8 +3,8 @@
 module PhComposer
   module Mechanical
     # This feature's Colour-by modes: each Zone in the colour of the item a single Serves slot names, `By
-    # ventilator` now, a later family's single slot the same way. The values are open, so they take the shared
-    # categorical ramp, spread so each item differs (Palette.spread_entries).
+    # ventilator` and `By hot water system`, a later family's single slot the same way. The values are open, so
+    # they take the shared categorical ramp, spread so each item differs (Palette.spread_entries).
     #
     # A mode paints Zones' entities, so it gives one entry per row of Zones' occurrence read, one per occurrence,
     # and resolves each row's occurrence path with the core OccurrencePath (context/EXTENSIBILITY.md, "Colour-by
@@ -13,14 +13,20 @@ module PhComposer
     # unclassified. An item the slot names that is not in the Model is incomplete, under its id.
     module ColourModes
       BY_VENTILATOR = "#{FEATURE_ID}.by_ventilator"
+      BY_HOT_WATER_SYSTEM = "#{FEATURE_ID}.by_hot_water_system"
+      # Each mode, its label and the single Serves slot whose item colours a Zone.
+      MODES = { BY_VENTILATOR => ["Ventilator", "ventilator_id"],
+                BY_HOT_WATER_SYSTEM => ["Hot Water System", "hot_water_system_id"] }.freeze
       ZONES = "ph_composer.zones.occurrences"
 
       module_function
 
       def install(feature)
-        feature.colour_mode(BY_VENTILATOR, :label => "Ventilator", :entity_kind => "zone",
-                                           :colours => ColourBy::Palette.ramp) do |read|
-          ColourBy::Palette.spread_entries(entries(read, Serves::Payload.slot("ventilator_id")))
+        MODES.each do |name, (label, slot)|
+          feature.colour_mode(name, :label => label, :entity_kind => "zone",
+                                    :colours => ColourBy::Palette.ramp) do |read|
+            ColourBy::Palette.spread_entries(entries(read, Serves::Payload.slot(slot)))
+          end
         end
       end
 

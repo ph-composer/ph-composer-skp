@@ -1,7 +1,9 @@
 /* The Mechanical tab in the preview: the Ventilation subtab and its Ventilators pill, in-place edits, electric
    efficiency in both unit systems, the Zone picker with its replace route, By ventilator from the Serves header,
-   the optional values, the Columns menu and the record forms, at the panel's three sizes. Browser evidence; not
-   host acceptance. */
+   the optional values, the Columns menu and the record forms; then the Hot Water subtab's Systems, Heaters and
+   Tanks: read-only recirculation, the method badge and the pooling note, Serves and By hot water system, a Heater's
+   Type change, litres in US gallons, the export slot, the System delete and New Tank; each at the panel's three
+   sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -161,6 +163,114 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     await page.screenshot({ path: path.join(output, `zone-picker-${width}x${height}.png`) });
     await page.keyboard.press("Escape");
     await open.waitFor({ state: "hidden" });
+  }
+  step("Hot Water › Systems: recirculation read only, the method badge and the pooling note");
+  await setPanelSize(page, 1280, 800);
+  const hotWater = id => host(`JSON.parse(JSON.stringify(window.previewHost.mechanical.hotWater.${id}))`);
+  await pane.getByRole("tab", { name: "Hot Water" }).click();
+  const pills = pane.getByRole("group", { name: "Hot Water tables" });
+  await pills.getByRole("button", { name: "Systems", pressed: true }).waitFor();
+  const systems = pane.locator(".mech-hot-water-systems");
+  const systemRow = id => systems.locator(`[data-row-key='${id}']`);
+  const DHW1 = "hws_Aa11Bb22Cc33", DHW3 = "hws_Gg77Hh88Ii99";
+  await systemRow(DHW1).waitFor();
+  assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c").textContent(), "60");
+  assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c input").count(), 0, "read only");
+  assert.match(await systemRow(DHW1).locator(".col-piping_calc_method .mech-cell-badge").getAttribute("aria-label"),
+    /pinned honeybee-ph has no field/);
+  assert.match(await pane.locator(".mech-table-note").textContent(), /DHW-1 Central, DHW-2 Retail serve Building Segment Apartments/);
+  await page.screenshot({ path: path.join(output, "hot-water-systems.png") });
+  const taps = systemRow(DHW1).locator("[data-record-field='number_tap_points']");
+  await taps.dblclick();
+  await taps.fill("30");
+  await taps.press("Enter");
+  await page.waitForFunction(() => window.previewHost.mechanical.hotWater.systems[0].values.number_tap_points === 30);
+  assert.deepEqual((await sent(PREFIX + "hot_water_systems.update")).pop().payload.params.expected_values,
+    { number_tap_points: 24 });
+
+  step("Serves on a System assigns on the hot water slot, and By hot water system colours from its header");
+  await clickSettled(page, systemRow(DHW3).locator(".mech-serves-cell"));
+  const hwPicker = page.getByRole("dialog", { name: "Zones served by DHW-3 Spare" });
+  await hwPicker.locator(".mech-zone-row").filter({ hasText: "Classroom" }).locator("input").check();
+  await hwPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
+  await hwPicker.waitFor({ state: "hidden" });
+  assert.equal((await hotWater("serves")).zon_classroom, DHW3);
+  assert.equal((await sent(PREFIX + "serves.assign")).pop().payload.params.slot, "hot_water_system_id");
+  const hwServes = systems.locator("th.col-serves");
+  await hwServes.hover();
+  const byHotWater = hwServes.getByRole("button", { name: "Colour by Hot Water System", exact: true });
+  await byHotWater.click();
+  await page.waitForFunction(() =>
+    window.previewHost.colourBy.mode === "ph_composer.mechanical.by_hot_water_system");
+  await byHotWater.click();
+  await page.waitForFunction(() => !window.previewHost.colourBy.mode);
+
+  step("a System that Heaters and Tanks name offers no clearing on delete");
+  await systems.getByRole("button", { name: "Delete DHW-1 Central", exact: true }).click();
+  const removeSystem = page.getByRole("dialog", { name: /DHW-1 Central$/ });
+  const choices = await removeSystem.getByRole("combobox").locator("option").evaluateAll(nodes =>
+    nodes.map(node => node.value));
+  assert.ok(choices.indexOf("__clear__") < 0, "Heaters and Tanks need a System");
+  await removeSystem.getByRole("button", { name: "Cancel", exact: true }).click();
+  await removeSystem.waitFor({ state: "hidden" });
+
+  step("Hot Water › Heaters: only the Type's efficiency cells are live; a Type change asks for its values");
+  await pills.getByRole("button", { name: "Heaters" }).click();
+  const heaters = pane.locator(".mech-hot-water-heaters");
+  const heaterRow = id => heaters.locator(`[data-row-key='${id}']`);
+  const HPWH1 = "hwh_Aa11Bb22Cc33";
+  await heaterRow(HPWH1).waitFor();
+  assert.equal(await heaterRow(HPWH1).locator(".col-cop_1").textContent(), "—");
+  assert.equal(await heaterRow(HPWH1).locator("[data-record-field='annual_energy_factor']").inputValue(), "3.75");
+  await page.screenshot({ path: path.join(output, "hot-water-heaters.png") });
+  await heaterRow(HPWH1).locator(".col-variant select").selectOption("heat_pump_annual");
+  const typeDialog = page.getByRole("dialog", { name: "Change HPWH-1 to Heat pump · annual" });
+  await typeDialog.getByText("Removes its Energy factor.").waitFor();
+  await typeDialog.getByRole("textbox", { name: "Performance ratio" }).fill("2.8");
+  await page.screenshot({ path: path.join(output, "heater-type-change.png") });
+  await typeDialog.getByRole("button", { name: "Change Type", exact: true }).click();
+  await typeDialog.waitFor({ state: "hidden" });
+  const changed = (await hotWater("heaters")).filter(row => row.id === HPWH1)[0].values;
+  assert.equal(changed.variant, "heat_pump_annual");
+  assert.equal(changed.total_system_perf_ratio, 2.8);
+  assert.equal(changed.annual_energy_factor, undefined, "the old Type's value went with it");
+  assert.equal(await heaterRow(HPWH1).locator(".col-annual_energy_factor").textContent(), "—");
+
+  step("Hot Water › Tanks: litres in US gallons under IP, the export slot from Role, New Tank with its System");
+  await pills.getByRole("button", { name: "Tanks" }).click();
+  const tanks = pane.locator(".mech-hot-water-tanks");
+  const tankRow = id => tanks.locator(`[data-row-key='${id}']`);
+  const T3 = "hwt_Gg77Hh88Ii99";
+  await tankRow(T3).waitFor();
+  assert.equal(await tankRow(T3).locator(".col-slot").textContent(), "No slot left");
+  await page.getByRole("button", { name: "Set display units to IP", exact: true }).click();
+  assert.equal(await tankRow("hwt_Aa11Bb22Cc33").locator("[data-record-field='storage_capacity_l']").inputValue(),
+    "118.9");
+  assert.match(await tanks.locator("th.col-storage_capacity_l").textContent(), /gal/);
+  await page.screenshot({ path: path.join(output, "hot-water-tanks-ip.png") });
+  await page.getByRole("button", { name: "Set display units to SI", exact: true }).click();
+  await tankRow(T3).locator("[data-record-field='role']").selectOption("solar");
+  await page.waitForFunction(id => window.previewHost.mechanical.hotWater.tanks.filter(r => r.id === id)[0]
+    .values.role === "solar", T3);
+  await tankRow(T3).locator(".col-slot").getByText("Solar tank").waitFor();
+  await pane.getByRole("button", { name: "+ New Hot Water Tank", exact: true }).click();
+  const newTank = page.getByRole("dialog", { name: "New Hot Water Tank" });
+  await newTank.getByRole("textbox", { name: "Tag", exact: true }).fill("T-4");
+  await newTank.getByRole("combobox", { name: "Hot Water System" }).selectOption("hws_Dd44Ee55Ff66");
+  await newTank.getByRole("button", { name: "Create Hot Water Tank", exact: true }).click();
+  await newTank.waitFor({ state: "hidden" });
+  assert.equal((await hotWater("tanks")).filter(row => row.values.name === "T-4")[0].values.hot_water_system_id,
+    "hws_Dd44Ee55Ff66");
+
+  step("each Hot Water table fits the panel's sizes");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    for (const pill of ["Systems", "Heaters", "Tanks"]) {
+      await pills.getByRole("button", { name: pill }).click();
+      assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+        `Hot Water ${pill} does not scroll sideways at ${width} x ${height}`);
+      await page.screenshot({ path: path.join(output, `hot-water-${pill.toLowerCase()}-${width}x${height}.png`) });
+    }
   }
   return `mechanical browser checks passed; screenshots: ${output}`;
 });

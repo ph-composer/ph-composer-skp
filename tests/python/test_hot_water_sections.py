@@ -35,6 +35,8 @@ FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "mechanical"
 GOLDEN = FIXTURES / "hot_water_extraction.json"
 #: The result fields the Ruby contributor declares, written by the same Ruby test.
 RESULT_FIELDS = FIXTURES / "hot_water_result_fields.json"
+#: Whether the Ruby System rows say the export writes a piping calculation method, written by the same Ruby test.
+METHOD = FIXTURES / "hot_water_method.json"
 ZONE_A = "zon_AAAAAAAAAAAA"
 ZONE_B = "zon_BBBBBBBBBBBB"
 HWS_1 = "hws_FIXED0000005"
@@ -158,6 +160,14 @@ def test_a_piping_calculation_method_is_left_out_with_a_finding_on_the_pinned_wh
     hbjson = result["canonical_model"]["hbjson"]
     assert CALC_METHOD_ATTRIBUTE not in hbjson and "calc_method" not in hbjson
     check(result["canonical_model"], result, SECTIONS)
+
+
+def test_the_system_rows_say_what_the_pinned_wheel_does_with_a_calculation_method() -> None:
+    """The panel's System rows note an unexported method from a Ruby flag; this holds the flag to the loaded class,
+    so a wheel that gains the field fails here until the flag flips."""
+    record = HotWaterSection().read({**records(document())[0], "piping_calc_method": 1})
+    _system, written = hot_water_system(record)
+    assert json.loads(METHOD.read_text())["method_exported"] is written
 
 
 def test_a_class_that_takes_and_writes_the_method_receives_it(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -175,10 +175,30 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
+    "html/features/mechanical/equipment_table.js": {
+      "bytes": 16904,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "7c489ff87a5dbc69ccba8b493349638be45f4cde2886dc180b056204395d6660"
+    },
+    "html/features/mechanical/hot_water.js": {
+      "bytes": 13002,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "a7354781bb575e4e92ca499d5248ad20fbf1d98857e45e17777abf8782fadcd3"
+    },
+    "html/features/mechanical/hot_water_heaters.js": {
+      "bytes": 12987,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "373dfa145bdd762f3d9602aa0438d20c874180bc0ea5ceac81db6c6bbe83b7b9"
+    },
+    "html/features/mechanical/hot_water_tanks.js": {
+      "bytes": 7005,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "24318afc58eb927c63add9a3c1dc82d7df8fc63ca58cd571c740583d9b1c20e9"
+    },
     "html/features/mechanical/mechanical.css": {
-      "bytes": 3810,
+      "bytes": 5354,
       "mime": "text/css; charset=utf-8",
-      "sha256": "945d2d6222e8ec03ff371c9aecb71df33b6a1c3f7a1a09598c1733c0c87382f4"
+      "sha256": "855e597b34390c097b430579ef6236313afaa64a4b34921c949c7b5897eeea67"
     },
     "html/features/mechanical/optional_values.js": {
       "bytes": 8685,
@@ -201,9 +221,9 @@
       "sha256": "e96bd2c8e94a83789b7dc7e6c6d94881916c6c7ef158d2b806b584c2c6bfa01f"
     },
     "html/features/mechanical/ventilators.js": {
-      "bytes": 16818,
+      "bytes": 9910,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "bacb887aa5d7c7d138dfad37e4bc448a0ed95786c2dabfa77def232d60327b43"
+      "sha256": "37ba2034b7031e4bae11905eb3ca063da8c88ed7ae3dc732c6c360c150c2fe33"
     },
     "html/features/programs/airtightness.js": {
       "bytes": 6073,
@@ -501,9 +521,9 @@
       "sha256": "9698d795e2d2031afa9dac5732125f52c0292492eaab2721f6a77a3a7e3de74f"
     },
     "html/fields.js": {
-      "bytes": 2531,
+      "bytes": 2661,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "4cc0757ddf1f1b550c7c5af8c4a7551579d0f30f4c981392e877877a2178883e"
+      "sha256": "e73799208142eba0f18f90910440dc6ad7960ba2bf339f32b03a7cd2ef70ffec"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -511,9 +531,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 10900,
+      "bytes": 11164,
       "mime": "text/html; charset=utf-8",
-      "sha256": "04c4c5ad718dee6ae62c4c65a162f7ed6209e7f350c2da9d53f6c1fadd43842b"
+      "sha256": "3140751e0661ddf2321847ed8f7610dcf953e1f7569e6d788635b54a25babeed"
     },
     "html/inventory.js": {
       "bytes": 15384,
@@ -521,9 +541,9 @@
       "sha256": "6e7af5d18ba90e442b63355c5bca713e9b92dbc05fb11f74b4810440e0297f76"
     },
     "html/inventory_forms.js": {
-      "bytes": 23066,
+      "bytes": 23252,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "011d195f47d2b951e4958040ffa82a0de86ec3b5ad2a55e9360547ebc030cb6a"
+      "sha256": "17b09ed88ce551458a17676fe688fb8a19357c8c734f3ebf7019e0b8db3f1655"
     },
     "html/inventory_grid.js": {
       "bytes": 16227,
@@ -766,9 +786,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 14286,
+      "bytes": 14630,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e4f35f287025cdbb0bf71ec90775e0a7d94ba8e69636353905904195996cf197"
+      "sha256": "22765d34475deb74319f5b9011abcf7ad25d5274789c0220f1cfe846338ac4a9"
     },
     "html/units.js": {
       "bytes": 14458,

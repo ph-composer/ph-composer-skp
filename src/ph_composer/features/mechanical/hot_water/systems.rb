@@ -16,6 +16,11 @@ module PhComposer
         KIND_ID = HOT_WATER_SYSTEM_KIND
         # honeybee-ph's defaults with no recirculation piping (PhHotWaterSystem.recirc_temp and recirc_hours).
         RECIRCULATION_DEFAULTS = { "temperature_c" => 60.0, "hours" => 24 }.freeze
+        # Whether the pinned honeybee-ph writes a piping calculation method. Only the loaded Python class can say
+        # (python/ph_composer_translation/mechanical_sections.py); this mirrors it for the System rows, and
+        # tests/fixtures/mechanical/hot_water_method.json holds the two equal, so a wheel that gains the field
+        # (honeybee_ph#135) fails tests/python/test_hot_water_sections.py until this flips.
+        METHOD_EXPORTED = false
         FIELDS = Fields.with_source_snapshot(Fields.common + [
           Fields.field("manufacturer", { "type" => %w[string null], "description" => "The maker; absent when " \
                                                                                      "unknown." }),
@@ -43,6 +48,15 @@ module PhComposer
         # A new System's values: the shared defaults. Tap points and the calculation method stay absent.
         def defaults(values)
           Fields.defaults(values)
+        end
+
+        # The message a System setting a calculation method the export cannot write carries, or nil.
+        def method_not_exported(record)
+          method = record["piping_calc_method"]
+          return nil if method.nil? || METHOD_EXPORTED
+
+          "#{record.fetch('name')} sets piping calculation method #{method}, and the pinned honeybee-ph has no " \
+            "field for it, so the export leaves it out."
         end
       end
     end

@@ -1444,6 +1444,21 @@
         sensible_heat_recovery: 0, latent_heat_recovery: 0, electric_efficiency_wh_m3: 0.55,
         frost_protection_reqd: true, temperature_below_defrost_used_c: -5, in_conditioned_space: true }, values) };
   }
+  function hotWater(id, kind, name, values) {
+    return { id: id, kind: "ph_composer.mechanical." + kind, schema_version: 1, user_data: {}, extension_data: {},
+      extension_status: {}, export_ready: true, export_blockers: [],
+      values: Object.assign({ name: name, notes: "", datasheet_links: [], source: { kind: "manual" } }, values) };
+  }
+  function heater(id, name, values) {
+    return hotWater(id, "hot_water_heater", name, Object.assign({ hot_water_system_id: "hws_Aa11Bb22Cc33",
+      variant: "electric", percent_coverage: 1, in_conditioned_space: true }, values));
+  }
+  function tank(id, name, values) {
+    return hotWater(id, "hot_water_tank", name, Object.assign({ hot_water_system_id: "hws_Aa11Bb22Cc33",
+      role: "storage", tank_type: "2-DHW ONLY", quantity: 1, in_conditioned_space: true, solar_connection: false,
+      solar_losses_w: 0, storage_loss_rate_w_k: 0, storage_capacity_l: 300, standby_losses_w_k: 4,
+      standby_fraction: 0.3, room_temp_c: 20, water_temp_c: 60 }, values));
+  }
   FIXTURES.mechanical = Object.assign(copy(FIXTURES.programs), { mechanical: {
     ventilators: [
       ventilator("vnt_Aa11Bb22Cc33", "ERV-1", { sensible_heat_recovery: 0.85, latent_heat_recovery: 0.6,
@@ -1459,7 +1474,31 @@
     serves: { zon_apt1: "vnt_Aa11Bb22Cc33", zon_apt2: "vnt_Dd44Ee55Ff66", zon_corridor: "vnt_Dd44Ee55Ff66",
       zon_classroom: "vnt_Jj00Kk11Ll22" },
     flows: { zon_living: [30, 30], zon_bedroom: [20, 20], zon_apt1: [60, 50], zon_apt2: [25, 25],
-      zon_corridor: [15, 15], zon_classroom: null } } });
+      zon_corridor: [15, 15], zon_classroom: null },
+    /* Hot water: DHW-1 Central serves the Apartments with 24 tap points and a calculation method the pinned
+       honeybee-ph cannot carry; DHW-2 Retail serves the Corridor in the same Segment, so the two pool; DHW-3 serves
+       nothing. Its two heat pump water heaters and an electric backup name DHW-1, as do two storage tanks and two
+       buffer tanks, the second of which has no slot left. */
+    hotWater: {
+      systems: [hotWater("hws_Aa11Bb22Cc33", "hot_water_system", "DHW-1 Central", { number_tap_points: 24,
+        piping_calc_method: 2, manufacturer: "Sanvik" }),
+      hotWater("hws_Dd44Ee55Ff66", "hot_water_system", "DHW-2 Retail", { number_tap_points: 2 }),
+      hotWater("hws_Gg77Hh88Ii99", "hot_water_system", "DHW-3 Spare", {})],
+      heaters: [heater("hwh_Aa11Bb22Cc33", "HPWH-1", { variant: "heat_pump_inside", percent_coverage: 0.85,
+        annual_energy_factor: 3.75, manufacturer: "Sanvik", model: "HP-300" }),
+      heater("hwh_Dd44Ee55Ff66", "EWH-1", { variant: "electric", percent_coverage: 0.15, manufacturer: "Sanvik",
+        model: "E-80", notes: "Backup" }),
+      heater("hwh_Gg77Hh88Ii99", "HPWH-2", { variant: "heat_pump_monthly", percent_coverage: 1,
+        in_conditioned_space: false, cop_1: 2.1, ambient_temp_1_c: -8.333, cop_2: 3.4, ambient_temp_2_c: 8.333,
+        manufacturer: "Borealis", model: "CO2-45", hot_water_system_id: "hws_Dd44Ee55Ff66" })],
+      tanks: [tank("hwt_Aa11Bb22Cc33", "T-1", { role: "storage", quantity: 2, storage_capacity_l: 450,
+        standby_losses_w_k: 2.1, manufacturer: "Sanvik", model: "ST-450" }),
+      tank("hwt_Dd44Ee55Ff66", "T-2", { role: "buffer", storage_capacity_l: 200, standby_losses_w_k: 1.4,
+        water_temp_c: 55 }),
+      tank("hwt_Gg77Hh88Ii99", "T-3", { role: "buffer", storage_capacity_l: 200, standby_losses_w_k: 1.4,
+        water_temp_c: 55 })],
+      serves: { zon_apt1: "hws_Aa11Bb22Cc33", zon_apt2: "hws_Aa11Bb22Cc33", zon_corridor: "hws_Dd44Ee55Ff66" } }
+  } });
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),

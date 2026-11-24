@@ -30,6 +30,9 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
   GOLDEN = File.join(FIXTURES, "hot_water_extraction.json")
   # The result fields the contributor declares, for the Python section's test to hold its rows to.
   RESULT_FIELDS = File.join(FIXTURES, "hot_water_result_fields.json")
+  # Whether the System rows say the export writes a piping calculation method, for the Python section's test to
+  # hold equal to what the pinned honeybee-ph does.
+  METHOD = File.join(FIXTURES, "hot_water_method.json")
   ERVS = [{ "name" => "ERV-1", "sensible_heat_recovery" => 0.85 }, { "name" => "ERV-2" }].freeze
   TANKS_OF = [["T1", { "storage_capacity_l" => 300.0, "standby_losses_w_k" => 4.0 }],
               ["T2", { "storage_capacity_l" => 200.0, "standby_losses_w_k" => 3.0 }],
@@ -74,6 +77,7 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     assert_empty preflight_rows
     write_or_compare(GOLDEN, stable(extraction.document))
     write_or_compare(RESULT_FIELDS, X::RESULT_FIELDS)
+    write_or_compare(METHOD, { "method_exported" => M::HotWater::Systems::METHOD_EXPORTED })
   end
 
   # The Ventilator export claims the Serves payload for the feature; with no Ventilator at all, it still hands the
@@ -98,6 +102,8 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     assert_equal [["mechanical.tank_unslotted", t4]], notes(extraction)
     assert_equal [["mechanical.tank_unslotted", t4, false]],
                  preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
+    assert_equal({ "name" => M::Locate::NAME, "params" => { "hot_water_tank_ids" => [t4] } },
+                 preflight_rows.first.fetch("locate"), "the Tank's row opens the Tanks table on it")
   end
 
   def test_an_unserved_system_is_noted_alone_and_two_served_systems_in_one_segment_are_pooled
@@ -116,6 +122,23 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     assert_equal [false, false], preflight_rows.map { |row| row.fetch("blocks_export") }
   end
 
+  # A hot water item's row opens its own Mechanical table on it, and the Locate command takes each item's ids.
+  def test_hot_water_rows_locate_their_item_and_the_locate_command_opens_its_table
+    reference
+    two = create(SYSTEMS, "name" => "HWS-2")
+    row = preflight_rows.find { |found| found.fetch("code") == "mechanical.item_unserved" }
+    assert_equal({ "name" => M::Locate::NAME, "params" => { "hot_water_system_ids" => [two] } }, row.fetch("locate"))
+    opened = []
+    @session.define_singleton_method(:open_in_panel) { |owner, intent| opened << [owner, intent] }
+    heater = @ids.fetch("H-E")
+    [{ "hot_water_system_ids" => [two] },
+     { "hot_water_heater_ids" => [heater], "ventilator_ids" => [] }].each do |params|
+      completed(API.view(:context => @context, :name => M::Locate::NAME, :params => params))
+    end
+    assert_equal [["ph_composer.mechanical", { "hot_water_system_ids" => [two] }],
+                  ["ph_composer.mechanical", { "hot_water_heater_ids" => [heater] }]], opened
+  end
+
   def test_a_served_zone_in_no_building_segment_is_left_out_and_a_zone_with_no_system_is_the_preflights_alone
     reference
     completed(invoke("ph_composer.zones.update_field", "field" => "building_segment", "value" => nil,
@@ -132,7 +155,7 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     rows = preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
     assert_includes rows, ["mechanical.zone_no_hot_water", zone_id("A"), false]
     zone_row = preflight_rows.find { |row| row.fetch("code") == "mechanical.zone_no_hot_water" }
-    assert_equal M::VentilationExport::LOCATE, zone_row.dig("locate", "name")
+    assert_equal M::Locate::NAME, zone_row.dig("locate", "name")
   end
 
   def test_a_system_serving_zones_in_two_building_segments_is_noted_and_written_to_both

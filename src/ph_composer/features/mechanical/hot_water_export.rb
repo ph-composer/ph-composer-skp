@@ -68,7 +68,7 @@ module PhComposer
                                  :unreadable => unreadable.map { |row| row.fetch("id") })
         rows + plan.findings.map do |found|
           Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,
-                        Preflight.zone_locate(found.record_id, references))
+                        Locate.row_locate(found.record_id, references))
         end
       end
     end

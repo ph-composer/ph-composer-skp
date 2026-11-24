@@ -97,7 +97,7 @@ class MechanicalExportTest < PhComposerTestCase
     reference
     completed(invoke("#{SERVES}.clear", "zones" => [target("B")], "slot" => "ventilator_id"))
     locates = preflight_rows.to_h { |row| [row.fetch("code"), row.fetch("locate")] }
-    assert_equal({ "name" => X::LOCATE, "params" => { "ventilator_ids" => [@erv.fetch("ERV-2")] } },
+    assert_equal({ "name" => M::Locate::NAME, "params" => { "ventilator_ids" => [@erv.fetch("ERV-2")] } },
                  locates.fetch("mechanical.item_unserved"))
     zone_b = locates.fetch("mechanical.zone_unventilated")
     assert_equal [zone_id("B")], zone_b.dig("params", "zones").map { |zone| zone.fetch("zone_id") }

@@ -111,7 +111,8 @@ module PhComposer
       def read_detail(kind)
         case kind
         when SYSTEMS then ", with export readiness, the Zones each serves, its Heater and Tank counts, its read-only " \
-                          "recirculation and findings, the Building Segment pooling note among them"
+                          "recirculation and findings, among them the Building Segment pooling note and a piping " \
+                          "calculation method the export leaves out"
         when TANKS then ", with export readiness and the System tank slot each fills"
         else ", with export readiness"
         end
@@ -134,6 +135,8 @@ module PhComposer
         pooled = HotWaterPlan.pooled(ExportZones.live(zones).select(&:exported), systems).group_by(&:record_id)
         lambda do |record|
           notes = pooled.fetch(record.fetch("id"), []).map { |found| Codes.finding(found.code, "info", found.message) }
+          method = HotWater::Systems.method_not_exported(record)
+          notes << Codes.finding(Codes::METHOD_NOT_EXPORTED, "info", method) if method
           served = usage.call(record)
           served.merge(members.call(record)).merge("findings" => served.fetch("findings") + notes)
         end
