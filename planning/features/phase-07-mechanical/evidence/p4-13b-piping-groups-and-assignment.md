@@ -59,7 +59,15 @@ operations and the recipe.
   hostkit 48 runs; "RBZ verified: 804 files, 8956811 bytes, 27557624 bytes installed".
 - Installed size: 27,557,624 bytes, 70,697 over P4-13a's 27,486,927 against the 75 KB estimate; 442,376 under the
   28,000,000 ceiling. No shipped panel or Python file changed.
-- The final head's gate on both Rubies, the browser checks and the PHX count follow the review below.
+- Final head `d232556d`, after both review cycles: `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes:
+  3481 runs, 49468 assertions, 0 failures, 0 errors, 1 skips"; JS 1214 pass; Python 467 passed, 1 skipped; hostkit 48
+  runs; "RBZ verified: 804 files, 8957684 bytes, 27560479 bytes installed" (3.2.2; 27560473 on 2.7.2), 73,552 over
+  P4-13a against the 75 KB estimate, 439,521 under the ceiling.
+- Browser checks: `make ui-checks` on `d232556d`: 39 of 39 scripts pass, exit 0, none skipped (no panel change).
+- PHX: `uv run --group phx pytest tests/python` on `d232556d`: 467 passed, 1 skipped (`test_map_borders.py`,
+  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: 24 passed, 0 skipped (this stage exports nothing).
+- Design System: not needed; no kit CSS, shared kit part or unit quantity changed.
+- `core/records/reference_resolution.rb` changed by one line (cycle 2), so native cases fingerprinting it read stale.
 
 ## Review
 
