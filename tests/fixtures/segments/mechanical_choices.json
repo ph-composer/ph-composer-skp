@@ -1,0 +1,16 @@
+{
+  "bypass_modes": [
+    "none",
+    "temperature_controlled",
+    "enthalpy_controlled",
+    "always"
+  ],
+  "defaults": {
+    "daytime_window_ach": 0.0,
+    "mech_room_temp_c": 20.0,
+    "mechanical_cooling": false,
+    "nighttime_window_ach": 0.0,
+    "summer_bypass_mode": "always",
+    "ventilation_system_ach": null
+  }
+}

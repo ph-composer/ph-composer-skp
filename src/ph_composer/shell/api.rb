@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 93
+    MINOR = 94
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -576,7 +576,14 @@ module PhComposer
                     "ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its " \
                     "rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and " \
                     "hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, " \
-                    "hp_outdoor_unit_ids and hp_indoor_unit_ids." }
+                    "hp_outdoor_unit_ids and hp_indoor_unit_ids." },
+      { "minor" => 94, "date" => "2026-11-24",
+        "change" => "The Building Segment extension ph_composer.mechanical.segment is new (mechanical_cooling, " \
+                    "mech_room_temp_c, summer_bypass_mode, ventilation_system_ach, daytime_window_ach and " \
+                    "nighttime_window_ach), saved through ph_composer.zones.save_segment_settings and read by the " \
+                    "new ph_composer.mechanical.segment.get. The export section " \
+                    "ph_composer.mechanical.export.segments is new, and ph_composer.mechanical.preflight adds its " \
+                    "rows: mechanical.segment_cooling_mismatch." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -211,9 +211,9 @@
       "sha256": "24318afc58eb927c63add9a3c1dc82d7df8fc63ca58cd571c740583d9b1c20e9"
     },
     "html/features/mechanical/mechanical.css": {
-      "bytes": 7189,
+      "bytes": 7681,
       "mime": "text/css; charset=utf-8",
-      "sha256": "28bcab8bdcb5269505f92a9e546e2f83a31ca892381482b011b4f1e36dedd9c8"
+      "sha256": "d57ac5852a9a3d65caf318416915099042209f203b33f07c05b375143fac901d"
     },
     "html/features/mechanical/optional_values.js": {
       "bytes": 8685,
@@ -224,6 +224,11 @@
       "bytes": 4960,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "682e789c9c0dd4f3c16d0685ff77d04b1b14f153701f64876b5416225e96159d"
+    },
+    "html/features/mechanical/segment_settings.js": {
+      "bytes": 8864,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "4b4938310f8ecd75accd3caa8763d100cd3bf0a7fd39d1ddb15baec3f133bc14"
     },
     "html/features/mechanical/serves.js": {
       "bytes": 16811,
@@ -546,9 +551,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 11362,
+      "bytes": 11430,
       "mime": "text/html; charset=utf-8",
-      "sha256": "ba7d2d48ca782172e90cf5530b93b7c6fc8739c47ab05d16f1628ef2a2c8c463"
+      "sha256": "3d3b3d33b42f41efdfa3b1801fb1a7fc75f53c299f6a5a290680c6dc7265d3f5"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -791,9 +796,9 @@
       "sha256": "36937199acf68ddfb82e82e2a8a72a1c9fc0f8d71d8eda599a5978cf13072b7b"
     },
     "html/unit_numbers.js": {
-      "bytes": 4112,
+      "bytes": 4269,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "60737dd197f679fdfc99a22948ff48438a2d00e940b843163af2569c59a9e267"
+      "sha256": "5e542c8cb552bb19bd37f3715e59e78a83cffdc3d4db70c08c613531e43bab59"
     },
     "html/unit_preferences.js": {
       "bytes": 5431,
@@ -841,9 +846,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1757,
+      "bytes": 1855,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "616e0d92341595c7525399e69fa6f1460002727faea9dff6390a9bf4bd2d73fd"
+      "sha256": "70ca4a86c70e22e2881a298f705daf80f454c964dc448f68833d9160a2980d58"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -914,6 +919,11 @@
       "bytes": 23721,
       "mime": "text/plain; charset=utf-8",
       "sha256": "44c6a87935bfd467f701258c1df60efe27d264b19432799a4b03629a26ba480c"
+    },
+    "python/ph_composer_translation/mechanical_segment_sections.py": {
+      "bytes": 6882,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "8f1abfca256210c1a647a0e9511cb54d3e164584442cc7eeaaf230352a83e416"
     },
     "python/ph_composer_translation/model_metadata.py": {
       "bytes": 1484,
@@ -1187,6 +1197,7 @@
     "python/ph_composer_translation/exporters.py",
     "python/ph_composer_translation/material_sources.py",
     "python/ph_composer_translation/mechanical_sections.py",
+    "python/ph_composer_translation/mechanical_segment_sections.py",
     "python/ph_composer_translation/model_metadata.py",
     "python/ph_composer_translation/model_sections.py",
     "python/ph_composer_translation/program_sections.py",

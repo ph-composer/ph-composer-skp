@@ -339,7 +339,7 @@ step and emits `ph_composer.zones.segment_settings_saved`; `ph_composer.zones.cr
 Segment with Zones moved in. `ph_composer.certification.segment.get` reads one Segment's Phius
 certification payload with its defaults applied, the read other features take it from;
 `ph_composer.programs.airtightness.get` reads one Segment's airtightness test result and wind exposure
-the same way.
+the same way, and `ph_composer.mechanical.segment.get` its mechanical settings.
 Programs, Schedules and Equipment Sets (API 1.79) have `create`, `update`, `duplicate` and `delete`, and
 `list` and `all` reads whose rows carry `stored`, what uses each record and, for a Schedule, its `profile`;
 `ph_composer.programs.schedules.profile` draws unsaved Schedule values, and a profile names its `weekdays` (API
@@ -907,11 +907,15 @@ honeybee-ph cannot carry; and `ph_composer.mechanical.by_hot_water_system` colou
 `hp_indoor_unit_ids`, and `serves.clear` takes `item_id` to take one off. `ph_composer.mechanical.heat_pumps.blended`
 reads the blended heat pump of each Building Segment, worked out by the Phius estimator's method from the Model's
 climate, so the feature requires `ph_composer.climate`; the export writes it on every served Room, the preflight lists
-its findings, and `locate` takes `hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` and `hp_indoor_unit_ids`. The
+its findings, and `locate` takes `hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` and `hp_indoor_unit_ids`. Since
+API 1.94 each Building Segment carries its mechanical settings as the `ph_composer.mechanical.segment` payload, saved
+with `ph_composer.zones.save_segment_settings` and read with its defaults by `ph_composer.mechanical.segment.get`;
+the export writes them to the Segment's `BldgSegment`, and the preflight warns, `mechanical.segment_cooling_mismatch`,
+where a Segment's mechanical cooling switch disagrees with its blended heat pump. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
 "Mechanical: the Ventilator export", "Mechanical: hot water", "Mechanical: the hot water export", "Mechanical: heat
-pumps" and "Mechanical: the heat pump export", is the recipe.
+pumps", "Mechanical: the heat pump export" and "Mechanical settings", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

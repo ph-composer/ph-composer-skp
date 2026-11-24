@@ -60,6 +60,8 @@ PhComposerUI.define("unit_numbers", ["unit_tables"], function (tables) {
 
   function parseRegionalNumber(text, format) {
     var match = /^([+\-]?)(.*?)([eE][+\-]?\d+)?$/.exec(String(text).trim());
+    // A line or paragraph separator inside the text matches nothing: unreadable, not an exception.
+    if (!match) return { ok: false, code: "malformed" };
     var body = match[2];
     var parts;
     var integer;

@@ -266,6 +266,22 @@
       ],
       "version": 1
     },
+    "ph_composer.mechanical.export.segments": {
+      "records": [
+        {
+          "daytime_window_ach": 0.0,
+          "export_identifier": "bseg_eb814be3ca3b78c0",
+          "id": "bsg_FIXED0000006",
+          "mech_room_temp_c": 20.0,
+          "mechanical_cooling": false,
+          "name": "Main",
+          "nighttime_window_ach": 0.0,
+          "summer_bypass_mode": "always",
+          "ventilation_system_ach": null
+        }
+      ],
+      "version": 1
+    },
     "ph_composer.mechanical.export.ventilation": {
       "records": [
         {

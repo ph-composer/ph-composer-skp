@@ -11,7 +11,9 @@ module PhComposer
     # The blend is one object built from several records, so none of their `user_data` has an object of its own:
     # each map is left out with export.metadata_omitted.
     #
-    # The preflight's heat pump rows come from the same plan (`preflight_rows`).
+    # The preflight's heat pump rows come from the same plan (`preflight_rows`). Its projection is each exported
+    # blend's Building Segment and whether it cools, which the Segment settings section compares with the Segment's
+    # mechanical cooling switch (SegmentExport).
     module HeatPumpExport
       SECTION = "#{FEATURE_ID}.export.heat_pumps"
       ZONES = Zones::ExportProjection::SECTION
@@ -31,22 +33,39 @@ module PhComposer
       def install(feature)
         feature.export_contributor(SECTION, :section_version => 1,
                                             :requires => [ZONES, VentilationExport::SECTION, CLIMATE],
-                                            :result => RESULT) { |reader| records(reader) }
+                                            :result => RESULT, :projection => method(:cooling)) do |reader|
+          records(reader)
+        end
       end
 
       # The pairs, once the plan finds nothing blocking; every other finding is a note.
       def records(reader)
-        by_id = ->(kind) { reader.records(kind).to_h { |row| [row.fetch("id"), row] } }
-        climate = reader.section(CLIMATE)
-        plan = HeatPumpPlan.call(:zones => reader.section(VentilationExport::SECTION),
-                                 :outdoor_equipment => by_id.call(HP_OUTDOOR_EQUIPMENT_KIND),
-                                 :outdoor_units => by_id.call(HP_OUTDOOR_UNIT_KIND),
-                                 :indoor_units => by_id.call(HP_INDOOR_UNIT_KIND),
-                                 :climate => HeatPumpPlan.climate(*climate.values_at("monthly_air_c", "heating_99_c",
-                                                                                     "cooling_1_c")))
-        VentilationExport.raise_blocking!(plan.findings)
-        plan.findings.each { |finding| reader.note(finding.code, finding.record_id, finding.message) }
-        plan.pairs
+        found = plan(reader)
+        VentilationExport.raise_blocking!(found.findings)
+        found.findings.each { |finding| reader.note(finding.code, finding.record_id, finding.message) }
+        found.pairs
+      end
+
+      # Each exported blend's Building Segment, by name as the plan keys it, and whether the blend cools.
+      def cooling(reader)
+        plan(reader).blends.map do |blend|
+          { "segment" => blend.fetch("segment"),
+            "cooling" => blend.fetch("result").fetch("export").fetch("cooling").fetch("used") }
+        end
+      end
+
+      # The plan over the export's snapshot, worked out once per export for the records and the projection.
+      def plan(reader)
+        reader.projection([:mechanical_heat_pump_plan]) do
+          by_id = ->(kind) { reader.records(kind).to_h { |row| [row.fetch("id"), row] } }
+          climate = reader.section(CLIMATE)
+          HeatPumpPlan.call(:zones => reader.section(VentilationExport::SECTION),
+                            :outdoor_equipment => by_id.call(HP_OUTDOOR_EQUIPMENT_KIND),
+                            :outdoor_units => by_id.call(HP_OUTDOOR_UNIT_KIND),
+                            :indoor_units => by_id.call(HP_INDOOR_UNIT_KIND),
+                            :climate => HeatPumpPlan.climate(*climate.values_at("monthly_air_c", "heating_99_c",
+                                                                                "cooling_1_c")))
+        end
       end
 
       # The preflight's heat pump rows: a blocking row for each unreadable heat pump record and each metadata
@@ -64,11 +83,17 @@ module PhComposer
           readable
         end
         rows.concat(Export::MetadataCheck.findings(request, records, :section => SECTION))
-        inputs = HeatPumpReads.inputs(request, :zones => zones)
-        plan = HeatPumpPlan.call(**HeatPumpReads.plan_args(inputs))
-        rows + plan.findings.map do |found|
+        rows + live_plan(request, zones).findings.map do |found|
           Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,
                         Locate.row_locate(found.record_id, references))
+        end
+      end
+
+      # The plan over the live Model, worked out once per request: the preflight's heat pump rows and its Segment
+      # settings rows read the same blends.
+      def live_plan(request, zones)
+        request.memo([:mechanical_heat_pump_plan, zones.map(&:id)]) do
+          HeatPumpPlan.call(**HeatPumpReads.plan_args(HeatPumpReads.inputs(request, :zones => zones)))
         end
       end
     end

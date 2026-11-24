@@ -2,8 +2,8 @@
    (context/EXTENSIBILITY.md, "Zone views" and "Building Segment settings"): headings in Geometry and Spaces at every panel size, New Building Segment and its name in
    place, moving a checked Zone from the selection bar, Delete with a destination, a long name, the settings
    dialog with every shipped section and the development Note section (tools/examples/zones/example_segment_note.js),
-   and the Occupancy section with the Single dwelling tag and findings on the headings. The preview host
-   answers the writes; native transactions and Undo remain SketchUp acceptance gates. */
+   the Occupancy section with the Single dwelling tag and findings on the headings, and the Mechanical section.
+   The preview host answers the writes; native transactions and Undo remain SketchUp acceptance gates. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -136,7 +136,7 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   const settings = page.getByRole("dialog", { name: "Building Segment settings", exact: true });
   await settings.waitFor();
   assert.deepEqual(await settings.locator("h3").allTextContents(),
-    ["General", "Occupancy", "Phius certification", "Airtightness", "Comfort", "Note"]);
+    ["General", "Occupancy", "Phius certification", "Airtightness", "Comfort", "Mechanical", "Note"]);
   assert.equal(await settings.getByRole("checkbox", { name: "New Zones join this Segment", exact: true }).isDisabled(), true);
   const result = await settings.locator(".phc-airtightness-result > *").evaluateAll(parts =>
     parts.map(part => { const box = part.getBoundingClientRect(); return Math.round(box.top + box.height / 2); }));
@@ -205,6 +205,39 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
     .filter(entry => entry.id === "bsg_house")[0].extension_data["ph_composer.programs.segment"].payload);
   assert.deepEqual(occupancy, { single_dwelling: true, default_program_id: null, bedrooms: 3, occupants: null,
     equipment_set_id: null });
+
+  step("Mechanical: each number beside its unit, every panel size, six values in one Save");
+  await main.hover();
+  await main.getByRole("button", { name: "Settings for Main house", exact: true }).click();
+  await settings.waitFor();
+  const mechanical = settings.locator("[data-namespace='ph_composer.mechanical.segment']");
+  assert.equal(await mechanical.getByRole("checkbox", { name: "Mechanical cooling", exact: true }).isChecked(), false);
+  assert.equal(await mechanical.getByRole("textbox", { name: "Mechanical room temperature", exact: true }).inputValue(),
+    "20");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert(await settings.evaluate(node => [node].concat(Array.from(node.querySelectorAll(".phc-segment-settings-body")))
+      .every(scroller => scroller.scrollWidth <= scroller.clientWidth)),
+    `the Mechanical section fits at ${width} x ${height}, its scrolling body included`);
+    const lines = await mechanical.locator(".mech-segment-value").evaluateAll(rows => rows.map(row =>
+      Array.from(row.children).map(part => { const box = part.getBoundingClientRect(); return box.top + box.height / 2; })));
+    assert.equal(lines.length, 4, "the room temperature and three air change rates");
+    lines.forEach(parts => assert(Math.max(...parts) - Math.min(...parts) <= 2,
+      `a number and its unit share one line at ${width} x ${height}`));
+    await mechanical.screenshot({ path: path.join(output, `mechanical-${width}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  await mechanical.getByRole("checkbox", { name: "Mechanical cooling", exact: true }).check();
+  await mechanical.getByRole("textbox", { name: "Mechanical room temperature", exact: true }).fill("18.5");
+  await mechanical.getByRole("combobox", { name: "Summer bypass", exact: true }).selectOption("enthalpy_controlled");
+  await mechanical.getByRole("textbox", { name: "Windows, nighttime air changes", exact: true }).fill("1.5");
+  await settings.getByRole("button", { name: "Save", exact: true }).click();
+  await settings.waitFor({ state: "detached" });
+  const mechanicalSaved = await page.evaluate(() => window.previewHost.zoneOptions.building_segments
+    .filter(entry => entry.id === "bsg_house")[0].extension_data["ph_composer.mechanical.segment"].payload);
+  assert.deepEqual(mechanicalSaved, { mechanical_cooling: true, mech_room_temp_c: 18.5,
+    summer_bypass_mode: "enthalpy_controlled", ventilation_system_ach: null, daytime_window_ach: 0,
+    nighttime_window_ach: 1.5 });
 
   step("a long name is cut in its cell and whole in its tooltip");
   const long = "Residential tower with retail podium and below-grade parking, phase two";

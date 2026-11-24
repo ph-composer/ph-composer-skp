@@ -396,6 +396,28 @@ values: `basis` (`n50`, air changes per hour at 50 Pa, or `q50`, m³/h per m² o
    Outdoors or Ground Face refuses `airtightness.no_exposed_face`. With no test result, each Zone keeps its
    Program's infiltration, and the wind exposure still reaches the Segment.
 
+### Mechanical settings
+
+Each Building Segment carries its mechanical settings as the `ph_composer.mechanical.segment` payload, six
+values: `mechanical_cooling` (true or false), `mech_room_temp_c` (the mechanical room temperature in °C),
+`summer_bypass_mode` (`none`, `temperature_controlled`, `enthalpy_controlled`, `always`), and the summer air
+changes per hour `ventilation_system_ach` (0 or more, or null for none entered), `daytime_window_ach` and
+`nighttime_window_ach` (each 0 or more).
+
+1. Read one Segment's values with `ph_composer.mechanical.segment.get` and its `id`. A Segment with no payload
+   reads honeybee-ph's defaults (no mechanical cooling, 20 °C, bypass always, no ventilation system rate, both
+   window rates 0) with `stored` false; check `extension_status` as for Phius certification.
+2. Write them with `ph_composer.zones.save_segment_settings`, all six in
+   `extension_payloads["ph_composer.mechanical.segment"]`. A missing or extra field, a value of the wrong type,
+   a rate below 0 or a bypass mode not listed refuses `validation.failed` and writes nothing.
+3. Export writes each exported Segment's values, or the defaults, to its honeybee-ph `BldgSegment`, and PHX
+   carries them to the WUFI-Passive and METr Variant. The export never changes the winter and summer set points,
+   which come from the Segment's Programs, and writes honeybee-ph's defaults for the summer extract system and
+   night flush values. Mechanical cooling is entered, not worked out from the heat pumps:
+   `ph_composer.mechanical.preflight` warns `mechanical.segment_cooling_mismatch` where it is on and the
+   Segment's export carries no heat pump cooling, or off and its blended heat pump cools. The warning never
+   blocks the export.
+
 ### Programs, Schedules and Equipment Sets
 
 A Program holds the eight loads a Zone carries (`people`, `lighting`, `electric_equipment`, `gas_equipment`,

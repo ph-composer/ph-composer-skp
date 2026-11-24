@@ -25,6 +25,9 @@
 #   heat_pump_plan.rb    the blended heat pump per Building Segment worked out in pure Ruby: its pairs and findings
 #   heat_pump_reads.rb   the heat pump tables' Zones, counts and findings, and the Blended result
 #   heat_pump_export.rb  the heat pump export section
+#   segment/             a Building Segment's mechanical settings: the extension on the Segment record, its
+#                        defaults and read, and whether its cooling switch agrees with its blended heat pump
+#   segment_export.rb    the Segment settings export section, and its findings
 #   locate.rb            the Locate view command, which opens the Mechanical tab on an item's table or the Zones tab
 #   preflight.rb         the one preflight query, each family's rows from its own plan
 #   colour_modes.rb      By ventilator: each served Zone in its item's colour
@@ -62,6 +65,10 @@ require_relative "heat_pumps/reads"
 require_relative "heat_pump_reads"
 require_relative "declarations/heat_pumps"
 require_relative "heat_pump_export"
+require_relative "segment/settings"
+require_relative "segment/cooling"
+require_relative "declarations/segment"
+require_relative "segment_export"
 require_relative "locate"
 require_relative "preflight"
 require_relative "colour_modes"
@@ -81,6 +88,8 @@ module PhComposer
       HotWaterExport.install(feature)
       HeatPumpRegistration.install(feature)
       HeatPumpExport.install(feature)
+      SegmentRegistration.install(feature)
+      SegmentExport.install(feature)
       Locate.install(feature)
       Preflight.install(feature)
       ColourModes.install(feature)

@@ -1108,7 +1108,32 @@ parameter sets identifiers `<identifier>_<name>`, and adds it with `add_heat_pum
 with its own row, digest included, and no Room may hold a heat pump the run did not report. The preflight adds the
 heat pump rows under this section: a blocking row per unreadable outdoor model or unit and per metadata problem, then
 the plan's findings; an outdoor model's, an outdoor unit's or an indoor unit's row carries `locate` with
-`hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` or `hp_indoor_unit_ids`.
+`hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` or `hp_indoor_unit_ids`. Its `projection` is each exported
+blend's Segment, by name, and whether it cools, which the Segment settings export reads; the records and the
+projection come from one plan per export.
+
+**Building Segment mechanical settings.** Each Building Segment's mechanical settings are the structured extension
+`ph_composer.mechanical.segment` (schema version 1, required) on the Segment record, staged by Zones' settings Save
+like every settings section (`features/mechanical/segment/settings.rb`; EXTENSIBILITY, "Building Segment
+settings"): `mechanical_cooling`, `mech_room_temp_c`, `summer_bypass_mode` (`none`, `temperature_controlled`,
+`enthalpy_controlled`, `always`), `ventilation_system_ach` (0 or more, or null), `daytime_window_ach` and
+`nighttime_window_ach` (0 or more), all six and nothing else. A Segment with none, or one this version does not
+understand, reads honeybee-ph's defaults (`false`, 20.0, `always`, null, 0.0, 0.0), which
+`ph_composer.mechanical.segment.get` answers. The switch is entered, never worked out from the heat pumps.
+`ph_composer.mechanical.export.segments` (section version 1, `features/mechanical/segment_export.rb`) claims the
+namespace on the Building Segment kind and requires the Zones section and the heat pump export: one record per
+exported Segment record in export identifier order, `{id, export_identifier, name}` and the six values, defaults
+written out. Where a Segment's switch is on and its exported blend has no recirculation cooling (no blend counts as
+none), or off and its blend cools, it notes `mechanical.segment_cooling_mismatch`, which never blocks; the preflight
+gives the same rows under this section from the live plan. The Python section (`MechanicalSegmentSection`,
+`mechanical_segment_sections.py`, required for export) attaches at `SEGMENT` and sets
+`set_points.mechanical_cooling`, `mech_room_temp` and the four `summer_ventilation` values on the shared
+`BldgSegment` in place; it never sets `set_points.winter` or `.summer`, which Programs writes, nor honeybee-ph's
+other seven summer ventilation values, which keep their defaults. Its result rows (`building_segments`) carry the
+export identifier and the six values as honeybee-ph holds them, and `conformance` reads them back from every reloaded
+Building Segment. PHX 1.59.4 copies all of them to the Variant's building data; its WUFI XML and METr writers carry
+the room temperature and the bypass mode and not mechanical cooling
+(`tests/python/test_mechanical_segment_phx_round_trip.py`).
 
 ## This computer's settings file
 
