@@ -155,6 +155,13 @@ two-cycle cap unreviewed.
 
 Tests: four more in `mechanical_panel_test.js`, one in `mechanical_balance_test.rb`.
 
+Final head `2b7b1afb`: `make ci` passes on Ruby 3.2.2 and 2.7.2, each "Ruby suite, 10 processes: 3350 runs, 44647
+assertions, 0 failures, 0 errors, 1 skips", JavaScript 1,167 passed, Python 379 passed and 1 skipped, hostkit 48
+runs, "RBZ verified: 733 files, 8780337 bytes, 27012485 bytes installed" (3.2.2). The browser checks pass on it
+(`mechanical_checks.cjs`, `inventories_checks.cjs`, `thermal_bridges_checks.cjs`, `preview_checks.cjs`). The
+Design System was re-synced from this PR's head `8218ed04` (artifact version 34: `bundle.css` rebuilt with the pill
+row, a PillRow card); the later commits change no shared stylesheet.
+
 ## Host
 
 Owed to MS2 (D4-31): case `M05` added to `planning/native-acceptance/cases.json`. `acceptance_ledger.py status` over
