@@ -111,12 +111,13 @@ lint-js:
 # Shipped code and tests never cite planning documents (context/CODING_STANDARDS.md, "Comments").
 # Planning ids: phase stages (P1-D, P3b-01, P4-01, P4-08b), interview questions (Q18), decisions (D7, R-D4,
 # D3b-02), acceptance cases (A02, R06, S01, T01, M01) and contract, requirement or finding numbers (C4, I10, U1,
-# B2, F8, F26). A review finding kept as a code comment is written `REVIEW F05` and is not a planning id. A
-# two-digit M followed by a number is an SVG path's move command (`M12 4v16`, `M18.992 12`), not a register id.
-PLANNING_IDS := \b(P\d-[A-F]\d?|P\d+[a-z]\d*-\d+|P\d+-\d+[a-z]?|M\d\d(?![\s,.]?-?\d)|Q\d{1,2}|D\d{1,2}|D\d+[a-z]\d*-\d+|D-\d+|M\d[a-z]|R-D\d+|R0\d|A\d\d|S\d\d|T\d\d|B\d|C\d|I\d{1,2}|U\d|(?<!REVIEW )F\d\d?)\b
+# B2, F8, F26). A review finding kept as a code comment is written `REVIEW F05` and is not a planning id.
+PLANNING_IDS := \b(P\d-[A-F]\d?|P\d+[a-z]\d*-\d+|P\d+-\d+[a-z]?|M\d\d|Q\d{1,2}|D\d{1,2}|D\d+[a-z]\d*-\d+|D-\d+|M\d[a-z]|R-D\d+|R0\d|A\d\d|S\d\d|T\d\d|B\d|C\d|I\d{1,2}|U\d|(?<!REVIEW )F\d\d?)\b
+# An SVG path's data (`d="M12 4v16"`) is skipped whole: its move commands read as register ids.
+SVG_PATH_DATA := \bd=[\x22\x27][^\x22\x27]*(*SKIP)(*FAIL)|
 # Planning moves when it is archived; a citation into it breaks. The vendored payload is exempt.
 lint-citations:
-	@if git grep $(CITATION_FLAGS) -nP 'planning/|\bPRD\b|CONTRACTS\.md C\d|$(PLANNING_IDS)' -- $(CITATION_PATHS) \
+	@if git grep $(CITATION_FLAGS) -nP '$(SVG_PATH_DATA)planning/|\bPRD\b|CONTRACTS\.md C\d|$(PLANNING_IDS)' -- $(CITATION_PATHS) \
 	    ':!src/ph_composer/vendor' \
 	    ':!tests/fixtures'; then \
 	  echo "lint-citations: cite context/ instead of planning (context/CODING_STANDARDS.md)"; exit 1; \

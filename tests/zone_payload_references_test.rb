@@ -92,6 +92,9 @@ class ZonePayloadReferencesTest < PhComposerTestCase
     assert_equal 2, rows.map { |row| row.fetch("id") }.uniq.length, "the copy is its own Zone"
     expected = { "single_id" => first, "multiple_ids" => [second] }
     assert_equal [expected, expected], rows.map { |row| payload(row) }
+
+    original_reference = rows.find { |row| row.dig("reference", "zone_path") == [1000] }.fetch("reference")
+    completed(invoke(PROBE::ASSIGN, "zones" => [{ "reference" => original_reference, "payload" => PROBE::EMPTY }]))
     refused(delete(second), "reference.in_use")
   end
 
@@ -109,20 +112,28 @@ class ZonePayloadReferencesTest < PhComposerTestCase
     assert_includes item_ids, first
   end
 
+  # A copy that keeps its Zone id is a second occurrence of one Zone: one entry each, as Zones' mode gives.
   def test_a_zone_keyed_projection_from_the_public_read_reaches_the_entities_the_zone_mode_paints
     first = @items.fetch("First")
     completed(assign("Apt 1" => { "single_id" => first, "multiple_ids" => [] }))
+    original = zone_group_named("Apt 1")
+    copy = Sketchup::Group.new(9000, original.entities, :name => "Apt 1")
+    Array(original.attribute_dictionaries).each do |dictionary|
+      dictionary.each { |key, value| copy.set_attribute(dictionary.name, key, value) }
+    end
+    @model.entities << copy
+    treat_duplicates_as_existing(@model)
 
     probe = project(PROBE::BY_SINGLE).sort_by { |entry| entry.path }
     zones = project(PhComposer::Zones::ColourModes::BY_ZONE).sort_by { |entry| entry.path }
-    assert_equal [[1000], [8000, 2000]], probe.map(&:path)
+    assert_equal [[1000], [8000, 2000], [9000]], probe.map(&:path)
     assert_equal zones.map { |entry| [entry.entity, entry.path, entry.transform.to_a] },
                  probe.map { |entry| [entry.entity, entry.path, entry.transform.to_a] }
-    assert_equal [first, nil], probe.map(&:value)
-    assert_in_delta 400, probe.last.transform.to_a[12], 1e-9, "the nested Zone's parent offset is composed"
+    assert_equal [first, nil, first], probe.map(&:value)
+    assert_in_delta 400, probe[1].transform.to_a[12], 1e-9, "the nested Zone's parent offset is composed"
 
     service = PhComposer::ColourBy.for(@session).activate(PROBE::BY_SINGLE)
-    assert_equal [1, 1], service.rows.map(&:count), "one Zone with the item, one unclassified"
+    assert_equal [2, 1], service.rows.map(&:count), "two occurrences with the item, one unclassified"
   end
 
   private

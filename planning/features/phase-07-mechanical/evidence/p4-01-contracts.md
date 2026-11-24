@@ -39,7 +39,7 @@ delete action that stage through `ph_composer.zones.stage_extension`, and a Zone
 `tests/zone_payload_references_test.rb`, on two Zones (one nested in a Group moved 400 in), Ruby 3.2.2:
 
 ```
-6 runs, 97 assertions, 0 failures, 0 errors, 0 skips
+6 runs, 98 assertions, 0 failures, 0 errors, 0 skips
 ```
 
 The same on Ruby 2.7.2 (`$(rbenv prefix 2.7.2)/bin/ruby -Itests tests/zone_payload_references_test.rb`).
@@ -49,7 +49,7 @@ The same on Ruby 2.7.2 (`$(rbenv prefix 2.7.2)/bin/ruby -Itests tests/zone_paylo
 | `a_plain_delete_refuses_an_item_named_in_either_slot_and_deletes_one_named_nowhere` | `reference.in_use` for an item in the single slot and for one only in the list; no revision change and no Model operation; an unnamed item deletes |
 | `a_delete_with_a_replacement_moves_both_slots_in_one_undo_step` | Both slots on both Zones move; one Model operation; Undo restores the payloads and the item |
 | `a_replacement_already_in_the_list_is_held_once` | `[first, second]` with first replaced by second reads `[second]` |
-| `a_copy_of_the_zone_keeps_its_payload` | A Zone Group copied with its attribute dictionaries (the stub's stand-in for a native copy, as Programs' copy test uses) and made independent has its own Zone id and the same payload; its list still blocks a delete. The native gesture is a host check |
+| `a_copy_of_the_zone_keeps_its_payload` | A Zone Group copied with its attribute dictionaries (the stub's stand-in for a native copy, as Programs' copy test uses) and made independent has its own Zone id and the same payload; with the original's payload emptied, the copy's list alone still blocks a delete. The native gesture is a host check |
 | `a_locked_zone_refuses_the_write_and_a_replacement_delete_touching_it` | `target.locked` for the assign and the replacement delete; no revision change and no Model operation; nothing moved |
 | `a_zone_keyed_projection_from_the_public_read_reaches_the_entities_the_zone_mode_paints` | Question 3, below |
 
@@ -79,14 +79,14 @@ Read in `honeybee_phhvac/properties/model.py` (1.33.68), `_build_mechanical_devi
 are keyed by identifier and two that differ raise `Conflicting ventilation systems share identifier`; hot water,
 heating, heat pump, supportive, exhaust and renewable systems are keyed by identifier with no check, so the last
 Room's object wins. The first Python test also checks the section built two distinct system objects with one identifier. The second shows the ventilation refusal; the hot water and heat pump behavior is
-read, not run, and is carried to P4-06 and P4-08 as a conformance check (CONTRACTS section 6).
+read, not run, and is carried to P4-06 and P4-08 as a conformance check on the written HBJSON before reload, since the reload itself hides the difference (CONTRACTS section 6; Codex review of PR #564).
 
 ### 3. A Zone-keyed Colour-by projection from a read
 
 The probe's `test.zone_payload.by_single` mode reads `ph_composer.zones.all` and resolves each row's
 `reference.zone_path` with `PhComposer::OccurrencePath.resolve`. Its entries equal Zones' `by_zone` entries in entity,
 path and world transform (colours and legend order are each mode's own) (`[[1000], [8000, 2000]]`, the nested Zone's x offset 400), carry the payload's item as the
-value, and the activated service shows two legend rows of one Zone each.
+value, and the activated service shows two legend rows. A copy of `Apt 1` that keeps its Zone id is a second occurrence: both modes give it its own entry (`[[1000], [8000, 2000], [9000]]`), and the item's legend row counts two.
 
 ### 4. `honeybee_phhvac` in the Pyodide runtime
 
@@ -112,7 +112,8 @@ A browser pass is not host evidence (the script says so). The installed-build ca
 - `stack.PACKAGES` gains `honeybee_phhvac`. `tests/python/test_imports.py` iterates the set: 30 passed. The runtime
   manifest was refreshed (`make runtime-manifest`). `html/runtime/runtime.js` keeps its own `STACK` list, which
   checks that no stack module loads at boot; `honeybee_ph` on it already covers `honeybee_phhvac`, so it is unchanged.
-- `PLANNING_IDS` adds `P\d+-\d+[a-z]?` and `M\d\d` not followed by a number (an SVG move command). With the old
+- `PLANNING_IDS` adds `P\d+-\d+[a-z]?` and `M\d\d`; the recipe skips SVG path data (`d="..."`) whole with a PCRE
+  `(*SKIP)(*FAIL)` branch, `SVG_PATH_DATA`, since its move commands (`M12 4v16`) read as register ids. With the old
   pattern a planted `P4-01`, `P4-08b`, `M01` and `M16` all passed (F22); now each fails, planted one at a time in
   `src/ph_composer/zz_planted.rb` and removed afterwards:
 
@@ -124,8 +125,9 @@ M16 exit=2 :: src/ph_composer/zz_planted.rb:2:# See M16.
 lint-citations: ok   (the tree, after removal)
 ```
 
-  `tests/python/test_githooks.py` reads the pattern from the Makefile and checks seven planted ids match and seven
-  texts do not (SVG paths, `REVIEW F05`, prose).
+  `tests/python/test_githooks.py` runs the Makefile's `lint-citations` in a scratch repository: nine planted
+  citations fail it (a register id followed by a date, and one beside SVG path data, included) and six texts pass
+  (SVG path data in double and single quotes, `REVIEW F05`, prose).
 
 ## Step 5: architecture review
 

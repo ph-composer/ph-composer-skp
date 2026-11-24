@@ -135,11 +135,13 @@ at 1.33.65 on 2026-10-21 and re-read at 1.33.68 by P4-01 on 2026-11-23: `set_ven
 and `add_renewable_device`; one ventilation system and one hot water system per Room, sets of the
 rest. A PH-Composer Zone is one Room, so each item maps onto the slots of the Rooms it serves.
 
-Open plan item: a translation section's `Attachment.key` names one host per translated object
-(`sections.py`). An item serving three Zones is therefore either one translated object per
-(item, Zone) pair sharing the item's identifier, or a new attachment shape. Decide at planning,
-with the shipped Spaces section as the pattern. Whether PHX then writes one METr device or three
-is a [metr-export](../../unscheduled/metr-export/README.md) row.
+A translation section's `Attachment.key` names one host per translated object (`sections.py`), so
+an item serving three Zones is written as one translated object per (item, Zone) pair sharing the
+item's identifiers ([D4-01](../DECISIONS.md#part-2-decisions-for-ed)). P4-01 proved the shape: the
+HBJSON reloads one object for the shared identifiers, and PHX makes one device from it; each export
+stage repeats that PHX round trip ([D4-25](../DECISIONS.md#part-4-review-after-programs-2026-11-22),
+[CONTRACTS section 8](../CONTRACTS.md#8-what-p4-01-found)). The METr file and its import stay
+[metr-export](../../unscheduled/metr-export/README.md)'s.
 
 Field units below are read from the honeybee-ph class docstrings where they state one. Fields
 with no stated unit are confirmed at the family's interview. Class and field names were

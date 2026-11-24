@@ -120,21 +120,29 @@ def test_every_planned_target_and_variable_exists_in_the_makefile() -> None:
             assert re.search(rf"^{variable} =", makefile, re.MULTILINE), variable
 
 
-def planning_ids() -> re.Pattern[str]:
-    """`PLANNING_IDS` as the Makefile declares it; Python's `re` reads the same constructs `git grep -P` does."""
-    makefile = MAKEFILE.read_text(encoding="utf-8")
-    declared = re.search(r"^PLANNING_IDS := (.+)$", makefile, re.MULTILINE)
-    assert declared
-    return re.compile(declared.group(1))
+def citation_lint(tmp_path: Path, text: str) -> str:
+    """The last line `make lint-citations` prints over one file holding `text`, in a scratch repository."""
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "planted.rb").write_text(text + "\n", encoding="utf-8")
+    run = ["make", "-s", "-f", str(MAKEFILE), "lint-citations", "CITATION_PATHS=planted.rb"]
+    completed = subprocess.run(run, cwd=tmp_path, capture_output=True, text=True, check=False)
+    return completed.stdout.strip().splitlines()[-1]
 
 
 # Built by joining, so this file carries none of them: the lint reads tests too.
 PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "D" + "4-01", "P3b" + "-01", "M" + "3a"]
 
 
-@pytest.mark.parametrize("text", [f"# Follows {planted}, as agreed." for planted in PLANTED])
-def test_the_citation_lint_catches_stage_and_register_ids(text: str) -> None:
-    assert planning_ids().search(text)
+@pytest.mark.parametrize(
+    "text",
+    [
+        *(f"# Follows {planted}, as agreed." for planted in PLANTED),
+        "# See " + "M" + "01 2026-11-23.",
+        '<path d="M1 1 L1 17"/> # cite ' + "M" + "16",
+    ],
+)
+def test_the_citation_lint_catches_stage_and_register_ids(tmp_path: Path, text: str) -> None:
+    assert citation_lint(tmp_path, text).startswith("lint-citations: cite context/")
 
 
 @pytest.mark.parametrize(
@@ -142,15 +150,14 @@ def test_the_citation_lint_catches_stage_and_register_ids(text: str) -> None:
     [
         '<path d="M12 4v16M4 12h16"/>',
         '<path d="M18.992 12H2.041"/>',
-        '<path d="M10 3h10v18H10M3 12h12m-4-4"/>',
-        "M14-4",
+        "url(\"<svg><path d='M11 7 6 2'/></svg>\")",
         "# REVIEW F05 keeps this.",
         "Phase 4 module",
         "ph_composer.mechanical",
     ],
 )
-def test_the_citation_lint_passes_svg_paths_and_review_findings(text: str) -> None:
-    assert not planning_ids().search(text)
+def test_the_citation_lint_passes_svg_path_data_and_review_findings(tmp_path: Path, text: str) -> None:
+    assert citation_lint(tmp_path, text) == "lint-citations: ok"
 
 
 @pytest.mark.parametrize(

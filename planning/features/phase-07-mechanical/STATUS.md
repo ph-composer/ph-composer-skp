@@ -53,7 +53,7 @@ only when all three are done and its evidence file exists.
 
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Equipment contracts, lint and the Pyodide seam | In review | | `feat/phase-07-mechanical-p4-01` | Recorded at the gate | Owed: MS1 sitting | Architecture review recorded, no blocking finding; Codex pending | [p4-01-contracts](evidence/p4-01-contracts.md) | M01 |
+| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Equipment contracts, lint and the Pyodide seam | In review | | `feat/phase-07-mechanical-p4-01`, [#564](https://github.com/ph-composer/ph-composer-skp/pull/564) | `make ci` pass on Ruby 2.7.2 and 3.2.2 at `f2c56dd5` (3,297 runs, 43,387 assertions each; Python 359 passed, 1 skipped) | Owed: MS1 sitting | Architecture review recorded, no blocking finding; Sonnet adversarial read, findings fixed before the gate; Codex gpt-6.2-sol cycle 1 on `f2c56dd5`: 1 P1, 4 P2, 1 P3, all fixed in the next commit | [p4-01-contracts](evidence/p4-01-contracts.md) | M01 |
 | [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The equipment feature and the Ventilator kind | Scoped | P4-01 | | | | ordinary | | M02 |
 | [P4-03](phases/p4-03-serves-assignment.md) | Serves: the assignment payload on the Zone | Scoped | P4-02 | | | | strong | | M03 |
 | [P4-04](phases/p4-04-ventilator-export.md) | Ventilator export | Scoped | P4-03 | | | | strong | | M04 |
