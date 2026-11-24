@@ -153,7 +153,7 @@ Scoped on 2026-11-15, including the Building Segment work it stands on and the P
 The [Phase 4 coordinating packet](features/phase-07-mechanical/README.md) was planned in detail on
 2026-10-21: stages P4-01 to P4-15, decisions D4-01 to D4-12 answered as recommended, register M01 to M15. Families 3
 to 7, piping and ducting were gate stubs until their interviews. Ed authorized every stage on 2026-11-23, run through
-the pr-loop with merge on green and host gates batched by milestone; P4-01 (#564), P4-02 (#565) and P4-03 (#566) merged; P4-04 is in review (#567), closing MS1 offline.
+the pr-loop with merge on green and host gates batched by milestone; P4-01 (#564), P4-02 (#565) and P4-03 (#566) merged, and P4-04 (#567), closing MS1 offline; P4-05, the Mechanical tab and the Ventilators view, is in review.
 
 Reviewed on 2026-11-22 after Phase 6 Programs
 ([DECISIONS, Part 4](features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22)):
@@ -165,7 +165,7 @@ into the packet. Phase 3b's stages, which several rows below name as needs, all 
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4.1 | [Equipment](features/phase-07-mechanical/equipment/README.md): shared shape and Ventilators | In progress: Ventilators authored, served and exported offline (P4-01 to P4-04, #564 to #567); MS1's host sitting owed | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is a round trip here (D4-25), and the METr file and its import are metr-export's. Owns the balance by ventilator (Spaces shows balance by Zone only), which counts a By Program Zone at its Program's flow (D4-24). The feature is `ph_composer.mechanical` (D4-22). No Phase 3b dependency |
+| 4.1 | [Equipment](features/phase-07-mechanical/equipment/README.md): shared shape and Ventilators | In progress: Ventilators authored, served and exported offline (P4-01 to P4-04, #564 to #567), and on the Mechanical tab with their balance (P4-05, in review); MS1's host sitting owed | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is a round trip here (D4-25), and the METr file and its import are metr-export's. Owns the balance by ventilator (Spaces shows balance by Zone only), which counts a By Program Zone at its Program's flow (D4-24). The feature is `ph_composer.mechanical` (D4-22). No Phase 3b dependency |
 | 4.2 | [ERV ducting](features/phase-07-mechanical/erv-ducting/README.md) | Requested; gate stub P4-14 | Needs 4.1 and its interview; Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08 are merged; a Ducting pill under Ventilation on the Mechanical tab (D4-13) |
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
 | 4.4 | [Hot water piping](features/phase-07-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and its interview; Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 are merged; a Piping pill under Hot Water on the Mechanical tab (D4-13) |

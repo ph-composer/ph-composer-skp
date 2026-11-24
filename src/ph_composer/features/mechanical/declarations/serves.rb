@@ -50,6 +50,9 @@ module PhComposer
         "building_segment_id" => Shapes.described({ "type" => %w[string null] },
                                                   "Null in No Building Segment, and for a Zone not yet adopted, " \
                                                   "which names its Segment by text."),
+        "building_segment" => Shapes.described({ "type" => %w[string null] },
+                                               "Its Building Segment's name, or the name a Zone not yet adopted " \
+                                               "carries; null in none."),
         "slots" => Shapes.described(SLOTS, "What serves it, every slot empty when it stores none."),
         "payload_status" => Shapes.described({ "type" => %w[string null] },
                                              "The stored payload's status, null for none; any but understood reads " \

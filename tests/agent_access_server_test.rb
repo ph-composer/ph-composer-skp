@@ -119,8 +119,15 @@ class AgentAccessServerTest < PhComposerTestCase
     owner = call_tool("discover", "owner" => TestFeature::ID)
 
     assert_equal [@session.id], index.dig("structuredContent", "sessions").map { |session| session.fetch("id") }
-    assert_includes index.dig("structuredContent", "operations", "queries", TestFeature::ID),
-                    "test.fixture.total_length"
+    # The index names every operation while it fits under Discovery::INDEX_BYTES, and counts them by owner once
+    # the installed registry outgrows it (context/AGENT_INTERFACE.md, "User-controlled local access").
+    listed = index.dig("structuredContent", "operations", "queries", TestFeature::ID)
+    if listed
+      assert_includes listed, "test.fixture.total_length"
+    else
+      assert_equal 1, index.dig("structuredContent", "operation_counts", "queries", TestFeature::ID)
+      assert_match(/page them with section operations/, index.dig("structuredContent", "next"))
+    end
     assert_equal @row.slice("id", "label", "capabilities"), index.dig("structuredContent", "connection")
     assert_equal "test.fixture.total_length",
                  owner.dig("structuredContent", "queries").first.fetch("name")

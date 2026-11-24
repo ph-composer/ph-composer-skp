@@ -93,7 +93,7 @@ module ZonePayloadProbe
   # Each Zone occurrence keyed by Zone id from Zones' public read, its entity and world transform resolved from
   # the row's occurrence path by the core walk: the projection names no Zones internals.
   def zone_entries(read)
-    read.query("ph_composer.zones.all").fetch("zones").map do |row|
+    read.query("ph_composer.zones.occurrences").fetch("zones").map do |row|
       path = row.dig("reference", "zone_path")
       resolved = PhComposer::OccurrencePath.resolve(read.model, path)
       value = row.fetch("extension_data", {}).dig(NAMESPACE, "payload", "single_id")

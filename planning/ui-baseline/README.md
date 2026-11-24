@@ -75,6 +75,11 @@ Bridges, Library, Export, then the reserved Systems button, disabled. Phase 4's
 [D4-27](../features/phase-07-mechanical/DECISIONS.md#part-4-review-after-programs-2026-11-22),
 answered 2026-11-22, puts the Mechanical tab after Thermal Bridges and before Library.
 
+Built by P4-05 on 2026-11-24 (offline; the host review is owed to the MS2 sitting): the row reads Climate, Zones,
+Programs, Assemblies, Window Types, Thermal Bridges, Mechanical, Library, Export, and the reserved Systems button is
+gone. Mechanical opens on one page header, the Ventilation subtab and its Ventilators pill; the pill row is the kit
+part `html/pill_row.js`, and later families register their subtabs and pills without editing the tab.
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the
@@ -218,7 +223,7 @@ in the polish skill's `patterns.md` once Ed accepts it.
 | Window Schedule for our own units | The predecessor's Schedule layout, minus adoption | window-types |
 | Preferences / Libraries | The predecessor's Library setup surface | libraries |
 | Attached zones subtab and its inline creation from the boundary condition chip | A Library subtab with `formDialog` | face-assignment Q20, Q21 |
-| Systems: Equipment, ERV ducting and Hot-water piping peer subtabs | Shared subtabs nav, one work surface at a time | confirmed by D4; equipment Q9, ducting Q8, piping Q12. Revised 2026-11-15 by Phase 4 D4-13: the Mechanical tab, subtabs by system, a pill row for the tables inside one |
+| Systems: Equipment, ERV ducting and Hot-water piping peer subtabs | Shared subtabs nav, one work surface at a time | confirmed by D4; equipment Q9, ducting Q8, piping Q12. Revised 2026-11-15 by Phase 4 D4-13: the Mechanical tab, subtabs by system, a pill row for the tables inside one. Built by P4-05 (Ventilation › Ventilators), host review owed to MS2 |
 
 ## Decisions recorded
 

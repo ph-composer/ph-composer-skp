@@ -219,7 +219,11 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
     window.previewHost.snapshot();
   });
   await page.locator(`${shown} .pgm-badge`, { hasText: "laboratories" }).waitFor();
-  const editorTop = await page.locator(`${shown} .pgm-main`).evaluate(node => node.getBoundingClientRect().top);
+  // Measured from the top of the panes: the tab row above them wraps to more rows as the panel narrows (three at
+  // 420 px since the Mechanical tab), which is the app header's height, not the editor moving.
+  const paneTop = () => page.evaluate(() => document.querySelector(".panel-panes").getBoundingClientRect().top);
+  const editorTop = await page.locator(`${shown} .pgm-main`).evaluate(node => node.getBoundingClientRect().top) -
+    await paneTop();
   for (const [width, height] of PANEL_SIZES) {
     await setPanelSize(page, width, height);
     const facts = await paneFacts(page, { floating: [], header: null });
@@ -232,7 +236,8 @@ check({ name: "programs_tab", output }, async ({ newPage, step }) => {
     if (width < 700) {
       assert.ok(boxes[1].top >= boxes[0].bottom - 1, `the sidebar sits beneath the editor at ${width}`);
     }
-    assert.ok(Math.abs(boxes[0].top - editorTop) < 60, `the editor keeps its place at ${width} x ${height}`);
+    assert.ok(Math.abs(boxes[0].top - await paneTop() - editorTop) < 60,
+      `the editor keeps its place at ${width} x ${height}`);
     await page.screenshot({ path: path.join(output, `programs-${width}.png`) });
   }
   await setPanelSize(page, 1280, 800);

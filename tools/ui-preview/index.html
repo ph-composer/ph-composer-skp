@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../../src/ph_composer/html/features/thermal_bridges/thermal_bridges.css">
     <link rel="stylesheet" href="../../src/ph_composer/html/features/climate/climate.css">
     <link rel="stylesheet" href="../../src/ph_composer/html/features/programs/programs.css">
+    <link rel="stylesheet" href="../../src/ph_composer/html/features/mechanical/mechanical.css">
     <!-- panel-styles:end -->
   </head>
   <body class="phc-workspace live-panel">
@@ -34,9 +35,9 @@
         <button type="button" data-tab="assemblies">Assemblies</button>
         <button type="button" data-tab="windows">Window Types</button>
         <button type="button" data-tab="thermal_bridges">Thermal Bridges</button>
+        <button type="button" data-tab="mechanical">Mechanical</button>
         <button type="button" data-tab="library">Library</button>
         <button type="button" data-tab="export">Export</button>
-        <button type="button" disabled data-tooltip="Planned" aria-label="Systems, planned">Systems</button>
       </nav>
       <!-- The row's end: display units, then Setup for the whole app, apart from any page's own gear. -->
       <div class="phc-app-tools">
@@ -56,6 +57,7 @@
       <div data-pane="windows" hidden></div>
       <div data-pane="assemblies" hidden></div>
       <div data-pane="thermal_bridges" hidden></div>
+      <div data-pane="mechanical" hidden></div>
       <div data-pane="library" hidden></div>
       <div data-pane="export" hidden></div>
       <div data-pane="setup" hidden></div>
@@ -131,6 +133,13 @@
     <script src="../../src/ph_composer/html/features/climate/values_editor.js"></script>
     <script src="../../src/ph_composer/html/source_cards.js"></script>
     <script src="../../src/ph_composer/html/features/climate/section.js"></script>
+    <script src="../../src/ph_composer/html/features/mechanical/optional_values.js"></script>
+    <script src="../../src/ph_composer/html/features/mechanical/systems.js"></script>
+    <script src="../../src/ph_composer/html/pill_row.js"></script>
+    <script src="../../src/ph_composer/html/features/mechanical/section.js"></script>
+    <script src="../../src/ph_composer/html/features/mechanical/serves.js"></script>
+    <script src="../../src/ph_composer/html/sections/colour_by.js"></script>
+    <script src="../../src/ph_composer/html/features/mechanical/ventilators.js"></script>
     <script src="../../src/ph_composer/html/features/programs/airtightness.js"></script>
     <script src="../../src/ph_composer/html/features/programs/program_loads.js"></script>
     <script src="../../src/ph_composer/html/features/programs/device_dialog.js"></script>
@@ -150,7 +159,6 @@
     <script src="../../src/ph_composer/html/features/spaces/create_review.js"></script>
     <script src="../../src/ph_composer/html/features/spaces/mark_paint.js"></script>
     <script src="../../src/ph_composer/html/features/spaces/selection.js"></script>
-    <script src="../../src/ph_composer/html/sections/colour_by.js"></script>
     <script src="../../src/ph_composer/html/features/spaces/view.js"></script>
     <script src="../../src/ph_composer/html/features/thermal_bridges/shared.js"></script>
     <script src="../../src/ph_composer/html/features/thermal_bridges/edge_tool.js"></script>

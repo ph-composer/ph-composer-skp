@@ -310,6 +310,28 @@ lighting stays in W. Escape closes an open bubble, then clears the checked Zones
 Values follow the unit system: people and watts per ft², cfm per person and per ft², and °F in IP.
 Hot water flow stays in L/h per m².
 
+## Add Ventilators and choose the Zones they serve
+
+1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation** now, and the
+   pills beneath them pick one table of that system, **Ventilators** now. The tab remembers the subtab and
+   table you last used on this computer.
+2. **+ New Ventilator** asks for a Tag; every other value starts at its default (0.55 Wh/m³, frost
+   protection on below -5 °C, in conditioned space). Edit any value in its cell: Enter or leaving the cell
+   applies it as one Undo step. Recovery efficiencies are fractions from 0 to 1. Electric efficiency
+   reads in Wh/m³, or W/cfm in IP.
+3. Click a row's **Serves** cell to choose its Zones. Zones are listed under their Building Segments, and a
+   Segment's checkbox takes all of its Zones. A Zone another Ventilator serves says so; assigning it asks
+   first and then **Replace and assign** moves it. Zones you uncheck are cleared. Each Zone has one
+   Ventilator.
+4. **Supply** and **Extract** add up the Zones the Ventilator serves: each Zone's Space rates, or, for a Zone
+   on its Program's ventilation, that flow as both. They turn amber when they differ by more than a tenth.
+   A dash means the value is not known yet; its tooltip says why.
+5. The subsoil heat exchanger and the preheated intake temperature sit behind the chevron at the start of
+   each row, blank until you enter them. The chevron is filled while either is set.
+6. **Columns** hides Manufacturer, Model and Notes. The palette in the **Serves** header colours each Zone
+   in the model by its Ventilator; a Zone with none stays uncoloured. **Duplicate** copies a Ventilator,
+   and **Delete** asks which Ventilator takes its place on its Zones, or clears them.
+
 ## Reuse library definitions
 
 Use **Libraries** to add a file, a folder of files or a connection supplied by a hosted provider.

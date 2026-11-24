@@ -23,7 +23,16 @@ module PhComposer
                .uniq.sort.freeze
       EXISTS = ["The Ventilator exists and is readable."].freeze
       UNIQUE = "Its name, trimmed and in any case, is not another Ventilator's."
-      ROW = Shapes.with(Shapes.row(KIND), ServesRegistration::SERVED)
+      FLOW = { "type" => %w[number null], "minimum" => 0, "x-unit" => "m3/h" }.freeze
+      BALANCE = Shapes.described(Shapes.object({
+        "supply_m3h" => Shapes.described(FLOW, "Summed over the Zones the export writes it to; null while unknown."),
+        "extract_m3h" => Shapes.described(FLOW, "As supply_m3h."),
+        "imbalanced" => Shapes.described({ "type" => "boolean" }, "Supply and extract differ by more than a tenth " \
+                                                                  "of the larger."),
+        "missing" => Shapes.described({ "type" => %w[string null] }, "Why the sums are null; null when known.")
+      }), "Its airflow balance: each Zone in Detailed airflows gives its Spaces' sums, a By Program Zone its " \
+          "Program's flow as both supply and extract.").freeze
+      ROW = Shapes.with(Shapes.row(KIND), ServesRegistration::SERVED.merge("balance" => BALANCE))
       LIST_PARAMS = DefinitionLists.params(ROW).tap do |params|
         params["properties"]["ids"]["items"] = Shapes.id(KIND.id_prefix, "A Ventilator id.")
       end.freeze
@@ -48,19 +57,23 @@ module PhComposer
 
       def install_reads(feature)
         list = Ventilators::Reads::LIST
-        feature.query(list, :description => "One bounded page of Ventilators in id order, with export readiness.",
+        feature.query(list, :description => "One bounded page of Ventilators in id order, with export readiness, " \
+                                            "the Zones each serves and its airflow balance.",
                             :refuses => PAGE + Serves::State::REFUSES, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
                             :examples => LIST_EXAMPLES) do |request|
-          Ventilators::Reads.list(request, :extra => Serves::Reads.usage(request, KIND.id))
+          usage = Serves::Reads.usage(request, KIND.id, :with_balance => true)
+          Ventilators::Reads.list(request, :extra => usage)
         end
-        feature.query("#{PREFIX}.all", :description => "Every Ventilator with its values, export readiness and the " \
-                                                       "Zones it serves, for the panel snapshot.",
+        feature.query("#{PREFIX}.all", :description => "Every Ventilator with its values, export readiness, the " \
+                                                       "Zones it serves and its airflow balance, for the panel " \
+                                                       "snapshot.",
                                        :response => { "bounded" => false, "prefer" => list },
                                        :refuses => Serves::State::REFUSES, :params => Shapes::NONE,
                                        :result => DefinitionLists.result(ROW, :paged => false),
                                        :examples => [{}]) do |request|
-          Ventilators::Reads.all(request, :extra => Serves::Reads.usage(request, KIND.id))
+          usage = Serves::Reads.usage(request, KIND.id, :with_balance => true)
+          Ventilators::Reads.all(request, :extra => usage)
         end
         feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
       end

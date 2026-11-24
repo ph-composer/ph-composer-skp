@@ -16255,6 +16255,7 @@ Result:
           "reference",
           "name",
           "building_segment_id",
+          "building_segment",
           "slots",
           "payload_status",
           "items",
@@ -16295,6 +16296,13 @@ Result:
               "null"
             ],
             "description": "Null in No Building Segment, and for a Zone not yet adopted, which names its Segment by text."
+          },
+          "building_segment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Its Building Segment's name, or the name a Zone not yet adopted carries; null in none."
           },
           "slots": {
             "type": "object",
@@ -16446,6 +16454,7 @@ Result:
           "reference",
           "name",
           "building_segment_id",
+          "building_segment",
           "slots",
           "payload_status",
           "items",
@@ -16486,6 +16495,13 @@ Result:
               "null"
             ],
             "description": "Null in No Building Segment, and for a Zone not yet adopted, which names its Segment by text."
+          },
+          "building_segment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Its Building Segment's name, or the name a Zone not yet adopted carries; null in none."
           },
           "slots": {
             "type": "object",
@@ -16611,7 +16627,7 @@ Example params:
 
 ### `ph_composer.mechanical.ventilators.all`
 
-Every Ventilator with its values, export readiness and the Zones it serves, for the panel snapshot. Owner: `ph_composer.mechanical`.
+Every Ventilator with its values, export readiness, the Zones it serves and its airflow balance, for the panel snapshot. Owner: `ph_composer.mechanical`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.ventilators.list` instead.
 
@@ -16655,7 +16671,8 @@ Result:
           "export_ready",
           "export_blockers",
           "zones",
-          "findings"
+          "findings",
+          "balance"
         ],
         "properties": {
           "id": {
@@ -17009,6 +17026,48 @@ Result:
                 }
               }
             }
+          },
+          "balance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "supply_m3h",
+              "extract_m3h",
+              "imbalanced",
+              "missing"
+            ],
+            "properties": {
+              "supply_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "m3/h",
+                "description": "Summed over the Zones the export writes it to; null while unknown."
+              },
+              "extract_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "m3/h",
+                "description": "As supply_m3h."
+              },
+              "imbalanced": {
+                "type": "boolean",
+                "description": "Supply and extract differ by more than a tenth of the larger."
+              },
+              "missing": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Why the sums are null; null when known."
+              }
+            },
+            "description": "Its airflow balance: each Zone in Detailed airflows gives its Spaces' sums, a By Program Zone its Program's flow as both supply and extract."
           }
         }
       }
@@ -17048,7 +17107,7 @@ Example params:
 
 ### `ph_composer.mechanical.ventilators.list`
 
-One bounded page of Ventilators in id order, with export readiness. Owner: `ph_composer.mechanical`.
+One bounded page of Ventilators in id order, with export readiness, the Zones each serves and its airflow balance. Owner: `ph_composer.mechanical`.
 
 Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
@@ -17082,7 +17141,8 @@ Params:
           "export_ready",
           "export_blockers",
           "zones",
-          "findings"
+          "findings",
+          "balance"
         ]
       },
       "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
@@ -17474,6 +17534,48 @@ Result:
                 }
               }
             }
+          },
+          "balance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "supply_m3h",
+              "extract_m3h",
+              "imbalanced",
+              "missing"
+            ],
+            "properties": {
+              "supply_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "m3/h",
+                "description": "Summed over the Zones the export writes it to; null while unknown."
+              },
+              "extract_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "x-unit": "m3/h",
+                "description": "As supply_m3h."
+              },
+              "imbalanced": {
+                "type": "boolean",
+                "description": "Supply and extract differ by more than a tenth of the larger."
+              },
+              "missing": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Why the sums are null; null when known."
+              }
+            },
+            "description": "Its airflow balance: each Zone in Detailed airflows gives its Spaces' sums, a By Program Zone its Program's flow as both supply and extract."
           }
         }
       }
@@ -44605,6 +44707,141 @@ Example params:
   ],
   "limit": 50
 }
+```
+
+### `ph_composer.zones.occurrences`
+
+Every Zone occurrence's id, reference, state, values and extension data, without its Faces, so an unreadable Face record does not refuse it: for a feature that colours or assigns Zones. Owner: `ph_composer.zones`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.zones.list` instead.
+
+Refuses: `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "reference",
+          "state",
+          "values",
+          "extension_data"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "found",
+              "ambiguous",
+              "shared_definition",
+              "wrong_hierarchy"
+            ]
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "ground_depth_mm"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ground_depth_mm": {
+                "type": "number",
+                "x-unit": "mm"
+              },
+              "building_segment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "level_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          }
+        }
+      },
+      "description": "Every Zone occurrence, copies and nested Zones included."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.zones.options.adoption_preview`
@@ -91073,6 +91310,102 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.locate`
+
+Open where a Mechanical finding is fixed: the Mechanical tab with its Ventilators narrowed to ventilator_ids, or, without them, the Zones tab with zones checked. Owner: `ph_composer.mechanical`.
+
+Side effects: Opens or raises the panel on the Mechanical or the Zones tab.
+
+Refuses: `session.inactive`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ventilator_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^vnt_[A-Za-z0-9]{12}$",
+        "description": "A Ventilator id."
+      },
+      "description": "Ventilators to show on the Mechanical tab, its Ventilators narrowed to them.",
+      "maxItems": 500
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Zones to check on the Zones tab, when no ventilator_ids are given.",
+      "maxItems": 500
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "opened"
+  ],
+  "properties": {
+    "opened": {
+      "type": "boolean"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "ventilator_ids": [
+    "vnt_Ab12Cd34Ef56"
+  ]
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        1201
+      ]
+    }
+  ]
+}
+```
+
 ### `ph_composer.programs.locate`
 
 Open the Zones tab on the Programs view with the given Zones checked, and a Building Segment's settings dialog when one is named. Owner: `ph_composer.programs`.
@@ -98652,3 +98985,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.87 | 2026-11-23 | The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with the reads ventilators.list and ventilators.all, whose rows carry export_ready and export_blockers, and the snapshot section ph_composer.mechanical.ventilators. |
 | 1.88 | 2026-11-23 | What serves each Zone: the extension ph_composer.mechanical.zone_serves on the Zone record, ph_composer.mechanical.serves.assign and serves.clear, the reads serves.list and serves.all with the snapshot section ph_composer.mechanical.serves, and the codes mechanical.slot_filled, zone_unventilated, item_unserved, item_missing and zone_left_out. ventilators.list and ventilators.all rows carry zones and findings; ventilators.delete takes replacement_id, an id or null, and refuses reference.in_use naming the Zones without one. |
 | 1.89 | 2026-11-24 | The Ventilator export: the section ph_composer.mechanical.export.ventilation writes one ventilation system per served Zone and claims ph_composer.mechanical.zone_serves, now required for export. ph_composer.mechanical.preflight is new; mechanical.item_missing blocks export and mechanical.item_across_segments is a new code. |
+| 1.90 | 2026-11-24 | ph_composer.mechanical.ventilators.all and .list rows gain balance, the airflow balance over the Zones each Ventilator serves, and ph_composer.mechanical requires ph_composer.programs. ph_composer.mechanical.serves rows gain building_segment, the Segment's name. ph_composer.zones.occurrences is new: every Zone occurrence without its Faces. ph_composer.mechanical.locate is new, and ph_composer.mechanical.preflight rows about a Ventilator or a Zone carry locate. |

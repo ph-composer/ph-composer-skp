@@ -111,7 +111,10 @@ PhComposerUI.define("unit_tables", [], function () {
     airflow_per_person: { label: "airflow per person", factor: FT3_PER_M3 / 60, precision: { SI: 1, IP: 1 },
     si: unit("m3_h_person", "m³/h per person"), ip: unit("cfm_person", "cfm per person") },
     airflow_per_area: { label: "airflow per area", factor: FT3_PER_M3 / 60 / FT2_PER_M2, precision: { SI: 2, IP: 3 },
-    si: unit("m3_h_m2", "m³/h per m²"), ip: unit("cfm_ft2", "cfm/ft²") }
+    si: unit("m3_h_m2", "m³/h per m²"), ip: unit("cfm_ft2", "cfm/ft²") },
+    /* A Ventilator's electric efficiency: watt-hours per cubic metre moved, or watts per cfm, airflow's inverse. */
+    electric_efficiency: { label: "electric efficiency", factor: 60 / FT3_PER_M3, precision: { SI: 2, IP: 2 },
+    si: unit("wh_m3", "Wh/m³"), ip: unit("w_cfm", "W/cfm") }
   };
 
   var DIMENSION_FORMATS = [

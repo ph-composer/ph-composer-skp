@@ -196,6 +196,17 @@ html { height: 100%; }
   background: transparent;
   box-shadow: inset 0 -2px var(--interaction-highlight);
 }
+/* The pill row beneath a page's subtabs picks one table inside the shown subtab: setting choices drawn as pills,
+   the current one in the active teal tint (pill_row.js). */
+.phc-pill-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px var(--page-gutter) 0; }
+.phc-workspace .phc-pill-row button.phc-pill { min-height: 28px; height: 28px; padding: 0 12px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface);
+  color: var(--muted-strong);
+  font-size: var(--text-sm); }
+.phc-workspace .phc-pill-row button.phc-pill[aria-pressed="true"],
+.phc-workspace .phc-pill-row button.phc-pill[aria-pressed="true"]:hover:enabled {
+  color: var(--interaction-highlight); background: var(--interaction-highlight-tint);
+  border-color: var(--interaction-highlight); font-weight: 600; }
 .phc-grid-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .phc-grid-tool-group { display: flex; gap: 4px; }
 .phc-grid-tool-group.is-idle { visibility: hidden; }

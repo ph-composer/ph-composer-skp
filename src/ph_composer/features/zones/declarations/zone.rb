@@ -60,6 +60,11 @@ module PhComposer
                                                             "face_area_m2" => AREA_TOTAL,
                                                             "unclassified_face_area_m2" => AREA_TOTAL,
                                                             "independence" => INDEPENDENCE)
+      OCCURRENCES_RESULT = Shapes.object({
+        "zones" => Shapes.list(Shapes.object(ZONE_ROW.fetch("properties").slice("id", "reference", "state", "values",
+                                                                                "extension_data")),
+                               :description => "Every Zone occurrence, copies and nested Zones included.")
+      }).freeze
       # A row as `list` returns it: whole, or with `fields` only its identity, state and those values.
       PROJECTED_ZONE_ROW = ZONE_ROW.merge(
         "required" => %w[id reference state values],
@@ -148,6 +153,13 @@ module PhComposer
                       :params => Shapes::NONE, :result => ALL_RESULT, :examples => [{}]) do |request|
           Zones.all(request)
         end
+        feature.query(Zones::OCCURRENCES_READ,
+                      :response => { "bounded" => false, "prefer" => "#{FEATURE_ID}.list" },
+                      :description => "Every Zone occurrence's id, reference, state, values and extension data, " \
+                                      "without its Faces, so an unreadable Face record does not refuse it: for a " \
+                                      "feature that colours or assigns Zones.",
+                      :refuses => Refuses::READ, :params => Shapes::NONE, :result => OCCURRENCES_RESULT,
+                      :examples => [{}]) { |request| Zones.occurrences(request) }
         install_containment(feature)
         install_make_candidates(feature)
         install_overview_pages(feature)

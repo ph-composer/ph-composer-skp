@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="features/thermal_bridges/thermal_bridges.css">
     <link rel="stylesheet" href="features/climate/climate.css">
     <link rel="stylesheet" href="features/programs/programs.css">
+    <link rel="stylesheet" href="features/mechanical/mechanical.css">
   </head>
   <body class="phc-workspace live-panel" data-phc-entry="panel">
     <div class="phc-app-header">
@@ -32,9 +33,9 @@
         <button type="button" data-tab="assemblies">Assemblies</button>
         <button type="button" data-tab="windows">Window Types</button>
         <button type="button" data-tab="thermal_bridges">Thermal Bridges</button>
+        <button type="button" data-tab="mechanical">Mechanical</button>
         <button type="button" data-tab="library">Library</button>
         <button type="button" data-tab="export">Export</button>
-        <button type="button" disabled data-tooltip="Planned" aria-label="Systems, planned">Systems</button>
       </nav>
       <!-- The row's end: display units, then Setup for the whole app, apart from any page's own gear. -->
       <div class="phc-app-tools">
@@ -54,6 +55,7 @@
       <div data-pane="windows" hidden></div>
       <div data-pane="assemblies" hidden></div>
       <div data-pane="thermal_bridges" hidden></div>
+      <div data-pane="mechanical" hidden></div>
       <div data-pane="library" hidden></div>
       <div data-pane="export" hidden></div>
       <div data-pane="setup" hidden></div>
@@ -127,6 +129,13 @@
     <script src="features/climate/values_editor.js"></script>
     <script src="source_cards.js"></script>
     <script src="features/climate/section.js"></script>
+    <script src="features/mechanical/optional_values.js"></script>
+    <script src="features/mechanical/systems.js"></script>
+    <script src="pill_row.js"></script>
+    <script src="features/mechanical/section.js"></script>
+    <script src="features/mechanical/serves.js"></script>
+    <script src="sections/colour_by.js"></script>
+    <script src="features/mechanical/ventilators.js"></script>
     <script src="features/programs/airtightness.js"></script>
     <script src="features/programs/program_loads.js"></script>
     <script src="features/programs/device_dialog.js"></script>
@@ -146,7 +155,6 @@
     <script src="features/spaces/create_review.js"></script>
     <script src="features/spaces/mark_paint.js"></script>
     <script src="features/spaces/selection.js"></script>
-    <script src="sections/colour_by.js"></script>
     <script src="features/spaces/view.js"></script>
     <script src="features/thermal_bridges/shared.js"></script>
     <script src="features/thermal_bridges/edge_tool.js"></script>

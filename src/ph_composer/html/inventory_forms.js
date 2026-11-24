@@ -104,7 +104,8 @@ function (RecordForm, request, snapshot, ui) {
   this.withdraw(); };
 
   /* Duplicate for a record that draws nothing, so the copy's name is asked for first: a free "(copy)" name,
-     selected, and whether to keep the datasheet links. `options`: { section, label }. */
+     selected, and whether to keep the datasheet links. `options`: { section, label, datasheets }; a section
+     whose duplicate copies every value passes `datasheets: false`, and the form neither asks nor sends it. */
   function DuplicateForm(session, send, changed, options) {
     var self = this;
     this.section = options.section;
@@ -115,6 +116,8 @@ function (RecordForm, request, snapshot, ui) {
     this.name = labelled(this.form, options.label + " copy name", ui.element("input"));
     this.copyDatasheets = labelled(this.form, "Copy datasheet links", ui.element("input"));
     this.copyDatasheets.type = "checkbox";
+    this.askDatasheets = options.datasheets !== false;
+    this.copyDatasheets.parentNode.hidden = !this.askDatasheets;
     this.name.addEventListener("input", function () {
       self.submitButton.disabled = self.busy() || !self.name.value.trim();
       self.error.textContent = "";
@@ -142,7 +145,9 @@ function (RecordForm, request, snapshot, ui) {
   };
   DuplicateForm.prototype.submit = function () {
     if (!this.enabled || !this.record || !this.name.value.trim() || this.busy()) return;
-    this.run({ id: this.record.id, name: this.name.value.trim(), copy_datasheets: this.copyDatasheets.checked });
+    var params = { id: this.record.id, name: this.name.value.trim() };
+    if (this.askDatasheets) params.copy_datasheets = this.copyDatasheets.checked;
+    this.run(params);
   };
   DuplicateForm.prototype.refresh = function (state) {
     this.records = (snapshot.value(state, this.section) || {}).records || [];

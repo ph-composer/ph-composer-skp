@@ -92,6 +92,25 @@ class MechanicalExportTest < PhComposerTestCase
                  preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }.sort
   end
 
+  # Each preflight row says where it is fixed: a Ventilator's on the Mechanical tab, a Zone's on the Zones tab.
+  def test_the_preflight_rows_locate_their_object_and_the_locate_command_opens_it
+    reference
+    completed(invoke("#{SERVES}.clear", "zones" => [target("B")], "slot" => "ventilator_id"))
+    locates = preflight_rows.to_h { |row| [row.fetch("code"), row.fetch("locate")] }
+    assert_equal({ "name" => X::LOCATE, "params" => { "ventilator_ids" => [@erv.fetch("ERV-2")] } },
+                 locates.fetch("mechanical.item_unserved"))
+    zone_b = locates.fetch("mechanical.zone_unventilated")
+    assert_equal [zone_id("B")], zone_b.dig("params", "zones").map { |zone| zone.fetch("zone_id") }
+
+    opened = []
+    @session.define_singleton_method(:open_in_panel) { |owner, intent| opened << [owner, intent] }
+    [locates.fetch("mechanical.item_unserved"), zone_b].each do |locate|
+      completed(API.view(:context => @context, :name => locate.fetch("name"), :params => locate.fetch("params")))
+    end
+    assert_equal [["ph_composer.mechanical", { "ventilator_ids" => [@erv.fetch("ERV-2")] }],
+                  ["ph_composer.zones", { "zones" => zone_b.dig("params", "zones") }]], opened
+  end
+
   def test_a_served_zone_in_no_building_segment_is_left_out_with_its_room
     reference
     completed(invoke("ph_composer.zones.update_field", "field" => "building_segment", "value" => nil,
@@ -239,9 +258,14 @@ class MechanicalExportTest < PhComposerTestCase
     contributor = PhComposer::Registry.current.export_contributors.fetch(X::SECTION)
     view = PhComposer::Export::ResultView.new({ "findings" => findings, X::SECTION => { "ventilation" => rows } },
                                               contributor)
-    html = X.report(view, "IP").join
+    html = X.report(view, "SI").join
     assert_includes html, "Mechanical: Ventilators"
+    assert_includes html, "Electric efficiency (Wh/m³)"
     assert_includes html, "<td>ERV-1</td><td>Zone A, Zone B</td><td>1</td><td>0.85</td><td>0.60</td><td>0.45</td>"
+    # Under IP the efficiency is in W/cfm: 0.45 Wh/m³ moves 1.699 m³/h for each cfm, 0.76 W/cfm.
+    html = X.report(view, "IP").join
+    assert_includes html, "Electric efficiency (W/cfm)"
+    assert_includes html, "<td>0.60</td><td>0.76</td>"
     assert_includes html, "ERV-2 serves no Zone, so nothing exports it."
     refute_includes html, "Not this section's."
     assert_empty X.report(PhComposer::Export::ResultView.new({ "findings" => [] }, contributor), "SI")
