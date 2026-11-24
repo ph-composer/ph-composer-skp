@@ -3,7 +3,7 @@
 DATE: 2026-11-24
 Register row: [M13b](../ACCEPTANCE.md). Stage: [P4-13b](../phases/p4-13b-piping-groups-and-assignment.md), under the
 parent index [P4-13](../phases/p4-13-hot-water-piping.md).
-Base: `feat/phase-07-mechanical-p4-13a` at `ba5cbe88` (#576, open), so this branch stacks on it.
+Base: built on `feat/phase-07-mechanical-p4-13a` at `ba5cbe88`, rebased onto `main` at `99a712a8` after #576 merged (identical tree).
 
 Offline evidence only. No SketchUp process was started. The host case `M13b` (in
 `planning/native-acceptance/cases.json`: H1 an empty group created by `groups.create` survives the commit and opens,
@@ -54,7 +54,12 @@ operations and the recipe.
 
 ## Gate
 
-Recorded on the code commit in the next section.
+- `make ci` on Ruby 3.2.2 on the tree of `0954e2a3` (rebased unchanged as `3dc8715d`): "Ruby suite, 10 processes:
+  3478 runs, 49440 assertions, 0 failures, 0 errors, 1 skips"; JS 1214 pass, 0 fail; Python 467 passed, 1 skipped;
+  hostkit 48 runs; "RBZ verified: 804 files, 8956811 bytes, 27557624 bytes installed".
+- Installed size: 27,557,624 bytes, 70,697 over P4-13a's 27,486,927 against the 75 KB estimate; 442,376 under the
+  28,000,000 ceiling. No shipped panel or Python file changed.
+- The final head's gate on both Rubies, the browser checks and the PHX count follow the review below.
 
 ## Review
 
