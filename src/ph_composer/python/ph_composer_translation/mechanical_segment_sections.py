@@ -51,7 +51,11 @@ class MechanicalSegmentRecord:
         }
 
 
-def _rate(value: object, label: str, nullable: bool) -> float | None:
+def _rate(raw: Mapping[str, object], field: str, label: str, nullable: bool) -> float | None:
+    """A rate the record must carry: null only where honeybee-ph's default is None, and never left out."""
+    if field not in raw:
+        raise RecordError(f"{label} is missing")
+    value = raw[field]
     if value is None and nullable:
         return None
     number = as_number(value, label)
@@ -92,7 +96,7 @@ class MechanicalSegmentSection(Section[MechanicalSegmentRecord, MechanicalSegmen
             cooling,
             as_number(raw.get("mech_room_temp_c"), f"{label} mech_room_temp_c"),
             BYPASS_MODES[mode],
-            tuple((field, _rate(raw.get(field), f"{label} {field}", nullable)) for field, nullable in RATES.items()),
+            tuple((field, _rate(raw, field, f"{label} {field}", nullable)) for field, nullable in RATES.items()),
         )
 
     def translate(self, record: MechanicalSegmentRecord, inputs: Inputs) -> MechanicalSegmentRecord:

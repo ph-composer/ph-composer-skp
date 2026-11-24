@@ -37,8 +37,8 @@ manifests refreshed.
   powers and night minimum, `1-TEMPERATURE_CONTROLLED`), as D4-32 and the Building Segment component give them.
 - **Mechanical cooling in PHX.** PHX 1.59.4 copies it to the Variant's building data; neither its WUFI XML nor its
   METr writer carries it (its PHPP writer does). The round trip reads it on the Variant object.
-- **Record order.** Export identifier order, not id order, so every golden that carries the section is stable from
-  run to run (ids are minted per run, export identifiers hash the Segment name).
+- **Record order.** By the persisted export identifier, then id, not id order alone: a fixture mints new ids on
+  each run while an adopted Segment's export identifier holds, so every golden that carries the section is stable.
 - **Goldens.** Every extraction golden gains the section's records (`make fixtures`); three tests that list sections
   by hand (`phase_one_export`, `shading_export`, `thermal_bridge_export`) and `tests/python/test_model_sections.py`
   name it. `mechanical_dependency_test.rb` treats `segment/` as the feature's own folder, not an equipment family,
@@ -109,3 +109,14 @@ its field was drawn with, and the draft holds numbers (JS regression test). P2: 
 number format's decimal (JS test with a decimal comma). P2: the PHX round trip asserts the WUFI XML and METr values by
 named Variant. P3: the stage doc now states the export identifier order, and the Ruby test asserts it before the golden
 normalises.
+
+Codex gpt-6.2-sol cycle 2 on `e595d10b` ([review](https://github.com/ph-composer/ph-composer-skp/pull/572#pullrequestreview-6039989884)):
+6 P2, 2 P3; 7 fixed in the next commit, which merges after the two-cycle cap unreviewed, 1 declined. Fixed: the
+shared regional number reader threw on a line separator, leaving an earlier rate in the draft (`unit_numbers.js` now
+answers malformed; JS regression); a record leaving out `ventilation_system_ach` read as null (Python now refuses a
+missing key; test); the bypass mapping test now holds each mode to its honeybee-ph number; the browser check measures
+the dialog's scrolling body and the number-and-unit lines at every panel size; case `M16` undoes the warning edits
+before its export; the order rationale names the persisted export identifier; D4-29's row states Ed's confirmation.
+Declined: conformance proving a record for every managed Segment, which Ruby guarantees and tests, as certification's
+section does.
+

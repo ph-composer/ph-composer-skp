@@ -210,3 +210,15 @@ test("the air changes are shown and read in the number format's decimal", functi
   assert.deepStrictEqual([payload.ventilation_system_ach, payload.daytime_window_ach, payload.nighttime_window_ach],
     [null, 0.75, 1.2]);
 });
+
+test("text the number reader cannot read, a line separator included, holds Save until corrected", function () {
+  var p = load();
+  var dialog = settings(p, "Annex"), shown = fields(dialog);
+  shown.day.value = "0\u20285"; shown.day.listeners.input({});
+  assert.strictEqual(saveButton(dialog).disabled, true);
+  shown.cooling.checked = false; shown.cooling.listeners.change({});
+  assert.strictEqual(saveButton(dialog).disabled, true, "another edit does not release the stale rate");
+  shown.day.value = "0.25"; shown.day.listeners.input({});
+  click(saveButton(dialog));
+  assert.strictEqual(plain(p.actions()[0].payload.params.extension_payloads)[NAMESPACE].daytime_window_ach, 0.25);
+});

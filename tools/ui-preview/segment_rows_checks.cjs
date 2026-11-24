@@ -211,17 +211,19 @@ check({ name: "segment_rows", output }, async ({ newPage, step }) => {
   await main.getByRole("button", { name: "Settings for Main house", exact: true }).click();
   await settings.waitFor();
   const mechanical = settings.locator("[data-namespace='ph_composer.mechanical.segment']");
-  const lines = await mechanical.locator(".mech-segment-value").evaluateAll(rows => rows.map(row =>
-    Array.from(row.children).map(part => { const box = part.getBoundingClientRect(); return box.top + box.height / 2; })));
-  assert.equal(lines.length, 4, "the room temperature and three air change rates");
-  lines.forEach(parts => assert(Math.max(...parts) - Math.min(...parts) <= 2, "a number and its unit share one line"));
   assert.equal(await mechanical.getByRole("checkbox", { name: "Mechanical cooling", exact: true }).isChecked(), false);
   assert.equal(await mechanical.getByRole("textbox", { name: "Mechanical room temperature", exact: true }).inputValue(),
     "20");
   for (const [width, height] of PANEL_SIZES) {
     await setPanelSize(page, width, height);
-    assert(await settings.evaluate(node => node.scrollWidth <= node.clientWidth),
-      `the Mechanical section fits at ${width} x ${height}`);
+    assert(await settings.evaluate(node => [node].concat(Array.from(node.querySelectorAll(".phc-segment-settings-body")))
+      .every(scroller => scroller.scrollWidth <= scroller.clientWidth)),
+    `the Mechanical section fits at ${width} x ${height}, its scrolling body included`);
+    const lines = await mechanical.locator(".mech-segment-value").evaluateAll(rows => rows.map(row =>
+      Array.from(row.children).map(part => { const box = part.getBoundingClientRect(); return box.top + box.height / 2; })));
+    assert.equal(lines.length, 4, "the room temperature and three air change rates");
+    lines.forEach(parts => assert(Math.max(...parts) - Math.min(...parts) <= 2,
+      `a number and its unit share one line at ${width} x ${height}`));
     await mechanical.screenshot({ path: path.join(output, `mechanical-${width}.png`) });
   }
   await setPanelSize(page, 1280, 800);

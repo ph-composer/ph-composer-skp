@@ -1,7 +1,7 @@
 # P4-08b: Building Segment mechanical settings
 
 DATE: 2026-11-22
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-08b`; offline evidence in [p4-08b-segment-mechanical-settings](../evidence/p4-08b-segment-mechanical-settings.md), host case `M16` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-11-22, F30, D4-25, D4-26, D4-32 and the [Phase 6 handoff](../../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) (C4a-5). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-08b` (#572); offline evidence in [p4-08b-segment-mechanical-settings](../evidence/p4-08b-segment-mechanical-settings.md), host case `M16` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-11-22, F30, D4-25, D4-26, D4-32 and the [Phase 6 handoff](../../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical) (C4a-5). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -90,8 +90,8 @@ None of these is a choice of behavior the sources leave open; each follows the p
    same code, section and object (the Segment id).
 3. **Export (CONTRACTS section 6).** `features/mechanical/segment_export.rb`: `ph_composer.mechanical.export.segments`,
    claiming the namespace on `Zones::Options::SEGMENT_KIND` from `ph_composer.zones.export.zones`, one record
-   per exported Segment record in export identifier order (it follows from the Segment's name, so goldens hold
-   from run to run; ids are minted per run): `{id, export_identifier, name, mechanical_cooling, mech_room_temp_c,
+   per exported Segment record ordered by its persisted export identifier (a fixture's ids differ from run to run, an
+   adopted Segment's export identifier does not, so goldens hold): `{id, export_identifier, name, mechanical_cooling, mech_room_temp_c,
    summer_bypass_mode, ventilation_system_ach, daytime_window_ach, nighttime_window_ach}` with the defaults
    where none is stored. A legacy Zone names no Segment record and gets no record. Its `projection` is the
    records. The heat pump section gains a `projection`, each exported blend's Segment and whether it cools,

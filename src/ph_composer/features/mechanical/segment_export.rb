@@ -31,8 +31,9 @@ module PhComposer
         end
       end
 
-      # One record per exported Building Segment record, in export identifier order (which follows from its name, so
-      # the order holds from one Model to the next), with the mismatch notes. A legacy Zone names
+      # One record per exported Building Segment record, ordered by its persisted export identifier, then id, with the
+      # mismatch notes. Unlike the ids a test fixture mints on each run, an adopted Segment's export identifier holds,
+      # so the order does too. A legacy Zone names
       # no Segment record, so its BldgSegment keeps honeybee-ph's defaults, which are the same values.
       def records(reader)
         rows = segments(reader)

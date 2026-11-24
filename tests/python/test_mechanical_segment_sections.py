@@ -62,8 +62,10 @@ def test_every_mode_ruby_offers_maps_to_a_value_the_pinned_enum_accepts_and_the_
     module = stack.load("honeybee_ph.bldg_segment")
     choices = json.loads(CHOICES.read_text())
     assert choices["bypass_modes"] == list(BYPASS_MODES)
-    for mode in BYPASS_MODES.values():
-        assert module.PhVentilationSummerBypassMode(mode).value == mode
+    numbers = {"none": 1, "temperature_controlled": 2, "enthalpy_controlled": 3, "always": 4}
+    for mode, value in BYPASS_MODES.items():
+        accepted = module.PhVentilationSummerBypassMode(value)
+        assert (accepted.value, accepted.number) == (value, numbers[mode]), mode
     defaults = choices["defaults"]
     expected = {**defaults, "summer_bypass_mode": BYPASS_MODES[defaults["summer_bypass_mode"]]}
     assert segment_values(module.BldgSegment()) == expected
@@ -105,6 +107,16 @@ def test_a_record_for_no_exported_segment_or_with_an_unknown_value_withholds_the
         assert result["summary"]["publishable"] is False, change
         rows = [row for row in result["findings"] if row["section"] == MECHANICAL_SEGMENT_SECTION_ID]
         assert [row["blocks_export"] for row in rows] == [True], rows
+
+
+def test_a_record_leaving_out_the_ventilation_system_rate_withholds_the_model_and_null_is_accepted() -> None:
+    value = document()
+    del value["sections"][MECHANICAL_SEGMENT_SECTION_ID]["records"][0]["ventilation_system_ach"]
+    assert run(value)["summary"]["publishable"] is False, "a missing key is not a blank rate"
+
+    value = document()
+    value["sections"][MECHANICAL_SEGMENT_SECTION_ID]["records"][0]["ventilation_system_ach"] = None
+    assert run(value)["summary"]["publishable"] is True
 
 
 def test_conformance_refuses_a_segment_whose_value_changed_after_assembly() -> None:
