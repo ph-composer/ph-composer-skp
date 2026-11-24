@@ -153,6 +153,7 @@ module PhComposer
     RESTORABLE_LIST = "#{FEATURE_ID}.restorable.list"
     RESTORABLE_DETAIL = "#{FEATURE_ID}.restorable.detail"
     FINDINGS_LIST = "#{FEATURE_ID}.findings.list"
+    OCCURRENCES_READ = "#{FEATURE_ID}.occurrences"
     # What a restore offer row leaves out, which grows with the exploded Zone: restorable.detail reads them.
     OFFER_DETAIL = %w[entity_ids choice_record].freeze
 
@@ -188,6 +189,20 @@ module PhComposer
       end
       page, next_cursor = Pages.bounded(request, FINDINGS_LIST, rows, :key => ->(row) { [row.first] })
       { "findings" => page.map(&:last), "next_cursor" => next_cursor, "total" => rows.length }
+    end
+
+    # Every Zone occurrence's identity, values and extension data, and nothing of its Faces: what another feature
+    # needs to colour or assign Zones, which an unreadable Face record elsewhere does not refuse (`all` validates
+    # each Face for its area totals).
+    def occurrences(request)
+      zones = Occurrences.zones(request.model)
+      duplicates = duplicate_ids(zones)
+      rows = zones.map do |zone|
+        ambiguous = duplicates.include?(zone.record.fetch("id"))
+        Schema.view(zone.record).slice("id", "values", "extension_data")
+              .merge("reference" => zone.reference, "state" => zone_state(zone, ambiguous))
+      end
+      { "zones" => rows }
     end
 
     # Every Zone occurrence, whole: the panel's projection. Scripts page `list` instead.

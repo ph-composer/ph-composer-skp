@@ -887,6 +887,13 @@ Undo step. Rows carry `export_ready` and `export_blockers`, the Zones each Venti
 `zones`, and `findings`: `mechanical.item_unserved` when it serves no Zone. Its `user_data` and
 extension payloads are written with `ph_composer.records.update_metadata`.
 
+Each row's `balance` gives `supply_m3h` and `extract_m3h`, summed over the Zones the export writes the
+Ventilator to, and `imbalanced` when they differ by more than a tenth of the larger. A Zone with its own
+Space rates gives their sums; a By Program Zone gives its Program's ventilation as both supply and
+extract; a Zone in no Building Segment is not counted. The two sums are null, with the reason in
+`missing`, while a By Program Zone's Program cannot work its flow out, and while the Ventilator serves
+no Zone the export writes.
+
 ### Mechanical: what serves each Zone
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
@@ -925,13 +932,16 @@ reloads one system for them and PHX makes one device.
    written with no Ventilator, `mechanical.item_unserved` a Ventilator that serves no Zone and is not
    written, `mechanical.zone_left_out` a served Zone in no Building Segment, whose Room the export
    leaves out, and `mechanical.item_across_segments` a Ventilator whose Zones lie in more than one
-   Building Segment, each Segment's model carrying the whole Ventilator. None of these blocks.
+   Building Segment, each Segment's model carrying the whole Ventilator. None of these blocks. Each
+   row's `locate` names `ph_composer.mechanical.locate` with its params: `ventilator_ids` opens the
+   Mechanical tab narrowed to those Ventilators, `zones` the Zones tab with those Zones checked.
 2. Export, then read back. The result's Mechanical section gives `ventilation`, one row per
    (Ventilator, Zone) pair: `zone_id`, `zone_name`, `item_id`, `display_name`,
    `system_identifier`, `unit_identifier` and the unit's values. In the HBJSON, each of those Rooms
    has `properties.ph_hvac.ventilation_system` with that `identifier` and `sys_type` 1, and its
    `ventilation_unit` with the unit identifier and the Ventilator's values. The report's
-   "Mechanical: Ventilators" section lists each Ventilator with the Zones it serves.
+   "Mechanical: Ventilators" section lists each Ventilator with the Zones it serves, its electric
+   efficiency in Wh/m³, or W/cfm when the report is in IP units.
 
 ### Library records
 

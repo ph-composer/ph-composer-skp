@@ -12,6 +12,8 @@ module PhComposer
       # the export will do (context/CONTRACTS.md, "Mechanical equipment"). Only a missing item blocks the export.
       module Reads
         LIST = "#{FEATURE_ID}.serves.list"
+        SPACES = "ph_composer.spaces.all"
+        PROGRAMS = "ph_composer.programs.zones"
 
         module_function
 
@@ -44,7 +46,8 @@ module PhComposer
             end
           end
           { "zone_id" => zone.id, "reference" => zone.reference, "name" => zone.name,
-            "building_segment_id" => zone.segment_id, "slots" => zone.values, "payload_status" => zone.status,
+            "building_segment_id" => zone.segment_id, "building_segment" => zone.segment, "slots" => zone.values,
+            "payload_status" => zone.status,
             "items" => items.map { |item| item.reject { |key, _value| key == "missing" } },
             "findings" => zone_findings(zone, items) }
         end
@@ -66,15 +69,32 @@ module PhComposer
         end
 
         # What an item read adds to each row of `kind`: the Zone occurrences it serves and its findings, from one
-        # Zones read.
-        def usage(request, kind)
+        # Zones read, and with `with_balance` its airflow balance over them (`balance`).
+        def usage(request, kind, with_balance: false)
           slots = SLOTS.select { |slot| slot.kind == kind }
           zones = State.zones(request)
+          balanced = with_balance ? balance(request) : nil
           lambda do |record|
             id = record.fetch("id")
             served = zones.select { |zone| slots.any? { |slot| slot.names?(zone.values.fetch(slot.key), id) } }
             rows = served.map { |zone| { "zone_id" => zone.id, "reference" => zone.reference, "name" => zone.name } }
-            { "zones" => rows, "findings" => item_findings(record, served) }
+            extra = { "zones" => rows, "findings" => item_findings(record, served) }
+            balanced ? extra.merge("balance" => balanced.call(served)) : extra
+          end
+        end
+
+        # An item's airflow balance over the Zones it serves (Balance), from one Spaces read and one Programs read
+        # that every row shares, each Zone found by its occurrence path. The Zones counted are those the export
+        # writes the item to: each Zone once, its first occurrence by path, and none in no Building Segment.
+        def balance(request)
+          spaces = request.query(SPACES).fetch("zones").to_h { |row| [row.fetch("zone_path"), row] }
+          programs = request.query(PROGRAMS).fetch("zones").to_h { |row| [row.dig("reference", "zone_path"), row] }
+          lambda do |served|
+            exported = served.reject(&:left_out).sort_by { |zone| zone.reference.fetch("zone_path") }.uniq(&:id)
+            Balance.call(exported.map do |zone|
+              path = zone.reference.fetch("zone_path")
+              Balance::Zone.new(:name => label(zone), :spaces => spaces[path], :programs => programs[path])
+            end)
           end
         end
 

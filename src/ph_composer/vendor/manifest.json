@@ -16,9 +16,9 @@
       "sha256": "fa30f5a2138759345c09b6da1846600a2351d7ecc71343c7282c85e59e34fae3"
     },
     "html/base.css": {
-      "bytes": 21355,
+      "bytes": 22187,
       "mime": "text/css; charset=utf-8",
-      "sha256": "2727fe9c2a96d4e529c45a0af16a31c7a50956ece5cbeebb3e73524e53a82aca"
+      "sha256": "5cf09cadef9774eb95c6dc66c4e4c6b5fd94fb0a368860b2cb94b26fb8a29da0"
     },
     "html/boot.js": {
       "bytes": 369,
@@ -174,6 +174,36 @@
       "bytes": 17181,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
+    },
+    "html/features/mechanical/mechanical.css": {
+      "bytes": 3117,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "2c5c7048f4dc96f439cf5002ac09609df375354a36b5f3ae0e1df117b1c022fa"
+    },
+    "html/features/mechanical/optional_values.js": {
+      "bytes": 6990,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "c5ae2611b3fd6e009f274dd7b6081e8e9434fce1d048073c71caab3e1b4ee372"
+    },
+    "html/features/mechanical/section.js": {
+      "bytes": 4960,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "682e789c9c0dd4f3c16d0685ff77d04b1b14f153701f64876b5416225e96159d"
+    },
+    "html/features/mechanical/serves.js": {
+      "bytes": 13767,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "ac597cce20f2c5cc0088fd041238c89213ac5e700e14b86048b92656611c8349"
+    },
+    "html/features/mechanical/systems.js": {
+      "bytes": 2025,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e96bd2c8e94a83789b7dc7e6c6d94881916c6c7ef158d2b806b584c2c6bfa01f"
+    },
+    "html/features/mechanical/ventilators.js": {
+      "bytes": 15452,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "905f4d531280c59e3d62dbeb73de9f3889e2e80487afd2a0dcb5711a9b785bdd"
     },
     "html/features/programs/airtightness.js": {
       "bytes": 6073,
@@ -471,9 +501,9 @@
       "sha256": "9698d795e2d2031afa9dac5732125f52c0292492eaab2721f6a77a3a7e3de74f"
     },
     "html/fields.js": {
-      "bytes": 2417,
+      "bytes": 2531,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ceed48c4ecd1033519bfb0e807d53ba7183f149dd4d7620cef789deec1404e42"
+      "sha256": "4cc0757ddf1f1b550c7c5af8c4a7551579d0f30f4c981392e877877a2178883e"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -481,19 +511,19 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 10473,
+      "bytes": 10900,
       "mime": "text/html; charset=utf-8",
-      "sha256": "1eae5b6ba965d973e86612c4f9c81aebbce34786a4888ec2c4fa93328937f110"
+      "sha256": "04c4c5ad718dee6ae62c4c65a162f7ed6209e7f350c2da9d53f6c1fadd43842b"
     },
     "html/inventory.js": {
-      "bytes": 12812,
+      "bytes": 15029,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "68cf90e30ccf68796e2b7d5be8ddcafdf1b28bc3a7d2abe0519eaae04d6b28e0"
+      "sha256": "40d3a6d459716e14ca24975e64a75656ed0529e589d333bfef52f7b51d0af32a"
     },
     "html/inventory_forms.js": {
-      "bytes": 22755,
+      "bytes": 23066,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9c6ad65d1c3b490e46dac1e6b7987925b9e10e6b195656165559773fd9378c28"
+      "sha256": "011d195f47d2b951e4958040ffa82a0de86ec3b5ad2a55e9360547ebc030cb6a"
     },
     "html/inventory_grid.js": {
       "bytes": 16227,
@@ -604,6 +634,11 @@
       "bytes": 40211,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "f5d97495a5da2710d32594f8702082f8f76eaae31cff7796d7c3a307823c5604"
+    },
+    "html/pill_row.js": {
+      "bytes": 2839,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "a47dac893d445a470820e4ce65f06824170eedab269bdd62947173e519a2d49e"
     },
     "html/record_edits.js": {
       "bytes": 18177,
@@ -731,9 +766,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 13995,
+      "bytes": 14286,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6ff147bbbe26b528dbf26b149a0b4eb321d24b4f48e83d8ede25ca628bd88393"
+      "sha256": "e4f35f287025cdbb0bf71ec90775e0a7d94ba8e69636353905904195996cf197"
     },
     "html/units.js": {
       "bytes": 14458,

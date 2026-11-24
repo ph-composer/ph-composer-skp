@@ -5448,6 +5448,32 @@
         "src/ph_composer/vendor/manifest.json"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "M05",
+      "label": "The Mechanical tab on the installed RBZ, with Ed at the mouse, on the reference model (Zone A with Space A1 60 / 50 m3/h and Zone B with Space B1 40 / 40 in one Building Segment): the tab sits after Thermal Bridges and before Library; the Ventilation subtab and Ventilators pill; create ERV-1 and ERV-2, edit a value in place and see a stale edit refused with its draft kept; duplicate, delete in use with a replacement and with clearing; the Serves picker grouped by Building Segment assigns ERV-1 to Zone A and ERV-2 to Zone B, then ERV-1 to Zone B after the refusal naming ERV-2 (Replace and assign); the balance reads 60 / 50 amber, 40 / 40, and 100 / 90 in the shared case; Zone A set By Program shows its Program's flow; electric efficiency 0.45 Wh/m3 under SI and its W/cfm value under IP with a draft keeping its unit through a switch; the optional values behind the row's disclosure; Columns hides Manufacturer, Model and Notes; By ventilator from the Serves header colours Zone A and Zone B by their Ventilator and leaves an unserved Zone uncoloured, with Zone counts in the legend; each write one native Undo step; the panel at 1280 x 800, 420 px and 360 x 520; the Phase 3a Zone views cases the ledger screens repeated",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/pill_row.js",
+        "src/ph_composer/html/inventory.js",
+        "src/ph_composer/html/inventory_forms.js",
+        "src/ph_composer/html/base.css",
+        "src/ph_composer/html/unit_tables.js",
+        "src/ph_composer/html/fields.js",
+        "src/ph_composer/html/features/mechanical/*",
+        "src/ph_composer/features/mechanical/install.rb",
+        "src/ph_composer/features/mechanical/colour_modes.rb",
+        "src/ph_composer/features/mechanical/serves/*",
+        "src/ph_composer/features/mechanical/declarations/*",
+        "src/ph_composer/features/mechanical/export.rb",
+        "src/ph_composer/features/zones/zone/operations.rb",
+        "src/ph_composer/features/zones/declarations/zone.rb",
+        "src/ph_composer/core/units.rb",
+        "src/ph_composer/core/occurrence_path.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

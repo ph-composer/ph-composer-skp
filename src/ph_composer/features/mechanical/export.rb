@@ -14,6 +14,18 @@ module PhComposer
     module VentilationExport
       SECTION = "#{FEATURE_ID}.export.ventilation"
       PREFLIGHT = "#{FEATURE_ID}.preflight"
+      LOCATE = "#{FEATURE_ID}.locate"
+      # A Locate names at most this many Zones or Ventilators, as the Export pane caps a group's.
+      LOCATE_LIMIT = 500
+      LOCATE_PARAMS = Shapes.object({
+        "ventilator_ids" => Shapes.list(Shapes.id(Ventilators::KIND.id_prefix, "A Ventilator id."),
+                                        :description => "Ventilators to show on the Mechanical tab, its " \
+                                                        "Ventilators narrowed to them.")
+                                  .merge("maxItems" => LOCATE_LIMIT),
+        "zones" => Shapes.list(Zones::ZONE_REFERENCE, :description => "Zones to check on the Zones tab, when no " \
+                                                                      "ventilator_ids are given.")
+                         .merge("maxItems" => LOCATE_LIMIT)
+      }, :optional => %w[ventilator_ids zones]).freeze
       ZONES = Zones::ExportProjection::SECTION
       CLAIM = { "namespace" => Serves::NAMESPACE, "target_kind" => Zones::REFERENCE_KIND, "source_section" => ZONES,
                 "fields" => Serves::KEYS }.freeze
@@ -27,8 +39,7 @@ module PhComposer
       # Findings about a Zone the export writes as it is, which the preflight alone reports; the run carries its
       # warnings into the result. The export notes only what it leaves out or writes for an item.
       PREFLIGHT_ONLY = [Codes::ZONE_UNVENTILATED].freeze
-      REPORT_COLUMNS = ["Ventilator", "Serves", "Quantity", "Sensible recovery", "Latent recovery",
-                        "Electric efficiency (Wh/m³)"].freeze
+      REPORT_COLUMNS = ["Ventilator", "Serves", "Quantity", "Sensible recovery", "Latent recovery"].freeze
 
       module_function
 
@@ -44,6 +55,27 @@ module PhComposer
                                  :result => PhComposer::Export::PREFLIGHT_RESULT, :examples => [{}]) do |request|
           preflight(request)
         end
+        feature.view_command(LOCATE, :description => "Open where a Mechanical finding is fixed: the Mechanical " \
+                                                     "tab with its Ventilators narrowed to ventilator_ids, or, " \
+                                                     "without them, the Zones tab with zones checked.",
+                                     :refuses => %w[session.inactive], :params => LOCATE_PARAMS,
+                                     :side_effects => "Opens or raises the panel on the Mechanical or the Zones tab.",
+                                     :result => Shapes.object({ "opened" => { "type" => "boolean" } }),
+                                     :examples => [{ "ventilator_ids" => [Shapes.example_id(Ventilators::KIND)] },
+                                                   { "zones" => [{ "zone_id" => "zon_Ab12Cd34Ef56",
+                                                                   "zone_path" => [1201] }] }]) do |request|
+          locate(request)
+        end
+      end
+
+      def locate(request)
+        ids = request.params.fetch("ventilator_ids", [])
+        if ids.empty?
+          request.session.open_in_panel("ph_composer.zones", "zones" => request.params.fetch("zones", []))
+        else
+          request.session.open_in_panel(FEATURE_ID, "ventilator_ids" => ids)
+        end
+        { "opened" => true }
       end
 
       # The pairs, once the plan finds nothing blocking; every other finding but the preflight's own is a note.
@@ -106,8 +138,9 @@ module PhComposer
         plan = VentilationPlan.call(:zones => zones.map { |zone| plan_zone(zone) },
                                     :ventilators => records.to_h { |record| [record.fetch("id"), record] },
                                     :unreadable => unreadable.map { |row| row.fetch("id") })
+        references = zones.to_h { |zone| [zone.id, zone.reference] }
         { "findings" => rows + plan.findings.map do |found|
-          finding(found.code, found.record_id, found.message, found.blocks)
+          finding(found.code, found.record_id, found.message, found.blocks, locate_for(found.record_id, references))
         end, "repairs" => [] }
       rescue CodedError => error
         { "findings" => [finding(error.code, nil, error.message, true)], "repairs" => [] }
@@ -121,7 +154,16 @@ module PhComposer
         code = { "unavailable" => "extension.unavailable", "invalid" => "extension.invalid" }
                .fetch(zone.status, "extension.schema_unsupported")
         finding(code, zone.id, "What serves Zone #{zone.name || zone.id} is #{zone.status}, so the Model " \
-                               "cannot be exported.", true)
+                               "cannot be exported.", true, locate_for(zone.id, zone.id => zone.reference))
+      end
+
+      # Where a finding's object is fixed: a Ventilator on the Mechanical tab, a Zone checked on the Zones tab.
+      def locate_for(object_id, references)
+        if object_id.to_s.start_with?("#{Ventilators::KIND.id_prefix}_")
+          { "name" => LOCATE, "params" => { "ventilator_ids" => [object_id] } }
+        elsif (reference = references[object_id])
+          { "name" => LOCATE, "params" => { "zones" => [reference.slice("zone_id", "zone_path")] } }
+        end
       end
 
       def plan_zone(zone)
@@ -129,16 +171,17 @@ module PhComposer
                                   :exported => !zone.left_out, :values => zone.values)
       end
 
-      def finding(code, object_id, message, blocks)
-        { "code" => code, "section" => SECTION, "object_id" => object_id, "message" => message,
-          "blocks_export" => blocks }
+      def finding(code, object_id, message, blocks, locate = nil)
+        found = { "code" => code, "section" => SECTION, "object_id" => object_id, "message" => message,
+                  "blocks_export" => blocks }
+        locate ? found.merge("locate" => locate) : found
       end
 
       # ---------------------------------------------------------------- the report
 
       # The Mechanical: Ventilators section: each exported Ventilator with the Zones it serves, as the Python result
       # reports them, and one line naming those that serve none.
-      def report(result, _display_units)
+      def report(result, display_units)
         rows = result.fetch("ventilation", [])
         unserved = result.findings.select { |row| row.fetch("code") == Codes::ITEM_UNSERVED }
         return [] if rows.empty? && unserved.empty?
@@ -146,19 +189,24 @@ module PhComposer
         html = ""
         unless rows.empty?
           body = rows.group_by { |row| row.fetch("item_id") }.sort_by { |_id, pairs| pairs.first.fetch("display_name") }
-                     .map { |_id, pairs| report_row(pairs) }
-          html += Export::ReportHtml.table(REPORT_COLUMNS, body)
+                     .map { |_id, pairs| report_row(pairs, display_units) }
+          efficiency = "Electric efficiency (#{Units.label(:quantity => 'electric_efficiency',
+                                                           :system => display_units)})"
+          html += Export::ReportHtml.table(REPORT_COLUMNS + [efficiency], body)
         end
         html += Export::ReportHtml.paragraph(unserved.map { |row| row.fetch("message") }.join(" ")) unless
           unserved.empty?
         [Export::ReportHtml.section("Mechanical: Ventilators", html)]
       end
 
-      def report_row(pairs)
+      # Electric efficiency in the report's display units: Wh/m³, or W/cfm under IP.
+      def report_row(pairs, display_units)
         unit = pairs.first
+        efficiency = Units.to_display(unit.fetch("electric_efficiency_wh_m3"), :quantity => "electric_efficiency",
+                                                                               :system => display_units)
         [unit.fetch("display_name"), pairs.map { |row| row.fetch("zone_name") }.sort.join(", "),
          unit.fetch("quantity").to_s, format("%.2f", unit.fetch("sensible_heat_recovery")),
-         format("%.2f", unit.fetch("latent_heat_recovery")), format("%.2f", unit.fetch("electric_efficiency_wh_m3"))]
+         format("%.2f", unit.fetch("latent_heat_recovery")), format("%.2f", efficiency)]
       end
     end
   end

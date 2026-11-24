@@ -4,7 +4,12 @@
  * column's menu (column_menu.js) in place of Order by; a filter offers the column's values as shown, its
  * declared choices included. `config.headerActions(field, state)`, when given, adds a feature's own actions to
  * a column's header, before its menu; each is a `{ node, persistent }` (table.js). An owner with a create action
- * sets `emptyAction` ({ label, run }) to offer it in the empty state of a table with no records. */
+ * sets `emptyAction` ({ label, run }) to offer it in the empty state of a table with no records.
+ * `config.defaultWidths` ({ field: px }) adds or replaces a column's starting width.
+ * `config.optionalColumns` ([[field, label]]) are columns the user may hide from a Columns menu in the control
+ * row; `config.hiddenColumns` ({ field: true }) is the session state that holds which are hidden, owned by the
+ * feature so a rebuilt view keeps it. A held cell draft keeps every column where it is, and hiding a column clears
+ * its filter. */
 PhComposerUI.define("inventory", ["request", "snapshot", "workspace", "table", "view_controls", "record_edits",
   "inventory_grid", "units", "unit_preferences", "column_menu"],
 function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences, columnMenus) {
@@ -50,6 +55,7 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     var self = this;
     this.root = root;
     this.config = config;
+    this.changed = changed;
     this.records = [];
     this.requests = request.channel(session, send, config.label + "-action");
     this.ranges = new RangeEdits(session, send, config.action, notice, changed);
@@ -73,9 +79,14 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.unreadable.setAttribute("role", "status");
     root.appendChild(this.unreadable);
     this.scroll = ui.element("div", "phc-table-scroll phc-inventory-table");
+    this.hidden = config.hiddenColumns || {};
     this.grid = new Grid({ edits: this.edits, scroll: this.scroll, toolbarParent: this.controls.root,
-      hiddenColumns: function () { return {}; }, isBusy: function () { return self.busy(); }, notify: notice,
+      hiddenColumns: function () { return self.hidden; }, isBusy: function () { return self.busy(); }, notify: notice,
       changeFor: config.changeFor, submitBatch: function (changes) { self.ranges.submit(changes); } });
+    if (config.optionalColumns && config.optionalColumns.length) {
+      this.columnsMenu = this.buildColumnsMenu(notice);
+      this.controls.root.appendChild(this.columnsMenu.root);
+    }
     // A feature's tab settings (`config.settings`, nodes it owns) end the action bar after the view controls.
     if (config.settings && config.settings.length) {
       this.settingsRoot = ui.element("div", "phc-inventory-settings");
@@ -85,6 +96,35 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     root.appendChild(this.controls.root);
     root.appendChild(this.scroll);
   }
+  /* Columns: one setting choice per optional column, pressed while it shows. It fills as it opens, so it always
+     lists the state in force. */
+  Inventory.prototype.buildColumnsMenu = function (notice) {
+    var self = this, menu = new ui.ActionMenu("Columns", { icon: "columns", onOpen: function () {
+      menu.content.replaceChildren();
+      self.config.optionalColumns.forEach(function (column) {
+        var item = menu.add(column[1], function () { self.toggleColumn(column[0], notice); });
+        item.classList.add("phc-setting-choice");
+        item.setAttribute("aria-pressed", String(!self.hidden[column[0]]));
+      });
+    } });
+    menu.root.classList.add("phc-control-menu");
+    return menu;
+  };
+  Inventory.prototype.toggleColumn = function (field, notice) {
+    // A held edit or a request keeps the table as it is, so its cell and Cancel stay in view.
+    var reason = this.guard();
+    if (reason) { notice(reason); return false; }
+    var hiding = !this.hidden[field];
+    // No filter applies without a column to clear it from; clearing one repaints, as showing a column must.
+    if (hiding && this.controls.columnFilter(field)) {
+      this.hidden[field] = true;
+      if (!this.controls.filterColumn(field, null)) { delete this.hidden[field]; return false; }
+      return true;
+    }
+    if (hiding) this.hidden[field] = true; else delete this.hidden[field];
+    this.changed();
+    return true;
+  };
   Inventory.prototype.columnLabel = function (field) {
     return this.config.columns.filter(function (entry) { return entry[0] === field; })[0][1];
   };
@@ -180,8 +220,9 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.edits.batchPending = this.ranges.busy();
     this.edits.refresh(rows, state);
     this.tableOptions = { rows: rows, columns: [["actions", "Actions"]].concat(columns), stickyWidths: {},
-      defaultWidths: { name: 228, notes: 180, color: 60, category: 170, exterior_condition: 140,
-        total_thickness_mm: 104 },
+      hiddenColumns: this.hidden,
+      defaultWidths: Object.assign({ name: 228, notes: 180, color: 60, category: 170, exterior_condition: 140,
+        total_thickness_mm: 104 }, config.defaultWidths),
       disabled: !payload || this.busy(),
       value: function (row, field) { return config.value(row.record, field); },
       rowHidden: projected.hidden, group: projected.group, visibleCount: projected.visibleCount,

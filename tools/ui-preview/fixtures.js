@@ -1434,6 +1434,33 @@
         record_id: "lobby", wire_schema_version: 1, snapshot: { name: "Phius MF Lobby" } }] }
   };
 
+  /* The Mechanical tab over the Programs fixture's Zones: the reference model's ERV-1 (60 / 50 m³/h, out of balance)
+     and ERV-2 (40 / 40), a third serving nothing and one with long names. `flows` is each Zone's supply and extract
+     as the host's balance reads them; null is a By Program Zone whose Program gives no flow. */
+  function ventilator(id, name, values) {
+    return { id: id, kind: "ph_composer.mechanical.ventilator", schema_version: 1, user_data: {}, extension_data: {},
+      extension_status: {}, export_ready: true, export_blockers: [], findings: [], zones: [], balance: null,
+      values: Object.assign({ name: name, notes: "", datasheet_links: [], source: { kind: "manual" }, quantity: 1,
+        sensible_heat_recovery: 0, latent_heat_recovery: 0, electric_efficiency_wh_m3: 0.55,
+        frost_protection_reqd: true, temperature_below_defrost_used_c: -5, in_conditioned_space: true }, values) };
+  }
+  FIXTURES.mechanical = Object.assign(copy(FIXTURES.programs), { mechanical: {
+    ventilators: [
+      ventilator("vnt_Aa11Bb22Cc33", "ERV-1", { sensible_heat_recovery: 0.85, latent_heat_recovery: 0.6,
+        electric_efficiency_wh_m3: 0.45, manufacturer: "Nordvent", model: "Q350" }),
+      ventilator("vnt_Dd44Ee55Ff66", "ERV-2", { sensible_heat_recovery: 0.75, electric_efficiency_wh_m3: 0.35,
+        frost_protection_reqd: false, in_conditioned_space: false, subsoil_heat_exchange_efficiency: 0.2,
+        manufacturer: "Nordvent", model: "Q600" }),
+      ventilator("vnt_Gg77Hh88Ii99", "ERV-3 Spare", { sensible_heat_recovery: 0.84, latent_heat_recovery: 0.73,
+        electric_efficiency_wh_m3: 0.24 }),
+      ventilator("vnt_Jj00Kk11Ll22", "ERV-4 Retail and common areas, long tag", { sensible_heat_recovery: 0.8,
+        electric_efficiency_wh_m3: 0.5, manufacturer: "Alpen Air", model: "HR 1200 Commercial",
+        notes: "Serves the ground floor" })],
+    serves: { zon_apt1: "vnt_Aa11Bb22Cc33", zon_apt2: "vnt_Dd44Ee55Ff66", zon_corridor: "vnt_Dd44Ee55Ff66",
+      zon_classroom: "vnt_Jj00Kk11Ll22" },
+    flows: { zon_living: [30, 30], zon_bedroom: [20, 20], zon_apt1: [60, 50], zon_apt2: [25, 25],
+      zon_corridor: [15, 15], zon_classroom: null } } });
+
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
     // The Spaces section summed again after the preview host writes rates, by the same rule as the fixtures.

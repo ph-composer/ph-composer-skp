@@ -832,7 +832,7 @@ Segment's set points and its Dwellings' units and counts from the Python result.
 
 ## Mechanical equipment
 
-`ph_composer.mechanical` (`features/mechanical/`) requires Zones and Spaces, and no other feature names it. Each
+`ph_composer.mechanical` (`features/mechanical/`) requires Zones, Spaces and Programs, and no other feature names it. Each
 equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
 names Zones, Spaces, Programs, the Zone record or `serves/` (`tests/mechanical_dependency_test.rb`). Serves
 (`features/mechanical/serves/`) sits above the families and names them.
@@ -886,7 +886,40 @@ unventilated) and `mechanical.item_missing` (a slot naming an item not in the Mo
 outside the engine, such as one pasted from another Model, can carry; an error that blocks export).
 `ventilators.all` and `ventilators.list` rows gain `zones`, each Zone occurrence the item serves, and `findings`:
 `mechanical.item_unserved` (a warning) and `mechanical.zone_left_out`. Each of these reads reads the Zones once
-through `ph_composer.zones.all`.
+through `ph_composer.zones.all`. Serves rows also carry `building_segment`, the Segment's name or the name a Zone not
+yet adopted carries.
+
+**Airflow balance.** Each `ventilators.all` and `ventilators.list` row carries `balance`: `supply_m3h`,
+`extract_m3h`, `imbalanced` and `missing`, worked out by the pure `Serves::Balance`
+(`features/mechanical/serves/balance.rb`) over the Zones the export writes the Ventilator to: each served Zone once,
+its first occurrence by path, none in no Building Segment. A Zone in Detailed airflows gives its Spaces' supply and extract sums from
+`ph_composer.spaces.all`; a By Program Zone gives its Program's flow, `ventilation_m3h` on its
+`ph_composer.programs.zones` row, as both supply and extract, which is what PHX writes for it; a Zone with no Spaces
+exports no ventilation and adds nothing. `imbalanced` is supply and extract differing by more than a tenth of the
+larger (the rule Spaces once applied per Zone, now per ventilator). Both sums are null, with the reason in `missing`,
+while a By Program Zone's Program cannot work its flow out, and while the Ventilator serves no Zone the export writes.
+Each read takes one Spaces read and one Programs read for all its rows.
+
+**By ventilator.** The Colour-by mode `ph_composer.mechanical.by_ventilator` (`features/mechanical/colour_modes.rb`,
+`entity_kind` `zone`) gives one entry per row of `ph_composer.zones.occurrences`, which leaves Faces out, so an
+unreadable Face record does not turn it off: each Zone occurrence whose slot names a Ventilator, coloured by it from
+the spread ramp and labelled with its name; an unserved Zone gets no entry and stays uncoloured; a slot naming no
+stored Ventilator is incomplete. The legend counts Zone occurrences.
+
+**Locate.** Each `ph_composer.mechanical.preflight` row carries `locate`, naming the view command
+`ph_composer.mechanical.locate`: a Ventilator's `ventilator_ids` open the Mechanical tab with its Ventilators narrowed
+to them, a Zone's `zones` open the Zones tab with them checked.
+
+**The Mechanical tab** (`html/features/mechanical/`). One page header over a subtab per system and a pill row
+(`html/pill_row.js`) picking one table of it; each family registers its system and tables in
+`features/mechanical/systems.js`, and the system and table last shown are remembered as the `table_view` display
+preference, never in the Model. Ventilation › Ventilators is the kit `Inventory`: Tag, the exported values, Serves
+(chips opening the Zone picker, `features/mechanical/serves.js`, which assigns the newly checked Zones and then
+clears those left unchecked, each one Undo step, and resends with `replace` after `mechanical.slot_filled`), supply
+and extract from `balance`, then Manufacturer, Model and Notes, which its Columns menu hides; the two optional values
+sit behind each row's disclosure (`features/mechanical/optional_values.js`). Electric efficiency is the
+`electric_efficiency` quantity, Wh/m³ stored and W/cfm under IP, in both unit registries; the export report shows it
+in its display units.
 
 **Ventilator export.** `ph_composer.mechanical.export.ventilation` (section version 1, `features/mechanical/export.rb`)
 requires the Zones section and claims `ph_composer.mechanical.zone_serves` on the Zone record (`entity_projections`),

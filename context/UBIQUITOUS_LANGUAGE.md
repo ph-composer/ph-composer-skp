@@ -157,7 +157,8 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Set Weighting Factor | The context-menu submenu that sets one weighting factor on every Floor Segment the selection holds: a Floor Segment Face in an open Volume, each Floor Segment of a Volume, or each one in a Space's Volumes, in one Undo step |
 | Space label | Viewport text at a Space's reference point, as `101 Living \| iCFA 2,083 ft² \| Vol: 20,831 ft³`. Its values are whole numbers. iCFA and net volume show unless turned off; supply and extract, shown on request, follow as `\| Sup 60 cfm / Ext 60 cfm` |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
-| Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A By Program Zone shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
+| Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A By Program Zone shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, on the Ventilators table of the Mechanical tab |
+| Balance by ventilator | A Ventilator's supply and extract, summed over the Zones the export writes it to: a Zone's Spaces' rates, or a By Program Zone's Program flow as both. Out of balance when the two differ by more than a tenth of the larger |
 | Move Space to Zone | The action that hosts one Space in another Zone by writing the Zone's id on the Space record. The Space Group stays where it stands |
 | Mark floor | The Spaces tool that marks a face inside a Volume as a Floor Segment with a weighting factor, started from the Weighting factor column menu. A separate tool beside Classify, not a mode of it |
 | Make independent | The repair for a copied Space, Volume or Floor Segment: the copy and everything inside it receive new identities, in one Undo step. Resolve shared identities before export |
@@ -206,6 +207,9 @@ terms are at the end, marked planned.
 | Term | Meaning |
 | --- | --- |
 | Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps and fans a Phius model needs. Appliances and Phius devices are Equipment Sets instead. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
+| Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation now; Heat Pumps, Hot Water, Pumps, Fans and Electric Heating as each lands) and, beneath it, a pill row picking one table of that system (Ventilators; Ducting later) |
+| Serves | Which Zones an equipment item serves. Shown as Zone chips on the item's row; the Zone picker chooses them, grouped by Building Segment |
+| Tag | An equipment item's name, as its tables show it |
 | Hot Water System | The planned record that groups heaters and tanks and serves Zones. Heaters and tanks are their own rows and each names its System |
 | Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |

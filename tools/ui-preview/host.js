@@ -19,6 +19,7 @@
   var ASSEMBLIES = "ph_composer.assemblies.assemblies";
   var TB = "ph_composer.thermal_bridges.";
   var CLIMATE = "ph_composer.climate.";
+  var MECHANICAL = "ph_composer.mechanical.";
   var ZONE_LABELS = { 1: "Not defined", 11: "1", 12: "2", 13: "3", 14: "4", 141: "4C", 15: "5", 16: "6", 17: "7",
     18: "8" };
   var NOTHING_WRITTEN = "Nothing was written.";
@@ -76,6 +77,8 @@
     this.thermalBridges = JSON.parse(JSON.stringify(settings.thermalBridges ||
       { types: [], selected: [], runs: [], edgeFindings: [] }));
     this.edgeTool = { active: false, thermal_bridge_type_id: null, quantity: 1, gesture_limit: 250 };
+    // The Mechanical tab's Ventilators, what serves each Zone, and each Zone's supply and extract.
+    this.mechanical = JSON.parse(JSON.stringify(settings.mechanical || { ventilators: [], serves: {}, flows: {} }));
     // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
     // for its geolocation; `climate.geolocation` stands in for the host read.
     this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
@@ -206,6 +209,9 @@
         [TB + "edges.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
           this.thermalBridges.selected)), ignored: [], ignored_total: 0 } },
         [TB + "edge_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.edgeTool)) },
+        [MECHANICAL + "ventilators"]: { status: "completed", value: { records: this.ventilatorRows(),
+          unreadable: [] } },
+        [MECHANICAL + "serves"]: { status: "completed", value: { zones: this.servesRows() } },
         [CLIMATE + "site"]: { status: "completed", value: this.climateSite() },
         [CLIMATE + "design_temperatures"]: { status: "completed", value: this.climateDesign() },
         [CLIMATE + "summary"]: { status: "completed", value: { site: this.climateSite().state,
@@ -268,7 +274,8 @@
         { name: "ph_composer.spaces.by_height", label: "Height", entity_kind: "volume", group: null },
         { name: "ph_composer.thermal_bridges.by_type", label: "Thermal Bridge Type", entity_kind: "edge", group: null },
         { name: "ph_composer.thermal_bridges.by_group", label: "Thermal bridge group", entity_kind: "edge",
-          group: null }],
+          group: null },
+        { name: "ph_composer.mechanical.by_ventilator", label: "Ventilator", entity_kind: "zone", group: null }],
       readouts: [["ph_composer.spaces.show", "Show Spaces", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],
@@ -500,6 +507,117 @@
       value: { id: id }, affected: [], findings: [], detail: null };
   };
 
+  /* The Mechanical reads as features/mechanical/ answers them: each Zone occurrence with its slot, and each
+     Ventilator with the Zones it serves and the balance over them, summed from the fixture's flows by the host's
+     rule (more than a tenth of the larger is out of balance). */
+  Host.prototype.servesRows = function () {
+    var data = this.mechanical, names = {}, segments = {};
+    data.ventilators.forEach(function (record) { names[record.id] = record.values.name; });
+    this.zoneOptions.building_segments.forEach(function (segment) { segments[segment.id] = segment.values.name; });
+    return this.zones.map(function (zone) {
+      var item = data.serves[zone.id] || null, segment = zone.values.building_segment_id || null;
+      return { zone_id: zone.id, reference: zone.reference, name: zone.values.name,
+        building_segment_id: segment,
+        building_segment: segment ? segments[segment] || null : zone.values.building_segment || null,
+        slots: { ventilator_id: item }, payload_status: item ? "understood" : null,
+        items: item ? [{ slot: "ventilator_id", id: item, name: names[item] || null }] : [], findings: [] };
+    });
+  };
+  Host.prototype.ventilatorRows = function () {
+    var data = this.mechanical, zones = this.zones;
+    return data.ventilators.map(function (record) {
+      var served = zones.filter(function (zone) { return data.serves[zone.id] === record.id; });
+      var flows = served.map(function (zone) { return data.flows[zone.id]; }), balance;
+      if (!served.length) balance = { supply_m3h: null, extract_m3h: null, imbalanced: false,
+        missing: "It serves no Zone the export writes, so it moves no air." };
+      else if (flows.some(function (flow) { return !flow; })) balance = { supply_m3h: null, extract_m3h: null,
+        imbalanced: false, missing: "A Zone it serves is By Program, and its Program's ventilation cannot be " +
+          "worked out yet." };
+      else {
+        var supply = flows.reduce(function (sum, flow) { return sum + flow[0]; }, 0);
+        var extract = flows.reduce(function (sum, flow) { return sum + flow[1]; }, 0);
+        var larger = Math.max(supply, extract);
+        balance = { supply_m3h: supply, extract_m3h: extract, missing: null,
+          imbalanced: larger > 0 && Math.abs(supply - extract) > 0.1 * larger };
+      }
+      return Object.assign(JSON.parse(JSON.stringify(record)), { balance: balance, findings: served.length ? [] :
+        [{ code: "mechanical.item_unserved", severity: "warning", blocks_export: false,
+          message: record.values.name + " serves no Zone, so nothing exports it." }],
+      zones: served.map(function (zone) {
+        return { zone_id: zone.id, reference: zone.reference, name: zone.values.name };
+      }) });
+    });
+  };
+  /* The Ventilator actions and Assign and Clear, with their guards: a changed expected value, and a Zone another
+     Ventilator serves without `replace`, refuse and write nothing. */
+  Host.prototype.mechanicalAction = function (payload) {
+    var data = this.mechanical, params = payload.params, name = payload.name.slice(MECHANICAL.length), id;
+    var target = data.ventilators.filter(function (record) { return record.id === params.id; })[0];
+    var zones = this.zones;
+    function copy(value) { return JSON.parse(JSON.stringify(value)); }
+    function zoneOf(row) {
+      return zones.filter(function (zone) {
+        return JSON.stringify(zone.reference) === JSON.stringify(row.reference);
+      })[0];
+    }
+    if (params.id && !target) return refused("target.not_found", "That Ventilator is unavailable.", this.revision);
+    if (target && params.expected_values && Object.keys(params.expected_values).some(function (field) {
+      var current = target.values[field];
+      return JSON.stringify(current === undefined ? null : current) !== JSON.stringify(params.expected_values[field]);
+    })) return refused("target.changed", "The Ventilator changed. " + NOTHING_WRITTEN, this.revision);
+    if (name === "ventilators.create" || name === "ventilators.duplicate") {
+      id = "vnt_preview" + String(++this.sequence).padStart(5, "0");
+      var values = name === "ventilators.create" ? copy(params.values) :
+        Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
+      var made = { id: id, kind: MECHANICAL + "ventilator", schema_version: 1, user_data: {}, extension_data: {},
+        extension_status: {}, export_ready: true, export_blockers: [], findings: [], zones: [], balance: null,
+        values: Object.assign({ notes: "", datasheet_links: [], source: { kind: "manual" }, quantity: 1,
+          sensible_heat_recovery: 0, latent_heat_recovery: 0, electric_efficiency_wh_m3: 0.55,
+          frost_protection_reqd: true, temperature_below_defrost_used_c: -5, in_conditioned_space: true }, values) };
+      data.ventilators.push(made);
+    } else if (name === "ventilators.update") {
+      Object.keys(params.values).forEach(function (field) {
+        if (params.values[field] === null) delete target.values[field];
+        else target.values[field] = params.values[field];
+      });
+    } else if (name === "ventilators.delete") {
+      var using = Object.keys(data.serves).filter(function (zone) { return data.serves[zone] === target.id; });
+      if (using.length && params.replacement_id === undefined) {
+        return refused("reference.in_use", target.values.name + " serves Zones. " + NOTHING_WRITTEN, this.revision);
+      }
+      using.forEach(function (zone) {
+        if (params.replacement_id) data.serves[zone] = params.replacement_id; else delete data.serves[zone];
+      });
+      data.ventilators.splice(data.ventilators.indexOf(target), 1);
+    } else if (name === "serves.assign" || name === "serves.clear") {
+      var picked = params.zones.map(zoneOf);
+      if (picked.some(function (zone) { return !zone; })) {
+        return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
+      }
+      if (params.zones.some(function (row, index) {
+        return (row.expected_values || {}).ventilator_id !== undefined &&
+          (data.serves[picked[index].id] || null) !== row.expected_values.ventilator_id;
+      })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
+      if (name === "serves.assign" && !params.replace) {
+        var filled = picked.filter(function (zone) {
+          return data.serves[zone.id] && data.serves[zone.id] !== params.item_id;
+        })[0];
+        if (filled) {
+          var other = data.ventilators.filter(function (record) { return record.id === data.serves[filled.id]; })[0];
+          return refused("mechanical.slot_filled", "Zone " + filled.values.name + " is served by " +
+            (other ? other.values.name : "another Ventilator") + ". Replace it to assign. " + NOTHING_WRITTEN,
+          this.revision);
+        }
+      }
+      picked.forEach(function (zone) {
+        if (name === "serves.assign") data.serves[zone.id] = params.item_id; else delete data.serves[zone.id];
+      });
+    } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
+    this.revision += 1;
+    return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
+      value: { id: id }, affected: [], findings: [], detail: null };
+  };
+
   /* Synthetic Window outcomes exercise panel transport only; thermal values are fixture projections. */
   Host.prototype.windowAction = function (payload) {
     var host = this, params = payload.params, name = payload.name.replace("ph_composer.windows.", "");
@@ -702,6 +820,7 @@
     }
     if (payload.name.indexOf("ph_composer.windows.") === 0) return this.windowAction(payload);
     if (payload.name.indexOf(TB) === 0) return this.thermalBridgeAction(payload);
+    if (payload.name.indexOf(MECHANICAL) === 0) return this.mechanicalAction(payload);
     if (payload.name.indexOf(CLIMATE) === 0) return this.climateAction(payload);
     if (payload.name === "ph_composer.library.copy") return this.libraryCopy(payload);
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||

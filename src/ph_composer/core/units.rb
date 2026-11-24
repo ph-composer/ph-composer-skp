@@ -101,6 +101,12 @@ module PhComposer
       "airflow_per_area" => {
         :si_label => "m³/h per m²", :ip_label => "cfm/ft²", :si_precision => 2, :ip_precision => 3,
         :factor => FT3_PER_M3 / 60 / FT2_PER_M2
+      },
+      # A Ventilator's electric efficiency: watt-hours per cubic metre moved, or watts per cfm, which is the same
+      # power over a flow in cfm, so the factor is airflow's inverse.
+      "electric_efficiency" => {
+        :si_label => "Wh/m³", :ip_label => "W/cfm", :si_precision => 2, :ip_precision => 2,
+        :factor => 60 / FT3_PER_M3
       }
     }.freeze
 

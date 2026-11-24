@@ -1,0 +1,44 @@
+/* The Mechanical tab (features/mechanical/): its tables' Serves chips, the balance cells, the Zone picker and the
+   optional values bubble. The subtabs, the pill row and the tables are the shared kit's. */
+.mech-table { padding-top: 10px; }
+
+/* Serves: the cell is one button holding the first Zones as chips; the row owns hover, so a chip never tints. */
+.phc-workspace .phc-table td.mech-serves { padding: 0 4px; }
+.phc-workspace button.mech-serves-cell { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0;
+  height: 24px; min-height: 24px; padding: 0 2px; overflow: hidden; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink); text-align: left; }
+.phc-workspace button.mech-serves-cell:hover:enabled { background: transparent; }
+.mech-zone-chip { flex: none; max-width: 140px; height: 20px; padding: 0 8px; overflow: hidden;
+  border-radius: var(--radius-pill); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--text-sm); line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.mech-zone-chip.is-empty { background: var(--warning-surface); box-shadow: inset 0 0 0 1px var(--warning-border);
+  color: var(--warning-ink); }
+.mech-zone-chip.is-more { background: transparent; box-shadow: none; color: var(--muted); }
+
+/* Supply and extract: a number under the header's unit; amber across both cells while out of balance. */
+.phc-workspace .phc-table td.mech-balance { text-align: right; }
+.phc-workspace .phc-table td.mech-balance.is-imbalanced { background: var(--warning-surface);
+  color: var(--warning-ink); }
+.mech-muted { color: var(--muted); }
+
+/* The Zone picker: a search, the Zones under their Building Segments, the status and the commit row. */
+.mech-zone-picker .phc-bubble { width: 300px; }
+.phc-workspace .mech-zone-find { box-sizing: border-box; width: 100%; }
+.mech-zone-list { max-height: 300px; margin: 8px 0; overflow: auto; }
+.phc-workspace .mech-zone-group, .phc-workspace .mech-zone-row { display: flex; flex-direction: row; align-items: center;
+  gap: 8px; }
+.phc-workspace .mech-zone-group { margin: 8px 0 2px; color: var(--muted); font-size: var(--text-xs); font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase; }
+.phc-workspace .mech-zone-group.is-muted { color: var(--muted-faint); }
+.phc-workspace .mech-zone-row { padding: 3px 2px 3px 20px; color: var(--ink); font-size: var(--text-md);
+  font-weight: 400; }
+.mech-zone-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mech-zone-note { flex: none; margin-left: auto; color: var(--muted); font-size: var(--text-sm); }
+.mech-zone-empty { margin: 8px 0; color: var(--muted); }
+.mech-zone-status { margin: 0 0 8px; color: var(--muted); font-size: var(--text-sm); }
+.mech-zone-status:empty { display: none; }
+.mech-zone-status.is-error { color: var(--red); }
+.mech-zone-picker .phc-dialog-actions { justify-content: flex-end; }
+
+/* The optional values: label over field, one per value. */
+.phc-workspace .mech-optional-field { display: grid; gap: 4px; margin: 0 0 10px; }
