@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require_relative "support/space_fixtures"
+require_relative "support/zone_options"
 require_relative "../tools/examples/authoring/ventilators_walkthrough"
 
 class VentilatorsWalkthroughTest < PhComposerTestCase
+  include SpaceFixtures
+  include ZoneOptionsSupport
+
   def setup
     super
     PhComposer.compose unless PhComposer::Registry.installed?("ph_composer.mechanical")
@@ -37,5 +42,73 @@ class VentilatorsWalkthroughTest < PhComposerTestCase
     assert_raises(RuntimeError) { VentilatorsWalkthrough.verify }
     text = File.read(File.expand_path("../tools/examples/authoring/ventilators_walkthrough.rb", __dir__))
     refute_match(/PhComposer::Mechanical|PhComposer::Zones/, text)
+  end
+
+  # Zone A at the root, Zone B in a turned Group, and a copy of Zone B made independent: the Serves steps reach
+  # every occurrence, step back one Undo step at a time and forward again.
+  def test_the_serves_steps_assign_replace_clear_and_move_in_nested_and_copied_zones
+    model = Sketchup.active_model
+    session = PhComposer::Sessions.for(model)
+    @context = PhComposer::API.connect(:session_id => session.id)
+    @sequence = 0
+    # A quarter turn about the vertical, then 400 inches along x.
+    turned = Geom::Transformation.new([0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 400, 0, 0, 1])
+    model.entities << zone(1000, "A", "Zone A") <<
+      Sketchup::Group.new(8000, Sketchup::Entities.new([zone(2000, "B", "Zone B")]), :transformation => turned)
+    adopt_zone_options
+    original = model.entities.to_a.last.entities.to_a.first
+    copy = Sketchup::Group.new(9000, original.entities, :name => "Zone B")
+    Array(original.attribute_dictionaries).each do |dictionary|
+      dictionary.each { |key, value| copy.set_attribute(dictionary.name, key, value) }
+    end
+    model.entities << copy
+    treat_duplicates_as_existing(model)
+    made = invoke("ph_composer.zones.make_independent", "zone_path" => [9000])
+    assert_equal "completed", made.fetch("status"), made.inspect
+
+    assert VentilatorsWalkthrough.run.fetch("passed")
+    result = VentilatorsWalkthrough.serve
+    assert result.fetch("passed"), result.inspect
+    assert_equal [["Zone A", [1000]], ["Zone B", [8000, 2000]], ["Zone B", [9000]]],
+                 VentilatorsWalkthrough.serve_state.fetch("zones").map { |row| row.first(2) }
+
+    # Each Undo step back, newest first: the delete, Zone B's assign, its clear, Zone A's replace, Zone B's and
+    # Zone A's first assigns.
+    expected = [%w[ERV-2 ERV-1 ERV-1], ["ERV-2", nil, nil], %w[ERV-2 ERV-2 ERV-2], %w[ERV-1 ERV-2 ERV-2],
+                ["ERV-1", nil, nil], [nil, nil, nil]]
+    stepped = expected.map do
+      model.undo
+      items
+    end
+    assert_equal expected, stepped
+    model.undo
+    assert_equal ["ERV-1", "ERV-1 (copy)"], VentilatorsWalkthrough.serve_state.fetch("ventilators"),
+                 "the seventh step back removes the recreated ERV-2"
+    VentilatorsWalkthrough::SERVE_STEPS.times { model.redo }
+    assert VentilatorsWalkthrough.serve_verify.fetch("passed")
+  end
+
+  private
+
+  def items
+    VentilatorsWalkthrough.serve_state.fetch("zones").map(&:last)
+  end
+
+  def zone(base, letter, name)
+    space = space_group(base + 10, space_record(letter, :number => "1", :name => name),
+                        [volume_group(base + 20, volume_record(letter),
+                                      [floor_face(base + 30, rectangle(0, 0, 5, 4), segment_record(letter))])])
+    group = Sketchup::Group.new(base, Sketchup::Entities.new([space]), :name => name)
+    ZONES::ZONE_STORE.write(group, { "id" => "zon_#{letter * 12}", "schema_version" => 1, "name" => name,
+                                     "building_segment" => "Reference", "level" => "L1", "ground_depth_mm" => 0.0 })
+    host_children([space], "zon_#{letter * 12}")
+    group
+  end
+
+  def invoke(name, params)
+    PhComposer::API.invoke(:context => @context, :name => name, :params => params,
+                           :request => { "sequence" => @sequence += 1,
+                                         "expected_revision" => PhComposer::Sessions.find(@context.session_id)
+                                                                                    .revision })
   end
 end

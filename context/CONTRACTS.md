@@ -834,7 +834,8 @@ Segment's set points and its Dwellings' units and counts from the Python result.
 
 `ph_composer.mechanical` (`features/mechanical/`) requires Zones and Spaces, and no other feature names it. Each
 equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
-names Zones, Spaces, Programs or the Zone record (`tests/mechanical_dependency_test.rb`).
+names Zones, Spaces, Programs, the Zone record or `serves/` (`tests/mechanical_dependency_test.rb`). Serves
+(`features/mechanical/serves/`) sits above the families and names them.
 
 - **Ventilator** (`ph_composer.mechanical.ventilator`, `vnt_`, `schema_version` 1): the shared name, notes, datasheet
   links and source; `manufacturer` and `model` (text or null, absent by default); `quantity` (integer, at least 1,
@@ -850,6 +851,42 @@ the source `derived` and a copy of the `user_data`; `delete` is the engine's gua
 `ventilators.all` (also the snapshot section `ph_composer.mechanical.ventilators`) answer each record's view with
 `export_ready` and `export_blockers`, empty for a Ventilator. Its `user_data` and extension payloads are written with
 `ph_composer.records.update_metadata`; nothing exports yet.
+
+**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 1)
+on the Zone record, as Programs keeps a Zone's assignment ("Occupancy"): no record, id or reference target of its
+own. Its payload holds one slot per family, `ventilator_id` (a `vnt_` id or null, a declared `one` reference to the
+Ventilator kind); a later family adds its slot (a `many` slot is a list holding each id once) and moves the version.
+The validator takes a whole payload: every slot present, each id of its slot's kind or null, no other key. It is
+`local_only` until the Ventilator export claims it and moves it to `required` in the same change, since a `required`
+namespace no contributor claims blocks every export of a Zone that carries it. A Zone served by nothing stores no
+payload or one whose every slot is empty; the reads answer both alike.
+
+`ph_composer.mechanical.serves.assign` (targets `{reference, expected_values}`, `slot`, `item_id`, `replace`) and
+`serves.clear` (targets and a `slot`, or every slot) read the Zones once through `ph_composer.zones.all`, check every
+target before anything is staged (a changed slot refuses `target.changed`; an item that is not stored refuses
+before staging) and hand each Zone's whole new payload to Zones' participant `ph_composer.zones.stage_extension`, so
+each is one Undo step, Zones' write refusals pass through unchanged, and no mechanical code writes a Zone. A single
+slot naming another item refuses `mechanical.slot_filled`, naming it, unless `replace`. Clear writes only a Zone
+that stores a payload, and stages the emptied one. The payload travels with a copied Zone because it is part of the
+record; the feature declares no transition contributor.
+
+The declared references put each named item in the engine's incoming-reference scan. `ventilators.delete` without
+`replacement_id` refuses `reference.in_use`, its message naming the Zones; with an id, every slot naming the item
+takes the replacement, and with null each is emptied, staged through `stage_extension` in the delete's proposal and
+handed to `propose_delete` as a `Records::ReferencePlan`, one Undo step. Only an understood payload is moved; any
+other stays as stored and the engine refuses the delete. A Zone whose two occurrences share an id, a copy not yet
+made independent, refuses the move as `target.ambiguous`. Every route through the engine, the generic metadata
+routes included, refuses a slot naming no stored item as `reference.invalid`.
+
+`serves.all` (the snapshot section `ph_composer.mechanical.serves`) and the bounded `serves.list` answer each Zone
+occurrence with its `slots`, the `items` they name with their names, the stored payload's status and `findings`
+(`{code, severity, message, blocks_export}`): `mechanical.zone_unventilated` (a Zone in a Building Segment with no
+Ventilator, a warning), `mechanical.zone_left_out` (a served Zone in no Building Segment, info; such a Zone is never
+unventilated) and `mechanical.item_missing` (a slot naming an item not in the Model, which only a Zone record written
+outside the engine, such as one pasted from another Model, can carry; an error that blocks export).
+`ventilators.all` and `ventilators.list` rows gain `zones`, each Zone occurrence the item serves, and `findings`:
+`mechanical.item_unserved` (a warning) and `mechanical.zone_left_out`. Each of these reads reads the Zones once
+through `ph_composer.zones.all`.
 
 ## This computer's settings file
 

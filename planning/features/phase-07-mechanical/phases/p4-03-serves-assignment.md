@@ -1,7 +1,7 @@
 # P4-03: Serves, the assignment payload on the Zone
 
 DATE: 2026-10-21
-STATUS: Scoped. Re-planned 2026-11-22 to D4-21: Serves is a structured extension on the Zone record, staged through Zones, in place of the record, reference target and Zone-copy contributor first planned. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: In review 2026-11-23 on `feat/phase-07-mechanical-p4-03`, stacked on P4-02; offline evidence in [p4-03-serves](../evidence/p4-03-serves.md), host case `M03` owed to MS1. Re-planned 2026-11-22 to D4-21: Serves is a structured extension on the Zone record, staged through Zones, in place of the record, reference target and Zone-copy contributor first planned. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

@@ -357,6 +357,21 @@ uv run tools/hostkit/host_bridge.py save
 
 After a fresh-process reopen, load the script and run `VentilatorsWalkthrough.verify`.
 
+In a Model with Zones named "Zone A" and "Zone B" (Zone B may sit in a turned Group, and a copy made
+independent keeps its name, so every occurrence of each name is served), `serve` follows `run`: it creates
+ERV-2 again, assigns ERV-1 to Zone A and ERV-2 to Zone B through `ph_composer.mechanical.serves.assign`,
+replaces Zone A's with ERV-2, clears Zone B, assigns ERV-1 to it, and deletes ERV-1 with ERV-2 as its
+replacement, seven native Undo steps. `serve_verify` reads `ph_composer.mechanical.serves.all` and the
+catalog back: every occurrence served by ERV-2.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval 'VentilatorsWalkthrough.serve'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'     # seven times, reading serve_state between
+uv run tools/hostkit/host_bridge.py eval 'VentilatorsWalkthrough.serve_state'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # seven times
+uv run tools/hostkit/host_bridge.py eval 'VentilatorsWalkthrough.serve_verify'
+```
+
 ## Edge assignment with the panel closed
 
 `thermal_bridge_assignment_walkthrough.rb` works on the Edges selected natively inside a Zone:

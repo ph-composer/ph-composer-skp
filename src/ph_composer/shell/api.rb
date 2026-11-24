@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 87
+    MINOR = 88
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -533,7 +533,14 @@ module PhComposer
         "change" => "The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, " \
                     "vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with " \
                     "the reads ventilators.list and ventilators.all, whose rows carry export_ready and " \
-                    "export_blockers, and the snapshot section ph_composer.mechanical.ventilators." }
+                    "export_blockers, and the snapshot section ph_composer.mechanical.ventilators." },
+      { "minor" => 88, "date" => "2026-11-23",
+        "change" => "What serves each Zone: the extension ph_composer.mechanical.zone_serves on the Zone record, " \
+                    "ph_composer.mechanical.serves.assign and serves.clear, the reads serves.list and serves.all " \
+                    "with the snapshot section ph_composer.mechanical.serves, and the codes mechanical.slot_filled, " \
+                    "zone_unventilated, item_unserved, item_missing and zone_left_out. ventilators.list and " \
+                    "ventilators.all rows carry zones and findings; ventilators.delete takes replacement_id, an id " \
+                    "or null, and refuses reference.in_use naming the Zones without one." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

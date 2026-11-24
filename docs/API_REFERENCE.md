@@ -16094,13 +16094,406 @@ Example params:
 {}
 ```
 
+### `ph_composer.mechanical.serves.all`
+
+Every Zone occurrence with what serves each, the items' names and the findings, for the panel snapshot. Owner: `ph_composer.mechanical`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.serves.list` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "reference",
+          "name",
+          "building_segment_id",
+          "slots",
+          "payload_status",
+          "items",
+          "findings"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "building_segment_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null in No Building Segment, and for a Zone not yet adopted, which names its Segment by text."
+          },
+          "slots": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ventilator_id"
+            ],
+            "properties": {
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^vnt_[A-Za-z0-9]{12}$",
+                "description": "Its Ventilator, null for none."
+              }
+            },
+            "description": "What serves it, every slot empty when it stores none."
+          },
+          "payload_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The stored payload's status, null for none; any but understood reads as served by nothing."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "id",
+                "name"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "ventilator_id"
+                  ],
+                  "description": "The family slot: ventilator_id."
+                },
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Null for an item that is not in the Model or cannot be read."
+                }
+              }
+            },
+            "description": "The items its slots name, with their names."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.mechanical.serves.list`
+
+One bounded page of Zone occurrences with what serves each, in Zone id order, and their findings. Owner: `ph_composer.mechanical`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "reference",
+          "name",
+          "building_segment_id",
+          "slots",
+          "payload_status",
+          "items",
+          "findings"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "building_segment_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null in No Building Segment, and for a Zone not yet adopted, which names its Segment by text."
+          },
+          "slots": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ventilator_id"
+            ],
+            "properties": {
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^vnt_[A-Za-z0-9]{12}$",
+                "description": "Its Ventilator, null for none."
+              }
+            },
+            "description": "What serves it, every slot empty when it stores none."
+          },
+          "payload_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The stored payload's status, null for none; any but understood reads as served by nothing."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "id",
+                "name"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "ventilator_id"
+                  ],
+                  "description": "The family slot: ventilator_id."
+                },
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Null for an item that is not in the Model or cannot be read."
+                }
+              }
+            },
+            "description": "The items its slots name, with their names."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
 ### `ph_composer.mechanical.ventilators.all`
 
-Every Ventilator with its values and export readiness, for the panel snapshot. Owner: `ph_composer.mechanical`.
+Every Ventilator with its values, export readiness and the Zones it serves, for the panel snapshot. Owner: `ph_composer.mechanical`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.mechanical.ventilators.list` instead.
 
-Refuses: only the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -16138,7 +16531,9 @@ Result:
           "kind",
           "extension_status",
           "export_ready",
-          "export_blockers"
+          "export_blockers",
+          "zones",
+          "findings"
         ],
         "properties": {
           "id": {
@@ -16417,6 +16812,81 @@ Result:
               "type": "string"
             },
             "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -16458,7 +16928,7 @@ Example params:
 
 One bounded page of Ventilators in id order, with export readiness. Owner: `ph_composer.mechanical`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -16488,7 +16958,9 @@ Params:
           "extension_data",
           "extension_status",
           "export_ready",
-          "export_blockers"
+          "export_blockers",
+          "zones",
+          "findings"
         ]
       },
       "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
@@ -16805,6 +17277,81 @@ Result:
               "type": "string"
             },
             "description": "The codes keeping it out of an export; empty when export_ready."
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zone_id",
+                "reference",
+                "name"
+              ],
+              "properties": {
+                "zone_id": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "zone_id",
+                    "zone_path"
+                  ],
+                  "properties": {
+                    "zone_id": {
+                      "type": "string"
+                    },
+                    "zone_path": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "Each Zone occurrence it serves."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -58968,6 +59515,284 @@ Example params:
 }
 ```
 
+### `ph_composer.mechanical.serves.assign`
+
+Name an item in one slot of Zones. A Ventilator serves a Zone alone. Owner: `ph_composer.mechanical`.
+
+Undo step: Assign Equipment. Writes each Zone's Serves payload; Programs' assignment is untouched.
+
+Before calling: The item exists. Each Zone is writable: no locked Group, shared definition or containing Zone.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `mechanical.slot_filled`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones",
+    "slot",
+    "item_id"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [],
+            "properties": {
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^vnt_[A-Za-z0-9]{12}$",
+                "description": "Its Ventilator, null for none."
+              }
+            },
+            "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
+          }
+        }
+      },
+      "description": "Each Zone occurrence, as serves.all or zones.all returns its reference.",
+      "minItems": 1
+    },
+    "slot": {
+      "type": "string",
+      "enum": [
+        "ventilator_id"
+      ],
+      "description": "The family slot: ventilator_id."
+    },
+    "item_id": {
+      "type": "string",
+      "pattern": "^[a-z]{3}_[A-Za-z0-9]{12}$",
+      "description": "The item the slot names; its id is of the slot's kind."
+    },
+    "replace": {
+      "type": "boolean",
+      "description": "Replace an item already in a single slot; without it that Zone refuses mechanical.slot_filled, naming the item."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "slot",
+    "item_id"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The Zones named."
+    },
+    "slot": {
+      "type": "string",
+      "enum": [
+        "ventilator_id"
+      ],
+      "description": "The family slot: ventilator_id."
+    },
+    "item_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "reference": {
+        "zone_id": "zon_Ab12Cd34Ef56",
+        "zone_path": [
+          101
+        ]
+      },
+      "expected_values": {
+        "ventilator_id": null
+      }
+    }
+  ],
+  "slot": "ventilator_id",
+  "item_id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.mechanical.serves.clear`
+
+Empty one slot of Zones, or every slot, so they read as served by nothing. Owner: `ph_composer.mechanical`.
+
+Undo step: Clear Equipment. Writes each Zone's Serves payload; a Zone that stores none is left as it is.
+
+Before calling: Each Zone is writable: no locked Group, shared definition or containing Zone.
+
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [],
+            "properties": {
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^vnt_[A-Za-z0-9]{12}$",
+                "description": "Its Ventilator, null for none."
+              }
+            },
+            "description": "Any of the Zone's slots as serves.all last read them; if one changed since, the command is refused as target.changed. {} skips the check."
+          }
+        }
+      },
+      "description": "Each Zone occurrence, as serves.all or zones.all returns its reference.",
+      "minItems": 1
+    },
+    "slot": {
+      "type": "string",
+      "enum": [
+        "ventilator_id"
+      ],
+      "description": "The slot to empty; every slot when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "slot"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The Zones named, written or already empty."
+    },
+    "slot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "reference": {
+        "zone_id": "zon_Ab12Cd34Ef56",
+        "zone_path": [
+          101
+        ]
+      },
+      "expected_values": {
+        "ventilator_id": null
+      }
+    }
+  ]
+}
+```
+
 ### `ph_composer.mechanical.ventilators.create`
 
 Create one Ventilator. Unless values give them, its unit values take honeybee-ph's defaults: quantity 1, no heat recovery, 0.55 Wh/m3, frost protection on below -5 C, in conditioned space, and the subsoil heat exchanger and preheated intake temperature absent. Owner: `ph_composer.mechanical`.
@@ -59268,13 +60093,15 @@ Example params:
 
 ### `ph_composer.mechanical.ventilators.delete`
 
-Delete one Ventilator; one still in use refuses as reference.in_use. Owner: `ph_composer.mechanical`.
+Delete one Ventilator. While a Zone names it, name a replacement_id, which takes its place on every Zone, or null, which empties those slots; without one it refuses as reference.in_use, naming the Zones. Owner: `ph_composer.mechanical`.
 
-Undo step: Delete Ventilator. Deletes one definition and its metadata; Undo restores both.
+Undo step: Delete Ventilator. Deletes one definition and its metadata, and rewrites the Zones that name it; Undo restores all of them.
 
 Before calling: The Ventilator exists and is readable.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+Calls: `ph_composer.zones.stage_extension`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `geometry.invalid`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -59560,6 +60387,14 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator that takes this one's place on every Zone, or null to empty those slots. Needed while a Zone names it."
     }
   }
 }
@@ -59635,6 +60470,15 @@ Example params:
 ```json
 {
   "id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "vnt_Ab12Cd34Ef56",
+  "replacement_id": "vnt_Zy98Xw76Vu54"
 }
 ```
 
@@ -97376,6 +98220,16 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.utc_offset_not_set` | The site's hours from UTC are not set. They are exported empty. |
 | `climate.zone_not_set` | The site's climate zone is not set. It is exported as Not defined. |
 
+### `ph_composer.mechanical`
+
+| Code | Meaning |
+| --- | --- |
+| `mechanical.item_missing` | A Zone's slot names an item that is not in the Model; reassign or clear it. |
+| `mechanical.item_unserved` | An item serves no Zone, so nothing exports it. |
+| `mechanical.slot_filled` | The Zone's slot already names another item; assign with replace to use the new one. |
+| `mechanical.zone_left_out` | A served Zone is in no Building Segment, so the export leaves its Room out. |
+| `mechanical.zone_unventilated` | A Zone in a Building Segment has no Ventilator. |
+
 ### `ph_composer.programs`
 
 | Code | Meaning |
@@ -97673,3 +98527,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.85 | 2026-11-21 | A Schedule's profile (programs.schedules.profile and each schedules row's profile) adds weekdays, the days its operating day applies on, Monday first. An equipment_sets.device_types field adds applies_when where it means something only under another field's values: a clothes dryer's gas_consumption and gas_efficiency_factor, under dryer_type gas_exhaust_air. |
 | 1.86 | 2026-11-21 | ph_composer.zones.save_segment_settings also emits ph_composer.zones.segment_settings_saving, before it stages the payloads, with building_segment_id and extension_payloads; a Segment's occupancy settings naming an unwritten default Program or Equipment Set store it in the same step. |
 | 1.87 | 2026-11-23 | The ph_composer.mechanical feature and its Ventilator kind (ph_composer.mechanical.ventilator, vnt_). ph_composer.mechanical.ventilators.create, update, duplicate and delete are new, with the reads ventilators.list and ventilators.all, whose rows carry export_ready and export_blockers, and the snapshot section ph_composer.mechanical.ventilators. |
+| 1.88 | 2026-11-23 | What serves each Zone: the extension ph_composer.mechanical.zone_serves on the Zone record, ph_composer.mechanical.serves.assign and serves.clear, the reads serves.list and serves.all with the snapshot section ph_composer.mechanical.serves, and the codes mechanical.slot_filled, zone_unventilated, item_unserved, item_missing and zone_left_out. ventilators.list and ventilators.all rows carry zones and findings; ventilators.delete takes replacement_id, an id or null, and refuses reference.in_use naming the Zones without one. |

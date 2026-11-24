@@ -51,9 +51,11 @@ module PhComposer
         end
 
         # The engine's guarded delete: a Ventilator another record still names refuses as reference.in_use.
-        def delete(request, proposal, id:, expected_values: {})
+        # `reference_plan` projects the records a caller moved off it in the same proposal.
+        def delete(request, proposal, id:, expected_values: {}, reference_plan: nil)
           { "id" => id }.merge(request.engine.propose_delete(VENTILATOR_KIND, id, proposal,
-                                                             :expected_values => expected_values))
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => reference_plan))
         end
       end
     end
