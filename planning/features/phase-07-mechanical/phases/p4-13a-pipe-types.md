@@ -56,7 +56,9 @@ the type (PRD, "Records").
 1. **The feature.** `features/piping/install.rb` with `FEATURE_ID = "ph_composer.piping"`, `codes.rb` (noun `piping`,
    arriving with `piping.insulation_conductivity_missing`), registered last in `extension.rb` `FEATURES`, requiring
    `ph_composer.mechanical` and `ph_composer.zones`. A dependency test in the shape of
-   `tests/mechanical_dependency_test.rb`: nothing under `features/mechanical/` names `piping`.
+   `tests/mechanical_dependency_test.rb`: nothing under `features/mechanical/` or `html/features/mechanical/` names
+   the feature (`ph_composer.piping`, `Piping::` or `features/piping`). Mechanical's own words for piping
+   (`piping_calc_method`, `from_piping`) are not names of the feature and stay.
 2. **The kind.** `features/piping/type/schema.rb`: `PIPE_TYPE_KIND`, the fields above, `DIAMETERS_MM` with their labels,
    `MATERIALS`, `defaults`, `color`, `export_blockers`; `Records::RecordKind` with prefix `ppt`. Persistence through
    `Records::DictionaryStore`; CRUD through mechanical's `CatalogOperations` if its shape fits a kind with no Serves
@@ -90,7 +92,8 @@ the type (PRD, "Records").
    guarded update with stale `expected_values` refuses; duplicate keeps `user_data`; delete removes it; Undo restores it.
 2. The type's export blocker: thickness above 0 with null conductivity gives `piping.insulation_conductivity_missing`,
    thickness 0 with null gives none.
-3. The dependency test: nothing under `features/mechanical/` or `html/features/mechanical/` names piping.
+3. The dependency test: nothing under `features/mechanical/` or `html/features/mechanical/` names `ph_composer.piping`,
+   `Piping::` or `features/piping`.
 4. `tests/python/test_githooks.py`: a planted `M13a` fails the citation lint; the SVG cases pass.
 5. The registry's reference test covers the new operations; `tests/agent_guide_test.rb` the recipe.
 

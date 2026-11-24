@@ -82,8 +82,8 @@ Paths are relative to `src/ph_composer/`.
    as the table in P4-13 has them, and that no calculation-method attribute exists. Cite the wheel path in the
    evidence. If the wheel was bumped and either differs, or a method attribute exists under a name other than
    `piping_calc_method`, stop and report: P4-06's guess and D4-12's bind change first.
-2. **The extraction.** `features/piping/export.rb`: the contributor, section version 1, `requires: [Mechanical
-   VentilationExport::SECTION]`, reading the snapshot's group and edge entries through P4-13c's scan adapter and tree,
+2. **The extraction.** `features/piping/export.rb`: the contributor, section version 1, `requires:
+   [Mechanical::VentilationExport::SECTION]`, reading the snapshot's group and edge entries through P4-13c's scan adapter and tree,
    `result:` rows declared with `Export::Privacy.fields`, `user_data_keys`. `piping.system_unexported` added to
    `codes.rb`.
 3. **Preflight.** `ph_composer.piping.export_preflight`: P4-13c's findings live, each with its `locate`, plus
@@ -116,7 +116,7 @@ Paths are relative to `src/ph_composer/`.
 
 ## Tests (write first)
 
-1. Ruby (`tests/piping_export_test.rb`): the acceptance model's facts give one record for HWS-1 with one trunk
+1. Ruby (`tests/piping_export_test.rb`): the [piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13)'s facts give one record for HWS-1 with one trunk
    (multiplier 12), three branches, six twigs and one recirculation element, identifiers as P4-13c's, segment values
    from their Pipe Types; each blocking finding keeps the section from being written and appears in the preflight with
    the same code, section and object; a System with pipes serving no exported Zone gives `piping.system_unexported`;
@@ -134,7 +134,7 @@ Paths are relative to `src/ph_composer/`.
 
 ## Host gate
 
-Batched into the `MS3` sitting (D4-31): case `M13d` on the installed RBZ and the acceptance model: export, reload the
+Batched into the `MS3` sitting (D4-31): case `M13d` on the installed RBZ and the reference model with the [piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13): export, reload the
 exact HBJSON in the pinned honeybee stack, and read the tree on both Rooms' Hot Water System with the right lengths,
 materials, diameters, multiplier and the recirculation total; break a branch and see the export refuse with its
 Locate; save, reopen and re-export give the same HBJSON. Offline `make ci` and the PHX round trip pass on this

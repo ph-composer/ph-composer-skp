@@ -53,9 +53,12 @@ Paths are relative to `src/ph_composer/`.
 - **The Systems table's recirculation.** Mechanical's `recirculation` field on `hot_water_systems.all`
   (`features/mechanical/hot_water/reads.rb`, `declarations/hot_water.rb`, `RECIRCULATION_DEFAULTS`) and its column in
   `html/features/mechanical/hot_water.js` are removed; piping contributes `Recirc. °C` and `Recirc. h/day` to the
-  Systems table through `table_contributions`, from the schedule's `systems` rows, honeybee-ph's 60 and 24 shown as
+  Systems table through `table_contributions`. A contribution's callbacks read the snapshot, so the values come from
+  the `piping_systems` snapshot section where P4-13c registered one, and otherwise from the schedule's `systems` rows,
+  fetched when the Hot Water subtab opens and on Refresh and held in the piping module; honeybee-ph's 60 and 24 show as
   defaults until a System has a recirculation pipe. The removal names nothing of piping. API minor bump with the field's
-  removal in its `API::CHANGES` row.
+  removal in its `API::CHANGES` row. This is the third item for Ed in [P4-13](p4-13-hot-water-piping.md), with its
+  alternative.
 - **Colour-by.** `piping_by_role` and `piping_by_type`, one entry per pipe occurrence with the Edge as `entity` and its
   segment in `derived` at the P3b-06 stroke weight; role colours fixed (Trunk, Branch, Twig, Recirculation), type
   colours the Pipe Type's `color`; legend rows count lengths through a readout. Unassigned lines in a Piping group are
@@ -64,7 +67,8 @@ Paths are relative to `src/ph_composer/`.
   role"); `pipe_tool.choose`, `pipe_tool.stop` and a `pipe_tool` snapshot section. If the architecture review agrees,
   the generic part of `features/thermal_bridges/edge_tool.rb` (gesture, drag set, cancellation, hover) moves to `core/`
   and both tools call it, which P4-14's duct tool reuses and saves its size; otherwise the pipe tool follows its shape.
-  The move, if made, repeats the thermal-bridge tool cases `acceptance_ledger.py status --changed` names.
+  The move, if made, is a second core move of shipped thermal-bridge code: that slice takes the strong lane,
+  `gpt-6-astra`, and repeats the thermal-bridge tool cases `acceptance_ledger.py status --changed` names.
 - **New Piping group** in the bar asks for a Hot Water System and calls `groups.create` (P4-13b), which opens it for
   the Line tool.
 - **Slices.** If the PR grows past one coherent review it splits along two slices, each merging whole: the pills, bar
@@ -88,7 +92,7 @@ Paths are relative to `src/ph_composer/`.
 8. **Documents.** `docs/PRODUCT.md` ("Draw hot water piping": groups, drawing, assigning, the schedule, Colour-by),
    `docs/AGENT_GUIDE.md` and the shipped guide (the tool route), `context/UBIQUITOUS_LANGUAGE.md` (the Mechanical tab
    row), the [ui-baseline](../../../ui-baseline/README.md) row, the packet CONTRACTS (section 3's colour modes and
-   tool; section 2's Hot Water System row without recirculation).
+   tool; section 3's `hot_water_systems.all` row without recirculation).
 
 ## Source
 
@@ -118,8 +122,8 @@ Paths are relative to `src/ph_composer/`.
 
 ## Host gate (`M13e`, MS3 sitting, D4-31)
 
-Fresh process, the installed RBZ, Ed at the mouse, the PRD's acceptance shape on the synthetic three-storey model: two
-Pipe Types; New Piping group linked to HWS-1 opens for the Line tool; one riser trunk with multiplier 12, three
+Fresh process, the installed RBZ, Ed at the mouse, the PRD's acceptance shape on the reference model with the
+[piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13) (three storeys of lines): two Pipe Types; New Piping group linked to HWS-1 opens for the Line tool; one riser trunk with multiplier 12, three
 branches, six twigs and a recirculation loop drawn and assigned from the bar, one Undo step each; one branch assigned
 with the pipe tool; the schedule's lengths match hand measurement; break a branch from its trunk and read the finding,
 whose Locate selects it; both Colour-by modes with their legend lengths; the Systems table's recirculation reads the

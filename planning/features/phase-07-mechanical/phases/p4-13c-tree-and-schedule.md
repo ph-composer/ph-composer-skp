@@ -60,10 +60,11 @@ Paths are relative to `src/ph_composer/`.
   to honeybee-ph, which keys segments and trunks by identifier, so neither uses the assignment id that a split shares.
   Display names are the role word and a counter per Hot Water System, numbered by group path, then the run's smallest
   point ("Trunk 1", "Branch 4", "Twig 12", "Recirculation 1").
-- **The recirculation sum per System** (D4-18): over every recirculation Edge in the System's groups, length in metres,
-  temperature as the length-weighted mean of `water_temp_c`, hours as the floor of the length-weighted mean of
-  `daily_period`, 60.0 and 24 with no recirculation pipe, `from_piping` true only when there is one. P4-13d's Python test
-  holds it equal to honeybee-ph's properties after reload.
+- **The recirculation sum per System** (D4-18): length in metres over every recirculation Edge in the System's groups;
+  temperature and hours nested as honeybee-ph nests them, each run's length-weighted mean first, then the System's
+  length-weighted mean of those, the hours truncated toward zero as `int()` does; 60.0 and 24 with no recirculation
+  pipe, `from_piping` true only when there is one. Nesting the same way keeps float noise from turning 24 into 23.
+  P4-13d's Python test holds it equal to honeybee-ph's properties after reload.
 - **Totals are drawn length.** A trunk's multiplier is a column, not applied to the totals, as honeybee-ph's
   `total_length` does not apply it.
 - **The findings**, each naming its run or Edge with a `locate`:
@@ -83,7 +84,9 @@ Paths are relative to `src/ph_composer/`.
 
   The PRD's nominal-size warning is dropped (P4-13, "Inferred in planning").
 - **The schedule** is a query, `ph_composer.piping.schedule`, bounded, with no snapshot section, asked for on opening
-  the Piping pills and on Refresh (D3b-13's rule), measured in step 7. Its rows: one per run (System, group, role,
+  the Piping pills and on Refresh (D3b-13's rule), measured in step 7. The per-System rows are also a snapshot section,
+  `piping_systems`, which P4-13e's Systems columns read, only if step 7 measures the scan under the 200 ms repaint
+  target the units packet set; otherwise P4-13e fetches them with the schedule. The evidence records which. Its rows: one per run (System, group, role,
   parent, Pipe Type, length, line count, the role values, findings); totals by role and System; one `systems` row per
   System (distribution length by role, recirculation length, temperature, hours, `from_piping`); one `types` row per
   Pipe Type with its used length, which `pipe_types.all` then reports.
@@ -111,8 +114,9 @@ Paths are relative to `src/ph_composer/`.
    `runs.locate` view command (`capability: "view"`, selecting a run's Edges along their paths and framing them, opening
    a nested Piping group through `ph_composer.context.open`, refusing hidden targets). `pipe_types.all` rows gain
    `used_length_m`. One `API::CHANGES` row; the recipe gains the schedule read.
-7. **Measure.** The schedule read on a synthetic Model of 50,000 Edges with 2,000 pipes in twenty groups, on the proving
-   host in the MS3 sitting and offline beforehand; record both. If it is over P3b-04's figure, say so in the evidence.
+7. **Measure.** The schedule read on a synthetic Model of 50,000 Edges with 2,000 pipes in twenty groups, offline here
+   and on the proving host in the MS3 sitting; record both, and from the offline figure whether `piping_systems` is
+   registered (above). If it is over P3b-04's figure, say so in the evidence.
 8. **Documents.** `context/CONTRACTS.md` (the schedule read, `runs.locate`, the codes), the packet CONTRACTS (sections 3
    and 6), `context/TECH_STACK.md` (step 1).
 
@@ -130,7 +134,7 @@ Paths are relative to `src/ph_composer/`.
 1. Core (`tests/edge_runs_test.rb`): 3b's chain-rule cases over generic facts; a fact's `item` comes back on its run;
    nothing in `core/edge_runs.rb` names a feature (a grep test, as the dependency tests do).
 2. Thermal bridges: every existing test passes unchanged except the moved ones; the goldens are byte-identical.
-3. Tree (`tests/piping_runs_test.rb`) on the acceptance model's facts: one riser trunk with multiplier 12, three
+3. Tree (`tests/piping_runs_test.rb`) on the [piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13)'s facts: one riser trunk with multiplier 12, three
    branches, six twigs and a recirculation loop give one trunk, three branches each under it, two twigs under each
    branch and one recirculation run, with lengths equal to the hand measurement to 0.001 m; a trunk changing Pipe Type
    mid-riser is two trunks; a branch drawn through a tee is one branch; the branch broken from its trunk gives
@@ -139,13 +143,15 @@ Paths are relative to `src/ph_composer/`.
    with distinct identifiers and `piping.shared_definition`.
 4. Identifiers and names are the same across two scans and after a reassignment that changes no key; a split Edge
    (two Edges, one assignment id) gives two segments with distinct identifiers.
-5. Recirculation: 10 m at 60 °C and 18 h with 5 m at 50 °C and 23 h gives 15 m, 56.67 °C and 19 h (19.67 truncated,
-   as `int()` does); none gives 60.0 and 24 with `from_piping` false.
+5. Recirculation: the piping case gives 11.000 m, 54.09 °C and 19 h; 10 m at 60 °C and 18 h with 5 m at 50 °C and 23 h
+   gives 15 m, 56.67 °C and 19 h (19.67 truncated); 3.3 m and 1.7 m both at 24 h, and runs of 0.1 m, 0.2 m and 0.7 m at
+   24 h, give 24, not 23; none gives 60.0 and 24 with `from_piping` false.
 6. Each finding fires on its case and on no other; the scan writes nothing and opens no operation.
 
 ## Host gate
 
-Batched into the `MS3` sitting (D4-31): case `M13c`, fresh process on the acceptance model, panel closed: read
+Batched into the `MS3` sitting (D4-31): case `M13c`, fresh process on the reference model with the [piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13),
+panel closed: read
 `schedule` and compare with the hand measurement; break a branch from its trunk and read the finding; `runs.locate` into
 a Piping group inside a wrapper; save, reopen and read the same identifiers (vertex ids of a faceless Group across
 reopen, not yet measured); the measurement in step 7; and the thermal-bridge cases `acceptance_ledger.py status
