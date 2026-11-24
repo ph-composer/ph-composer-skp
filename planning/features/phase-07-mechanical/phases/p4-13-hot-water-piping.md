@@ -1,9 +1,9 @@
 # P4-13: hot water piping
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview. Phase 3b's edge stages, an entry gate below, merged on 2026-10-26 (F21, [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22)).
+STATUS: Requested. A gate stub: Phase 3b's edge stages merged 2026-10-26 (F21) and the piping interview completed 2026-11-23 (D4-36, Q1–Q13 all as recommended); ready to be written in full. See [DECISIONS, Part 5](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry gates
 

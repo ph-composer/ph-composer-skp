@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families; then D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry and scope
 

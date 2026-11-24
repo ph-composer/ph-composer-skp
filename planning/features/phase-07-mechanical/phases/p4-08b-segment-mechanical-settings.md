@@ -1,9 +1,9 @@
 # P4-08b: Building Segment mechanical settings
 
 DATE: 2026-11-22
-STATUS: Requested. A gate stub: written in full after summer ventilation is interviewed. D4-26 was answered on 2026-11-22: mechanical cooling is entered.
+STATUS: Requested. A gate stub: D4-26 (2026-11-22) and the summer ventilation interview (D4-32, 2026-11-23) are both answered; ready to be written in full.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 Added on 2026-11-22 from the [Phase 6 handoff](../../../archive/phase-06-program/STATUS.md#handoff-to-phase-7-mechanical)
 (C4a-5). The finding is [DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22) F30.

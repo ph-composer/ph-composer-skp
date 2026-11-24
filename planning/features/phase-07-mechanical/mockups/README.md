@@ -3,7 +3,7 @@
 DATE: 2026-11-15
 STATUS: Reviewed. Ed reviewed these on 2026-11-15 and answered D4-13 to D4-20 against them ([DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15)). Static wireframes, not a screen; no panel code. Six items stay open there.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 Ten static artboards of the Mechanical tab, drawn to settle the tab's navigation, the tables each
 equipment family needs and what each exports. The decisions are the record; these illustrate them.

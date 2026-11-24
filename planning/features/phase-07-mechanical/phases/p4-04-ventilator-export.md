@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: the left-out Zone rule, the pinned wheel. A PHX round trip added the same day (D4-25). See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Entry and scope
 

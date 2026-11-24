@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged; see hot-water-piping's note of the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Problem
 
@@ -119,7 +119,7 @@ Settle once, for both.
 
 ## Decisions for the interview
 
-Recommendations changed on 2026-10-21 are marked; Ed has answered none of them.
+Recommendations changed on 2026-10-21 are marked. **Interviewed 2026-11-23 ([D4-37](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23)):** Ed confirmed all recommendations (Q8 already settled by D4-13).
 
 | # | Question | Recommendation |
 | --- | --- | --- |

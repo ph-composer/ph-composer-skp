@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7. Reviewed 2026-11-22 after Phase 6 Programs: the table of what `main` supplies is dated, and [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22) holds what changed and the decisions D4-21 to D4-27, answered the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## Problem
 
@@ -228,11 +228,15 @@ its own read-only view (D4-16). The stage needs the Model's climate.
 `PhHeatingSystem` base has Fossil boiler, Wood boiler and District variants, which Ed's list
 leaves out. See Q7.
 
+Interviewed 2026-11-23 ([D4-33](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23)): `percent_coverage` stored as `0.0–1.0`, displayed as `0–100%`, default `100%`; `many` Serves slot (`heater_ids`); no cross-family heating-coverage-sum validation in v1.
+
 ## Family 5: Pumps
 
 `PhSupportiveDevice`: `device_type` (4 heat circulation pump, 6 DHW circulation pump, 7 DHW
 storage load pump, 10 other), `quantity`, `in_conditioned_space`, `norm_energy_demand_W`,
 `annual_period_operation_khrs` (default 8.76), `ihg_utilization_factor`, `ihg_usage_profile`.
+
+Interviewed 2026-11-23 ([D4-34](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23)): offer all four `device_type` values (`4`, `6` [default], `7`, `10`); keep `ihg_utilization_factor` (`1.0`) and `ihg_usage_profile` (auto-seeded from `device_type`) editable behind a collapsed per-row disclosure; emit a non-blocking finding if a Pump serves a Zone with no Spaces.
 
 ## Family 6: Fans
 
@@ -257,6 +261,8 @@ Ed chose on 2026-10-21 (Q6): a Fan record is an exhaust ventilator (kind, flow, 
 quantity) with an optional electric block (W, khrs, in conditioned space). One row on screen; at
 export the electric block becomes a linked supportive device of type 10 beside the exhaust
 ventilator, so a kitchen hood with a known draw is two honeybee-ph objects from one record.
+
+Interviewed 2026-11-23 ([D4-35](../DECISIONS.md#part-5-kickoff-review-and-remaining-interviews-2026-11-23)): default `Type` to `User-defined` (all three kinds offered); `Power (W)` on the row (blank = no linked supportive device); `annual_period_operation_khrs` auto-derived from `annual_runtime_minutes / 60,000`; `In conditioned space` (default `true`) and optional runtime override (`khrs`) behind a collapsed per-row disclosure; non-blocking finding if a Fan serves a Zone with no Spaces.
 
 ## Family 7: Appliances
 

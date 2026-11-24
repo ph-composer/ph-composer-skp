@@ -1,9 +1,9 @@
 # Equipment: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape, Ventilators and hot water interviewed 2026-10-21; families 3 to 7 not interviewed; stages tracked in the phase ledger; nothing authorized. Wireframes reviewed 2026-11-15: heat pumps settled (D4-14 to D4-16); Pumps, Fans and Electric Heating have their table shape and columns, their interviews otherwise open. Reviewed 2026-11-22 after Phase 6 Programs: the phase DECISIONS Part 4 holds the findings and the decisions D4-21 to D4-27, answered the same day.
+STATUS: Scoped. All six equipment families interviewed (shared shape, Ventilators and hot water 2026-10-21; heat pumps 2026-11-15/2026-11-23; Electric heaters, Pumps and Fans 2026-11-23); stages tracked in the phase ledger; nothing authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: #562
 
 ## State
 
