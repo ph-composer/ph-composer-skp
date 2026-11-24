@@ -1,7 +1,7 @@
 # P4-09: electric heaters
 
 DATE: 2026-10-21
-STATUS: Planned in full 2026-11-24 from the stub of 2026-10-21, D4-13, D4-20, D4-25, D4-30, D4-31 and D4-33, and the [equipment PRD](../equipment/PRD.md), "Family 4". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-09` (#573); offline evidence in [p4-09-electric-heaters](../evidence/p4-09-electric-heaters.md), host case `M09` owed to MS3. Planned in full 2026-11-24 from the stub of 2026-10-21, D4-13, D4-20, D4-25, D4-30, D4-31 and D4-33, and the [equipment PRD](../equipment/PRD.md), "Family 4". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host gate runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
