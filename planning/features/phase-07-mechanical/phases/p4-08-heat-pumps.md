@@ -1,7 +1,7 @@
 # P4-08: Heat Pumps (four tables, pure Ruby blend, blended result view and export)
 
 DATE: 2026-10-21
-STATUS: Scoped. Written in full on 2026-11-23 from D4-14 to D4-16, D4-20, D4-23, D4-25 and D4-28 to D4-31. Climate's entry gate was met on 2026-11-18. Host gate runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-08` (#571); offline evidence in [p4-08-heat-pumps](../evidence/p4-08-heat-pumps.md), host case `M08` owed to MS3. Written in full on 2026-11-23 from D4-14 to D4-16, D4-20, D4-23, D4-25 and D4-28 to D4-31. Climate's entry gate was met on 2026-11-18. Host gate runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
