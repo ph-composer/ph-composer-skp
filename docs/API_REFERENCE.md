@@ -59666,7 +59666,7 @@ Params:
     "name": {
       "type": "string",
       "minLength": 1,
-      "description": "The copy's name; \"<name> (copy)\" when absent. Names are unique."
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
     }
   }
 }

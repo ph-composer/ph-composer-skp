@@ -47,7 +47,9 @@ module PhComposer
       def duplicate(kind)
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to copy."),
                  "name" => { "type" => "string", "minLength" => 1,
-                             "description" => "The copy's name; \"<name> (copy)\" when absent. Names are unique." } },
+                             "description" => "The copy's name. When absent, the first free of \"<name> (copy)\", " \
+                                              "\"<name> (copy 2)\" and so on; read the result's id. Names are " \
+                                              "unique." } },
                :optional => ["name"])
       end
 

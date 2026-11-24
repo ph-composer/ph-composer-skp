@@ -107,6 +107,14 @@ class MechanicalVentilatorsTest < PhComposerTestCase
     assert_equal %w[refused target.changed], taken.values_at("status", "code"), "a stale read is reported first"
     assert_equal "validation.failed", invoke("update", "id" => id, "values" => { "name" => " erv-2 " },
                                                        "expected_values" => { "quantity" => 1 })["code"]
+    engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+    proposal = PhComposer::Operations::Proposal.new
+    caller = Struct.new(:engine).new(engine)
+    assert_raises(PhComposer::CodedError) do
+      M::Ventilators::Operations.update(caller, proposal, :id => id, :values => { "name" => "ERV-2" },
+                                                          :expected_values => {})
+    end
+    assert proposal.refusal, "a composing caller that rescues the refusal cannot commit the staged rename"
     stale = invoke("delete", "id" => id, "expected_values" => { "name" => "ERV-9" })
     assert_equal %w[refused target.changed], stale.values_at("status", "code"), stale.inspect
     assert_equal revision, @session.revision

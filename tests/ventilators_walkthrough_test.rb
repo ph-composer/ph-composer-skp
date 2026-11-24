@@ -19,7 +19,7 @@ class VentilatorsWalkthroughTest < PhComposerTestCase
     erv2 = VentilatorsWalkthrough::ERV_1.merge("name" => "ERV-2", "quantity" => 1, "sensible_heat_recovery" => 0.75,
                                                "latent_heat_recovery" => 0.0, "electric_efficiency_wh_m3" => 0.55,
                                                "subsoil_heat_exchange_efficiency" => 0.2)
-    assert_equal VentilatorsWalkthrough::EXPECTED.merge("ERV-2" => [erv2, {}]), restored
+    assert_equal VentilatorsWalkthrough::EXPECTED + [[erv2, {}]], restored
     4.times { model.undo }
     assert_empty VentilatorsWalkthrough.state
     5.times { model.redo }
@@ -30,6 +30,9 @@ class VentilatorsWalkthroughTest < PhComposerTestCase
     copy = engine.find(kind, engine.ids(kind).min)
     store.write(model, copy.merge("temperature_below_defrost_used_c" => -18.0))
     refute VentilatorsWalkthrough.verify.fetch("passed"), "a changed stored value fails the read-back"
+    store.write(model, copy)
+    store.write(model, copy.merge("id" => "vnt_ZZZZZZZZZZZZ"))
+    refute VentilatorsWalkthrough.verify.fetch("passed"), "an extra record fails the read-back, even an equal one"
     store.write(model, copy.merge("rated_flow_m3h" => 120))
     assert_raises(RuntimeError) { VentilatorsWalkthrough.verify }
     text = File.read(File.expand_path("../tools/examples/authoring/ventilators_walkthrough.rb", __dir__))

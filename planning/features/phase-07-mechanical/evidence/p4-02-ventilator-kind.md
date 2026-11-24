@@ -100,6 +100,12 @@ and delete declare `target.ambiguous`; `ventilators.list` takes only `vnt_` ids 
 with an offline case for each; the layer test also catches bare module names and relative imports in both directions,
 with positive controls; create and update state the unique-name precondition.
 
+Codex gpt-6.2-sol, cycle 2 on `f8582bbb`: 2 P2, 1 P3, all fixed in the next commit, which merges after the two-cycle
+cap unreviewed. A taken name on update now refuses the proposal itself, so a caller that rescues the refusal cannot
+commit the staged rename (tested against the operation directly; removing the refusal fails the test); the
+walkthrough compares one entry per record, so an extra equal record fails `verify`; the duplicate's `name` describes
+the numbered copy names.
+
 ## Native case
 
 `M02` added to `planning/native-acceptance/cases.json` (mode `mixed`, `native_control_required: true`) with paths for

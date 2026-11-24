@@ -22,7 +22,8 @@ module PhComposer
         end
 
         # A guarded edit: a value in `expected_values` that changed since it was read refuses the whole proposal,
-        # before any check of the new values, so a stale caller always learns to read again. A null removes an
+        # before any check of the new values, so a stale caller always learns to read again. A taken name then
+        # refuses the proposal whole, so a caller composing it cannot commit the staged write. A null removes an
         # optional value; on a required one the engine refuses it.
         def update(request, proposal, id:, values:, expected_values:)
           values = DeepCopy.call(values)
@@ -31,6 +32,9 @@ module PhComposer
                                                                        :expected_values => expected_values)
           Records::Names.unique!(values["name"], records(request), :except => id) if values["name"]
           { "id" => id }
+        rescue StandardError => error
+          proposal.refuse(error)
+          raise
         end
 
         # A copy is a new Ventilator derived from the original: a fresh id, its own name, and `user_data` copied

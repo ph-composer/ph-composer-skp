@@ -16,11 +16,12 @@ module VentilatorsWalkthrough
             "quantity" => 2, "sensible_heat_recovery" => 0.85, "latent_heat_recovery" => 0.6,
             "electric_efficiency_wh_m3" => 0.45, "frost_protection_reqd" => true,
             "temperature_below_defrost_used_c" => -5.0, "in_conditioned_space" => true }.freeze
-  # The catalog after `run`, by name: [values, user_data]. The copy carries ERV-1's values and user_data.
-  EXPECTED = {
-    "ERV-1" => [ERV_1, USER_DATA],
-    "ERV-1 (copy)" => [ERV_1.merge("name" => "ERV-1 (copy)", "source" => { "kind" => "derived" }), USER_DATA]
-  }.freeze
+  # The catalog after `run`, one [values, user_data] per record in name order. The copy carries ERV-1's values and
+  # user_data.
+  EXPECTED = [
+    [ERV_1, USER_DATA],
+    [ERV_1.merge("name" => "ERV-1 (copy)", "source" => { "kind" => "derived" }), USER_DATA]
+  ].freeze
 
   module_function
 
@@ -44,7 +45,8 @@ module VentilatorsWalkthrough
     { "passed" => steps.all? { |row| row["passed"] }, "steps" => steps }
   end
 
-  # The catalog as ventilators.all reads it, in EXPECTED's shape. An unreadable Ventilator fails the read.
+  # The catalog as ventilators.all reads it, in EXPECTED's shape: one entry per record, so an extra one shows. An
+  # unreadable Ventilator fails the read.
   def state
     result = AuthoringExample::Client.new.query("#{PREFIX}.all")
     raise "ventilators.all failed: #{result['code']}" unless result["status"] == "completed"
@@ -52,9 +54,8 @@ module VentilatorsWalkthrough
     unreadable = result.dig("value", "unreadable")
     raise "ventilators.all has unreadable records: #{unreadable}" unless unreadable.empty?
 
-    result.dig("value", "records").to_h do |row|
-      [row.dig("values", "name"), [row.fetch("values"), row.fetch("user_data")]]
-    end
+    result.dig("value", "records").map { |row| [row.fetch("values"), row.fetch("user_data")] }
+          .sort_by { |values, _user_data| values.fetch("name") }
   end
 
   def verify
