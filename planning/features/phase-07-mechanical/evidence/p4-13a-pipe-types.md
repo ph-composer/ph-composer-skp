@@ -55,7 +55,8 @@ test and `tests/agent_guide_test.rb` cover the new operations and the recipe.
   8931824 bytes, 27486874 bytes installed".
 - Installed size: 27,486,880 bytes, 24,679 bytes over P4-11's 27,461,724 against the 30 KB estimate; 513,120 under the
   28,000,000 ceiling. No shipped panel or Python file changed; `vendor.py --check` verified the runtime manifest.
-- Browser checks: `make ui-checks` on `17f63e6a`: 39 of 39 scripts pass, exit 0, none skipped (no panel change).
+- Browser checks: `make ui-checks` on `17f63e6a` and again on the final head `3b64519b`: 39 of 39 scripts pass, exit 0,
+  none skipped (no panel change).
 - PHX round trips: `uv run --group phx pytest tests/python -k phx_round_trip`: 24 passed, 0 skipped (no change, this
   stage exports nothing). Whole group: 467 passed, 1 skipped (`test_map_borders.py`, `PH_COMPOSER_MAP_DATA` unset).
 - `acceptance_ledger.py status --changed` for `extension.rb`, `mechanical/install.rb` and `shell/api.rb`: 58 cases
@@ -72,5 +73,21 @@ delete's `replacement_id` wording in the guide and the param (nothing to move wh
 rename onto a taken Tag, Undo of create and an existing replacement. Declined: the refusal lists keep the Thermal
 Bridge Types' codes (`reference.in_use` is P4-13b's; the others mirror the engine's paths); `fetch` on a required
 field stays; the whole-folder dependency exemption is intended.
+
+
+## Codex review and the final head
+
+- Cycle 1, gpt-6.2-sol on `7d6b8f94`: 3 P2, 2 P3. Fixed in `793949fe`: the walkthrough's `verify(ids)` holds each type
+  to the id `PipeTypesWalkthrough.ids` read before (Redo, reopen; host case M13a updated); the diameter test names the
+  eight sizes, labels and materials itself; the guide says to send the listed decimals; USER_DATA says a delete
+  reports the map's keys. Declined: the update schema admitting null for required fields is core
+  `Descriptor#patch_schema`, shared by every kind (follow-up).
+- Cycle 2, gpt-6.2-sol on `793949fe`: 1 P1, 2 P2, 1 P3. Fixed in `3b64519b`, which merges unreviewed after the
+  two-cycle cap: a test of the bounded `.list` (cursor, `fields`, `ids`) and the snapshot section; USER_DATA and the
+  create schema say no export writes a Pipe Type's map. Declined: case-insensitive Tag uniqueness is ASCII-only in core
+  `Records::Names.unique!` for every kind (follow-up); the null update schema again.
+- Final head `3b64519b`: `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes: 3462 runs, 49064
+  assertions, 0 failures, 0 errors, 1 skips"; JS 1214 pass; Python 467 passed, 1 skipped; "RBZ verified: 793 files,
+  8931856 bytes, 27486927 bytes installed" (+25,203 over P4-11, estimate 30 KB).
 
 Not run: anything in SketchUp.
