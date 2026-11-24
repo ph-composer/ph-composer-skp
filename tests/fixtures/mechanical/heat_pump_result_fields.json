@@ -1,0 +1,17 @@
+{
+  "heat_pumps": [
+    "id",
+    "zone_id",
+    "zone_name",
+    "segment",
+    "display_name",
+    "system_identifier",
+    "cop_1",
+    "cop_2",
+    "cooling_used",
+    "capacity_kw",
+    "flow_rate_m3_hr",
+    "annual_cop",
+    "digest"
+  ]
+}

@@ -42,9 +42,9 @@ class MechanicalDependencyTest < PhComposerTestCase
     assert_empty offenders(others, DOWNWARD)
   end
 
-  # Programs since the airflow balance counts a By Program Zone's flow.
-  def test_mechanical_requires_zones_spaces_and_programs
-    assert_equal %w[ph_composer.zones ph_composer.spaces ph_composer.programs],
+  # Programs since the airflow balance counts a By Program Zone's flow, Climate since the heat pump blend reads it.
+  def test_mechanical_requires_zones_spaces_programs_and_climate
+    assert_equal %w[ph_composer.zones ph_composer.spaces ph_composer.programs ph_composer.climate],
                  PhComposer::Registry.current.features.fetch("ph_composer.mechanical").requires
   end
 end

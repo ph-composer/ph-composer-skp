@@ -832,7 +832,8 @@ Segment's set points and its Dwellings' units and counts from the Python result.
 
 ## Mechanical equipment
 
-`ph_composer.mechanical` (`features/mechanical/`) requires Zones, Spaces and Programs, and no other feature names it. Each
+`ph_composer.mechanical` (`features/mechanical/`) requires Zones, Spaces, Programs and Climate, and no other feature
+names it. Each
 equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
 names Zones, Spaces, Programs, the Zone record or `serves/` (`tests/mechanical_dependency_test.rb`). Serves
 (`features/mechanical/serves/`) sits above the families and names them.
@@ -880,10 +881,66 @@ values with no recirculation piping, `from_piping` false) and `findings`: `mecha
 System; with an id, the Zones' slots move through Serves and each Heater and Tank is a guarded edit to the
 replacement, in one proposal; with null the Zones' slots empty, and a Heater or Tank still naming the System refuses.
 
-**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 2)
+- **Heat pumps** are four flat kinds (`features/mechanical/heat_pumps/`), each with the shared name, notes, datasheet
+  links and source, `manufacturer` and `model`, `schema_version` 1. An **outdoor model**
+  (`ph_composer.mechanical.hp_outdoor_equipment`, `hpo_`) holds the Phius Heat Pump Performance Estimator's inputs:
+  `heating_cap_17f_kw`, `heating_cap_47f_kw` and `cooling_cap_95f_kw` (kW, at least 0, absent until given);
+  `heating_rating_mode` (`cop_pair` by default, or `hspf`) with `cop_17f` and `cop_47f` (default 2.5 each) or
+  `hspf_value`, and `hspf_version` (`hspf2` by default, or `hspf`); `cooling_rating_mode` (`eer_seer`, `ieer` or
+  null, absent by default) with `eer` and `seer` or `ieer`, and `seer_version` (`seer2` by default, or `seer`);
+  every rating above 0. Each mode reads only its own values and the other's stay stored. It may name its paired
+  indoor model in `paired_indoor_equipment_id`, an optional `one` reference. An **indoor model**
+  (`hp_indoor_equipment`, `hpi_`) is identity only. An **outdoor unit** (`hp_outdoor_unit`, `hou_`) names its outdoor
+  model in `outdoor_equipment_id` (required), with `quantity` (default 1) and `in_conditioned_space` (default false).
+  An **indoor unit** (`hp_indoor_unit`, `hiu_`) names its indoor model and its outdoor unit (`indoor_equipment_id`,
+  `outdoor_unit_id`, both required), with `quantity` (default 1) and `in_conditioned_space` (default true).
+
+Each heat pump kind has `ph_composer.mechanical.heat_pumps.outdoor_equipment`, `indoor_equipment`, `outdoor_units` or
+`indoor_units` `.list`, `.all` (also its snapshot section), `create`, `update`, `duplicate` and `delete`, one Undo step
+each, with the Ventilator's rules for names, guards and copies; create and duplicate go through the shared
+`CatalogOperations` (`features/mechanical/catalog_operations.rb`), as hot water's do. A delete without
+`replacement_id` refuses `reference.in_use` while a record or a Zone names the record; with an id, every record
+naming it (a unit's model, an indoor unit's outdoor unit, an outdoor model's pairing) is a guarded edit to the
+replacement and every Zone's list takes it in place of the deleted one, in one proposal; with null the pairing
+empties and the Zones' lists drop it, and a unit still naming the record refuses. An outdoor model's row is
+`export_ready` false, with `mechanical.hp_equipment_incomplete` in `export_blockers`, while it lacks a value the blend
+needs (`OutdoorEquipment.missing_inputs`: both heating capacities above 0, its heating mode's ratings and, when it
+cools, its cooling capacity and ratings); rows add `unit_count` (models) or `indoor_unit_count` (outdoor units), an
+indoor unit's served `zones`, and the heat pump plan's `findings` about the record.
+
+**The blend.** `HeatPumps::Blend` (`features/mechanical/heat_pumps/blend.rb`) is the Phius Heat Pump Performance
+Estimator's air-source arithmetic (v25.1.2), pure Ruby in its IP units: one row per outdoor model, its quantity the
+sum of its outdoor units'; each row's share of cooling capacity at 95 °F and of heating capacity at 17 °F and 47 °F;
+a COP pair weighted by the heating shares; an HSPF (an HSPF2 times 1.1236, to one decimal) derated for the 99%
+heating design temperature and weighted by the cooling share, as the estimator does, giving one value to both COPs;
+EER and SEER (EER2 times 1.0432 less 0.0018 and SEER2 times 1.047 less 0.0004, each to one decimal) weighted by the
+cooling share, the weighted SEER derated for the 1% cooling design temperature by the branch the entered SEER picks;
+an IEER weighted and not derated; each row's cooling COP the mean of its EER and derated SEER, or its IEER, over 3.412;
+the blend's COPs the sums. The estimator's own expressions are kept, including its linear temperature terms. Fans
+and pumps are left out, so the monthly mean temperatures give only the Climate Information (heating months and their
+shares at or below 17 °F and 47 °F). `export` gives honeybee-ph's values: COPs at -8.333 °C and 8.333 °C, coverage 1.0,
+and recirculation cooling, used when the blend cools, with the whole capacity in kW, airflow at 300 cfm per ton of
+12 kBtu/h in m³/h, the weighted COP, `min_coil_temp` 12.0 °C, `single_speed` false and `flow_rate_variable` true.
+`HeatPumpPlan` (`features/mechanical/heat_pump_plan.rb`) picks, for each exported Building Segment, the complete
+outdoor models whose outdoor units have indoor units serving its Zones, blends them, and gives one pair per served
+Zone the blend reaches, under the Segment's identifier `ph_composer_heat_pump_<12 hex of SHA-256 of its name>`. It
+reads the climate as twelve monthly mean air temperatures and both design temperatures; without them every blend is
+left out with `mechanical.hp_climate_missing`. Its findings: `mechanical.item_missing` (a Zone naming an indoor unit
+not stored, blocking), `mechanical.hp_unit_unpaired` (an indoor unit serving no Zone, an outdoor unit with no indoor
+unit serving one), `mechanical.zone_left_out`, `mechanical.item_across_segments` (on the outdoor unit),
+`mechanical.hp_equipment_incomplete` (an outdoor model lacking a value, once; or a Segment whose models blend to no
+heating COP) and `mechanical.hp_cooling_over_200kw` (cooling above 682 kBtu/h: exported as one system, which PHX
+splits for WUFI-Passive). `ph_composer.mechanical.heat_pumps.blended` (also the snapshot section
+`ph_composer.mechanical.heat_pumps_blended`) answers the climate's state, each Segment's blend and every finding with
+its `object_id`. The live reads take the climate from `ph_composer.climate.climate.get` and
+`ph_composer.climate.design_temperatures.get`; the export from the Site export's projection.
+
+**Serves.** What serves a Zone is the structured extension `ph_composer.mechanical.zone_serves` (schema version 3)
 on the Zone record, as Programs keeps a Zone's assignment ("Occupancy"): no record, id or reference target of its
 own. Its payload holds one slot per family, `ventilator_id` (a `vnt_` id or null, a declared `one` reference to the
-Ventilator kind) and, since schema version 2, `hot_water_system_id` (an `hws_` id or null, `one`); a later family adds its slot (a `many` slot is a list holding each id once) and moves the version.
+Ventilator kind) and, since schema version 2, `hot_water_system_id` (an `hws_` id or null, `one`), and since schema
+version 3 `hp_indoor_unit_ids` (a list of `hiu_` ids, each once, `many`); a later family adds its slot and moves the
+version.
 The validator takes a whole payload: every slot present, each id of its slot's kind or null, no other key. It is
 `required`: the Ventilator export claims it (below), so a payload this version does not understand blocks the export.
 A Zone served by nothing stores no payload or one whose every slot is empty; the reads answer both alike.
@@ -894,7 +951,9 @@ target before anything is staged (a changed slot refuses `target.changed`; an it
 before staging) and hand each Zone's whole new payload to Zones' participant `ph_composer.zones.stage_extension`, so
 each is one Undo step, Zones' write refusals pass through unchanged, and no mechanical code writes a Zone. A single
 slot naming another item refuses `mechanical.slot_filled`, naming it, unless `replace`. Clear writes only a Zone
-that stores a payload, and stages the emptied one. The payload travels with a copied Zone because it is part of the
+that stores a payload, and stages the emptied one; with `item_id` (and its `slot`) it takes only that item out of the
+slot, which a list slot needs. Assign on a list slot adds the item beside those it holds and never refuses
+`mechanical.slot_filled`. The payload travels with a copied Zone because it is part of the
 record; the feature declares no transition contributor.
 
 The declared references put each named item in the engine's incoming-reference scan. `ventilators.delete` without
@@ -1034,6 +1093,22 @@ Tanks' `user_data` passed through), then `mechanical.item_missing` (blocks), `me
 at most five Systems. A family's own read that refuses gives one blocking row under its section and leaves the
 other family's rows. A Zone's row carries the Zones tab's `locate`; hot water items have none until their tables
 ship.
+
+**Heat pump export.** `ph_composer.mechanical.export.heat_pumps` (section version 1,
+`features/mechanical/heat_pump_export.rb`) requires the Zones section, the Ventilator export (for the Zones) and
+Climate's `ph_composer.climate.export.site`, whose `projection` gives the monthly mean air temperatures and both
+design temperatures (the Site section, below). Its records are `HeatPumpPlan`'s
+pairs: id `<identifier>_<zon id>`, `segment`, `system_identifier`, `display_name` `Heat pumps: <segment>` and the
+blend's `export` values. It reads the outdoor models and units without passing `user_data` through, so each map is
+left out with `export.metadata_omitted`. The Python section (`HeatPumpSection`, required for export) builds each
+pair's own `PhHeatPumpRatedMonthly` with the blend's values and recirculation cooling, gives its four cooling
+parameter sets identifiers `<identifier>_<name>`, and adds it with `add_heat_pump_system`. Its result rows
+(`heat_pumps`) carry the pair's ids, the Zone's name, the Segment, the identifier, the COPs, `cooling_used`,
+`capacity_kw`, `flow_rate_m3_hr`, `annual_cop` and `digest`; `conformance` compares each reloaded Room's one heat pump
+with its own row, digest included, and no Room may hold a heat pump the run did not report. The preflight adds the
+heat pump rows under this section: a blocking row per unreadable outdoor model or unit and per metadata problem, then
+the plan's findings; an outdoor model's, an outdoor unit's or an indoor unit's row carries `locate` with
+`hp_outdoor_equipment_ids`, `hp_outdoor_unit_ids` or `hp_indoor_unit_ids`.
 
 ## This computer's settings file
 
@@ -1994,7 +2069,11 @@ stays in the Model with an `export.metadata_omitted` finding. Its result fields 
 climate's identity, the four peak-load temperatures, the limit check, the edited values with what the
 file read, the design temperatures, the count of Building Segments and a digest of the built `Site`;
 conformance finds that `Site` on every reloaded Building Segment, honeybee-ph's default for each part the
-record did not carry, Cooling 2 equal to Cooling 1 and no `source_uri`.
+record did not carry, Cooling 2 equal to Cooling 1 and no `source_uri`. Its `projection` is what another feature's
+export section reads of the climate, through `reader.section` after naming the Site section in `requires:`: the
+stored monthly mean air temperatures (`monthly_air_c`, twelve values in °C, null with no climate) and both design
+temperatures (`heating_99_c`, `cooling_1_c`, null while not set), as stored and whatever the climate's state.
+Mechanical's heat pump export reads it.
 
 Phius certification is the first section to attach at `SEGMENT`: `ph_composer.certification.export.segments`
 (Ruby `features/certification/export.rb`, Python `certification_sections.py`) writes one record per exported

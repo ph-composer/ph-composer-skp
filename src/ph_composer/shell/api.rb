@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 92
+    MINOR = 93
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -565,7 +565,18 @@ module PhComposer
                     "hot_water_tank_ids, one item kind per request (params.invalid for two), and the preflight's " \
                     "hot water item rows carry it; Hot Water System rows " \
                     "add mechanical.method_not_exported while a piping calculation method is set; the colour mode " \
-                    "ph_composer.mechanical.by_hot_water_system is new." }
+                    "ph_composer.mechanical.by_hot_water_system is new." },
+      { "minor" => 93, "date" => "2026-11-24",
+        "change" => "ph_composer.mechanical.heat_pumps.outdoor_equipment, indoor_equipment, outdoor_units and " \
+                    "indoor_units are new, each with list, all, a snapshot section, create, update, duplicate and " \
+                    "delete; ph_composer.mechanical.heat_pumps.blended and its snapshot section heat_pumps_blended " \
+                    "are new. ph_composer.mechanical requires ph_composer.climate. " \
+                    "ph_composer.mechanical.zone_serves moves to schema 3 with the hp_indoor_unit_ids list slot, " \
+                    "and serves.clear takes item_id to take one item out of a slot. The export section " \
+                    "ph_composer.mechanical.export.heat_pumps is new, and ph_composer.mechanical.preflight adds its " \
+                    "rows: mechanical.hp_climate_missing, hp_unit_unpaired, hp_equipment_incomplete and " \
+                    "hp_cooling_over_200kw. ph_composer.mechanical.locate takes hp_outdoor_equipment_ids, " \
+                    "hp_outdoor_unit_ids and hp_indoor_unit_ids." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

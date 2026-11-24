@@ -108,7 +108,9 @@ module PhComposer
         result = Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT, :description => "The Zones named."),
                                  "slot" => SLOT, "item_id" => Shapes::TEXT })
         feature.action("#{PREFIX}.assign",
-                       :description => "Name an item in one slot of Zones. A Ventilator serves a Zone alone.",
+                       :description => "Name an item in one slot of Zones. A single slot holds one item (a " \
+                                       "Ventilator serves a Zone alone); a list slot, hp_indoor_unit_ids, adds it " \
+                                       "beside the items it holds.",
                        :refuses => ASSIGN, :params => params, :result => result, :participants => [STAGE],
                        :undo_name => "Assign Equipment",
                        :preconditions => ["The item exists.", "Each Zone is writable: no locked Group, shared " \
@@ -126,13 +128,17 @@ module PhComposer
 
       def install_clear(feature)
         params = Shapes.object({ "zones" => TARGETS,
-                                 "slot" => SLOT.merge("description" => "The slot to empty; every slot when absent.") },
-                               :optional => ["slot"])
+                                 "slot" => SLOT.merge("description" => "The slot to empty; every slot when absent."),
+                                 "item_id" => ITEM_ID.merge("description" => "Take only this item out of the slot, " \
+                                                                             "which a list slot needs; the slot " \
+                                                                             "must be given.") },
+                               :optional => %w[slot item_id])
         result = Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT, :description => "The Zones named, written " \
                                                                                          "or already empty."),
                                  "slot" => { "type" => %w[string null] } })
         feature.action("#{PREFIX}.clear",
-                       :description => "Empty one slot of Zones, or every slot, so they read as served by nothing.",
+                       :description => "Empty one slot of Zones, or every slot, so they read as served by nothing; " \
+                                       "with item_id, take only that item out of the slot.",
                        :refuses => WRITE, :params => params, :result => result, :participants => [STAGE],
                        :undo_name => "Clear Equipment",
                        :preconditions => ["Each Zone is writable: no locked Group, shared definition or containing " \
@@ -141,7 +147,8 @@ module PhComposer
                                         "is.",
                        :examples => [{ "zones" => [ZONE_EXAMPLE] }]) do |request, proposal|
           Serves::Operations.clear(request, proposal, :targets => request.params.fetch("zones"),
-                                                      :slot => request.params["slot"])
+                                                      :slot => request.params["slot"],
+                                                      :item_id => request.params["item_id"])
         end
       end
     end

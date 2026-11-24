@@ -899,8 +899,8 @@ Ventilators are read either way.
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
 `ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
-(`ventilator_id` and `hot_water_system_id`, null for none), the `items` the slots name with their
-names, and `findings`.
+(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids`, a list, empty for
+none), the `items` the slots name with their names, and `findings`.
 A Zone served by nothing reads the same whether it stores no payload or an emptied one.
 
 Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
@@ -909,7 +909,9 @@ Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
 already has another, the command is refused as `mechanical.slot_filled`, naming that Ventilator, and
 nothing is written; send it again with `replace: true` to replace it. Empty a slot with
 `ph_composer.mechanical.serves.clear`, giving `zones` and `slot`, or leave `slot` out to empty every
-slot. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
+slot. The heat pump slot, `hp_indoor_unit_ids`, holds several indoor units: assigning adds the unit
+beside those the Zone has, and nothing is replaced; to take one unit off a Zone, clear with `slot` and
+`item_id`. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
 locked Group, in a shared component or inside another Zone is refused with Zones' own codes
 (`target.locked`, `target.shared_definition`, `target.wrong_hierarchy`). Each command is one Undo step
 and leaves other features' data on the Zone, such as its Program, as it was. A copied Zone keeps
@@ -1018,6 +1020,71 @@ once.
    `tank_buffer` and `tank_solar`, and the Heaters under `heaters`. A System's
    `piping_calc_method` is not written while the pinned honeybee-ph has no field for it; the run
    then notes `mechanical.method_not_exported`.
+
+### Mechanical: heat pumps
+
+Heat pumps are four catalogs: outdoor equipment (the outdoor models), indoor equipment (the indoor
+models), outdoor units, each installing one outdoor model, and indoor units, each installing one indoor
+model on one outdoor unit. Read each a bounded page at a time with
+`ph_composer.mechanical.heat_pumps.outdoor_equipment.list`, `heat_pumps.indoor_equipment.list`,
+`heat_pumps.outdoor_units.list` and `heat_pumps.indoor_units.list`; names are unique within each.
+
+1. Create the models. `ph_composer.mechanical.heat_pumps.outdoor_equipment.create` takes `name` and the
+   Phius Heat Pump Performance Estimator's inputs: `heating_cap_17f_kw` and `heating_cap_47f_kw`, then
+   `heating_rating_mode` `cop_pair` with `cop_17f` and `cop_47f`, or `hspf` with `hspf_value` and
+   `hspf_version` (`hspf` or `hspf2`). A model that cools gives `cooling_cap_95f_kw` and
+   `cooling_rating_mode` `eer_seer` with `eer`, `seer` and `seer_version` (`seer` or `seer2`), or `ieer`
+   with `ieer`; leave `cooling_rating_mode` null for a heating-only model. Capacities are kW. Each mode
+   reads only its own values, and the other mode's stay stored. A new model is a COP pair at 2.5 and
+   2.5 with no capacities: its row reads `export_ready` false with `mechanical.hp_equipment_incomplete`
+   until the blend has every value it needs. `paired_indoor_equipment_id` may name the indoor model its
+   ratings were measured with. `ph_composer.mechanical.heat_pumps.indoor_equipment.create` takes `name`,
+   `manufacturer`, `model` and `notes` only.
+2. Create the units. `ph_composer.mechanical.heat_pumps.outdoor_units.create` needs
+   `outdoor_equipment_id`; `ph_composer.mechanical.heat_pumps.indoor_units.create` needs
+   `indoor_equipment_id` and `outdoor_unit_id`. Each takes `quantity` (1 by default) and
+   `in_conditioned_space` (false outdoors, true indoors). A record that does not exist is refused as
+   `reference.invalid`.
+3. Assign indoor units to Zones with `ph_composer.mechanical.serves.assign`, `slot`
+   `hp_indoor_unit_ids`. A Zone may hold several indoor units.
+4. Read the blend with `ph_composer.mechanical.heat_pumps.blended`. It needs the Model's climate: the
+   twelve monthly mean air temperatures and both ASHRAE design temperatures (see "Climate"); without
+   them `climate.state` is `missing` and there is no blend. Each exported Building Segment whose
+   Zones an indoor unit serves gives one entry in `segments`: its served Zones and `result`, the
+   estimator's sections in IP units (`climate`, `devices`, `weighted`, `totals`, `energy_model`) and
+   `export`, the SI values the HBJSON carries. One row per outdoor model with the summed quantity of
+   its outdoor units; fans and pumps are left out. `findings` lists what the blend leaves out.
+
+Delete any record with its `delete`. While another record or a Zone names it, it is refused as
+`reference.in_use`; give `replacement_id` to move every record and Zone naming it to another in one
+Undo step. `replacement_id: null` empties an outdoor model's pairing and takes an indoor unit off its
+Zones, and still refuses while a unit names the record. Outdoor unit rows carry `indoor_unit_count`
+and models `unit_count`; indoor unit rows carry the Zones each serves. Heat pump `user_data` is not
+exported: the blend is one object built from several records.
+
+### Mechanical: the heat pump export
+
+The export writes each served Zone's Room one rated monthly heat pump per Building Segment, the blend:
+its COPs at -8.333 °C and 8.333 °C, full heating coverage, and recirculation cooling with the whole
+blended capacity in kW, its airflow at 300 cfm per ton in m³/h, its weighted COP and a 12.0 °C coil.
+Every Room of one Segment carries the same identifier, so PHX makes one device per Segment.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`; its heat pump rows name the heat pump
+   export as their `section`. `mechanical.item_missing` blocks: a Zone names an indoor unit that is
+   not in the Model, or a served unit names an outdoor unit or outdoor model that is not. `mechanical.hp_climate_missing` leaves every blend out until the climate is
+   complete, `mechanical.hp_unit_unpaired` names an indoor unit serving no Zone or an outdoor unit
+   with no indoor unit serving one, `mechanical.hp_equipment_incomplete` an outdoor model lacking a
+   value or an HSPF model with no cooling share, which the estimator weights an HSPF by, so it adds no
+   heating COP (a Segment whose models then blend to no COP is left out),
+   `mechanical.item_across_segments` an outdoor unit on Zones in two Building Segments, and
+   `mechanical.hp_cooling_over_200kw` a Segment whose cooling is over 200 kW (682 kBtu/h), exported
+   as one system for PHX to split for WUFI-Passive. None of these blocks. A row about an outdoor
+   model, an outdoor unit or an indoor unit carries `locate` with `hp_outdoor_equipment_ids`,
+   `hp_outdoor_unit_ids` or `hp_indoor_unit_ids`.
+2. Export, then read back. The result gives `heat_pumps`, one row per (Segment, Zone) pair:
+   `segment`, `system_identifier`, `cop_1`, `cop_2`, `cooling_used`, `capacity_kw`, `flow_rate_m3_hr`,
+   `annual_cop` and `digest`. In the HBJSON each of those Rooms has one entry in
+   `properties.ph_hvac.heat_pump_systems` with that identifier.
 
 ### Library records
 

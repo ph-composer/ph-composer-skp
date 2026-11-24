@@ -13,7 +13,7 @@ from .certification_sections import CertificationSection
 from .constructions import ConstructionSection
 from .exporters import Exporter
 from .material_sources import MaterialSourcesSection
-from .mechanical_sections import HotWaterSection, VentilationSection
+from .mechanical_sections import HeatPumpSection, HotWaterSection, VentilationSection
 from .model_metadata import ModelMetadataSection
 from .model_sections import FaceSection, ZoneSection
 from .program_sections import ProgramTypeSection, RoomProgramSection, ScheduleSection, SetPointSection
@@ -44,5 +44,6 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     ShadeSection(),
     VentilationSection(),
     HotWaterSection(),
+    HeatPumpSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

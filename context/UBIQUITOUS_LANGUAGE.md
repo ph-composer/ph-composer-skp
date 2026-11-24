@@ -216,7 +216,9 @@ terms are at the end, marked planned.
 | Recirculation | A Hot Water System's recirculation temperature and hours per day, read only: honeybee-ph works them out from the recirculation piping and gives 60 °C and 24 h while there is none |
 | Piping calculation method | How a Hot Water System's distribution losses are worked out, one of PHX's four: Individual pipes (simplified), Hot water calculator (simplified), Piping per unit, Piping per floor. Stored, and exported once honeybee-ph carries a field for it |
 | Pooled hot water | Two or more served Hot Water Systems in one Building Segment. WUFI-Passive and METr add their tanks and heaters together and keep one tap point count; a note, not an error |
-| Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
+| Heat Pump Outdoor Equipment, Heat Pump Indoor Equipment | The outdoor and indoor heat pump models, shown as Equipment · Outdoor and Equipment · Indoor. An outdoor model holds the Phius estimator's inputs (capacities at 17 °F, 47 °F and 95 °F, a COP pair or an HSPF, an EER and SEER or an IEER) and may name its paired indoor model; an indoor model is identity only |
+| Heat Pump Outdoor Unit, Heat Pump Indoor Unit | Installed units, shown as Units · Outdoor and Units · Indoor. An outdoor unit installs an outdoor model; an indoor unit installs an indoor model on an outdoor unit and serves Zones, several to a Zone |
+| Blended heat pump | The one air-source heat pump exported for each Building Segment, on every Room an indoor unit serves, computed by the Phius Heat Pump Performance Estimator's method from the outdoor models whose units serve the Segment's Zones. Read-only in the Blended result pill |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
 
 ## Export

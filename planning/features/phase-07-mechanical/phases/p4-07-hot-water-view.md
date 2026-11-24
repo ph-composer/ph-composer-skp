@@ -1,7 +1,7 @@
 # P4-07: the Hot Water subtab (Systems, Heaters, Tanks)
 
 DATE: 2026-10-21
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-07` (#570); offline evidence in [p4-07-hot-water-view](../evidence/p4-07-hot-water-view.md), host case `M07` owed to MS2. Re-bound 2026-11-23 to D4-13, D4-17 to D4-20, D4-30 and D4-31: three flat pill tables (`Systems`, `Heaters`, `Tanks`) under the `Hot Water` subtab; read-only recirculation from piping; closes milestone MS2 with the MS2 host sitting.
+STATUS: Merged to main 2026-11-24 as `d292f45a` (#570); offline evidence in [p4-07-hot-water-view](../evidence/p4-07-hot-water-view.md), host case `M07` owed to MS2. Re-bound 2026-11-23 to D4-13, D4-17 to D4-20, D4-30 and D4-31: three flat pill tables (`Systems`, `Heaters`, `Tanks`) under the `Hot Water` subtab; read-only recirculation from piping; closes milestone MS2 with the MS2 host sitting.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

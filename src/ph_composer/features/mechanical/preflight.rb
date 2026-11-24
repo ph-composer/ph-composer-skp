@@ -10,7 +10,7 @@ module PhComposer
     # refuses answers one blocking row, since the export would stop on the same cause.
     module Preflight
       NAME = "#{FEATURE_ID}.preflight"
-      FAMILIES = [VentilationExport, HotWaterExport].freeze
+      FAMILIES = [VentilationExport, HotWaterExport, HeatPumpExport].freeze
 
       module_function
 
@@ -18,8 +18,10 @@ module PhComposer
         feature.query(NAME, :description => "Mechanical export checks: a Zone naming an item that is not in the " \
                                             "Model (blocking), a Zone with no Ventilator or no Hot Water System, an " \
                                             "item serving no Zone, a served Zone in no Building Segment, an item " \
-                                            "serving Zones in two Building Segments, a Tank with no free slot and " \
-                                            "Hot Water Systems pooled in one Building Segment.",
+                                            "serving Zones in two Building Segments, a Tank with no free slot, " \
+                                            "Hot Water Systems pooled in one Building Segment, and the heat pump " \
+                                            "blend's: a climate it cannot read, an unpaired unit, an incomplete " \
+                                            "outdoor model and cooling over 200 kW.",
                             :refuses => [], :params => Shapes::NONE,
                             :result => PhComposer::Export::PREFLIGHT_RESULT, :examples => [{}]) do |request|
           call(request)

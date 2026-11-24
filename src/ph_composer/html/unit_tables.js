@@ -123,7 +123,10 @@ PhComposerUI.define("unit_tables", [], function () {
     /* A share stored as a fraction from 0 to 1 and read and entered as a percentage in either system (a Hot Water
        Heater's coverage): `scale` applies in both, where `factor` applies under IP only. */
     percent: { label: "percentage", scale: 100, precision: { SI: 1, IP: 1 }, si: unit("pct", "%", ["percent"]),
-    ip: unit("pct", "%", ["percent"]) }
+    ip: unit("pct", "%", ["percent"]) },
+    /* A heat pump's rated capacity: kilowatts, or thousands of Btu per hour, as the Phius estimator takes it. */
+    capacity: { label: "capacity", factor: BTU_H_PER_W, precision: { SI: 2, IP: 1 }, si: unit("kw", "kW"),
+    ip: unit("kbtu_h", "kBtu/h", ["kbtuh", "mbh"]) }
   };
 
   var DIMENSION_FORMATS = [

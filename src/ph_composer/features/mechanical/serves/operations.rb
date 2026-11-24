@@ -36,12 +36,20 @@ module PhComposer
           raise
         end
 
-        # Empties `slot`, or every slot when nil, on each target. A Zone that stores no payload is left as it is.
-        def clear(request, proposal, targets:, slot: nil)
+        # Empties `slot`, or every slot when nil, on each target; with `item_id`, takes only that item out of the
+        # slot, which a list slot (several indoor units on one Zone) needs. A Zone that stores no payload is left as
+        # it is.
+        def clear(request, proposal, targets:, slot: nil, item_id: nil)
           slot = slot && slot!(slot)
+          raise CodedError.new("params.invalid", "item_id needs its slot.") if item_id && slot.nil?
+          if item_id && !slot.id?(item_id)
+            raise CodedError.new("params.invalid", "#{slot.key} takes a #{slot.label} id; #{item_id} is not one.")
+          end
+
           zones = targets!(State.zones(request), targets)
           payloads = zones.select(&:status).to_h do |zone|
-            [zone, slot ? zone.values.merge(slot.key => slot.empty) : EMPTY.dup]
+            value = slot && (item_id ? slot.renamed(zone.values.fetch(slot.key), item_id, nil) : slot.empty)
+            [zone, slot ? zone.values.merge(slot.key => value) : EMPTY.dup]
           end
           State.stage(request, payloads)
           { "zone_ids" => zones.map(&:id), "slot" => slot&.key }
