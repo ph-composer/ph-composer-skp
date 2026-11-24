@@ -4095,6 +4095,157 @@ Values:
 }
 ```
 
+### `ph_composer.piping.group`
+
+Piping group, a entity kind owned by `ph_composer.piping`, schema version 1.
+
+References: `hot_water_system_id` names one `ph_composer.mechanical.hot_water_system`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hot_water_system_id"
+  ],
+  "properties": {
+    "hot_water_system_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Hot Water System its pipes serve; null while unlinked, which blocks their export."
+    }
+  }
+}
+```
+
+Occurrence reference:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id",
+    "group_path"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "The Piping group's ppg_ id."
+    },
+    "group_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The root-to-Group persistent-id path, one per placement."
+    }
+  }
+}
+```
+
+### `ph_composer.piping.pipe`
+
+Pipe, a entity kind owned by `ph_composer.piping`, schema version 1.
+
+References: `pipe_type_id` names one `ph_composer.piping.pipe_type`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipe_type_id",
+    "role"
+  ],
+  "properties": {
+    "pipe_type_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Pipe Type; null once its type was deleted with null, which blocks export."
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "trunk",
+        "branch",
+        "twig",
+        "recirculation"
+      ]
+    },
+    "multiplier": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "A trunk only: how many identical risers this one stands for; 1 by default."
+    },
+    "demand_recirculation": {
+      "type": "boolean",
+      "description": "A trunk only: whether it has demand recirculation; false by default."
+    },
+    "water_temp_c": {
+      "type": "number",
+      "x-unit": "C",
+      "description": "A recirculation pipe only: its water temperature; 60 by default."
+    },
+    "daily_period": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24,
+      "x-unit": "h",
+      "description": "A recirculation pipe only: hours a day it runs, 0 to 24; 24 by default."
+    }
+  }
+}
+```
+
+Occurrence reference:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_path",
+    "entity_path",
+    "entity_id"
+  ],
+  "properties": {
+    "group_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The root-to-Group path of the Piping group holding the Edge."
+    },
+    "entity_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+    },
+    "entity_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Edge's assignment id, or null for an Edge with none."
+    }
+  }
+}
+```
+
 ### `ph_composer.piping.pipe_type`
 
 Pipe Type, a catalog kind owned by `ph_composer.piping`, schema version 1.
@@ -29195,6 +29346,317 @@ Example params:
 }
 ```
 
+### `ph_composer.piping.groups.all`
+
+Every Piping group occurrence in one read. Owner: `ph_composer.piping`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.piping.groups.list` instead.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "name",
+          "values",
+          "pipe_count",
+          "copied",
+          "findings",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Piping group's ppg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            },
+            "description": "The group's reference, or null when its record holds no valid id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "description": "The record's values as stored: hot_water_system_id, null while unlinked."
+          },
+          "pipe_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Edges directly inside it carrying a pipe assignment."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another occurrence carries the same id: a pasted copy sharing its storage."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "piping.group_in_zone or piping.group_nested where it sits somewhere pipes may not."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why its record is invalid, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write through its path meets, or null."
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.piping.groups.list`
+
+One bounded page of the Piping group occurrences in path order, each with its Hot Water System, pipe count, copies and placement findings. Owner: `ph_composer.piping`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "name",
+          "values",
+          "pipe_count",
+          "copied",
+          "findings",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Piping group's ppg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            },
+            "description": "The group's reference, or null when its record holds no valid id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "description": "The record's values as stored: hot_water_system_id, null while unlinked."
+          },
+          "pipe_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Edges directly inside it carrying a pipe assignment."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another occurrence carries the same id: a pasted copy sharing its storage."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "piping.group_in_zone or piping.group_nested where it sits somewhere pipes may not."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why its record is invalid, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write through its path meets, or null."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
 ### `ph_composer.piping.pipe_types.all`
 
 Every Pipe Type with its values and export readiness, for the panel snapshot. Owner: `ph_composer.piping`.
@@ -29918,6 +30380,443 @@ Example params:
     "export_ready"
   ]
 }
+```
+
+### `ph_composer.piping.pipes.selection`
+
+One bounded page of the selected Edges under the active path, each with the Piping group holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.piping`.
+
+Refuses: `gesture.too_large`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "next_cursor",
+    "total",
+    "ignored",
+    "ignored_total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "group",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Piping group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when it is not directly in a Piping group."
+          },
+          "group": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "hot_water_system_id"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Piping group holding it, or null outside one or when the group's record cannot be read."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "outside_group"
+            ],
+            "description": "outside_group when the Edge's parent is no Piping group; null otherwise."
+          },
+          "values": {
+            "type": "object",
+            "description": "The assignment's values as stored; empty with none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another Edge carries the same assignment id, as a split or copy leaves it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored record is invalid or unreadable, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write to the Edge meets, or null."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Edges, the first 50; never assigned."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
+}
+```
+
+### `ph_composer.piping.pipes.selection_all`
+
+Every selected Edge in one read, for the panel. Owner: `ph_composer.piping`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.piping.pipes.selection` instead.
+
+Refuses: `gesture.too_large`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "ignored",
+    "ignored_total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "group",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Piping group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when it is not directly in a Piping group."
+          },
+          "group": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "hot_water_system_id"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "hot_water_system_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Piping group holding it, or null outside one or when the group's record cannot be read."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "outside_group"
+            ],
+            "description": "outside_group when the Edge's parent is no Piping group; null otherwise."
+          },
+          "values": {
+            "type": "object",
+            "description": "The assignment's values as stored; empty with none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another Edge carries the same assignment id, as a split or copy leaves it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored record is invalid or unreadable, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write to the Edge meets, or null."
+          }
+        }
+      }
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Edges, the first 50; never assigned."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.programs.airtightness.get`
@@ -79312,7 +80211,7 @@ Example params:
 
 Delete one Hot Water System. While a Zone, Heater or Tank names it, name a replacement_id, which takes its place on each of them; null empties the Zones' slots, and a Heater or Tank still naming it refuses. Without one it refuses as reference.in_use. Owner: `ph_composer.mechanical`.
 
-Undo step: Delete Hot Water System. Deletes one definition and its metadata, and rewrites the Zones, Heaters and Tanks that name it; Undo restores all of them.
+Undo step: Delete Hot Water System. Deletes one definition and its metadata, and rewrites the Zones, Heaters and Tanks that name it and, with replacement_id or null, any other feature's records that name it; Undo restores all of them.
 
 Before calling: The Hot Water System exists and is readable.
 
@@ -79512,7 +80411,7 @@ Params:
         "null"
       ],
       "pattern": "^hws_[A-Za-z0-9]{12}$",
-      "description": "The Hot Water System that takes this one's place on every Zone, Heater and Tank, or null to empty the Zones' slots. Needed while a Zone, Heater or Tank names it; null leaves Heaters and Tanks in use."
+      "description": "The Hot Water System that takes this one's place on every Zone, Heater, Tank and other record naming it, or null to empty the Zones' slots and clear other features' records. Needed while anything names it; null leaves Heaters and Tanks in use."
     }
   }
 }
@@ -84135,6 +85034,273 @@ Example params:
 }
 ```
 
+### `ph_composer.piping.groups.create`
+
+Add one empty Piping group at the Model root linked to a Hot Water System and open it, so lines drawn next land inside it. Owner: `ph_composer.piping`.
+
+Undo step: New Piping Group. Adds a Group at the root with a Piping group record and moves the edit path into it, closing any Group open before.
+
+Before calling: The Hot Water System exists.
+
+Refuses: `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hot_water_system_id"
+  ],
+  "properties": {
+    "hot_water_system_id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System the group's pipes serve."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "hot_water_system_id": "hws_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.piping.groups.link`
+
+Link explicit Piping groups to one Hot Water System, replacing any link. Owner: `ph_composer.piping`.
+
+Undo step: Link Piping Group. Rewrites each group's hot_water_system_id.
+
+Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Piping group. Each target carries the reference and values groups.all last read.
+
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets",
+    "hot_water_system_id"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Piping group's ppg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The group's values as last read; a changed one refuses as target.changed. {} skips the check."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Explicit Piping group occurrences, as groups.all returns them."
+    },
+    "hot_water_system_id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System the group's pipes serve."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_ids"
+  ],
+  "properties": {
+    "group_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Groups rewritten; empty when none changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_id": "ppg_Ab12Cd34Ef56",
+        "group_path": [
+          1301
+        ]
+      }
+    }
+  ],
+  "hot_water_system_id": "hws_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.piping.groups.unlink`
+
+Unlink explicit Piping groups from their Hot Water System, which blocks their pipes' export until linked again. Owner: `ph_composer.piping`.
+
+Undo step: Unlink Piping Group. Sets each group's hot_water_system_id to null.
+
+Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Piping group. Each target carries the reference and values groups.all last read.
+
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Piping group's ppg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The group's values as last read; a changed one refuses as target.changed. {} skips the check."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Explicit Piping group occurrences, as groups.all returns them."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_ids"
+  ],
+  "properties": {
+    "group_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Groups rewritten; empty when none changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_id": "ppg_Ab12Cd34Ef56",
+        "group_path": [
+          1301
+        ]
+      }
+    }
+  ]
+}
+```
+
 ### `ph_composer.piping.pipe_types.create`
 
 Create one Pipe Type. Unless values give them, it is a 1/2 in (diameter_mm 12.7) Copper L pipe (material 2) with 12.7 mm of reflective insulation at 0.04 W/mK, insulation_quality 1, and no stored color. Owner: `ph_composer.piping`.
@@ -84652,7 +85818,7 @@ Params:
         "null"
       ],
       "pattern": "^ppt_[A-Za-z0-9]{12}$",
-      "description": "Another existing Pipe Type to take this one's place on every pipe using it, or null to clear them; while no pipe uses it, there is nothing to move."
+      "description": "Another existing Pipe Type to take this one's place on every pipe using it, or null to leave those pipes with no type, which blocks their export."
     }
   }
 }
@@ -85184,6 +86350,280 @@ Example params:
   "expected_values": {
     "insulation_conductivity_w_mk": 0.04
   }
+}
+```
+
+### `ph_composer.piping.pipes.assign`
+
+Give explicit Edges in Piping groups one Pipe Type, a role and the role's values, or reassign them; a stale or unwritable target refuses the whole command. Owner: `ph_composer.piping`.
+
+Undo step: Assign Pipe. Writes one pipe assignment record on each Edge.
+
+Before calling: Each Edge sits directly in a Piping group outside every Zone, reached through no locked or shared storage. Each target carries the reference and values pipes.selection last read.
+
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `piping.outside_group`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets",
+    "pipe_type_id",
+    "role"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Piping group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Explicit Edges, as pipes.selection returns them; at most 250."
+    },
+    "pipe_type_id": {
+      "type": "string",
+      "pattern": "^ppt_[A-Za-z0-9]{12}$",
+      "description": "The Pipe Type every Edge gets."
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "trunk",
+        "branch",
+        "twig",
+        "recirculation"
+      ],
+      "description": "trunk, branch, twig or recirculation. A role's values not given take their defaults; values of another role refuse as params.invalid."
+    },
+    "multiplier": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "A trunk only: how many identical risers this one stands for; 1 by default."
+    },
+    "demand_recirculation": {
+      "type": "boolean",
+      "description": "A trunk only: whether it has demand recirculation; false by default."
+    },
+    "water_temp_c": {
+      "type": "number",
+      "x-unit": "C",
+      "description": "A recirculation pipe only: its water temperature; 60 by default."
+    },
+    "daily_period": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24,
+      "x-unit": "h",
+      "description": "A recirculation pipe only: hours a day it runs, 0 to 24; 24 by default."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_ids"
+  ],
+  "properties": {
+    "edge_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Assignment ids written; empty when nothing changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_path": [
+          1301
+        ],
+        "entity_path": [
+          1301,
+          1305
+        ],
+        "entity_id": null
+      }
+    }
+  ],
+  "pipe_type_id": "ppt_Ab12Cd34Ef56",
+  "role": "trunk",
+  "multiplier": 12
+}
+```
+
+### `ph_composer.piping.pipes.clear`
+
+Remove the pipe assignment from explicit Edges. Owner: `ph_composer.piping`.
+
+Undo step: Clear Pipe. Removes the pipe assignment record from each Edge.
+
+Before calling: Each Edge sits directly in a Piping group outside every Zone, reached through no locked or shared storage. Each target carries the reference and values pipes.selection last read.
+
+Refuses: `copy.rule_missing`, `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `piping.outside_group`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Piping group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Explicit Edges, as pipes.selection returns them; at most 250."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cleared"
+  ],
+  "properties": {
+    "cleared": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_path": [
+          1301
+        ],
+        "entity_path": [
+          1301,
+          1305
+        ],
+        "entity_id": "ppe_Ab12Cd34Ef56"
+      }
+    }
+  ]
 }
 ```
 
@@ -122551,7 +123991,10 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `piping.group_in_zone` | A Piping group sits inside a Zone; pipes live outside Zones. |
+| `piping.group_nested` | A Piping group sits inside another Piping group. |
 | `piping.insulation_conductivity_missing` | A Pipe Type has insulation and no insulation conductivity, so a pipe using it cannot export. |
+| `piping.outside_group` | An Edge is not directly inside a Piping group, so it cannot be a pipe. |
 
 ### `ph_composer.programs`
 
@@ -122861,3 +124304,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.96 | 2026-11-24 | ph_composer.mechanical.pumps is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 5 with the pump_ids list slot. The export section ph_composer.mechanical.export.pumps is new and ph_composer.mechanical.preflight adds its rows, with the new code mechanical.zone_without_spaces; ph_composer.mechanical.locate takes pump_ids. The Spaces export's projection gives each Zone's space_count, with a row for every Zone holding a Space. |
 | 1.97 | 2026-11-24 | ph_composer.mechanical.fans is new, with list, all, a snapshot section, create, update, duplicate and delete. ph_composer.mechanical.zone_serves moves to schema 6 with the fan_ids list slot. The export section ph_composer.mechanical.export.fans is new and ph_composer.mechanical.preflight adds its rows, mechanical.zone_without_spaces among them; ph_composer.mechanical.locate takes fan_ids. |
 | 1.98 | 2026-11-24 | ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, with the code piping.insulation_conductivity_missing. |
+| 1.99 | 2026-11-24 | ph_composer.piping adds Piping groups and pipes: the reference targets ph_composer.piping.group and ph_composer.piping.pipe, groups.create, groups.link, groups.unlink, groups.list, groups.all, pipes.assign, pipes.clear, pipes.selection, pipes.selection_all and its snapshot section, with the codes piping.outside_group, piping.group_in_zone and piping.group_nested. pipe_types.delete moves or nulls the pipes using a type. A Hot Water System delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |

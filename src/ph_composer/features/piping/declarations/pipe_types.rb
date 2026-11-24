@@ -35,8 +35,8 @@ module PhComposer
         { "id" => Shapes.id(KIND.id_prefix, "The #{KIND.label} to delete."),
           "expected_values" => Shapes.expected(KIND),
           "replacement_id" => Shapes.id(KIND.id_prefix, "Another existing Pipe Type to take this one's place on " \
-                                                        "every pipe using it, or null to clear them; while no " \
-                                                        "pipe uses it, there is nothing to move.",
+                                                        "every pipe using it, or null to leave those pipes with no " \
+                                                        "type, which blocks their export.",
                                         :nullable => true) },
         :optional => %w[expected_values replacement_id]
       ).freeze
@@ -118,9 +118,9 @@ module PhComposer
                                        "replacement_id" => "ppt_Zy98Xw76Vu54" }]) do |request, proposal|
           params = request.params
           replacement = params.fetch("replacement_id", PipeType::Operations::KEEP)
-          PipeType::Operations.delete(request, proposal, :id => params.fetch("id"),
-                                                         :expected_values => params.fetch("expected_values", {}),
-                                                         :replacement_id => replacement)
+          Assignment::Operations.delete_type(request, proposal, :id => params.fetch("id"),
+                                                                :expected_values => params.fetch("expected_values", {}),
+                                                                :replacement_id => replacement)
         end
       end
     end

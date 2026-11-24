@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 98
+    MINOR = 99
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -606,7 +606,16 @@ module PhComposer
       { "minor" => 98, "date" => "2026-11-24",
         "change" => "ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot " \
                     "section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, " \
-                    "with the code piping.insulation_conductivity_missing." }
+                    "with the code piping.insulation_conductivity_missing." },
+      { "minor" => 99, "date" => "2026-11-24",
+        "change" => "ph_composer.piping adds Piping groups and pipes: the reference targets " \
+                    "ph_composer.piping.group and ph_composer.piping.pipe, groups.create, groups.link, " \
+                    "groups.unlink, groups.list, groups.all, " \
+                    "pipes.assign, pipes.clear, pipes.selection, pipes.selection_all and its snapshot section, with " \
+                    "the codes piping.outside_group, piping.group_in_zone and piping.group_nested. " \
+                    "pipe_types.delete moves or nulls the pipes using a type. A Hot Water System delete with a " \
+                    "replacement_id, or null, now also moves or clears every other feature's record naming it, " \
+                    "through the registered reference retargeters." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

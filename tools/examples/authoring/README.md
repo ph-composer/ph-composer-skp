@@ -457,3 +457,21 @@ uv run tools/hostkit/host_bridge.py eval \
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeColourByWalkthrough.report'
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeColourByWalkthrough.cost'
 ```
+
+## Piping groups and pipes with the panel closed
+
+`piping_assignment_walkthrough.rb` creates a Piping group linked to a Hot Water System and opens it, draws three
+connected lines in it (on the host, draw them with the Line tool instead, case M13b), assigns the selection a Pipe
+Type and role and clears it, each a registered action and one native Undo step, and reads the selection back through
+`ph_composer.piping.pipes.selection`. `tests/piping_assignment_walkthrough_test.rb` runs it offline. It needs a Hot
+Water System named HWS-1 and the Pipe Type PT-1 (`PipeTypesWalkthrough.run`).
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/piping_assignment_walkthrough.rb"; PipingAssignmentWalkthrough.create("HWS-1")'
+uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.draw'
+uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.assign("PT-1", "trunk", "multiplier" => 12)'
+uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.selection'
+uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.clear'
+uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.groups'
+```

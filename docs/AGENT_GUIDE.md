@@ -1236,7 +1236,7 @@ ventilator's quantity; it copies the supportive device's.
 ### Hot water piping
 
 Hot water piping is its own feature beside Mechanical, its operations named `ph_composer.piping.*`.
-Pipes are lines drawn in SketchUp, each given a Pipe Type and a role; today only the Pipe Types exist.
+Pipes are lines drawn in SketchUp inside a Piping group, each given a Pipe Type and a role.
 
 A Pipe Type is one pipe specification kept in the Model. Read `ph_composer.piping.pipe_types.list`, a
 bounded page at a time; names are unique. Create one with `ph_composer.piping.pipe_types.create`,
@@ -1257,11 +1257,36 @@ using the type. A bare pipe, `insulation_thickness_mm` 0, needs no conductivity.
 the colour the type draws in under `display.color`; set `color` to store one, or null to return to the
 default. Edit with `ph_composer.piping.pipe_types.update`, copying `expected_values` from the values you
 read; `ph_composer.piping.pipe_types.duplicate` copies one with its `user_data`.
-`ph_composer.piping.pipe_types.delete` deletes one. Once pipes can be assigned, a type in use will
-refuse as `reference.in_use` unless `replacement_id` names another type to take its place on those
-pipes, or is null to clear them; today no pipe uses a type, and a `replacement_id` you give must still
-be another existing type or null. Each is one Undo step. Write a type's
+`ph_composer.piping.pipe_types.delete` deletes one. A type in use refuses as `reference.in_use` unless
+`replacement_id` names another type to take its place on every pipe using it, or is null to leave those
+pipes with no type, which blocks their export. A pipe the delete cannot rewrite (outside a Piping group,
+or behind a locked or shared Group) refuses the whole delete. Each is one Undo step. Write a type's
 `user_data` with `ph_composer.records.update_metadata`.
+
+A Piping group is a SketchUp Group that holds pipes and names the Hot Water System they serve. Create one
+with `ph_composer.piping.groups.create`, giving `hot_water_system_id`: it adds an empty Group at the Model
+root and opens it, so the lines drawn next land inside it, in one Undo step; read its `group_id`. Read
+`ph_composer.piping.groups.list`, a bounded page at a time, for every group with its `values`
+(`hot_water_system_id`, null while unlinked), `pipe_count`, `copied` (a pasted copy, which shares storage
+and refuses writes until made unique) and `findings`. A group may sit at the Model root or inside plain
+Groups, never inside a Zone (`piping.group_in_zone`) or another Piping group (`piping.group_nested`).
+Change the System with `ph_composer.piping.groups.link` or clear it with
+`ph_composer.piping.groups.unlink`, sending each row's `reference` and its `values` as `expected_values`.
+Deleting a Hot Water System a group names refuses unless `replacement_id` names another System, which
+the group then names, or is null, which unlinks it.
+
+Only an Edge directly inside a Piping group can be a pipe. Select Edges in the open group natively, then
+read `ph_composer.piping.pipes.selection`: each Edge's `reference`, its `group` with the System, its
+`values` and the `write_refusal` a write would meet; an Edge in no Piping group has no reference and
+reads `reason` `outside_group`. Assign with `ph_composer.piping.pipes.assign`, sending the rows'
+references with their `values` as `expected_values`, a `pipe_type_id` and a `role`: `trunk`, `branch`,
+`twig` or `recirculation`. A trunk also takes `multiplier` (a whole number, 1 when absent) and
+`demand_recirculation` (false when absent); a recirculation pipe takes `water_temp_c` (60 when absent)
+and `daily_period`, hours a day from 0 to 24 (24 when absent). A branch and a twig take neither. A value
+another role takes is refused as `params.invalid`; giving a pipe a new role drops the values of its old
+one. `ph_composer.piping.pipes.clear` removes the assignment. Each command takes at most 250 Edges, is
+refused whole if one target is stale or unwritable, and is one Undo step. A split line keeps one
+assignment on both halves, read as `copied`.
 
 ### Library records
 
