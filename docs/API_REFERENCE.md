@@ -118225,7 +118225,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `mechanical.zone_left_out` | A served Zone is in no Building Segment, so the export leaves its Room out. |
 | `mechanical.zone_no_hot_water` | A Zone in a Building Segment has no Hot Water System. |
 | `mechanical.zone_unventilated` | A Zone in a Building Segment has no Ventilator. |
-| `mechanical.zone_without_spaces` | An item PHX reads through a Room's Spaces (a Pump) serves an exported Zone with no Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only through another Room it serves. |
+| `mechanical.zone_without_spaces` | An item PHX reads through a Room's Spaces (a Pump) serves an exported Zone with no Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only through another Room it serves in the same Building Segment. |
 
 ### `ph_composer.programs`
 

@@ -73,8 +73,10 @@ class MechanicalPumpExportTest < PhComposerTestCase
     assert_includes pumps(extraction).map { |row| row.values_at("item_id", "zone_id") },
                     [@ids.fetch("P-2"), zone_id("C")]
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("P-2")]], notes(extraction)
-    assert_match(/P-2 serves Zone Zone C, which has no Spaces\. PHX reads a Pump through a Room's Spaces/,
-                 extraction.findings.find { |row| row["code"] == "mechanical.zone_without_spaces" }.fetch("message"))
+    assert_includes extraction.findings.find { |row| row["code"] == "mechanical.zone_without_spaces" }.fetch("message"),
+                    "P-2 serves Zone Zone C, which has no Spaces. PHX reads a Pump through a Room's Spaces, so a " \
+                    "Building Segment's WUFI-Passive and METr model gets P-2 only through another Room it serves in " \
+                    "that Segment"
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("P-2"), false]],
                  preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
   end

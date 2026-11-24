@@ -308,12 +308,12 @@ module PhComposer
       end
 
       # The section's registered projection, for a contributor that needs each exported Zone's Spaces
-      # (`reader.section(SECTION)`): one row per Zone that holds a Space, in Zone id order, with how many Spaces
-      # name it (`space_count`; PHX reads a Room's mechanical devices through its Spaces) and the sums of its
-      # Volumes' floor area, weighted floor area (iCFA) and net volume as the metrics measure them (net volume is
-      # net floor area times average clear ceiling height), which is what honeybee-ph and PHX read back; zero for a
-      # Zone whose Spaces hold no Volume. What sits in a Zone in no Building Segment is left out with it, and a
-      # Volume with no height counts no volume here: the section's records refuse it.
+      # (`reader.section(SECTION)`): one row per exported Zone that holds a Space, in Zone id order, with how many
+      # Spaces name it (`space_count`; PHX reads a Room's mechanical devices through its Spaces) and the sums of its
+      # Volumes' floor area, weighted floor area (iCFA) and net volume as the metrics measure them (net volume is net
+      # floor area times average clear ceiling height), which is what honeybee-ph and PHX read back; zero for a Zone
+      # whose Spaces hold no Volume. What sits in a Zone in no Building Segment is left out with it, and a Volume with
+      # no height counts no volume here: the section's records refuse it.
       def zone_totals(reader)
         snapshot = reader.snapshot
         kept = lambda do |dictionary, kind|
@@ -335,7 +335,12 @@ module PhComposer
         end
         # Space occurrences per Zone id: a Zone copied but not yet made independent counts its Spaces once a copy.
         counts = spaces.values.filter_map { |record| record["zone_id"] }.tally
-        (counts.keys | totals.keys).sort.map do |zone_id|
+        # Rows for exported Zones only: a Space beside its Zone, naming one in no Building Segment, leaves with it.
+        exported = lambda do |zone_id|
+          found = Zones::ExportProjection.zone_entry(reader, zone_id)
+          found && Zones::Schema.exported?(found.last)
+        end
+        (counts.keys | totals.keys).select(&exported).sort.map do |zone_id|
           { "zone_id" => zone_id, "space_count" => counts.fetch(zone_id, 0) }.merge(totals[zone_id])
         end
       end

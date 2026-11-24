@@ -60,7 +60,7 @@ function setup() {
   var system = root._view.systems.filter(function (entry) { return entry.id === SYSTEM; })[0];
   var view = root._view.tables.filter(function (held) { return held.id === PUMPS; })[0].view;
   return { root: root, state: state, sent: sent, notices: notices, paint: paint, view: view, pills: system.pills,
-    navigate: function (intent) { navigate.mechanical(root, intent); } };
+    modules: modules, navigate: function (intent) { navigate.mechanical(root, intent); } };
 }
 function named(o, name) { return o.sent.filter(function (message) { return message.payload.name === name; }); }
 function press(node) { node.listeners.click({ preventDefault: function () {} }); }
@@ -110,12 +110,24 @@ test("a type change and a power edit send guarded updates, and a negative power 
 
   var power = cell(o, P2.id, "norm_energy_demand_w");
   type(power.input, "-5"); key(power.input, "Enter");
-  assert.match(power.message, /0 or more/);
+  assert.match(power.message, /cannot be negative/);
   assert.strictEqual(named(o, PUMPS + ".update").length, 1, "a negative power is not sent");
   key(power.input, "Escape");
   type(power.input, "25"); key(power.input, "Enter");
   assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[1].payload.params), { id: P2.id,
     values: { norm_energy_demand_w: 25 }, expected_values: { norm_energy_demand_w: 0 } });
+});
+
+test("power and operation read and take the regional number format, the same unit in SI and IP", function () {
+  var o = setup();
+  o.modules.unit_preferences.replace({ unit_system: "IP", dimension_formats: {},
+    number_format: { decimal: ",", group: ".", locale: "de-DE" } });
+  o.paint();
+  var operation = cell(o, P2.id, "annual_period_operation_khrs");
+  assert.strictEqual(operation.input.value, "8,76", "kilohours stay kilohours under IP");
+  type(operation.input, "4,5"); key(operation.input, "Enter");
+  assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[0].payload.params), { id: P2.id,
+    values: { annual_period_operation_khrs: 4.5 }, expected_values: { annual_period_operation_khrs: 8.76 } });
 });
 
 test("the internal heat gains sit behind the row's disclosure, the profile following the type until one is chosen",
@@ -156,6 +168,18 @@ test("the internal heat gains sit behind the row's disclosure, the profile follo
     factor.input.value = "0.5"; factor.input.listeners.input({}); key(factor.input, "Enter");
     assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[2].payload.params), { id: P1.id,
       values: { ihg_utilization_factor: 0.5 }, expected_values: { ihg_utilization_factor: 1 } });
+
+    var update2 = named(o, PUMPS + ".update")[2];
+    records[0].values.ihg_utilization_factor = 0.8;
+    answer(o, update2, { status: "refused", code: "target.changed", message: "The Pump changed." });
+    assert.strictEqual(factor.input.value, "0.8");
+    records[0].values.ihg_utilization_factor = 0.6;
+    o.paint();
+    assert.strictEqual(factor.input.value, "0.6", "a field with no draft follows a newer snapshot after a refusal");
+    assert.strictEqual(factor.error.textContent, "The Pump changed.", "and keeps its message");
+    factor.input.value = "0.7"; factor.input.listeners.input({}); key(factor.input, "Enter");
+    assert.deepStrictEqual(clone(named(o, PUMPS + ".update")[3].payload.params.expected_values),
+      { ihg_utilization_factor: 0.6 }, "the retry is guarded by the value shown");
 
     var p = setup();
     press(disclosure(p, P2.id));

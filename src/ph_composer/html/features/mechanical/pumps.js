@@ -20,8 +20,8 @@ function (panel, fields, systems, serves, optional, equipment) {
     { value: "4", label: "None (hot water)" }];
   var BOOLEANS = ["in_conditioned_space"];
   var NUMBERS = ["norm_energy_demand_w", "annual_period_operation_khrs"];
-  var columns = [["device_type", "Type"], ["quantity", "Quantity"], ["norm_energy_demand_w", "Power (W)"],
-    ["annual_period_operation_khrs", "Operation (kh/yr)"], ["in_conditioned_space", "In conditioned space"],
+  var columns = [["device_type", "Type"], ["quantity", "Quantity"], ["norm_energy_demand_w", "Power"],
+    ["annual_period_operation_khrs", "Operation"], ["in_conditioned_space", "In conditioned space"],
     ["serves", "Serves"]];
   var OPTIONAL = [
     { key: "ihg_utilization_factor", label: "Utilization factor", defaultValue: 1,
@@ -43,15 +43,12 @@ function (panel, fields, systems, serves, optional, equipment) {
     if (BOOLEANS.indexOf(field) >= 0) return String(stored !== false);
     return field === "device_type" ? String(stored) : stored;
   }
-  /* Typed or pasted text as the update sends it: a type, an integer quantity, a yes or no, a number. Anything else is
-     refused before it is sent. */
+  /* Typed or pasted text as the update sends it: a type, an integer quantity, a yes or no. Power and operation are
+     unit quantities, read in the regional number format. Anything else is refused before it is sent. */
   function normalize(field, text) {
     if (BOOLEANS.indexOf(field) >= 0) return equipment.yesNo(text);
     if (field === "device_type") return equipment.choice(TYPES, text, Number);
     if (field === "quantity") return equipment.wholeNumber(text, 1);
-    if (NUMBERS.indexOf(field) >= 0) {
-      return /^-?(\d+\.?\d*|\.\d+)$/.test(text) ? Number(text) : { ok: false, message: "Enter a number." };
-    }
     return undefined;
   }
   function searchText(record) {
@@ -76,6 +73,8 @@ function (panel, fields, systems, serves, optional, equipment) {
         usage: function (state, id) { return self.usage(id); } },
       parts: [this.picker, this.optional], repainted: function () { self.retarget(); },
       inventory: {
+        quantities: { norm_energy_demand_w: fields.with(fields.ELECTRIC_POWER_W, { label: "Power" }),
+          annual_period_operation_khrs: fields.with(fields.KILOHOURS, { label: "Operation" }) },
         selectFields: { device_type: TYPES, in_conditioned_space: equipment.YES_NO },
         normalize: normalize,
         validate: function (field, entered) {

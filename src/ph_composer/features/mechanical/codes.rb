@@ -50,7 +50,7 @@ module PhComposer
                                     "pump: on with no heat pump cooling in its export, or off with a blend that cools.",
         ZONE_WITHOUT_SPACES => "An item PHX reads through a Room's Spaces (a Pump) serves an exported Zone with no " \
                                "Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it only " \
-                               "through another Room it serves."
+                               "through another Room it serves in the same Building Segment."
       }.freeze
 
       module_function

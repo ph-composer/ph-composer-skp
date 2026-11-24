@@ -172,8 +172,16 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       if (self.pending === entry && self.busy()) return;
       // A choice holds no draft, so it always shows the Model's value; its refusal message stays beside it.
       if (entry.entry.choices) { entry.unit.paint(held.record); return; }
-      // A refusal stays on a unit field, with what the user typed, until they edit or cancel it.
-      if (!entry.unit.editing && !entry.refused) entry.unit.setValue(held.record.values[entry.key]);
+      // A refusal stays on a unit field, with what the user typed, until they edit or cancel it. A field holding no
+      // draft follows the snapshot, so its next write is guarded by the value it shows; its message stays.
+      if (entry.unit.editing) return;
+      var message = entry.refused ? entry.unit.error.textContent : "";
+      entry.unit.setValue(held.record.values[entry.key]);
+      if (message) {
+        entry.unit.error.textContent = message;
+        entry.unit.error.hidden = false;
+        entry.unit.input.setAttribute("aria-invalid", "true");
+      }
     });
   };
   OptionalValues.prototype.refresh = function (state, records) {

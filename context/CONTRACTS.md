@@ -1067,8 +1067,9 @@ quantity, the Serves chips with the Zone picker over the `heater_ids` list (a he
 and nothing is replaced; an unchecked Zone loses only this heater), then Manufacturer, Model and Notes; its delete
 offers a replacement or clearing for the Zones it serves.
 
-Pumps › Pumps (`pumps.js`) is another: Tag, Type (a choice of the four), Quantity, Power (W) and Operation (kh/yr)
-as plain numbers, In conditioned space, the Serves chips with the Zone picker over the `pump_ids` list, then
+Pumps › Pumps (`pumps.js`) is another: Tag, Type (a choice of the four), Quantity, Power and Operation through the
+`electric_power` (W) and `kilohours` (kh/yr) quantities, the same unit in SI and IP and read in the regional number
+format (both unit registries carry them), In conditioned space, the Serves chips with the Zone picker over the `pump_ids` list, then
 Manufacturer, Model and Notes. The utilization factor and usage profile sit behind each row's disclosure
 (`optional_values.js`, which takes a choice field and a per-field default: the row action is pressed while a value
 differs from its default); the profile's first choice, "From type (...)", is null and names the type's profile.
@@ -1171,7 +1172,7 @@ record's names with the usage profile resolved, and `user_data`. It notes and bl
 and notes `mechanical.zone_without_spaces` once per pump, naming each served exported Zone that no Space names
 (`ExportZones.spaceless_findings`, which takes a family's slot and label so another family PHX reads through Spaces
 reports the same): PHX reads supportive devices through a Room's Spaces, so such a Room carries the pump in the HBJSON
-and PHX reads it only through another Room it serves. The pair is still written. The preflight counts Spaces from
+and PHX reads it only through another Room it serves in the same Building Segment. The pair is still written. The preflight counts Spaces from
 `ph_composer.spaces.all` as the export does, each under the Zone it names unless it sits inside a left-out Zone, and
 reads it only while an exported Zone names a pump; a refused read skips the finding and keeps the pump rows. The Python section (`PumpSection`, required
 for export) builds each pair's own `PhSupportiveDevice`, setting the usage profile after the type (honeybee-ph's type

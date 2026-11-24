@@ -29,5 +29,7 @@
   { "quantity": "electric_efficiency", "canonical_unit": "wh_m3", "canonical_value": 0.55, "expected_ip_value": 0.9344559375360001, "tolerance": 1e-12 },
   { "quantity": "volume_l", "canonical_unit": "l", "canonical_value": 378.5411784, "expected_ip_value": 100.0, "tolerance": 1e-9 },
   { "quantity": "percent", "canonical_unit": "1", "canonical_value": 0.85, "expected_ip_value": 85.0, "tolerance": 1e-9 },
-  { "quantity": "capacity", "canonical_unit": "kw", "canonical_value": 10.0, "expected_ip_value": 34.12141633127942, "tolerance": 1e-9 }
+  { "quantity": "capacity", "canonical_unit": "kw", "canonical_value": 10.0, "expected_ip_value": 34.12141633127942, "tolerance": 1e-9 },
+  { "quantity": "electric_power", "canonical_unit": "w", "canonical_value": 45.0, "expected_ip_value": 45.0, "tolerance": 1e-12 },
+  { "quantity": "kilohours", "canonical_unit": "kh", "canonical_value": 8.76, "expected_ip_value": 8.76, "tolerance": 1e-12 }
 ]

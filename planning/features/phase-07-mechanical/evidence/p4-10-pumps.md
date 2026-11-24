@@ -116,3 +116,12 @@ refusal, so the next write is guarded by the value shown (panel test reproducing
 Spaces as the export does, a Space inside a left-out Zone leaving with it (Ruby test reproducing the miss); the
 no-Spaces finding is one per pump naming each Zone, so same-named Zones cannot collapse into one note; delete with
 clearing asserts one Undo step that restores the pump and both Zones' lists.
+
+Codex gpt-6.2-sol cycle 2 on `68f0a5fb` ([review](https://github.com/ph-composer/ph-composer-skp/pull/574#pullrequestreview-6043033949)):
+1 P1, 3 P2, all fixed in the next commit, which merges after the two-cycle cap unreviewed. Fixed: a unit field in the
+disclosure with no draft now follows a newer snapshot after a `target.changed` refusal and keeps its message, so a retry
+is guarded by the value shown (panel test failing on the old code); the no-Spaces message says PHX reads the pump
+through another Room in the same Building Segment; Power and Operation use new `electric_power` and `kilohours`
+quantities (W and kh/yr in both systems) so the regional number format applies (panel test with comma decimals; both
+unit registries and the shared vectors gain them); the Spaces projection keeps rows for exported Zones only, so a
+Space beside its Zone naming a left-out one gives no row (no dedicated test: the row was invisible to every reader).

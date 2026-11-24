@@ -73,7 +73,8 @@ pattern, honeybee-ph or its Grasshopper component.
   only the two IHG values behind the disclosure.
 - **Power defaults to 0 W**, the Grasshopper component's default (the class's is 1.0), so New asks only for the Tag
   and a new pump adds no energy until its power is entered. Power is shown in W under both unit systems, as WUFI-Passive
-  and METr take a pump's electrical input; it uses no unit quantity (the `power` quantity converts to Btu/h).
+  and METr take a pump's electrical input (the `power` quantity converts to Btu/h). After review it and Operation use
+  two new quantities, `electric_power` and `kilohours`, unconverted under IP, so the regional number format applies.
 - **Operation** is `annual_period_operation_khrs`, kilohours a year, 8.76 by default (the whole year), a plain number.
 - The kind's label is **Pump**; kind id `ph_composer.mechanical.pump`, prefix `pmp` (free), operations and snapshot
   section `ph_composer.mechanical.pumps`, export section `ph_composer.mechanical.export.pumps`. Stored field names

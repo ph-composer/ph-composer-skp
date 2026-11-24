@@ -89,8 +89,9 @@ module PhComposer
           zones = bare.length == 1 ? "Zone #{bare.first}, which has" : "Zones #{bare.join(', ')}, which have"
           Finding.new(:code => Codes::ZONE_WITHOUT_SPACES, :record_id => id, :blocks => false,
                       :message => "#{name} serves #{zones} no Spaces. PHX reads a #{label} through a Room's " \
-                                  "Spaces, so WUFI-Passive and METr get #{name} only through another Room it " \
-                                  "serves. Add Spaces to #{bare.length == 1 ? 'that Zone' : 'those Zones'}.")
+                                  "Spaces, so a Building Segment's WUFI-Passive and METr model gets #{name} only " \
+                                  "through another Room it serves in that Segment. Add Spaces to " \
+                                  "#{bare.length == 1 ? 'that Zone' : 'those Zones'}.")
         end
       end
 
