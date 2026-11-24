@@ -71,14 +71,19 @@ module PhComposer
           ordered
         end
 
-        # Pipes join when they share a group occurrence, role, Pipe Type and role values. A number is compared as a
-        # float, so a multiplier of 12 and one of 12.0 are one trunk, whichever a caller wrote.
+        # Pipes join when they share a group occurrence, role, Pipe Type and role values. A whole float is compared as
+        # the integer it is, so a multiplier of 12 and one of 12.0 are one trunk, whichever a caller wrote, and an
+        # integer too large for a float stays exact.
         def key(fact)
           [fact.path[0...-1], fact.role, fact.pipe_type_id.to_s, values_key(fact.values)]
         end
 
         def values_key(values)
-          values.sort.map { |name, value| [name, value.is_a?(Numeric) ? value.to_f : value] }
+          values.sort.map { |name, value| [name, whole?(value) ? value.to_i : value] }
+        end
+
+        def whole?(value)
+          value.is_a?(Float) && value.finite? && value == value.floor
         end
 
         def run_from(run)

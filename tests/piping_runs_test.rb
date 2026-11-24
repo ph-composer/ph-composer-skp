@@ -134,6 +134,14 @@ class PipingRunsTest < Minitest::Test
     assert_equal({ branch.first.fetch("display_name") => ["piping.parent_ambiguous"] }, codes(rows))
   end
 
+  def test_a_multiplier_written_as_a_float_or_past_a_floats_range_keys_and_identifies
+    as_float = [pipe("trunk", PT1, [0, 0, 0], [1, 0, 0], :values => TRUNK),
+                pipe("trunk", PT1, [1, 0, 0], [2, 0, 0], :values => TRUNK.merge("multiplier" => 12.0))]
+    assert_equal 1, RUNS::Tree.call(as_float).length
+    huge = pipe("trunk", PT1, [5, 0, 0], [6, 0, 0], :values => TRUNK.merge("multiplier" => 10**309))
+    assert_match(/\Apipe_[0-9a-f]{16}\z/, RUNS::Tree.call([huge]).first.identifier)
+  end
+
   # A branch touching its trunk at both ends has one parent, not two.
   def test_a_branch_touching_its_trunk_twice_has_one_parent
     trunk = line("trunk", PT1, [[0, 0, 0], [1, 0, 0], [2, 0, 0]], :values => TRUNK)

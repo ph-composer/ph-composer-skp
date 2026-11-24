@@ -17,7 +17,7 @@ to the MS3 sitting (D4-31). M13c stays Open.
 | --- | --- | --- |
 | 1. The chain rule to core | `core/edge_runs.rb` (`EdgeRuns`); `features/thermal_bridges/runs/chains.rb` | A generic fact (`path`, `key`, `vertex_ids`, `points_m`, `item`) and run (`key`, `container_path`, `closed`, `points_m`, `edge_paths`, `facts`, `length_m`, `items`), the canonical order and the point keys; names no feature. `Runs::Chains.build` keeps its signature and output: it keys by Zone path, type and `quantity.to_f`, reads each run's Zone, type and quantity from its first Edge and mints `tb_` identifiers as before |
 | 2. Scan | `features/piping/scan/occurrences.rb` | One walk through Groups and components, once per placement; a fact per pipe directly in a readable Piping group with world metres and vertex ids, `shared` through component or shared Group storage; unreadable group and pipe records (bad JSON, not an object, failing the schema) as `record.unreadable` rows; Zones' containment read only for the group paths, and only by the schedule |
-| 3. Runs and the tree | `runs/tree.rb` | `EdgeRuns` keyed by group occurrence, role, Pipe Type and role values (numbers as floats); parents by shared vertex, the first identifier of two; `pipe_` run and `pipe_seg_` segment identifiers; display names per System and role |
+| 3. Runs and the tree | `runs/tree.rb` | `EdgeRuns` keyed by group occurrence, role, Pipe Type and role values (a whole float as its integer); parents by shared vertex, the first identifier of two; `pipe_` run and `pipe_seg_` segment identifiers; display names per System and role |
 | 4. Recirculation | `runs/recirculation.rb` | honeybee-ph's arithmetic step for step: segment length as ladybug-geometry's magnitude, left-to-right sums as CPython 3.11, run means then System means, `int()` truncation |
 | 5. Findings | `runs/findings.rb`, `codes.rb` | The stage doc's table; `piping.hidden` for locate |
 | 6. Schedule and locate | `runs/schedule.rb`, `scan/schedule_pages.rb`, `run_locate.rb`, `declarations/schedule.rb`, `declarations/pipe_types.rb`, `type/reads.rb` | `ph_composer.piping.schedule` (bounded, `compact`), `ph_composer.piping.runs.members`, `ph_composer.piping.systems` with the snapshot section `ph_composer.piping.piping_systems`, `ph_composer.piping.runs.locate`; `pipe_types.list` and `.all` rows gain `used_length_m`; API 1.100 with one `CHANGES` row; `make fixtures` |
@@ -116,6 +116,11 @@ runs, with uncut names, and the 50 unreadable messages could pass one reply even
 cut, left out of compact pages and paged by `schedule.details`). A run's parents were deduplicated by `uniq` on whole
 Run Structs, hashing their pipes and the tree: an alternating-type branch over 1,998 pipes took 1.24 s in `Tree.call`
 (Codex's figure); by identity it takes 41 ms (scratch, Ruby 3.2.2), with a test for a branch touching its trunk twice.
+
+Codex gpt-6-astra cycle 2 on `5af6af53`: 1 P2, fixed in the next commit, which merges unreviewed after the two-cycle
+cap. The run key turned every number into a float, so a valid integer multiplier of 10**309 became Infinity and broke
+the digest, and with it the schedule and both snapshot reads; a whole float now keys as the integer it is (12 and 12.0
+still join) and an integer stays exact, with a test.
 
 
 Sonnet adversarial read before the gate: 13 findings. Fixed: an unbounded `water_temp_c` could make the sum infinite

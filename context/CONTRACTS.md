@@ -1299,7 +1299,7 @@ pipe segment carries its pipe's.
   naming it through piping's retargeter `ph_composer.piping.groups.retarget_hot_water_system`.
 - **Runs and the tree** (`features/piping/runs/`, pure Ruby over detached facts; the live walk in
   `features/piping/scan/`). Runs are derived, never stored. The core chain rule (`core/edge_runs.rb`) joins pipes of
-  one group occurrence, role, Pipe Type and role values where they share a vertex (numbers compared as floats); a run
+  one group occurrence, role, Pipe Type and role values where they share a vertex (a whole float compared as its integer); a run
   ends at a free end or a vertex where its own pipes do not number two, so a branch passing a trunk tee is one branch
   and a trunk changing type or multiplier is two. A branch's parent is the trunk run of its group occurrence sharing a
   vertex with it, a twig's the branch run; of two, the one whose identifier sorts first. A tree lives in one Piping
