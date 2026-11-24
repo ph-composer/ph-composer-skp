@@ -1244,8 +1244,9 @@ giving at least `name` (shown as Tag). Unless you give them, it is a Copper L pi
 `diameter_mm` 12.7 (1/2 in) with `insulation_thickness_mm` 12.7 of reflective insulation
 (`insulation_reflective` true) at `insulation_conductivity_w_mk` 0.04 W/mK and `insulation_quality` 1.
 `material` is 1 Copper M, 2 Copper L, 3 Copper K, 4 CPVC CTS SDR, 5 CPVC Sch 40, 6 PEX, 7 PE or 8 PEX
-CTS SDR. `diameter_mm` must be one of the eight nominal sizes, written as the inch size times 25.4:
-9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1 or 50.8 (3/8 in to 2 in). `insulation_quality` is 1 None,
+CTS SDR. `diameter_mm` must be one of the eight nominal sizes (3/8 in to 2 in), sent as one of these
+decimals exactly: 9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1 or 50.8. Do not compute it from the
+inch size: `0.375 * 25.4` is not exactly 9.525 and is refused. `insulation_quality` is 1 None,
 2 Moderate or 3 Good. A value outside its range, or a diameter off the list, is refused as
 `params.invalid` and nothing is written. The role a pipe plays, its water temperature and its hours are
 not on the type.

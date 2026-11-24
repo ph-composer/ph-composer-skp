@@ -5641,7 +5641,7 @@
     },
     {
       "id": "M13a",
-      "label": "Pipe Types with the panel closed, from a fresh process on the installed RBZ: the walkthrough (tools/examples/authoring/pipe_types_walkthrough.rb) creates two Pipe Types, edits one's diameter, duplicates it and deletes the other through registered actions only; native Undo and Redo of each of the five steps; save, fresh-process reopen and the same catalog, user_data included, read back through pipe_types.all",
+      "label": "Pipe Types with the panel closed, from a fresh process on the installed RBZ: the walkthrough (tools/examples/authoring/pipe_types_walkthrough.rb) creates two Pipe Types, edits one's diameter, duplicates it and deletes the other through registered actions only; native Undo and Redo of each of the five steps; save, fresh-process reopen and the same catalog, user_data included, read back through pipe_types.all, each type under the id PipeTypesWalkthrough.ids recorded before the save",
       "mode": "mixed",
       "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
       "paths": [

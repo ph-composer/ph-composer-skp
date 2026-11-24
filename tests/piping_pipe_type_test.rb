@@ -32,14 +32,19 @@ class PipingPipeTypeTest < PhComposerTestCase
     assert_empty KIND.problems(JSON.parse(JSON.generate(KIND.store.read(@model, id))))
   end
 
+  # METr's eight nominal sizes, each the inch size in millimetres, and honeybee-ph's eight materials.
+  NOMINAL = { 9.525 => "3/8 in", 12.7 => "1/2 in", 15.875 => "5/8 in", 19.05 => "3/4 in", 25.4 => "1 in",
+              31.75 => "1 1/4 in", 38.1 => "1 1/2 in", 50.8 => "2 in" }.freeze
+  MATERIALS = ["Copper M", "Copper L", "Copper K", "CPVC CTS SDR", "CPVC Sch 40", "PEX", "PE", "PEX CTS SDR"].freeze
+
   def test_each_nominal_diameter_and_material_is_stored_as_given
-    P::PipeType::DIAMETERS_MM.keys.each_with_index do |diameter, index|
+    NOMINAL.keys.each_with_index do |diameter, index|
       material = index + 1
       id = create("name" => "D-#{index}", "diameter_mm" => diameter, "material" => material)
       assert_equal [diameter, material], values(id).values_at("diameter_mm", "material")
     end
-    assert_equal ["3/8 in", "2 in"], P::PipeType::DIAMETERS_MM.values_at(9.525, 50.8)
-    assert_equal 8, P::PipeType::MATERIALS.length
+    assert_equal NOMINAL, P::PipeType::DIAMETERS_MM
+    assert_equal MATERIALS, P::PipeType::MATERIALS.values_at(*1..8)
   end
 
   def test_a_value_out_of_range_or_off_the_nominal_list_refuses_and_writes_nothing

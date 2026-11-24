@@ -12,6 +12,8 @@ class PipeTypesWalkthroughTest < PhComposerTestCase
   def test_the_walkthrough_authors_pipe_types_through_public_calls_and_undo_steps_back_through_it
     result = PipeTypesWalkthrough.run
     assert result.fetch("passed"), result.inspect
+    ids = PipeTypesWalkthrough.ids
+    assert_equal ["PT-1", "PT-1 (copy)"], ids.keys.sort
     assert_equal 5, result.fetch("steps").count { |step| %w[create update duplicate delete].include?(step["step"]) }
     model = Sketchup.active_model
     model.undo
@@ -21,7 +23,9 @@ class PipeTypesWalkthroughTest < PhComposerTestCase
     4.times { model.undo }
     assert_empty PipeTypesWalkthrough.state
     5.times { model.redo }
-    assert PipeTypesWalkthrough.verify.fetch("passed")
+    assert PipeTypesWalkthrough.verify(ids).fetch("passed"), "Redo restores each type under its id"
+    refute PipeTypesWalkthrough.verify(ids.merge("PT-1" => "ppt_ZZZZZZZZZZZZ")).fetch("passed"),
+           "a type back under another id fails the read-back"
     kind = "ph_composer.piping.pipe_type"
     engine = PhComposer::Records::Engine.new(model, PhComposer::Registry.current.catalog)
     store = engine.kind(kind).store

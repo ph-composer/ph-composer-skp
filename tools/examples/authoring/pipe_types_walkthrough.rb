@@ -5,8 +5,10 @@ require_relative "client"
 # Run with the panel closed, through the public API only, in a scratch Model:
 #   PipeTypesWalkthrough.run      creates two Pipe Types, edits one, duplicates one and deletes one
 #   PipeTypesWalkthrough.verify   reads pipe_types.all back against the expected catalog
+#   PipeTypesWalkthrough.ids      each surviving type's id by name; pass them to verify after Redo or a reopen
 # Each action is one native Undo step, five in all; AuthoringExample.undo and .redo step through them in separate
-# bridge calls, and `state` shows the catalog between steps.
+# bridge calls, and `state` shows the catalog between steps. Later pipes store these ids, so verify(ids) also holds
+# them to the ids read before.
 module PipeTypesWalkthrough
   PREFIX = "ph_composer.piping.pipe_types"
 
@@ -56,9 +58,20 @@ module PipeTypesWalkthrough
           .sort_by { |values, _user_data| values.fetch("name") }
   end
 
-  def verify
+  # Each record's id by its name, as pipe_types.all reads them.
+  def ids
+    result = AuthoringExample::Client.new.query("#{PREFIX}.all")
+    raise "pipe_types.all failed: #{result['code']}" unless result["status"] == "completed"
+
+    result.dig("value", "records").to_h { |row| [row.dig("values", "name"), row.fetch("id")] }
+  end
+
+  # The catalog against EXPECTED and, given `expected_ids` (from `ids`), every id as it was.
+  def verify(expected_ids = nil)
     found = state
-    { "passed" => found == EXPECTED, "state" => found }
+    found_ids = expected_ids && ids
+    { "passed" => found == EXPECTED && (expected_ids.nil? || found_ids == expected_ids), "state" => found,
+      "ids" => found_ids }.compact
   end
 
   def invoke(client, steps, name, params)

@@ -382,14 +382,16 @@ after Undo and Redo and after a save and reopen. `tests/pipe_types_walkthrough_t
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
   'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/pipe_types_walkthrough.rb"; PipeTypesWalkthrough.run'
+uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.ids'      # record the two ids
 uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'     # five times, reading state between
 uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.state'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # five times
-uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.verify'
+uv run tools/hostkit/host_bridge.py eval 'PipeTypesWalkthrough.verify({"PT-1" => "ppt_...", "PT-1 (copy)" => "ppt_..."})'
 uv run tools/hostkit/host_bridge.py save
 ```
 
-After a fresh-process reopen, load the script and run `PipeTypesWalkthrough.verify`.
+After a fresh-process reopen, load the script and run `PipeTypesWalkthrough.verify` with the same ids: later pipes
+store them, so a type restored under another id fails.
 
 ## Edge assignment with the panel closed
 
