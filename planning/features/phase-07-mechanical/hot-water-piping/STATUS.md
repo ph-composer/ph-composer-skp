@@ -1,7 +1,7 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
+STATUS: In progress: P4-13a in review (#576). Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -25,8 +25,8 @@ This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
 
 ## Next step
 
-Implement [P4-13a](../phases/p4-13a-pipe-types.md) on `feat/phase-07-mechanical-p4-13a`, then P4-13b to P4-13e in
-order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
+[P4-13a](../phases/p4-13a-pipe-types.md), the piping feature and Pipe Types, is in review (#576); then P4-13b to
+P4-13e in order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
 [phase ledger](../STATUS.md).
 
 ## Blockers
@@ -49,7 +49,7 @@ order ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and thei
 
 ## Verification
 
-None. Nothing is implemented.
+P4-13a offline: [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md). No host evidence yet; the host cases run in MS3.
 
 ## Ledger
 
@@ -62,3 +62,4 @@ None. Nothing is implemented.
 | 2026-11-22 | Phase reviewed after Phase 6 Programs: the stale Phase 3b gate wording removed here and in the PRD; recirculation temperature and hours noted as read from this packet's pipes (D4-18). No interview, no implementation. |
 | 2026-11-23 | Interviewed: Q1 to Q13 all as recommended (D4-36). |
 | 2026-11-24 | Planned in full as P4-13a to P4-13e in the phase packet; the registry question answered "none" and the run builder's move allocated to P4-13c. No implementation. |
+| 2026-11-24 | P4-13a implemented on `feat/phase-07-mechanical-p4-13a` and in review (#576): the `ph_composer.piping` feature and the Pipe Type kind, panel closed; host case `M13a` owed to MS3. |
