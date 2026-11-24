@@ -73,7 +73,31 @@ Python, `tests/python/test_ventilation_sections.py`: 11 tests.
 | 7. PHX round trip | `tests/python/test_ventilation_phx_round_trip.py`: base case two `PhxDeviceVentilator`s (ERV-1, ERV-2) with the record's quantity, recoveries and efficiency, each Space naming its Room's device, each named once in WUFI XML and METr JSON; shared case one device both Spaces name |
 
 `uv run --group phx pytest tests/python/test_ventilation_sections.py tests/python/test_ventilation_phx_round_trip.py`:
-13 passed, 0 skipped (the two PHX round trips executed).
+13 passed, 0 skipped (the two PHX round trips executed). The whole group, `uv run --group phx pytest tests/python
+-rA` on `678d21b6`: 379 passed, 1 skipped (`test_map_borders.py`, `PH_COMPOSER_MAP_DATA` not set); every PHX round
+trip executed, `test_ventilation_phx_round_trip.py`'s two among them.
+
+## The B4 HBJSON proof, read back
+
+The HBJSON half of the predecessor's B4 proof (two Zones, two Ventilators, distinct on two Rooms). Each golden was
+translated through the shipped `SECTIONS`, and the exact canonical HBJSON was reloaded in the pinned stack
+(honeybee-ph 1.33.68, the vendored wheel). Each Room's `properties.ph_hvac.ventilation_system` was then printed
+(scratch script, not committed):
+
+```
+base publishable True
+  zon_AAAAAAAAAAAA Zone A: system vnt_FIXED0000001 sys_type 1 unit vnt_FIXED0000001_unit ERV-1 qty 1 sens 0.85 lat 0.6 elec 0.45 frost True defrost -5.0 in_cond True subsoil None
+  zon_BBBBBBBBBBBB Zone B: system vnt_FIXED0000002 sys_type 1 unit vnt_FIXED0000002_unit ERV-2 qty 1 sens 0.75 lat 0.0 elec 0.35 frost False defrost -5.0 in_cond False subsoil 0.2
+shared publishable True
+  zon_AAAAAAAAAAAA Zone A: system vnt_FIXED0000001 sys_type 1 unit vnt_FIXED0000001_unit ERV-1 qty 1 sens 0.85 lat 0.6 elec 0.45 frost True defrost -5.0 in_cond True subsoil None
+  zon_BBBBBBBBBBBB Zone B: system vnt_FIXED0000001 sys_type 1 unit vnt_FIXED0000001_unit ERV-1 qty 1 sens 0.85 lat 0.6 elec 0.45 frost True defrost -5.0 in_cond True subsoil None
+```
+
+- **Base case.** Two distinct Ventilators on two Rooms, each with ACCEPTANCE's values.
+- **Shared case.** One identifier on both Rooms, which reload as one system object (`test_the_shared_case_reloads_one_system_on_both_rooms`).
+- **PHX.** The base case gives two devices and the shared case one.
+
+This is offline. The same read-back on an HBJSON the installed RBZ wrote is the host case `M04`.
 
 Mutation checks (source restored after each): dropping the Zone dedupe in `exported_zones` fails
 `test_a_zone_with_two_occurrences_gives_one_pair`; dropping the unreadable guard in the plan fails
@@ -106,9 +130,26 @@ runs above.
 
 ## Review
 
-Architecture and Ruby quality rubrics applied while building: the plan is pure Ruby over plain values and the
-Python section computes nothing beyond honeybee-ph's attributes; the new files sit at the feature root, so the
-family folders still name no Zone (`tests/mechanical_dependency_test.rb` holds); no other feature names Mechanical.
+The architecture review and Ruby quality rubrics (`.agents/skills/ph-composer-architecture-review/SKILL.md`,
+`ph-composer-ruby-quality`) were applied to `export.rb`, `ventilation_plan.rb`, the `serves/` edits and
+`result_view.rb` after both Codex cycles, on `678d21b6`, and found nothing actionable. The plan is pure Ruby over
+plain values, and the Python section computes nothing beyond honeybee-ph's attributes. The contributor uses only
+the public export contract and Zones' published projection reads (`zone_entry`, as Spaces does), and
+`ResultView#findings` names no feature. The new files sit at the feature root, so the family folders still name no
+Zone (`tests/mechanical_dependency_test.rb` holds), and no other feature names Mechanical. The Ventilator's
+`user_data` is traced from the record to the honeybee-ph `Ventilator` and refused under a reserved key, both in the
+preflight and in extraction. The record shape matches honeybee-ph's Grasshopper "Create Ventilation System" (one
+`PhVentilationSystem` per Room holding a `Ventilator`), less its default ducts.
+
+Diagnostic complexity cops, not in the gate (`make lint-ruby 'RUBOCOP_ARGS=--only Metrics/AbcSize,
+Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity <the three files>'`), report:
+- `VentilationExport.preflight`: ABC 41.2, cyclomatic 10.
+- `exported_zones`: ABC 25.8, cyclomatic 10.
+- `report`: ABC 26.7, cyclomatic 10.
+- `records`: ABC 29.5.
+- `VentilationPlan.item_findings`: ABC 19.2.
+
+Each is a short sequence of block reads, so these are recorded and not split.
 
 One Sonnet adversarial read of the diff before the gate: no P1, 2 P2, 8 P3. Fixed: `mechanical.preflight` now gives
 a blocking row for an exported Zone whose Serves payload this version does not understand (it had read such a Zone
@@ -137,4 +178,6 @@ installed. Its residual notes: the sandbox could not run the tests itself, and M
 
 `M04` added to `planning/native-acceptance/cases.json` (mode `bridge`, `native_control_required: false`) with paths
 for the export, the plan, the Serves payload, Zones' export, the foundation export, the Python section, record,
-composition and assembly, and the runtime manifest. Owed to the MS1 sitting.
+composition and assembly, and the runtime manifest. Owed to the MS1 sitting. `acceptance_ledger.py status` with every
+`src/` path this branch changes screens 55 cases as affected, among them `M01` to `M04`, `E01` to `E17` (export),
+`PG12`, `CM12` and `AW10`. All are owed to their sittings, and none was run here.
