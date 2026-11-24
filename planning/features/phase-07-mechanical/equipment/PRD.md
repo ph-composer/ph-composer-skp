@@ -27,7 +27,7 @@ after Phase 3b, Climate, Shading and Programs, these rows have moved ([DECISIONS
   Detailed airflows; the sums are null while By Program (F24).
 - **Export.** Sections attach at `MODEL`, `SEGMENT`, `ROOM` or `FACE`; a Zone in no Building
   Segment is left out (F28, F29).
-- **The pinned runtime.** honeybee-ph 1.33.68; `stack.PACKAGES` still lacks `honeybee_phhvac`;
+- **The pinned runtime.** honeybee-ph 1.33.68; `stack.PACKAGES` serves `honeybee_phhvac` since P4-01;
   PHX 1.59.4 is installed for tests only (F22, F23).
 - **Display units.** `temperature` and `power` exist in both registries; litres and W/cfm do not
   (F31).
@@ -50,7 +50,7 @@ after Phase 3b, Climate, Shading and Programs, these rows have moved ([DECISIONS
 | Per-Zone airflow sums | Exists | `ph_composer.spaces.all` Zone rows: supply, extract and transfer summed over user-specified Spaces, null while any Space inherits, `imbalanced` at 10 percent of the larger (D3a-12). There is no balance view and no grouping function: D3a-8 was superseded on 2026-10-15 |
 | Colour-by modes, derived geometry, readouts | Exists | `colour_by/`; `context/EXTENSIBILITY.md`, "Colour-by modes", "Colour-by derived geometry", "Colour-by readouts" |
 | Export contributor, preflight, translation sections that attach to a Room, result fields, conformance | Exists | `export/`; `python/ph_composer_translation/sections.py`, `assembly.py`; Spaces is the shipped Room-attaching section (`features/spaces/export.rb`, `space_sections.py`) |
-| honeybee-ph's mechanical classes in the pinned runtime | Partly | The pinned wheel `honeybee_ph-1.33.65` ships `honeybee_phhvac` and `honeybee_energy_ph`. `python/ph_composer_translation/stack.py` lists the packages its `load` serves and `honeybee_phhvac` is not among them, so the first mechanical section adds it there and to `tests/python/test_imports.py` |
+| honeybee-ph's mechanical classes in the pinned runtime | Yes | The pinned wheel `honeybee_ph-1.33.68` ships `honeybee_phhvac` and `honeybee_energy_ph`. P4-01 added `honeybee_phhvac` to the packages `python/ph_composer_translation/stack.py` serves, and `tests/python/test_imports.py` iterates that set |
 | Display units for equipment quantities | Partly | Panel: 18 quantities; Ruby report: 10, including `volume` and `airflow` (PR #84). Litres, capacity in kBtu/h and ventilator efficiency in W/cfm are [units Q3](../../cross-phase/units/PRD.md), still proposals |
 | Agent access | Exists | Every registered query and action is an agent-facing surface (Phase 3a1): a query declares `response:` and `while_busy:`, an action `preconditions:`, and a new feature bumps `API::MINOR` in `shell/api.rb` with one `API::CHANGES` row. A list read that can grow with the Model is paged, as `ph_composer.spaces.list` is |
 | METr | Deferred | PHX is not in the pinned wheels. [metr-export](../../unscheduled/metr-export/README.md) owns conversion and import; every METr row below is checked there |
@@ -130,20 +130,24 @@ a Space inherits it. Appliances are the exception, see family 7.
 ### Export
 
 honeybee-ph attaches mechanical equipment per Room through `room.properties.ph_hvac`. Verified
-at 1.33.65 on 2026-10-21: `set_ventilation_system`, `set_hot_water_system`,
+at 1.33.65 on 2026-10-21 and re-read at 1.33.68 by P4-01 on 2026-11-23: `set_ventilation_system`, `set_hot_water_system`,
 `add_heating_system`, `add_heat_pump_system`, `add_supportive_device`, `add_exhaust_vent_device`
 and `add_renewable_device`; one ventilation system and one hot water system per Room, sets of the
 rest. A PH-Composer Zone is one Room, so each item maps onto the slots of the Rooms it serves.
 
-Open plan item: a translation section's `Attachment.key` names one host per translated object
-(`sections.py`). An item serving three Zones is therefore either one translated object per
-(item, Zone) pair sharing the item's identifier, or a new attachment shape. Decide at planning,
-with the shipped Spaces section as the pattern. Whether PHX then writes one METr device or three
-is a [metr-export](../../unscheduled/metr-export/README.md) row.
+A translation section's `Attachment.key` names one host per translated object (`sections.py`), so
+an item serving three Zones is written as one translated object per (item, Zone) pair sharing the
+item's identifiers ([D4-01](../DECISIONS.md#part-2-decisions-for-ed)). P4-01 proved the shape: the
+HBJSON reloads one object for the shared identifiers, and PHX makes one device from it; each export
+stage repeats that PHX round trip ([D4-25](../DECISIONS.md#part-4-review-after-programs-2026-11-22),
+[CONTRACTS section 8](../CONTRACTS.md#8-what-p4-01-found)). The METr file and its import stay
+[metr-export](../../unscheduled/metr-export/README.md)'s.
 
 Field units below are read from the honeybee-ph class docstrings where they state one. Fields
 with no stated unit are confirmed at the family's interview. Class and field names were
-re-read against the pinned wheel, 1.33.65, on 2026-10-21.
+re-read against the pinned wheel, 1.33.65, on 2026-10-21, and against 1.33.68 by P4-01 on 2026-11-23:
+the tank's `storage_loss_rate` is W/K, and `PhHotWaterSystem` carries no `user_data`
+([CONTRACTS section 8](../CONTRACTS.md#8-what-p4-01-found)).
 
 ## Family 1: Ventilators
 
@@ -336,7 +340,7 @@ half, that PHX keeps them distinct, is a metr-export row.
   (`../../ph-navigator-sketchup/`).
 - honeybee-ph `honeybee_phhvac/`: `ventilation.py`, `heat_pumps.py`, `heating.py`,
   `hot_water_devices.py`, `hot_water_system.py`, `supportive_device.py`,
-  `properties/room.py`. Re-read at 1.33.65 on 2026-10-21.
+  `properties/room.py`. Re-read at 1.33.65 on 2026-10-21 and at 1.33.68 on 2026-11-23 (P4-01).
 - honeybee-ph `honeybee_energy_ph/load/`: `ph_equipment.py`, `phius_residential.py`,
   `phius_mf.py`; `honeybee_energy_ph/properties/load/equipment.py`.
 - PHX `model/enums/hvac.py`, `to_METr_JSON/metr_schemas.py`: not re-read; PHX is not in the

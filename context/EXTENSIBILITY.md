@@ -554,6 +554,12 @@ entry's `transform` maps that entity's own contents to world. A value of nil is 
 a projection that knows a record is only half filled in says `state: :incomplete`; the service
 owns the appearance of both, so those two states look the same in every mode.
 
+A mode that paints another feature's entities gives one entry per row of that feature's registered read, one row
+per occurrence (two occurrences may share a record id), and resolves each row's occurrence path with the core `OccurrencePath.resolve`, whose last instance is the entity and whose
+`transform` is its world transform; it names nothing of the owner's. A mode over Zones reads
+`ph_composer.zones.all` and resolves `reference.zone_path`, and paints what Zones' own `by_zone` paints
+(`tests/support/zone_payload_probe.rb`, run by `tests/zone_payload_references_test.rb`).
+
 A legend row's state answers for the one field its mode paints. The Faces table's row state answers
 for the whole record, and is stricter about two things a mode cannot see without a Model walk: a
 dangling Attached zone reference and an adjacency that has gone stale. A Face can therefore read

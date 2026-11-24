@@ -1,7 +1,7 @@
 # Phase 4: mechanical, tracking ledger
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed (shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; D4-01 to D4-12 answered as recommended the same day; nothing authorized or implemented. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered, revising D4-08 and five interview answers; CONTRACTS, ACCEPTANCE and stages P4-05 to P4-11 owe re-planning; Climate's entry gate for the heat pumps met 2026-11-18. Reviewed 2026-11-22 after Phase 6 Programs: stale gates and facts corrected, stage P4-08b added; D4-21 to D4-27 answered the same day, all as recommended, and the bindings re-bound to them.
+STATUS: In progress. Interviewed (shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; D4-01 to D4-12 answered as recommended the same day. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered, revising D4-08 and five interview answers; CONTRACTS, ACCEPTANCE and stages P4-05 to P4-11 owe re-planning; Climate's entry gate for the heat pumps met 2026-11-18. Reviewed 2026-11-22 after Phase 6 Programs: stale gates and facts corrected, stage P4-08b added; D4-21 to D4-27 answered the same day, all as recommended, and the bindings re-bound to them. Ed authorized implementation of the whole phase on 2026-11-23 through the pr-loop with merge on green; host gates go to the milestone sittings (MS1, MS2, MS3). P4-01 in review.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -26,7 +26,7 @@ Phase 6 (P4-12 superseded), heat pumps were settled at the wireframe review, and
 
 ## Next step
 
-1. Ed authorizes implementation (e.g. `P4-01` alone, or `P4-01` to `P4-04` through `MS1`). Every open decision (`D4-01`–`D4-37`) and interview across the phase is answered, the Phase 7 GitHub issue ([#562](https://github.com/ph-composer/ph-composer-skp/issues/562)) is created and wired into headers, `CONTRACTS`, `ACCEPTANCE` and `P4-05`–`P4-08` are re-bound, and host gates are batched by milestone (`MS1`, `MS2`, `MS3`, D4-31).
+1. P4-01's PR merges; P4-02 to P4-04 follow through the pr-loop, each stacked on the last. Their host cases, with P4-01's `M01`, run at the MS1 sitting after P4-04 (D4-31): Ed is not at the Mac while the loop runs.
 2. Stub stages `P4-08b`, `P4-09`–`P4-11`, `P4-13` and `P4-14` are all interviewed and ready to be expanded into full stage docs before their respective runs.
 
 ## Entry gates
@@ -36,7 +36,7 @@ Phase 6 (P4-12 superseded), heat pumps were settled at the wireframe review, and
 | The equipment shared shape, Ventilators and hot water interviewed | Done 2026-10-21 |
 | Ed answers D4-01 to D4-12 | Done 2026-10-21, all as recommended |
 | A Phase 7 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Done 2026-11-23: [#562](https://github.com/ph-composer/ph-composer-skp/issues/562) |
-| Ed authorizes implementation, stage by stage or for a run of stages | Open |
+| Ed authorizes implementation, stage by stage or for a run of stages | Done 2026-11-23, every stage: "/implement-loop planning/features/phase-07-mechanical - use the 'pr-loop' skill and protocol for managing reviews and PRs. You are authorized to merge on green CI once any and all reviewer comments are addressed. Cleanup branches and worktrees as you go to keep the repo tidy." Loop argument `--merge` |
 | Ed answers D4-21 to D4-27 | Done 2026-11-22, all as recommended |
 | P3b-01 merged before P4-01 (both edit the `PLANNING_IDS` line) | Met: Phase 3b closed 2026-10-26, P3b-01 to P3b-09 merged |
 | The other shared files (`extension.rb`, `index.html`, `composition.py`, `assembly.py`, `api.rb`, the agent guide) are never open on two branches at once | No other phase is in progress on 2026-11-22; the rule now holds between this phase's own parallel stages (PLAN, "Order and parallel work") |
@@ -53,7 +53,7 @@ only when all three are done and its evidence file exists.
 
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Equipment contracts, lint and the Pyodide seam | Scoped | Ed's go | | | | architecture review | | M01 |
+| [P4-01](phases/p4-01-equipment-contracts-and-seams.md) | Equipment contracts, lint and the Pyodide seam | In review | | `feat/phase-07-mechanical-p4-01`, [#564](https://github.com/ph-composer/ph-composer-skp/pull/564) | `make ci` pass on Ruby 2.7.2 and 3.2.2 at `f2c56dd5` (3,297 runs, 43,387 assertions each; Python 359 passed, 1 skipped) | Owed: MS1 sitting | Architecture review recorded, no blocking finding; Sonnet adversarial read, findings fixed before the gate; Codex gpt-6.2-sol cycle 1 on `f2c56dd5`: 1 P1, 4 P2, 1 P3, all fixed in `c3a3303f`; cycle 2 on `c3a3303f`: 1 P1, 3 P2, 1 P3, all fixed in the next commit, which merges after the two-cycle cap unreviewed | [p4-01-contracts](evidence/p4-01-contracts.md) | M01 |
 | [P4-02](phases/p4-02-equipment-feature-and-ventilator-kind.md) | The equipment feature and the Ventilator kind | Scoped | P4-01 | | | | ordinary | | M02 |
 | [P4-03](phases/p4-03-serves-assignment.md) | Serves: the assignment payload on the Zone | Scoped | P4-02 | | | | strong | | M03 |
 | [P4-04](phases/p4-04-ventilator-export.md) | Ventilator export | Scoped | P4-03 | | | | strong | | M04 |
@@ -160,7 +160,7 @@ table is implemented.
 
 | Decision | Bound in | Still owed |
 | --- | --- | --- |
-| D4-21 | [CONTRACTS](CONTRACTS.md) sections 1 to 4 and 7; [P4-01](phases/p4-01-equipment-contracts-and-seams.md) step 1; [P4-03](phases/p4-03-serves-assignment.md); M01 and M03 | P4-01's test of a `many` reference in a payload |
+| D4-21 | [CONTRACTS](CONTRACTS.md) sections 1 to 4 and 7; [P4-01](phases/p4-01-equipment-contracts-and-seams.md) step 1; [P4-03](phases/p4-03-serves-assignment.md); M01 and M03 | Proved by P4-01 (CONTRACTS section 8): the `many` scan, the replacement move and the Zone copy |
 | D4-22 | The feature id, code noun, kind, operation and section ids, and source paths in CONTRACTS, [ACCEPTANCE](ACCEPTANCE.md), [PLAN](PLAN.md) and the stage documents | `context/UBIQUITOUS_LANGUAGE.md` at P4-15. The `equipment/` packet, the stage file names and the interview records keep "equipment", the glossary word for the records together |
 | D4-23 | CONTRACTS section 6 (`mechanical.item_across_segments`); [P4-06](phases/p4-06-hot-water-records-and-export.md); [P4-08](phases/p4-08-heat-pumps.md) | The pooling note and the blend are written with their stages' wireframe re-plan |
 | D4-24 | CONTRACTS sections 1 and 4; [P4-05](phases/p4-05-systems-tab-and-ventilators-view.md); M05 and the reference model | |
@@ -170,9 +170,11 @@ table is implemented.
 
 ## Verification
 
-None. Nothing is implemented. DECISIONS Part 1 was read from source and not reproduced; P4-01
-reproduces what the stages depend on. Part 4 says for each finding whether it was run against the
-pinned wheels on 2026-11-22 or read.
+P4-01 reproduced what the stages depend on by test on 2026-11-23 ([CONTRACTS section 8](CONTRACTS.md#8-what-p4-01-found),
+[evidence](evidence/p4-01-contracts.md)): the `many` reference in a Zone payload, one object per (item, Zone) pair
+through the HBJSON and PHX, the Zone-keyed Colour-by projection and `honeybee_phhvac` in the Pyodide runtime (offline,
+in Chromium 88; the installed-build case is owed to MS1). DECISIONS Part 4 says for each of its findings whether it
+was run against the pinned wheels on 2026-11-22 or read.
 
 ## How to update this file
 
@@ -199,3 +201,6 @@ pinned wheels on 2026-11-22 or read.
 | 2026-11-22 | Reviewed against `main` at `8c710412` after Phase 6 Programs was archived ([DECISIONS, Part 4](DECISIONS.md#part-4-review-after-programs-2026-11-22)): findings F21 to F39. Applied: the Phase 3b gates are met, the pins, composition order, Spaces read names, units, export hosts and the left-out Zone rule are corrected across the packet, M12 is superseded, and the Phase 6 handoff is allocated to a new stage P4-08b with register row M16. Opened, unanswered: D4-21 to D4-27. Nothing authorized. |
 | 2026-11-22 | Ed answered D4-21 to D4-27, all as recommended. Bound the same day ("Bound after the Programs review"): Serves is a payload on the Zone record, the feature is `ph_composer.mechanical`, the Building Segment scopes the blend and the pooling, the balance reads Programs' flow for a By Program Zone, each export stage gains a PHX round trip, mechanical cooling is entered, and the tab sits after Thermal Bridges. P4-01 to P4-04 lose their decision blockers. Nothing authorized. |
 | 2026-11-23 | Kickoff review and all remaining interviews complete (DECISIONS Part 5, F40, D4-28 to D4-37): Part 3 open items closed (`Equipment · Indoor` identity-only, `min_coil_temp = 12.0 °C` and no > 200 kW HBJSON split since PHX splits for WUFI and METr has no cap, skip extra wireframes), host gates batched by milestone (`MS1`, `MS2`, `MS3`), and all remaining stub interviews completed (summer ventilation, electric heaters, pumps, fans, hot water piping and ERV ducting). Ready for wireframe re-binding, phase issue creation and P4-01 authorization. |
+| 2026-11-23 | Ed authorized implementation of the whole phase: "/implement-loop planning/features/phase-07-mechanical - use the 'pr-loop' skill and protocol for managing reviews and PRs. You are authorized to merge on green CI once any and all reviewer comments are addressed. Cleanup branches and worktrees as you go to keep the repo tidy." The loop runs with `--merge`. |
+| 2026-11-23 | Ed is not at the Mac while the loop runs: every host case is owed to its milestone sitting (D4-31), P4-01 to P4-04 to MS1, P4-05 to P4-07 to MS2, the rest to MS3. A stage's Host column reads `Owed`; no ACCEPTANCE row flips to Pass before its sitting. |
+| 2026-11-23 | P4-01 in review on `feat/phase-07-mechanical-p4-01`: CONTRACTS section 7 answered by test and recorded in section 8, with the wheel re-read and two corrections (`storage_loss_rate` in W/K; no `user_data` on `PhHotWaterSystem`); `honeybee_phhvac` in `stack.PACKAGES`; `PLANNING_IDS` catches `P4-01`, `P4-08b`, `M01` to `M16`; installed size 26,841,808 bytes on `main`, 1,158,192 under the ceiling. Offline evidence recorded; host case `M01` owed to MS1. |

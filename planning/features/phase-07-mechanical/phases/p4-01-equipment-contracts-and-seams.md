@@ -1,13 +1,13 @@
 # P4-01: equipment contracts, lint and the Pyodide seam
 
 DATE: 2026-10-21
-STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: the Phase 3b gate is met, an entry check is added, and steps 1 and 2 follow D4-21, D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: In review (authorized 2026-11-23; offline evidence in [p4-01-contracts](../evidence/p4-01-contracts.md), host case M01 owed to MS1). Corrected 2026-11-22 after Phase 6 Programs: the Phase 3b gate is met, an entry check is added, and steps 1 and 2 follow D4-21, D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
 ## Entry and scope
 
-Requires Ed's go. D4-21 and D4-22, which decide what step 1 confirms and the names every later
+Requires Ed's go, given 2026-11-23. D4-21 and D4-22, which decide what step 1 confirms and the names every later
 stage uses, were answered on 2026-11-22. Phase 3b's P3b-01, which edits the same `Makefile` line,
 merged on 2026-10-26. Owns the confirmation of [CONTRACTS](../CONTRACTS.md) against the code by test, the two seam
 edits the first mechanical section needs, the citation lint for this packet's ids, and the

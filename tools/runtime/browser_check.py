@@ -7,10 +7,11 @@
 Serves the manifest's assets with the isolation headers the extension's asset server sends, loads
 html/runtime/index.html headless, and sends two probes at once. It checks cross-origin isolation,
 single-flight boot, that importing the translation package loads none of the stack, and the cold-boot
-and warm round-trip ceilings in the manifest. Not part of `make ci`: it launches a browser, and a
-browser pass is not host evidence.
+and warm round-trip ceilings in the manifest. With `--translation` it also translates a synthetic export
+against the pinned native wheels and loads `honeybee_phhvac` through the stack seam. Not part of `make ci`:
+it launches a browser, and a browser pass is not host evidence.
 
-    uv run tools/runtime/browser_check.py [--download-chromium] [--out result.json]
+    uv run tools/runtime/browser_check.py [--download-chromium] [--translation] [--out result.json]
 """
 
 from __future__ import annotations
@@ -205,6 +206,7 @@ def run_browser(binary: Path, translation: bool = False) -> dict[str, Any]:
         observed.update(client.evaluate(PROBE % MANIFEST["gates"]["boot_deadline_ms"]))
         if translation:
             observed["export_translation"] = check_translation(client)
+            observed["hvac_seam"] = check_hvac_seam(client)
     finally:
         if client:
             client.socket.close()
@@ -327,6 +329,42 @@ new Promise(function (resolve, reject) {
     }
 
 
+# Run in the page once a translation has installed the wheels: the mechanical package loads through the stack seam
+# after honeybee_ph, and a Room carries its `ph_hvac` properties.
+HVAC_SEAM = """
+import json
+from ph_composer_translation import stack
+stack.load("honeybee_energy._extend_honeybee")
+stack.load("honeybee_ph")
+hvac = stack.load("honeybee_phhvac")
+ventilation = stack.load("honeybee_phhvac.ventilation")
+room = stack.load("honeybee.room").Room.from_box("hvac_seam_probe", 1, 1, 1)
+room.properties.ph_hvac.set_ventilation_system(ventilation.PhVentilationSystem())
+json.dumps({
+    "package": hvac.__name__,
+    "room_ph_hvac": type(room.properties.ph_hvac).__name__,
+    "ventilation_system": type(room.properties.ph_hvac.ventilation_system).__name__,
+})
+"""
+
+
+def check_hvac_seam(client: CDP) -> dict[str, Any]:
+    """`honeybee_phhvac` through `stack.load` in the shipped Pyodide runtime, and a Room's `ph_hvac`."""
+    try:
+        found = json.loads(client.evaluate(f"window.__phc.runtime.runPythonAsync({json.dumps(HVAC_SEAM)})"))
+    except RuntimeError as error:
+        return {"loads": False, "error": str(error)[:1000]}
+    return {
+        **found,
+        "loads": found
+        == {
+            "package": "honeybee_phhvac",
+            "room_ph_hvac": "RoomPhHvacProperties",
+            "ventilation_system": "PhVentilationSystem",
+        },
+    }
+
+
 def comparable_result(result: dict[str, Any]) -> dict[str, Any]:
     """Compare exact values and authored references; scope normalization to upstream-created defaults.
 
@@ -414,12 +452,15 @@ def verdict(major: int, observed: dict[str, Any], console: list[str]) -> dict[st
     }
     if "export_translation" in observed:
         checks["export_translation"] = observed["export_translation"]["shipped_authored_construction_translation"]
+    if "hvac_seam" in observed:
+        checks["hvac_seam"] = observed["hvac_seam"]["loads"]
     return {
         "verdict": "PASS" if all(checks.values()) else "FAIL",
         "checks": checks,
         "results": results,
         "console": console,
         **({"export_translation": observed["export_translation"]} if "export_translation" in observed else {}),
+        **({"hvac_seam": observed["hvac_seam"]} if "hvac_seam" in observed else {}),
     }
 
 
@@ -429,7 +470,9 @@ def main() -> int:
     parser.add_argument("--chrome", type=Path, default=DEFAULT_CHROME)
     parser.add_argument("--out", type=Path)
     parser.add_argument(
-        "--translation", action="store_true", help="check authored HBJSON translation against the pinned native wheels"
+        "--translation",
+        action="store_true",
+        help="check authored HBJSON translation against the pinned native wheels, then the mechanical stack seam",
     )
     args = parser.parse_args()
     subprocess.run([sys.executable, str(ROOT / "tools" / "runtime" / "vendor.py"), "--check"], check=True)

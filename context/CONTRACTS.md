@@ -694,6 +694,17 @@ first, and refuse `programs.single_dwelling` for a Zone a single dwelling decide
 `programs.dwelling_across_segments` for a Dwelling whose Zones would lie in two Segments (no Segment counts as
 one). The generic metadata routes may store either; the reads report it as a finding.
 
+**A Zone payload that names records.** A feature that keeps a payload on Zone records declares each id field as a
+reference: `one` for an id or null, `many` for a list of ids. The engine scans both alike, so a record any Zone's
+payload names, in either form, refuses a plain delete as `reference.in_use`, and a native copy of the Zone keeps the
+payload and so names the same records. A delete with a replacement is the owning feature's code, as Programs' is:
+it reads the Zones through `ph_composer.zones.all`, stages each changed payload through
+`ph_composer.zones.stage_extension` in the delete's proposal, and passes the returned `zone_entries` to
+`propose_delete` as a `Records::ReferencePlan`, so the incoming check reads the moved payloads. It moves only a
+payload whose status is `understood`; any other stays as stored, and the incoming check refuses the delete. A list that already
+holds the replacement keeps it once. A locked Zone refuses the whole delete. `tests/zone_payload_references_test.rb`
+runs each of these over a test-only feature, `tests/support/zone_payload_probe.rb`.
+
 **A library Program on Zones.** `ph_composer.programs.assign_library_program` takes the Zones and the library row
 with the choice its resolution allows (`create`, `keep_local` with the local id, `use_library` with its expected
 values), as `ph_composer.library.copy` takes them without an assignment. It joins the copy to its own proposal

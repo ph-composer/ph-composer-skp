@@ -1,7 +1,7 @@
 # Equipment: status
 
 DATE: 2026-10-21
-STATUS: Scoped. All six equipment families interviewed (shared shape, Ventilators and hot water 2026-10-21; heat pumps 2026-11-15/2026-11-23; Electric heaters, Pumps and Fans 2026-11-23); stages tracked in the phase ledger; nothing authorized.
+STATUS: Scoped. All six equipment families interviewed (shared shape, Ventilators and hot water 2026-10-21; heat pumps 2026-11-15/2026-11-23; Electric heaters, Pumps and Fans 2026-11-23); stages tracked in the phase ledger; implementation authorized 2026-11-23, P4-01 in review.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

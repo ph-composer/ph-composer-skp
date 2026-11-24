@@ -120,6 +120,51 @@ def test_every_planned_target_and_variable_exists_in_the_makefile() -> None:
             assert re.search(rf"^{variable} =", makefile, re.MULTILINE), variable
 
 
+def citation_lint(tmp_path: Path, text: str) -> tuple[int, str]:
+    """`make lint-citations` over one file holding `text`, in a scratch repository: its exit status and last line."""
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "planted.rb").write_text(text + "\n", encoding="utf-8")
+    run = ["make", "-s", "-f", str(MAKEFILE), "lint-citations", "CITATION_PATHS=planted.rb"]
+    completed = subprocess.run(run, cwd=tmp_path, capture_output=True, text=True, check=False)
+    return completed.returncode, completed.stdout.strip().splitlines()[-1]
+
+
+# Built by joining, so this file carries none of them: the lint reads tests too.
+PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "D" + "4-01", "P3b" + "-01", "M" + "3a"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        *(f"# Follows {planted}, as agreed." for planted in PLANTED),
+        "# See " + "M" + "01 2026-11-23.",
+        '<path d="M1 1 L1 17"/> # cite ' + "M" + "16",
+        'd = "' + "M" + '01"',
+        'd = "planning' + '/notes.md"',
+    ],
+)
+def test_the_citation_lint_catches_stage_and_register_ids(tmp_path: Path, text: str) -> None:
+    status, said = citation_lint(tmp_path, text)
+    assert status != 0 and said.startswith("lint-citations: cite context/"), (status, said)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '<path d="M12 4v16M4 12h16"/>',
+        '<path d="M18.992 12H2.041"/>',
+        "url(\"<svg><path d='M11 7 6 2'/></svg>\")",
+        '<path d = "M12 4v16"/>',
+        '<path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/>',
+        "# REVIEW F05 keeps this.",
+        "Phase 4 module",
+        "ph_composer.mechanical",
+    ],
+)
+def test_the_citation_lint_passes_svg_path_data_and_review_findings(tmp_path: Path, text: str) -> None:
+    assert citation_lint(tmp_path, text) == (0, "lint-citations: ok")
+
+
 @pytest.mark.parametrize(
     ("message", "signed"),
     [
