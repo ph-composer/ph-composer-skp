@@ -5,7 +5,8 @@
    Type change, litres in US gallons, the export slot, the System delete and New Tank; then the Heat Pumps subtab's
    five pills: capacities in kBtu/h, a rating mode chosen in place, a lacking value, the indoor units grouped by
    outdoor unit with their list Serves slot and New with two parents, and the Blended result with its copy action;
-   each at the panel's three sizes. Browser evidence; not host acceptance. */
+   then the Electric Heating subtab's Heaters: coverage in percent, a heater added beside a Zone's others, New and
+   the delete with clearing; each at the panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -366,6 +367,56 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
       const slug = pill.toLowerCase().replace(/[^a-z]+/g, "-");
       await page.screenshot({ path: path.join(output, `heat-pumps-${slug}-${width}x${height}.png`) });
     }
+  }
+  step("Electric Heating › Heaters: coverage in percent, Serves beside a Zone's others, New, delete with clearing");
+  await setPanelSize(page, 1280, 800);
+  await pane.getByRole("tab", { name: "Electric Heating" }).click();
+  const ehPills = pane.getByRole("group", { name: "Electric Heating tables" });
+  assert.deepEqual(await ehPills.locator("button").allTextContents(), ["Heaters"]);
+  const ehTable = pane.locator(".mech-electric-heaters");
+  const ehRow = id => ehTable.locator(`[data-row-key='${id}']`);
+  const EH1 = "ehr_Aa11Bb22Cc33", EH3 = "ehr_Gg77Hh88Ii99";
+  const electric = key => host(`window.previewHost.mechanical.electricHeaters[${JSON.stringify(key)}]`);
+  await ehRow(EH1).waitFor();
+  const ehCoverage = ehRow(EH1).locator("[data-record-field='percent_coverage']");
+  assert.equal(await ehCoverage.inputValue(), "25", "coverage reads as a percentage");
+  await ehCoverage.dblclick();
+  await ehCoverage.fill("40");
+  await ehCoverage.press("Enter");
+  await page.waitForFunction(id => window.previewHost.mechanical.electricHeaters.heaters.filter(r => r.id === id)[0]
+    .values.percent_coverage === 0.4, EH1);
+  assert.deepEqual((await sent(PREFIX + "electric_heaters.update")).pop().payload.params,
+    { id: EH1, values: { percent_coverage: 0.4 }, expected_values: { percent_coverage: 0.25 } });
+  assert.match(await ehRow(EH3).locator(".mech-serves-cell").textContent(), /Serves no Zone/);
+  await page.screenshot({ path: path.join(output, "electric-heaters.png") });
+  await clickSettled(page, ehRow(EH3).locator(".mech-serves-cell"));
+  const ehPicker = page.getByRole("dialog", { name: "Zones served by EH-3 Spare" });
+  await ehPicker.locator(".mech-zone-row").filter({ hasText: "Apt 1" }).locator("input").check();
+  assert.equal(await ehPicker.getByText("will be replaced").count(), 0, "a list slot replaces nothing");
+  await ehPicker.getByRole("button", { name: "Assign 1 Zone", exact: true }).click();
+  await ehPicker.waitFor({ state: "hidden" });
+  assert.deepEqual((await electric("serves")).zon_apt1, [EH1, "ehr_Dd44Ee55Ff66", EH3]);
+  await pane.getByRole("button", { name: "+ New Electric Heater", exact: true }).click();
+  const newHeater = page.getByRole("dialog", { name: "New Electric Heater" });
+  await newHeater.getByRole("textbox", { name: "Tag", exact: true }).fill("EH-4");
+  await newHeater.getByRole("button", { name: "Create Electric Heater", exact: true }).click();
+  await newHeater.waitFor({ state: "hidden" });
+  assert.equal((await electric("heaters")).filter(row => row.values.name === "EH-4")[0].values.percent_coverage, 1,
+    "a new heater covers the whole load");
+  await ehTable.getByRole("button", { name: "Delete EH-1", exact: true }).click();
+  const ehDelete = page.getByRole("dialog", { name: /EH-1$/ });
+  await ehDelete.getByRole("combobox").selectOption("__clear__");
+  await ehDelete.getByRole("button", { name: /delete$/i }).click();
+  await ehDelete.waitFor({ state: "hidden" });
+  assert.equal((await sent(PREFIX + "electric_heaters.delete")).pop().payload.params.replacement_id, null);
+  assert.deepEqual((await electric("serves")).zon_apt1, ["ehr_Dd44Ee55Ff66", EH3], "clearing takes it off its Zones");
+
+  step("Electric Heating fits the panel's sizes");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+      `Electric Heating does not scroll sideways at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `electric-heaters-${width}x${height}.png`) });
   }
   return `mechanical browser checks passed; screenshots: ${output}`;
 });

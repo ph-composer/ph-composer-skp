@@ -106,7 +106,8 @@ None of these is a choice of behavior the sources leave open; each follows the p
    `EquipmentTable` with Tag, `Coverage` (the stored fraction shown and entered in percent through the Heaters
    table's `percent` quantity, 0 to 100), `Serves` (Zone chips and the `many` Zone picker, as Units · Indoor),
    hideable Manufacturer, Model and Notes; New asks for the Tag; Duplicate; Delete with a replacement or clearing the
-   Zones; Locate's narrowing by `electric_heater_ids`; the item findings in the table note. Added to `index.html`,
+   Zones; Locate's narrowing by `electric_heater_ids`. An unserved heater reads "Serves no Zone" in its Serves cell, as
+   a Ventilator does. Added to `index.html`,
    the panel manifest and the preview (`tools/ui-preview/host.js`, `fixtures.js`, `mechanical_checks.cjs`); the
    runtime manifest is refreshed.
 8. **Documents.** `context/CONTRACTS.md` (the export section after the heat pump export), the packet CONTRACTS
@@ -125,7 +126,7 @@ None of these is a choice of behavior the sources leave open; each follows the p
 ## Tests (write first)
 
 1. Ruby (`tests/mechanical_electric_heater_test.rb`): a heater created with only a Tag takes coverage 1.0 and no
-   Manufacturer or Model; coverage below 0 or above 1 refuses `validation.failed`; a taken Tag refuses; guarded
+   Manufacturer or Model; coverage below 0 or above 1 refuses `params.invalid` (the action's schema carries the range); a taken Tag refuses; guarded
    update, duplicate with `user_data`; a heater on two Zones and two heaters on one Zone through `serves.assign`;
    Clear with `item_id` takes one out; a plain delete while a Zone names it refuses `reference.in_use`; delete with a
    replacement moves every Zone's list (a list already holding the replacement keeps it once) and delete with null

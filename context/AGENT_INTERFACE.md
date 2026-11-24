@@ -911,11 +911,16 @@ its findings, and `locate` takes `hp_outdoor_equipment_ids`, `hp_outdoor_unit_id
 API 1.94 each Building Segment carries its mechanical settings as the `ph_composer.mechanical.segment` payload, saved
 with `ph_composer.zones.save_segment_settings` and read with its defaults by `ph_composer.mechanical.segment.get`;
 the export writes them to the Segment's `BldgSegment`, and the preflight warns, `mechanical.segment_cooling_mismatch`,
-where a Segment's mechanical cooling switch disagrees with its blended heat pump. The
+where a Segment's mechanical cooling switch disagrees with its blended heat pump. Since API 1.95 Electric Heaters
+are the catalog `ph_composer.mechanical.electric_heaters` (`list`, `all`, a snapshot section, `create`, `update`,
+`duplicate` and `delete` with `replacement_id`); they serve Zones through the list slot `heater_ids`, the export adds
+each to every Room it serves as a direct electric heating system, the preflight lists its findings, and `locate`
+takes `electric_heater_ids`. The
 [Ventilators walkthrough](../tools/examples/authoring/ventilators_walkthrough.rb) authors with the panel closed;
 [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Mechanical: Ventilators", "Mechanical: what serves each Zone",
 "Mechanical: the Ventilator export", "Mechanical: hot water", "Mechanical: the hot water export", "Mechanical: heat
-pumps", "Mechanical: the heat pump export" and "Mechanical settings", is the recipe.
+pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mechanical: the Electric Heater export"
+and "Mechanical settings", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

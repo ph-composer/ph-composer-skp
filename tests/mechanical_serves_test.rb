@@ -286,14 +286,16 @@ class MechanicalServesTest < PhComposerTestCase
     refused(metadata("Apt 2", M::Serves::EMPTY.merge("heat_pump_ids" => [])), "validation.failed")
     assert_equal ["unknown fields heat_pump_ids"], M::Serves::Payload.problems(M::Serves::EMPTY
                                                                                  .merge("heat_pump_ids" => []))
-    assert_equal ["missing fields ventilator_id, hot_water_system_id, hp_indoor_unit_ids"],
+    assert_equal ["missing fields ventilator_id, hot_water_system_id, hp_indoor_unit_ids, heater_ids"],
                  M::Serves::Payload.problems({})
     assert_equal ["ventilator_id must be a Ventilator id or null",
                   "hot_water_system_id must be a Hot Water System id or null",
-                  "hp_indoor_unit_ids must be a list of Heat Pump Indoor Unit ids"],
+                  "hp_indoor_unit_ids must be a list of Heat Pump Indoor Unit ids",
+                  "heater_ids must be a list of Electric Heater ids"],
                  M::Serves::Payload.problems("ventilator_id" => "hws_ZZZZZZZZZZZZ",
                                              "hot_water_system_id" => "vnt_ZZZZZZZZZZZZ",
-                                             "hp_indoor_unit_ids" => ["hpi_ZZZZZZZZZZZZ"])
+                                             "hp_indoor_unit_ids" => ["hpi_ZZZZZZZZZZZZ"],
+                                             "heater_ids" => ["hwh_ZZZZZZZZZZZZ"])
     assert_equal ["hp_indoor_unit_ids holds an id twice"],
                  M::Serves::Payload.problems(M::Serves::EMPTY.merge("hp_indoor_unit_ids" => ["hiu_ZZZZZZZZZZZZ"] * 2))
   end

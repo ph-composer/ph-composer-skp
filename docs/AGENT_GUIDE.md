@@ -921,8 +921,8 @@ Ventilators are read either way.
 
 Read `ph_composer.mechanical.serves.list`, a bounded page of Zone occurrences, or
 `ph_composer.mechanical.serves.all`. Each row gives the Zone's `reference`, its `slots`
-(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids`, a list, empty for
-none), the `items` the slots name with their names, and `findings`.
+(`ventilator_id` and `hot_water_system_id`, null for none, and `hp_indoor_unit_ids` and `heater_ids`,
+lists, empty for none), the `items` the slots name with their names, and `findings`.
 A Zone served by nothing reads the same whether it stores no payload or an emptied one.
 
 Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
@@ -931,8 +931,8 @@ Assign with `ph_composer.mechanical.serves.assign`: `zones` is a list of
 already has another, the command is refused as `mechanical.slot_filled`, naming that Ventilator, and
 nothing is written; send it again with `replace: true` to replace it. Empty a slot with
 `ph_composer.mechanical.serves.clear`, giving `zones` and `slot`, or leave `slot` out to empty every
-slot. The heat pump slot, `hp_indoor_unit_ids`, holds several indoor units: assigning adds the unit
-beside those the Zone has, and nothing is replaced; to take one unit off a Zone, clear with `slot` and
+slot. The list slots, `hp_indoor_unit_ids` and `heater_ids`, hold several items: assigning adds the item
+beside those the Zone has, and nothing is replaced; to take one item off a Zone, clear with `slot` and
 `item_id`. A slot changed since you read it refuses the whole command as `target.changed`. A Zone in a
 locked Group, in a shared component or inside another Zone is refused with Zones' own codes
 (`target.locked`, `target.shared_definition`, `target.wrong_hierarchy`). Each command is one Undo step
@@ -1107,6 +1107,41 @@ Every Room of one Segment carries the same identifier, so PHX makes one device p
    `segment`, `system_identifier`, `cop_1`, `cop_2`, `cooling_used`, `capacity_kw`, `flow_rate_m3_hr`,
    `annual_cop` and `digest`. In the HBJSON each of those Rooms has one entry in
    `properties.ph_hvac.heat_pump_systems` with that identifier.
+
+### Mechanical: electric heaters
+
+An Electric Heater is direct electric resistance heating, kept in the Model as a definition. Read
+`ph_composer.mechanical.electric_heaters.list`, a bounded page at a time; names are unique. Create one with
+`ph_composer.mechanical.electric_heaters.create`, giving at least `name` (shown as Tag). `percent_coverage`
+is the share of the heating load it covers, a fraction from 0 to 1, and 1.0 unless you give it; a value
+outside 0 to 1 is refused as `params.invalid` and nothing is written. `manufacturer` and `model` stay
+absent until you give them.
+
+Edit with `ph_composer.mechanical.electric_heaters.update`, copying `expected_values` from the values you
+read; `ph_composer.mechanical.electric_heaters.duplicate` copies one with its `user_data`. Assign heaters
+to Zones with `ph_composer.mechanical.serves.assign`, `slot` `heater_ids`: a Zone may hold several, and
+their coverages are not added up or checked against each other or a heat pump's. Clear one with `slot`
+and `item_id`. `ph_composer.mechanical.electric_heaters.delete` is refused as `reference.in_use` while a
+Zone names the heater; `replacement_id` puts another in its place on every Zone (once, where the Zone
+already holds it), and `replacement_id: null` takes it off them, each one Undo step. Rows carry the Zones
+each heater serves under `zones`, and `findings`: `mechanical.item_unserved` when it serves no Zone.
+
+### Mechanical: the Electric Heater export
+
+The export adds to each served Zone's Room one direct electric heating system per heater serving it,
+under the heater's id, with its Tag, coverage and `user_data`, so every Room one heater serves carries
+the same system and PHX makes one device per heater.
+
+1. Before exporting, read `ph_composer.mechanical.preflight`; its heater rows name the Electric Heater
+   export as their `section`. `mechanical.item_missing` blocks: a Zone names a heater that is not in the
+   Model. `mechanical.item_unserved` names a heater that serves no Zone, `mechanical.zone_left_out` a
+   served Zone in no Building Segment, and `mechanical.item_across_segments` a heater on Zones in two
+   Building Segments; none of these blocks. A row about a heater carries `locate` with
+   `electric_heater_ids`.
+2. Export, then read back. The result gives `electric_heaters`, one row per (heater, Zone) pair:
+   `identifier`, `display_name`, `percent_coverage` and `digest`. In the HBJSON each of those Rooms has
+   an entry in `properties.ph_hvac.heating_systems` with that identifier and `heating_type`
+   `PhHeatingDirectElectric`.
 
 ### Library records
 

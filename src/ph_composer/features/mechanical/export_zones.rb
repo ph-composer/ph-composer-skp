@@ -17,6 +17,12 @@ module PhComposer
         def slot(key)
           values.fetch(key)
         end
+
+        # Whether the slot `key` names item `id`: a single slot holds it, a list slot includes it.
+        def names?(key, id)
+          value = slot(key)
+          value.is_a?(Array) ? value.include?(id) : value == id
+        end
       end
       # `record_id` is the row's object: a Zone for a Zone's finding, an item for an item's.
       Finding = Struct.new(:code, :record_id, :message, :blocks, keyword_init: true)
@@ -57,12 +63,12 @@ module PhComposer
 
       # Per item of a family: serving no Zone, each served Zone the export leaves out, and Zones in more than one
       # Building Segment. `items` maps each stored item's id to its values with its name; `slot` is the family's
-      # single Serves slot and `label` its item's name, such as "Ventilator".
+      # Serves slot, single or a list, and `label` its item's name, such as "Ventilator".
       def item_findings(exported, left_out, items, slot, label)
         items.keys.sort.flat_map do |id|
           name = items.fetch(id).fetch("name")
-          served = exported.select { |zone| zone.slot(slot) == id }
-          gone = left_out.select { |zone| zone.slot(slot) == id }
+          served = exported.select { |zone| zone.names?(slot, id) }
+          gone = left_out.select { |zone| zone.names?(slot, id) }
           next [unserved(id, name)] if served.empty? && gone.empty?
 
           gone.map { |zone| left_out(id, name, zone) } + across_segments(id, name, served, label)

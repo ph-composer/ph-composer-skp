@@ -109,6 +109,10 @@
       ],
       "version": 1
     },
+    "ph_composer.mechanical.export.electric_heaters": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.mechanical.export.heat_pumps": {
       "records": [],
       "version": 1

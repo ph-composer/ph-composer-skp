@@ -1614,7 +1614,16 @@
         indoorUnit("hiu_Pp66Qq77Rr88", "HP-3.2", "hou_Gg77Hh88Ii99", "hpi_Jj00Kk11Ll22")],
       serves: { zon_apt1: ["hiu_Aa11Bb22Cc33", "hiu_Mm33Nn44Oo55"], zon_apt2: ["hiu_Dd44Ee55Ff66"],
         zon_corridor: ["hiu_Gg77Hh88Ii99"], zon_living: ["hiu_Jj00Kk11Ll22"] },
-      blended: BLENDED }
+      blended: BLENDED },
+    /* Electric heating: EH-1 (25%) tops up both apartments beside their heat pumps, EH-2 Bath (100%) heats Apt 1 as
+       well, and EH-3 Spare serves nothing. */
+    electricHeaters: {
+      heaters: [
+        heatPump("ehr_Aa11Bb22Cc33", "electric_heater", "EH-1", { percent_coverage: 0.25, manufacturer: "Kaltwerk",
+          model: "Panel 750" }),
+        heatPump("ehr_Dd44Ee55Ff66", "electric_heater", "EH-2 Bath", { percent_coverage: 1, notes: "Towel rail" }),
+        heatPump("ehr_Gg77Hh88Ii99", "electric_heater", "EH-3 Spare", { percent_coverage: 1 })],
+      serves: { zon_apt1: ["ehr_Aa11Bb22Cc33", "ehr_Dd44Ee55Ff66"], zon_apt2: ["ehr_Aa11Bb22Cc33"] } }
   } });
 
   global.PhComposerPreviewFixtures = {

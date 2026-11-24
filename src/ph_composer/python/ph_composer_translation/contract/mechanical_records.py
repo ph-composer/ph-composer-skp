@@ -2,7 +2,8 @@
 
 Ventilation: one (Ventilator, Zone) pair with the identifiers Ruby derived from the Ventilator's id and the unit's
 values as the record stores them. Hot water: one (Hot Water System, Zone) pair with the System's values, its Tanks in
-the slots Ruby worked out and its Heaters, each Tank and Heater under its own record's id."""
+the slots Ruby worked out and its Heaters, each Tank and Heater under its own record's id. Electric heating: one
+(Electric Heater, Zone) pair under the heater's id."""
 
 from __future__ import annotations
 
@@ -341,4 +342,35 @@ class HeatPumpRecord:
             positive(raw.get("cop_2"), f"{label} cop_2"),
             as_number(raw.get("ambient_temp_2_c"), f"{label} ambient_temp_2_c"),
             RecirculationValues.read(raw.get("cooling"), f"{label} cooling"),
+        )
+
+
+# -- Electric heaters ---------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ElectricHeaterRecord:
+    """One (Electric Heater, Zone) pair: the heater's identifier (its record id) and Tag, which every pair of one
+    heater shares, its coverage as a fraction and its `user_data` (`ElectricHeaterPlan`)."""
+
+    id: str
+    item_id: str
+    zone_id: str
+    identifier: str
+    display_name: str
+    percent_coverage: float
+    user_data: JSONObject
+
+    @classmethod
+    def read(cls, raw: Mapping[str, object]) -> ElectricHeaterRecord:
+        identifier = as_text(raw.get("id"), "electric heater id")
+        label = f"electric heater {identifier}"
+        return cls(
+            identifier,
+            as_text(raw.get("item_id"), f"{label} item_id"),
+            as_text(raw.get("zone_id"), f"{label} zone_id"),
+            as_text(raw.get("identifier"), f"{label} identifier"),
+            as_text(raw.get("display_name"), f"{label} display_name"),
+            fraction(raw.get("percent_coverage"), f"{label} percent_coverage"),
+            user_data(raw.get("user_data"), label),
         )

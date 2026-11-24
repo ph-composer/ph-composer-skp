@@ -4,13 +4,14 @@ module PhComposer
   module Mechanical
     # `ph_composer.mechanical.preflight`: every mechanical export section's checks over the live Model, one query the
     # Ventilator export names for the whole feature (the export pane runs each contributor's named preflight once). It
-    # reads the Zones once through Serves and gives each family's rows (VentilationExport, HotWaterExport), each with
+    # reads the Zones once through Serves and gives each family's rows (VentilationExport, HotWaterExport,
+    # HeatPumpExport, ElectricHeaterExport, SegmentExport), each with
     # the section, code and object its export notes, so a run lists a finding once. An exported Zone whose Serves
     # payload this version does not understand comes first, since the claim stops the export on it. A read that
     # refuses answers one blocking row, since the export would stop on the same cause.
     module Preflight
       NAME = "#{FEATURE_ID}.preflight"
-      FAMILIES = [VentilationExport, HotWaterExport, HeatPumpExport, SegmentExport].freeze
+      FAMILIES = [VentilationExport, HotWaterExport, HeatPumpExport, ElectricHeaterExport, SegmentExport].freeze
 
       module_function
 

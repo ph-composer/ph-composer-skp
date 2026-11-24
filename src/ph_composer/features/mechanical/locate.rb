@@ -15,7 +15,8 @@ module PhComposer
         Ventilators::KIND => "ventilator_ids", HotWater::Systems::KIND => "hot_water_system_ids",
         HotWater::Heaters::KIND => "hot_water_heater_ids", HotWater::Tanks::KIND => "hot_water_tank_ids",
         HeatPumps::OutdoorEquipment::KIND => "hp_outdoor_equipment_ids",
-        HeatPumps::OutdoorUnits::KIND => "hp_outdoor_unit_ids", HeatPumps::IndoorUnits::KIND => "hp_indoor_unit_ids"
+        HeatPumps::OutdoorUnits::KIND => "hp_outdoor_unit_ids", HeatPumps::IndoorUnits::KIND => "hp_indoor_unit_ids",
+        ElectricHeaters::KIND => "electric_heater_ids"
       }.freeze
       PARAMS = Shapes.object(
         ITEMS.to_h do |kind, param|
@@ -35,7 +36,8 @@ module PhComposer
                                                    "on the table of the items named (ventilator_ids, " \
                                                    "hot_water_system_ids, hot_water_heater_ids, " \
                                                    "hot_water_tank_ids, hp_outdoor_equipment_ids, " \
-                                                   "hp_outdoor_unit_ids or hp_indoor_unit_ids; one kind per " \
+                                                   "hp_outdoor_unit_ids, hp_indoor_unit_ids or " \
+                                                   "electric_heater_ids; one kind per " \
                                                    "request), narrowed to " \
                                                    "them, or, with none, the Zones tab with zones checked.",
                                    :refuses => %w[session.inactive], :params => PARAMS,

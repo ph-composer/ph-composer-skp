@@ -315,9 +315,9 @@ Hot water flow stays in L/h per m².
 
 ## Add Ventilators and choose the Zones they serve
 
-1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation** and **Hot Water**
-   now, and the pills beneath them pick one table of that system. The tab remembers the subtab and
-   table you last used on this computer.
+1. Use the **Mechanical** tab. Its subtabs are the systems a model carries, **Ventilation**, **Heat Pumps**,
+   **Hot Water** and **Electric Heating** now, and the pills beneath them pick one table of that system. The
+   tab remembers the subtab and table you last used on this computer.
 2. **+ New Ventilator** asks for a Tag; every other value starts at its default (0.55 Wh/m³, frost
    protection on below -5 °C, in conditioned space). Edit any value in its cell: Enter or leaving the cell
    applies it as one Undo step. Recovery efficiencies are fractions from 0 to 1. Electric efficiency
@@ -359,6 +359,16 @@ Hot water flow stays in L/h per m².
    no slot left is amber and the export leaves it out. **Capacity** reads in litres, or US gallons in IP.
 8. Deleting a System asks which System takes its place on its Zones, Heaters and Tanks. You can clear its
    Zones instead only when no Heater or Tank names it.
+
+## Add electric heaters
+
+1. Use **Mechanical > Electric Heating**. Its pill is **Heaters**.
+2. **+ New Electric Heater** asks for a Tag. **Coverage** is the share of the heating load the heater
+   covers, in percent, and starts at 100%. Coverages are not added up or checked against each other or
+   against a heat pump.
+3. Click a row's **Serves** cell to choose its Zones, as for a Ventilator. A Zone may have several
+   heaters, so assigning one never replaces another; unchecking a Zone takes only this heater off it.
+4. Deleting a heater that serves Zones asks which heater takes its place on them, or clears it from them.
 
 ## Reuse library definitions
 
