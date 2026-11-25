@@ -1,7 +1,7 @@
 # P4-14a: the ducting feature and Duct Types
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q5, Q7), D4-19, D4-20, D4-31 and the [ducting PRD](../erv-ducting/PRD.md), "Records". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14a` runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14` (#581), on `main`; offline evidence in [p4-14a-duct-types](../evidence/p4-14a-duct-types.md), host case `M14a` owed to MS3. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q5, Q7), D4-19, D4-20, D4-31 and the [ducting PRD](../erv-ducting/PRD.md), "Records". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14a` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
