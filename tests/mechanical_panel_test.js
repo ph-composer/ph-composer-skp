@@ -496,6 +496,30 @@ test("a refusal stays beside its field through a unit switch", function () {
   assert.strictEqual(unit.error.hidden, false);
 });
 
+test("a draft that ends without a write shows the Model's value, so the next edit is guarded by what is shown",
+  function () {
+    var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+    var values = o.state.sections[PREFIX + "ventilators"].value.records[1].values;
+    unit.input.value = "0.3"; unit.input.listeners.input({});
+    values.subsoil_heat_exchange_efficiency = 0.25; o.paint();
+    key(unit.input, "Escape");
+    assert.strictEqual(unit.input.value, "0.25", "Escape shows the value the Model holds now");
+    unit.input.value = "0.2"; unit.input.listeners.input({});
+    values.subsoil_heat_exchange_efficiency = 0.3; o.paint();
+    unit.input.value = "0.25"; unit.input.listeners.input({}); unit.input.listeners.blur({});
+    assert.strictEqual(unit.input.value, "0.3", "and so does a draft typed back");
+    assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 0);
+  });
+
+test("leaving a refused field unchanged keeps its refusal", function () {
+  var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+  unit.input.value = "0.4"; unit.input.listeners.input({}); key(unit.input, "Enter");
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "refused", code: "target.changed",
+    message: "The Ventilator changed." });
+  unit.input.listeners.blur({});
+  assert.strictEqual(unit.error.textContent, "The Ventilator changed.");
+});
+
 test("a Locate's cleared search survives a refused search edit", function () {
   var o = setup(), controls = o.ventilators().inventory.controls;
   controls.filter.value = "Q350"; controls.filter.listeners.input({});

@@ -148,6 +148,18 @@ test("a copied power and operation keep every stored digit, so pasting them back
   });
 });
 
+test("a power stored past the nanowatt pastes back as itself, sending nothing", function () {
+  var o = setup();
+  o.state.sections[PUMPS].value.records[0].values.norm_energy_demand_w = 45.0400000004;
+  o.paint();
+  var grid = o.view.inventory.grid, power = cell(o, P1.id, "norm_energy_demand_w");
+  grid.refresh(); grid.select(power, false);
+  var copy = new dom.ClipboardEvent("copy");
+  o.view.inventory.scroll.listeners.copy(copy);
+  grid.paste([[copy.clipboardData.getData("text/plain")]]);
+  assert.strictEqual(named(o, PUMPS + ".update").length, 0);
+});
+
 test("the internal heat gains sit behind the row's disclosure, the profile following the type until one is chosen",
   function () {
     var o = setup();

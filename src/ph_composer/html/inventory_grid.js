@@ -277,7 +277,9 @@ PhComposerUI.define("inventory_grid", ["record_edits", "workspace"], function (R
       var value = edits.normalize(cell.field, target.value, canonical ? { canonical: true } : null);
       error = error || RecordEdits.normalizationError(value) || (edits.validationError ?
         edits.validationError(cell.field, value) : (edits.validate ? edits.validate(cell.field, value) : ""));
-      if (cell.current === value) return;
+      // A cell's own copied text pastes back as itself, though the parser rounds what it stores past a nanounit.
+      if (cell.current === value || !canonical && String(target.value).trim() === edits.copyText(cell.field,
+        cell.current)) return;
       changes.push(options.changeFor ? options.changeFor(cell, value) : {
         id: cell.row.record.id, values: { [cell.field]: value }, expected_values: { [cell.field]: cell.current }
       });

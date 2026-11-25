@@ -127,7 +127,7 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       }
       held.unit = new unitFields.UnitField({ field: entry.field, value: record.values[entry.key], commitOnBlur: true,
         onCommit: function (value, draft) { self.apply(held, value, draft); },
-        onCancel: function () { held.base = undefined; held.refusal = null; } });
+        onCancel: function () { held.base = undefined; held.refusal = null; self.paint(); } });
       held.unit.input.setAttribute("aria-label", entry.label);
       if (entry.placeholder) {
         held.hint = ui.element("span", "", entry.placeholder(record));
@@ -139,12 +139,17 @@ function (ui, unitFields, units, preferences, request, snapshot) {
         held.unit.root.appendChild(held.hint);
       }
       // The value the draft started from is its guard, whatever a snapshot shows meanwhile. A draft that ends
-      // without a write (typed back, Escape) drops it, and typing clears a refusal shown on the field.
+      // without a write (typed back, Escape) drops it and shows the Model's value again, so the next edit is guarded
+      // by what the field shows; typing clears a refusal shown on the field, leaving the field does not.
       held.unit.input.addEventListener("input", function () {
         held.refusal = null;
         if (held.base === undefined && self.held) held.base = stored(self.held.record, entry.key);
       });
-      function ended() { if (!held.unit.editing && self.pending !== held) held.base = undefined; }
+      function ended() {
+        if (held.unit.editing || self.pending === held) return;
+        held.base = undefined;
+        self.paint();
+      }
       held.unit.input.addEventListener("keydown", function (event) { if (event.key === "Enter") ended(); });
       held.unit.input.addEventListener("blur", ended);
       label.appendChild(ui.element("span", "", entry.label));

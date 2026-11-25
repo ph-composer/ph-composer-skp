@@ -71,7 +71,7 @@ function (panel, snapshot, ui, fields, systems, equipment) {
      [section, field, label] for each kind of record naming it, and `zones` counts the Zones a record serves. A
      replacement takes its place on all of them; clearing is offered only while nothing names it through a required
      reference (`clearable(record, state)`). A referring record that cannot be read may name it too, so its uses
-     are then not all known (`incomplete`). */
+     are then not all known (`incomplete`); the host's delete checks what each stored record names. */
   function replacement(options) {
     function usage(state, id) {
       var named = [], unread = 0;
@@ -92,7 +92,7 @@ function (panel, snapshot, ui, fields, systems, equipment) {
       if (zones.length) parts.push("Serves " + zones.join(", ") + ".");
       return { count: named.length + zones.length, description: parts.join(" "),
         incomplete: unread ? "Some of the " + options.usedOn + "s cannot be read, so whether they use it is not " +
-          "known. Fix or delete them first, or choose a replacement." : null };
+          "known: the delete is refused while one still names it." : null };
     }
     return { replacement: true, usedOn: options.usedOn, usage: usage,
       allowClear: function (record) { return options.clearable(record); } };

@@ -209,7 +209,7 @@ test("a delete in use asks for a replacement, and offers clearing only where not
   assert.strictEqual(clone(named(p, INDOOR_UNITS + ".delete")[0].payload.params).replacement_id, null);
 });
 
-test("an unreadable outdoor unit leaves a model's uses unknown, so Delete asks for a replacement and says why",
+test("an unreadable outdoor unit leaves a model's uses unknown: Delete says so and leaves the check to the host",
   function () {
     var o = setup();
     o.state.sections[OUTDOOR_UNITS].value.unreadable = [{ id: "hpo_UNREADABLEUN",
@@ -217,9 +217,12 @@ test("an unreadable outdoor unit leaves a model's uses unknown, so Delete asks f
     o.paint();
     var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
     form.open(models[1], models);
-    assert.strictEqual(form.inUse, true, "ODU-B may still be named by the unit that cannot be read");
-    assert.match(form.uses.textContent, /cannot be read/);
-    assert.strictEqual(form.submitButton.textContent, "Replace and delete");
+    assert.strictEqual(form.inUse, false, "no known use, so a guarded plain Delete stays");
+    assert.match(form.uses.textContent, /cannot be read, so whether they use it is not known/);
+    assert.strictEqual(form.submitButton.disabled, false);
+    form.open(models[0], models);
+    assert.match(form.uses.textContent, /HP-1 names it\. .*cannot be read/);
+    assert.ok(!form.select.querySelectorAll("option").some(function (node) { return node.value === "__clear__"; }));
   });
 
 test("a model in use with nothing to replace it says to create one first", function () {

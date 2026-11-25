@@ -241,9 +241,9 @@
       "sha256": "51aa6370c2a210f66773561fd9d94f773fa965ad7ee2d49de7ee27693b7ff943"
     },
     "html/features/mechanical/heat_pumps.js": {
-      "bytes": 15063,
+      "bytes": 15116,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "7dc2bfad1b3a35d47aeb0efec40e9fa14960e2f2603b336ba9e8b5c82a5b0ab1"
+      "sha256": "f7e22dec4511d3c2806dd8912de1b511434b80c5750fce518763c1d3b3a8f9a6"
     },
     "html/features/mechanical/hot_water.js": {
       "bytes": 11313,
@@ -266,9 +266,9 @@
       "sha256": "19c1ad8ce7b514f3dbe32026f1b7e757e2b097c55d96dd3e5213baa80dfb789f"
     },
     "html/features/mechanical/optional_values.js": {
-      "bytes": 14338,
+      "bytes": 14523,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2e9ce184ae6ec5c558404b2ca310f31a7398a68a7cabc4a76e672a81a422a8d6"
+      "sha256": "c904d5e1173b2f5f4103991e01263f6ddd2866f884dcb81710b8ac5394c74f95"
     },
     "html/features/mechanical/pumps.js": {
       "bytes": 9031,
@@ -656,14 +656,14 @@
       "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
-      "bytes": 23994,
+      "bytes": 24062,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "34e9faf376c5f1f3e424a40183aa693e3c6239fec03b72e3ed0990cff5ebcf78"
+      "sha256": "7ca546e08c23ff14e85577fa97d8d706930b506ca111fabda8c7b67d2acee28b"
     },
     "html/inventory_grid.js": {
-      "bytes": 16304,
+      "bytes": 16516,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "0b0703a9d5185fa3882d5ac87504ba1081fa91e6f381a25607a285e1480759ec"
+      "sha256": "64ee86b0fb5cccc30e2ff9d626aa6a2c0890bef3c31fdc0067c5f4a1dc4b57f9"
     },
     "html/length_expression.js": {
       "bytes": 10503,
