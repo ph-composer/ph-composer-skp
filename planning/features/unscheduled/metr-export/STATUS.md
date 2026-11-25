@@ -23,6 +23,26 @@ None until Ed schedules it. Then re-scope against available features and intervi
   METr at quantity 1. Check it here against a real conversion before relying on METr's thermal-bridge rows.
   Run names are distinct per type (D3b-07), so PHX does not merge runs into one row.
 
+### From Phase 7, mechanical (handed over 2026-11-25)
+
+Phase 7 proves what PHX 1.59.4 builds from its HBJSON by a round trip per export stage (its D4-25); the METr
+file and its import are this packet's. Owner of every row: this packet, when Ed schedules it; a row naming an
+upstream library also needs that library's maintainer. Sources are under
+[phase-07-mechanical](../../phase-07-mechanical/README.md).
+
+| Row | What the HBJSON carries | What to check in METr | Source |
+| --- | --- | --- | --- |
+| Duct list and `lassVU` | Each (Ventilator, Zone) ventilation system carries the Ventilator's supply and exhaust duct elements with their geometry, shape, sizes and insulation; a shared Ventilator's Rooms carry equal identifiers | METr's model-level duct list: one row per run with its length, direction, shape, sizes, insulation and reflective flag, and `lassVU` naming its ventilator device once, for one Ventilator on one Zone and for one on several | erv-ducting PRD, "What honeybee-ph and METr take"; P4-14e evidence |
+| Pipe tree and diameter enum | Each Hot Water System's trunks with their branches and twigs, a trunk's multiplier and demand recirculation, and a Pipe Type's diameter in mm, one of METr's eight nominal sizes (3/8 in to 2 in) | The trunk, branch and twig hierarchy in `lTruncW` with each trunk's `cUoF` and `drecW`; PHX snaps a run's length-weighted diameter to the nearest enum entry, so check a mixed run and each of the eight sizes | hot-water-piping PRD, "What honeybee-ph and METr take"; P4-13a, P4-13d evidence |
+| Recirculation heat loss coefficient | Recirculation elements with diameter and insulation; PH-Composer shows no coefficient | The length-weighted coefficient PHX computes, the temperature and hours, and the "all pipes insulated" flag METr reads | hot-water-piping PRD; phases/p4-13-hot-water-piping.md, "Inferred in planning" |
+| Distribution pipe temperature and hours | Trunk, branch and twig segments at honeybee-ph's 60 °C and 24 h | Whether METr reads these or only the recirculation values | phases/p4-13-hot-water-piping.md, "Inferred in planning" |
+| Shared item | One object per (item, served Zone) pair under the item's identifier (D4-01); PHX makes one device per Building Segment's Variant, and the heat pump blend is per Segment | What METr shows for one Ventilator, Hot Water System, heater, pump or fan serving several Zones of one Segment: one row, and which Zones it names; and for one serving Zones in two Segments (`mechanical.item_across_segments`): one device in each Variant, under the same identifier | DECISIONS D4-01, F13; the round trips listed in the P4-15 evidence |
+| Duct quantity has no carrier | A duct run of quantity N exports as N identical duct elements, copies 2 to N suffixed `-k`; neither honeybee-ph 1.33.68 nor PHX 1.59.4 carries a duct quantity | METr lists N rows of quantity 1, not one row of quantity N. Ed's decision on the export shape is owed (P4-15 evidence, "For Ed") | P4-14e evidence, "Recorded at implementation" |
+| Fans and pumps, through Spaces | A Fan's exhaust ventilator carries its quantity and a linked supportive device takes it too; Pumps are supportive devices; both are written on every served Room | PHX reads both through a Room's Spaces, so `lExhVent` and `lSuppDev` hold nothing from a Room with no Spaces; and PHX 1.59.4 drops the exhaust ventilator's quantity (a kitchen hood of 3 gave a device of 1), so METr sees one exhaust device per Fan record. Upstream: PH-Tools/PHX | P4-11 evidence, "Departures and choices" |
+| Re-export not byte-identical | Noted in P4-13d's review, not reproduced: two Python processes give canonical HBJSON differing in `team` identifiers, `bldg_segments` and list order | Compare a METr file from a re-export by content, not bytes; the hot water systems and piping were identical in P4-13d's comparison | P4-13d evidence, "Review" |
+| Cooling over 200 kW | One blended heat pump per Building Segment, unsplit (D4-29); PHX splits it only for WUFI-Passive | That METr takes one system over 200 kW with no cap, as D4-29 assumed | DECISIONS F40, D4-29 |
+| Piping calculation method | No field: honeybee-ph's `PhHotWaterSystem` has none until [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (open on 2026-11-25); PHX writes `calc_method` to METr at its default | Which method METr receives and which methods read the drawn tree | DECISIONS F14, D4-12; P4-06 evidence |
+
 ## Blockers
 
 Ed's scheduling decision. Useful output likely needs Phase 2 Assemblies and a floor-area source.
@@ -38,3 +58,4 @@ None. Nothing is implemented. B1 conversion evidence is prior art, not acceptanc
 | 2026-09-20 | Ed deferred METr exporter development and consumer acceptance. |
 | 2026-09-30 | Packet created from Phase 1 acceptance row A15. |
 | 2026-10-26 | Thermal bridges P3b-08: the PHX quantity observation (F18) recorded here as unreproduced. |
+| 2026-11-25 | Phase 7 P4-15: the mechanical METr rows handed over ("From Phase 7, mechanical"), ten rows, owner this packet. |

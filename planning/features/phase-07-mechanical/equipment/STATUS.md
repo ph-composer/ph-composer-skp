@@ -1,7 +1,7 @@
 # Equipment: status
 
 DATE: 2026-10-21
-STATUS: Scoped. All six equipment families interviewed (shared shape, Ventilators and hot water 2026-10-21; heat pumps 2026-11-15/2026-11-23; Electric heaters, Pumps and Fans 2026-11-23); stages tracked in the phase ledger; implementation authorized 2026-11-23, P4-01 in review.
+STATUS: Merged to main, host cases owed to the MS1, MS2 and MS3 sittings. All six equipment families interviewed (shared shape, Ventilators and hot water 2026-10-21; heat pumps 2026-11-15/2026-11-23; Electric heaters, Pumps and Fans 2026-11-23); implemented by P4-01 to P4-11 and P4-08b (#564 to #575); stages tracked in the phase ledger, where P4-15's evidence lists the owed host cases.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -42,7 +42,8 @@ the interview state only.
 
 D4-01 to D4-27 are answered ([phase DECISIONS](../DECISIONS.md#part-4-review-after-programs-2026-11-22)). Electric heaters, pumps and fans were interviewed on
 2026-11-23 (D4-33 to D4-35); electric heaters merged in P4-09 and pumps in P4-10 and fans in P4-11; heat pumps were settled
-on 2026-11-15, and appliances are Programs'.
+on 2026-11-15, and appliances are Programs'. Every family is merged; what remains is the host cases `M01` to `M11` and `M16`
+at their sittings and the phase's `M15` ([P4-15 evidence](../evidence/p4-15-acceptance.md)).
 
 ## Blockers
 
