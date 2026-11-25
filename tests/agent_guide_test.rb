@@ -44,6 +44,7 @@ class AgentGuideTest < PhComposerTestCase
 
     assert_equal topics.map { |topic| topic.fetch("id") }.uniq, topics.map { |topic| topic.fetch("id") }
     assert_includes topics.map { |topic| topic.fetch("id") }, "recipes.thermal_bridge_types"
+    assert_includes topics.map { |topic| topic.fetch("id") }, "recipes.erv_ducting"
     assert_equal Guide::TEXT.scan(/^#+ .+$/).length, topics.sum { |topic| topic.fetch("text").scan(/^#+ .+$/).length }
     topics.each do |topic|
       found = executor.call(row, "discover", "section" => "guide", "topic" => topic.fetch("id"))

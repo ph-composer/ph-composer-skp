@@ -1,7 +1,7 @@
 # P4-13: hot water piping
 
 DATE: 2026-10-21
-STATUS: Implemented on branch 2026-11-24: P4-13a to P4-13d merged (#576 to #579), P4-13e in review; host cases M13a to M13e owed to MS3, M13 not Pass. Planned in full 2026-11-24 as five sub-stages, P4-13a to P4-13e, each one pull request, from this stub, the [piping PRD](../hot-water-piping/PRD.md), D4-09, D4-13, D4-18, D4-25, D4-30, D4-31 and D4-36 (Q1 to Q13 all as recommended). This file is their parent index: the entry gates, what the sub-stages share and the inferences that cross them. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host cases run in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-25: P4-13a to P4-13e merged (#576 to #580); host cases M13a to M13e owed to MS3, M13 not Pass. Planned in full 2026-11-24 as five sub-stages, P4-13a to P4-13e, each one pull request, from this stub, the [piping PRD](../hot-water-piping/PRD.md), D4-09, D4-13, D4-18, D4-25, D4-30, D4-31 and D4-36 (Q1 to Q13 all as recommended). This file is their parent index: the entry gates, what the sub-stages share and the inferences that cross them. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host cases run in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

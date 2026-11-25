@@ -393,6 +393,27 @@ uv run tools/hostkit/host_bridge.py save
 After a fresh-process reopen, load the script and run `PipeTypesWalkthrough.verify` with the same ids: later pipes
 store them, so a type restored under another id fails.
 
+## Duct Types with the panel closed
+
+`duct_types_walkthrough.rb` creates two Duct Types, makes one Rectangular (its diameter goes with the shape),
+duplicates it and deletes the other, each a registered action and one native Undo step, and reads the catalog back
+through `ph_composer.ducting.duct_types.all`. `verify` compares that read with the expected catalog, so it serves
+after Undo and Redo and after a save and reopen. `tests/duct_types_walkthrough_test.rb` runs it offline.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/duct_types_walkthrough.rb"; DuctTypesWalkthrough.run'
+uv run tools/hostkit/host_bridge.py eval 'DuctTypesWalkthrough.ids'      # record the two ids
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'     # five times, reading state between
+uv run tools/hostkit/host_bridge.py eval 'DuctTypesWalkthrough.state'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # five times
+uv run tools/hostkit/host_bridge.py eval 'DuctTypesWalkthrough.verify({"DT-2" => "dct_...", "DT-2 (copy)" => "dct_..."})'
+uv run tools/hostkit/host_bridge.py save
+```
+
+After a fresh-process reopen, load the script and run `DuctTypesWalkthrough.verify` with the same ids: later ducts
+store them, so a type restored under another id fails.
+
 ## Edge assignment with the panel closed
 
 `thermal_bridge_assignment_walkthrough.rb` works on the Edges selected natively inside a Zone:

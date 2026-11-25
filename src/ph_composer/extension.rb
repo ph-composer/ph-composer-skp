@@ -71,9 +71,10 @@ module PhComposer
     require_relative "features/programs/install"
     require_relative "features/mechanical/install"
     require_relative "features/piping/install"
+    require_relative "features/ducting/install"
     unless const_defined?(:FEATURES)
       FEATURES = [Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification,
-                  Programs, Mechanical, Piping].freeze
+                  Programs, Mechanical, Piping, Ducting].freeze
     end
 
     # Capabilities the foundation itself provides, registered through the same interface as a feature.

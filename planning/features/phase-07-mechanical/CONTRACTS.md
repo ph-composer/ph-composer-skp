@@ -28,8 +28,9 @@ file in the same change.
 
 | Feature id | Folder | Requires | Registered in |
 | --- | --- | --- | --- |
-| `ph_composer.mechanical` (new; D4-22), Ruby module `Mechanical` | `features/mechanical/` | `ph_composer.zones`, `ph_composer.spaces` (D4-02, D4-10); `ph_composer.programs` from P4-05 (D4-24); `ph_composer.climate` from P4-08 (D4-15) | `FEATURES`, after Programs (F22): `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs, Mechanical, Piping]` |
-| `ph_composer.piping` (P4-13a, D4-36), Ruby module `Piping` | `features/piping/` | `ph_composer.mechanical` (the Hot Water System and its export, D4-09), `ph_composer.zones` (containment, Q13) | `FEATURES`, last, after Mechanical |
+| `ph_composer.mechanical` (new; D4-22), Ruby module `Mechanical` | `features/mechanical/` | `ph_composer.zones`, `ph_composer.spaces` (D4-02, D4-10); `ph_composer.programs` from P4-05 (D4-24); `ph_composer.climate` from P4-08 (D4-15) | `FEATURES`, after Programs (F22): `[Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate, Certification, Programs, Mechanical, Piping, Ducting]` |
+| `ph_composer.piping` (P4-13a, D4-36), Ruby module `Piping` | `features/piping/` | `ph_composer.mechanical` (the Hot Water System and its export, D4-09), `ph_composer.zones` (containment, Q13) | `FEATURES`, after Mechanical |
+| `ph_composer.ducting` (P4-14a, D4-37), Ruby module `Ducting` | `features/ducting/` | `ph_composer.mechanical` (the Ventilator and the ventilation section, D4-09), `ph_composer.zones` (containment, Q5) | `FEATURES`, last, after Piping |
 
 One feature for the six families (D4-02, from Q1; the seventh, appliances, is Programs' Equipment
 Sets). It is named for its tab (D4-22): "equipment" stays the glossary word for its records
@@ -39,9 +40,10 @@ rules"); Serves is layer 3, a payload on a Zone record. A test holds the line fr
 P4-02: nothing under `features/mechanical/<family>/` names Zones, Spaces, Programs, the Zone
 record or `serves/`. Nothing under another feature's folder names this one, except a feature that requires it:
 Piping (P4-13a), whose Pipe Type CRUD is Mechanical's `CatalogOperations` and whose later export names the hot water
-section. `tests/mechanical_dependency_test.rb` reads the exemption from the registry, and
-`tests/piping_dependency_test.rb` holds that nothing under `features/mechanical/` or `html/features/mechanical/`
-names Piping.
+section, and Ducting (P4-14a), whose Duct Type CRUD and param shapes are Mechanical's. `tests/mechanical_dependency_test.rb`
+reads the exemption from the registry, and `tests/piping_dependency_test.rb` holds that nothing under
+`features/mechanical/` or `html/features/mechanical/` names Piping; `tests/ducting_dependency_test.rb` that nothing
+under Mechanical's or Piping's folders names Ducting and nothing under Ducting's names Piping.
 
 Proposed layout, following `features/windows/install.rb` and `features/spaces/install.rb`:
 
@@ -176,6 +178,14 @@ Deleting a Hot Water System follows `reference.in_use` for both Serves payloads 
 
 **Piping group (`ppg_`, `features/piping/group/`, P4-13b):** an entity record on a Group, dictionary `ph_composer.piping.group`, reference target `ph_composer.piping.group` (`group_id`, `group_path`): `hot_water_system_id` (a `one` reference to the Hot Water System, null while unlinked), `user_data`, schema version 1. Claims its Group. Model root or plain wrapper Groups only (Q13). **Pipe assignment (`ppe_`, `features/piping/assignment/`, P4-13b):** dictionary `ph_composer.piping` on an Edge directly in a Piping group, reference target `ph_composer.piping.pipe` (`group_path`, root-to-Edge `entity_path`, `entity_id`): `pipe_type_id` (a `one` reference, null after a type delete with null), `role` (`trunk`, `branch`, `twig`, `recirculation`) and the role's values (trunk `multiplier` >= 1 and `demand_recirculation`; recirculation `water_temp_c` and `daily_period` 0 to 24; none for the others), `user_data`, schema version 1. No edge registry (Q1). A System delete with a replacement or null reaches the groups through `request.retarget_references`, which Mechanical's delete calls naming no feature (P4-13b inference, evidence).
 
+### Duct Type (catalog record, ducting; D4-37, built in P4-14a)
+
+| Kind id | Label | Prefix | Store |
+| --- | --- | --- | --- |
+| `ph_composer.ducting.duct_type` (new) | Duct Type | `dct` | `DictionaryStore`, Model dictionary `ph_composer.records.ph_composer.ducting.duct_type` |
+
+**Duct Type (`dct_`, `features/ducting/type/`):** `Fields.common` (`name` shown as `Tag`), `shape` (`round` or `rectangular`, required, default `round`; shown Round and Rectangular), `diameter_mm` (`mm`, > 0; required for `round` and absent for `rectangular`, default 160), `width_mm` and `height_mm` (`mm`, > 0; required for `rectangular` and absent for `round`, no default), `insulation_thickness_mm` (`mm`, >= 0, required, default 25.4), `insulation_conductivity_w_mk` (`W/mK`, > 0 or absent, default 0.04), `insulation_reflective` (boolean, required, default true) and `color` (hex, stored only once authored; reads show a ramp colour by id in `display.color`). Schema version 1. The defaults are `PhDuctSegment`'s at 1.33.68. The shape rule is the kind's validation for every stored record, and `create` and `update` check it on the values they would write and refuse `params.invalid`; an update changing `shape` removes the old shape's dimensions in the same write (P4-14a). Direction and length are not on the type. Its export blocker, `ducting.insulation_conductivity_missing`, is insulation above 0 mm with no conductivity, read by P4-14d and P4-14e only for a type a duct uses. Not a library kind (Q7). Its `user_data` is the engine's; the export leaves it out (P4-14e).
+
 ### Serves (a payload on the Zone record, layer 3)
 
 D4-21, answered 2026-11-22: Serves is stored as Programs stores a Zone's assignment
@@ -231,7 +241,7 @@ is Zones'. The catalog kinds above keep theirs through the engine.
 
 ## 3. Operations
 
-Every name starts with `ph_composer.mechanical.`, except piping's, which start with `ph_composer.piping.`. Each query, action and view command is registered
+Every name starts with `ph_composer.mechanical.`, except piping's, which start with `ph_composer.piping.`, and ducting's, which start with `ph_composer.ducting.`. Each query, action and view command is registered
 with schemas and an example, so `docs/API_REFERENCE.md` regenerates and the reference test covers
 it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 
@@ -259,12 +269,14 @@ it. Id params carry the prefix pattern, for example `^vnt_[A-Za-z0-9]{12}$`.
 | `ph_composer.piping.groups.create`, `.link`, `.unlink`, `.list`, `.all`; `ph_composer.piping.pipes.assign`, `.clear`, `.selection`, `.selection_all`, `pipes.selected` | action, query, snapshot section | P4-13b | Piping groups (`ppg_`) on Groups and the pipe assignment (`ppe_`) on Edges directly in them, over explicit references, one Undo step each; `groups.create` opens the new group; codes `piping.outside_group`, `piping.group_in_zone`, `piping.group_nested`; the retargeter `ph_composer.piping.groups.retarget_hot_water_system` serves a System delete |
 | `ph_composer.piping.schedule`, `ph_composer.piping.schedule.details`, `ph_composer.piping.runs.members`; `ph_composer.piping.systems`, `piping_systems`; `ph_composer.piping.runs.locate` | query, query and snapshot section, view command | P4-13c | The schedule (bounded, `limit`, `cursor` and `compact`, with `schedule.details` paging the System, Pipe Type and unreadable rows and `runs.members` one run's pipes, as thermal bridges' `schedule.list`, `schedule.by_type.list` and `runs.members.list` do; no snapshot section, D3b-13's rule): runs by the core chain rule (`core/edge_runs.rb`) per group occurrence, role, Pipe Type and role values, each with System, group, role, `parent`, Pipe Type, drawn `length_m`, `line_count`, role `values`, `edge_paths` and section 6's findings; `totals` by role; `systems`, every Hot Water System's drawn distribution by role and its recirculation length, temperature and hours as honeybee-ph's `recirc_temp` and `recirc_hours` (D4-18); `types`, every Pipe Type's used length; `unreadable` records. `systems` alone is `ph_composer.piping.systems`, registered as the snapshot section `ph_composer.piping.piping_systems` because P4-13c measured it under the 200 ms target offline (about 55 ms on Ruby 3.2 at 2,000 pipes in a stub Model of 50,000 Edges; the host figure is M13c's); P4-13e's Systems columns read it. `runs.locate` selects one run's or finding's `edge_paths`, opening the group through `context.open`, refusing `piping.hidden` |
 | `ph_composer.piping.schedule.all`; `ph_composer.piping.pipe_tool.state`, `pipe_tool`, `.choose`, `.stop`, `.arm_menu`, `.stop_menu`; `ph_composer.piping.by_role`, `ph_composer.piping.by_type` | query, snapshot section, view command, menu item, colour mode | P4-13e | The panel's whole schedule read (unbounded, prefers `schedule`); the pipe tool in the thermal-bridge edge tool's shape, armed with a Pipe Type, a role and its values, each gesture one `pipes.assign`, leasing Colour by pipe role; the two Colour-by modes over Edges at the 5 px stroke, by role in fixed colours and by Pipe Type in its colour, the legend's `figure` the drawn length (equal to the schedule's totals by role). Piping contributes `Recirc.` °C and h/day to the Systems table through `table_contributions` from `piping_systems` |
+| `ph_composer.ducting.duct_types.list`, `.all`, `duct_types`, `.create`, `.update`, `.duplicate`, `.delete` | query, snapshot section, action | P4-14a | The flat Duct Types catalog (D4-37): CRUD through Mechanical's `CatalogOperations` with Mechanical's `Shapes`; a missing or other-shape dimension refuses `params.invalid`, a stale `expected_values` first refusing `target.changed`; rows add `display.color`, `export_ready` and `export_blockers`; delete takes `replacement_id` (another existing type or null; the type itself refuses `params.invalid`), whose Edge rewrite P4-14c adds |
 | `by_ventilator`, `by_hot_water_system` | colour mode | P4-05, P4-07 | `entity_kind: "zone"`: each Zone in its serving item's colour; unserved Zones uncoloured; the legend row counts Zones. The projection gives one entry per row of `ph_composer.zones.all`, which is one per Zone occurrence (two occurrences may share a Zone id), its value from that Zone's payload, and resolves the row's `reference.zone_path` with the core `OccurrencePath.resolve` for the entity and world transform, naming nothing of Zones' (section 8) |
 | `preflight` | query | P4-04 | The export preflight rows, passed to `export_contributor(preflight:)`. One query for the feature (P4-06): the export pane runs each contributor's named preflight, so only the Ventilator export names it, and each family's rows carry that family's `section` |
 
 Codes are declared once with `feature.code` in `features/mechanical/codes.rb` under the noun
 `mechanical`; piping's in `features/piping/codes.rb` under the noun `piping`, arriving in P4-13a with
-`piping.insulation_conductivity_missing`. P4-02 raises none of its own (its refusals are the foundation's), so the file arrives with the first,
+`piping.insulation_conductivity_missing`; ducting's in `features/ducting/codes.rb` under the noun `ducting`, arriving
+in P4-14a with `ducting.insulation_conductivity_missing`. P4-02 raises none of its own (its refusals are the foundation's), so the file arrives with the first,
 `mechanical.slot_filled` in P4-03. Refusals that Zones owns keep Zones' `target.*` codes, and a delete in use keeps the
 foundation's `reference.in_use`.
 

@@ -1593,6 +1593,233 @@ Values:
 }
 ```
 
+### `ph_composer.ducting.duct_type`
+
+Duct Type, a catalog kind owned by `ph_composer.ducting`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "shape",
+    "insulation_thickness_mm",
+    "insulation_reflective"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "shape": {
+              "type": "string",
+              "enum": [
+                "round",
+                "rectangular"
+              ],
+              "description": "The duct's cross-section: round or rectangular."
+            },
+            "diameter_mm": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "x-unit": "mm",
+              "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+            },
+            "width_mm": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "x-unit": "mm",
+              "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+            },
+            "height_mm": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "x-unit": "mm",
+              "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+            },
+            "insulation_thickness_mm": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "mm",
+              "description": "The insulation thickness; 0 for a bare duct."
+            },
+            "insulation_conductivity_w_mk": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "exclusiveMinimum": 0,
+              "x-unit": "W/mK",
+              "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+            },
+            "insulation_reflective": {
+              "type": "boolean",
+              "description": "Whether the insulation has a reflective facing."
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "shape": {
+      "type": "string",
+      "enum": [
+        "round",
+        "rectangular"
+      ],
+      "description": "The duct's cross-section: round or rectangular."
+    },
+    "diameter_mm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "x-unit": "mm",
+      "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+    },
+    "width_mm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "x-unit": "mm",
+      "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+    },
+    "height_mm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "x-unit": "mm",
+      "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+    },
+    "insulation_thickness_mm": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "mm",
+      "description": "The insulation thickness; 0 for a bare duct."
+    },
+    "insulation_conductivity_w_mk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "x-unit": "W/mK",
+      "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+    },
+    "insulation_reflective": {
+      "type": "boolean",
+      "description": "Whether the insulation has a reflective facing."
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    }
+  }
+}
+```
+
 ### `ph_composer.mechanical.electric_heater`
 
 Electric Heater, a catalog kind owned by `ph_composer.mechanical`, schema version 1.
@@ -16601,6 +16828,759 @@ Example params:
 ```json
 {
   "limit": 50
+}
+```
+
+### `ph_composer.ducting.duct_types.all`
+
+Every Duct Type with its values and export readiness, for the panel snapshot. Owner: `ph_composer.ducting`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.duct_types.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "shape",
+              "insulation_thickness_mm",
+              "insulation_reflective"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "shape": {
+                        "type": "string",
+                        "enum": [
+                          "round",
+                          "rectangular"
+                        ],
+                        "description": "The duct's cross-section: round or rectangular."
+                      },
+                      "diameter_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+                      },
+                      "width_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+                      },
+                      "height_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+                      },
+                      "insulation_thickness_mm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "mm",
+                        "description": "The insulation thickness; 0 for a bare duct."
+                      },
+                      "insulation_conductivity_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "W/mK",
+                        "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+                      },
+                      "insulation_reflective": {
+                        "type": "boolean",
+                        "description": "Whether the insulation has a reflective facing."
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "round",
+                  "rectangular"
+                ],
+                "description": "The duct's cross-section: round or rectangular."
+              },
+              "diameter_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+              },
+              "width_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+              },
+              "height_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+              },
+              "insulation_thickness_mm": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "mm",
+                "description": "The insulation thickness; 0 for a bare duct."
+              },
+              "insulation_conductivity_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "W/mK",
+                "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+              },
+              "insulation_reflective": {
+                "type": "boolean",
+                "description": "Whether the insulation has a reflective facing."
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether a duct using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once a duct uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.ducting.duct_types.list`
+
+One bounded page of Duct Types in id order, with export readiness. Owner: `ph_composer.ducting`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^dct_[A-Za-z0-9]{12}$",
+        "description": "A Duct Type id."
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id",
+          "schema_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "shape",
+              "insulation_thickness_mm",
+              "insulation_reflective"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "shape": {
+                        "type": "string",
+                        "enum": [
+                          "round",
+                          "rectangular"
+                        ],
+                        "description": "The duct's cross-section: round or rectangular."
+                      },
+                      "diameter_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+                      },
+                      "width_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+                      },
+                      "height_mm": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "mm",
+                        "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+                      },
+                      "insulation_thickness_mm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "mm",
+                        "description": "The insulation thickness; 0 for a bare duct."
+                      },
+                      "insulation_conductivity_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "exclusiveMinimum": 0,
+                        "x-unit": "W/mK",
+                        "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+                      },
+                      "insulation_reflective": {
+                        "type": "boolean",
+                        "description": "Whether the insulation has a reflective facing."
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "round",
+                  "rectangular"
+                ],
+                "description": "The duct's cross-section: round or rectangular."
+              },
+              "diameter_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+              },
+              "width_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+              },
+              "height_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm",
+                "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+              },
+              "insulation_thickness_mm": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "mm",
+                "description": "The insulation thickness; 0 for a bare duct."
+              },
+              "insulation_conductivity_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "W/mK",
+                "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+              },
+              "insulation_reflective": {
+                "type": "boolean",
+                "description": "Whether the insulation has a reflective facing."
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether a duct using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once a duct uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
 }
 ```
 
@@ -73914,6 +74894,1099 @@ Example params:
 }
 ```
 
+### `ph_composer.ducting.duct_types.create`
+
+Create one Duct Type. Unless values give them, it is a round duct of diameter_mm 160 with 25.4 mm of reflective insulation at 0.04 W/mK and no stored color; a rectangular one gives width_mm and height_mm and no diameter. A missing or other-shape dimension refuses params.invalid. Owner: `ph_composer.ducting`.
+
+Undo step: Create Duct Type. Creates one Model-owned definition.
+
+Before calling: Its name, trimmed and in any case, is not another Duct Type's. The values written give the shape's dimensions and no other shape's: diameter_mm for round, width_mm and height_mm for rectangular.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "round",
+                    "rectangular"
+                  ],
+                  "description": "The duct's cross-section: round or rectangular."
+                },
+                "diameter_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+                },
+                "width_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "height_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare duct."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "shape": {
+          "type": "string",
+          "enum": [
+            "round",
+            "rectangular"
+          ],
+          "description": "The duct's cross-section: round or rectangular."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+        },
+        "width_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "height_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "insulation_thickness_mm": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare duct."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+        },
+        "insulation_reflective": {
+          "type": "boolean",
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The new Duct Type's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "DT-2",
+    "shape": "rectangular",
+    "width_mm": 200.0,
+    "height_mm": 100.0,
+    "insulation_thickness_mm": 50.8
+  }
+}
+```
+
+### `ph_composer.ducting.duct_types.delete`
+
+Delete one Duct Type. A type a duct still uses refuses as reference.in_use unless replacement_id names another type to take its place, or is null to clear it. Owner: `ph_composer.ducting`.
+
+Undo step: Delete Duct Type. Deletes one definition and its metadata; Undo restores both.
+
+Before calling: The Duct Type exists and is readable.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dct_[A-Za-z0-9]{12}$",
+      "description": "The Duct Type to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "round",
+                    "rectangular"
+                  ],
+                  "description": "The duct's cross-section: round or rectangular."
+                },
+                "diameter_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+                },
+                "width_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "height_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare duct."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "shape": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "round",
+            "rectangular",
+            null
+          ],
+          "description": "The duct's cross-section: round or rectangular."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+        },
+        "width_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "height_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare duct."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^dct_[A-Za-z0-9]{12}$",
+      "description": "Another existing Duct Type to take this one's place on every duct using it, or null to clear them; while no duct uses it, there is nothing to move."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dct_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dct_Ab12Cd34Ef56",
+  "replacement_id": "dct_Zy98Xw76Vu54"
+}
+```
+
+### `ph_composer.ducting.duct_types.duplicate`
+
+Duplicate one Duct Type with a new id and source derived. Owner: `ph_composer.ducting`.
+
+Undo step: Duplicate Duct Type. Creates one definition; user_data is copied.
+
+Before calling: The Duct Type exists and is readable.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dct_[A-Za-z0-9]{12}$",
+      "description": "The Duct Type to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name. When absent, the first free of \"<name> (copy)\", \"<name> (copy 2)\" and so on; read the result's id. Names are unique."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dct_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.ducting.duct_types.update`
+
+Edit guarded values of one Duct Type; a changed expected value refuses and writes nothing. A new shape removes the old shape's dimensions and must give its own; a missing or other-shape dimension refuses params.invalid. A null color returns the type to its default colour. Owner: `ph_composer.ducting`.
+
+Undo step: Edit Duct Type. Updates one definition and preserves its metadata.
+
+Before calling: The Duct Type exists and is readable. A new name: Its name, trimmed and in any case, is not another Duct Type's. The values written give the shape's dimensions and no other shape's: diameter_mm for round, width_mm and height_mm for rectangular.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dct_[A-Za-z0-9]{12}$",
+      "description": "The Duct Type to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "shape": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "round",
+            "rectangular",
+            null
+          ],
+          "description": "The duct's cross-section: round or rectangular."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+        },
+        "width_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "height_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare duct."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The values to change; any not given stay. Null removes an optional value."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "round",
+                    "rectangular"
+                  ],
+                  "description": "The duct's cross-section: round or rectangular."
+                },
+                "diameter_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+                },
+                "width_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "height_mm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "mm",
+                  "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+                },
+                "insulation_thickness_mm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "mm",
+                  "description": "The insulation thickness; 0 for a bare duct."
+                },
+                "insulation_conductivity_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "exclusiveMinimum": 0,
+                  "x-unit": "W/mK",
+                  "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+                },
+                "insulation_reflective": {
+                  "type": "boolean",
+                  "description": "Whether the insulation has a reflective facing."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "shape": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "round",
+            "rectangular",
+            null
+          ],
+          "description": "The duct's cross-section: round or rectangular."
+        },
+        "diameter_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside diameter. A round type needs it, 160 when a create leaves it out; a rectangular one has none, and null removes it."
+        },
+        "width_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside width. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "height_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "mm",
+          "description": "The inside height. A rectangular type needs it; a round one has none, and null removes it."
+        },
+        "insulation_thickness_mm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "mm",
+          "description": "The insulation thickness; 0 for a bare duct."
+        },
+        "insulation_conductivity_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "W/mK",
+          "description": "The insulation's conductivity; absent while unknown, which blocks the export of an insulated type once a duct uses it."
+        },
+        "insulation_reflective": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the insulation has a reflective facing."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "dct_Ab12Cd34Ef56",
+  "values": {
+    "shape": "rectangular",
+    "width_mm": 200.0,
+    "height_mm": 100.0
+  },
+  "expected_values": {
+    "shape": "round"
+  }
+}
+```
+
 ### `ph_composer.library.copy`
 
 Copy or reuse one library record with optional assignment. Owner: `ph_composer.library`.
@@ -125773,6 +127846,12 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.utc_offset_not_set` | The site's hours from UTC are not set. They are exported empty. |
 | `climate.zone_not_set` | The site's climate zone is not set. It is exported as Not defined. |
 
+### `ph_composer.ducting`
+
+| Code | Meaning |
+| --- | --- |
+| `ducting.insulation_conductivity_missing` | A Duct Type has insulation and no insulation conductivity, so a duct using it cannot export. |
+
 ### `ph_composer.mechanical`
 
 | Code | Meaning |
@@ -126124,3 +128203,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.100 | 2026-11-24 | ph_composer.piping adds the schedule: ph_composer.piping.schedule (runs by connection with their parents, lengths and findings, totals, each Hot Water System's distribution and recirculation and each Pipe Type's used length, with compact), ph_composer.piping.schedule.details, ph_composer.piping.runs.members, ph_composer.piping.systems and its snapshot section, and the view command ph_composer.piping.runs.locate, with the codes piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, piping.trunk_without_branches, piping.parent_ambiguous, piping.shared_definition and piping.hidden. pipe_types.list and pipe_types.all rows add used_length_m. A pipe's water_temp_c is 0 to 100. The thermal-bridge chain rule moves to core unchanged. |
 | 1.101 | 2026-11-24 | ph_composer.piping exports its pipes: the export section ph_composer.piping.export.piping adds each Hot Water System's trunks, branches, twigs and recirculation elements to its hot water systems, the query ph_composer.piping.export_preflight lists its checks, and the code piping.system_unexported notes a System whose pipes no exported Zone takes. The schedule's recirculation temperature and hours add runs and pipes in identifier order, as a reloaded honeybee-ph system does. |
 | 1.102 | 2026-11-24 | ph_composer.piping adds the panel's whole schedule read ph_composer.piping.schedule.all, the pipe tool (ph_composer.piping.pipe_tool.state and its snapshot section, the view commands pipe_tool.choose and pipe_tool.stop, and their menu items) and the Colour-by modes ph_composer.piping.by_role and ph_composer.piping.by_type. ph_composer.mechanical.hot_water_systems rows drop recirculation, which the piping Systems read gives. Units add hours_per_day. |
+| 1.103 | 2026-11-25 | ph_composer.ducting is new: the Duct Type kind, duct_types.list, duct_types.all and its snapshot section, and duct_types.create, duct_types.update, duct_types.duplicate and duct_types.delete, with the code ducting.insulation_conductivity_missing. |

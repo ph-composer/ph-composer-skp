@@ -1,7 +1,7 @@
 # ERV ducting
 
 DATE: 2026-10-21
-STATUS: Requested. Draft, not interviewed. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged; see hot-water-piping's note of the same day.
+STATUS: Requested. Interviewed 2026-11-23 (D4-37) and planned in full 2026-11-24 as [P4-14a to P4-14f](../phases/p4-14-erv-ducting.md), which correct its field citations to the pinned 1.33.68 and settle the record fields. Re-baselined against `main` at `420c783a` on 2026-10-21. Noted 2026-11-22: Phase 3b's stages are merged; see hot-water-piping's note of the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

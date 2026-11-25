@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 102
+    MINOR = 103
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -640,7 +640,11 @@ module PhComposer
                     "pipe_tool.choose and pipe_tool.stop, and their menu items) and the Colour-by modes " \
                     "ph_composer.piping.by_role and ph_composer.piping.by_type. ph_composer.mechanical." \
                     "hot_water_systems rows drop recirculation, which the piping Systems read gives. Units add " \
-                    "hours_per_day." }
+                    "hours_per_day." },
+      { "minor" => 103, "date" => "2026-11-25",
+        "change" => "ph_composer.ducting is new: the Duct Type kind, duct_types.list, duct_types.all and its " \
+                    "snapshot section, and duct_types.create, duct_types.update, duct_types.duplicate and " \
+                    "duct_types.delete, with the code ducting.insulation_conductivity_missing." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

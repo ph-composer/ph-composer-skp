@@ -1,7 +1,7 @@
 # P4-13e: the Piping pills, Colour-by and the pipe tool
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13e`, on `main` after #579 merged; offline evidence in [p4-13e-piping-view](../evidence/p4-13e-piping-view.md), host case `M13e` owed to MS3; the edge tool was not moved to `core/` (recorded in the evidence). Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-13, D4-18, D4-30, D4-36 (Q2, Q6, Q11) and the [piping PRD](../hot-water-piping/PRD.md), "Pipe Types", "Assign", "Schedule" and "Colour-by mode". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13e` runs in the MS3 sitting (D4-31) with Ed at the mouse.
+STATUS: Merged to main 2026-11-25 (#580, squash `98ba249c`); offline evidence in [p4-13e-piping-view](../evidence/p4-13e-piping-view.md), host case `M13e` owed to MS3; the edge tool was not moved to `core/` (recorded in the evidence). Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-13, D4-18, D4-30, D4-36 (Q2, Q6, Q11) and the [piping PRD](../hot-water-piping/PRD.md), "Pipe Types", "Assign", "Schedule" and "Colour-by mode". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13e` runs in the MS3 sitting (D4-31) with Ed at the mouse.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

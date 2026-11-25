@@ -229,7 +229,14 @@ terms are at the end, marked planned.
 | Role | What a Pipe does in its System: **Trunk**, **Branch**, **Twig** or **Recirculation**. Connected Pipes with one Role, Pipe Type and role values in one Piping group form one run; a Branch hangs from the Trunk it touches and a Twig from the Branch it touches, so a tree lives in one Piping group. Recirculation is summed per System, with no tree |
 | Twig | The Role of a fixture run, the last pipe to a tap, as METr names it. honeybee-ph calls it a fixture |
 | Pipe-Segment | honeybee-ph's pipe segment, one per Pipe at export, carrying the Pipe Type's values and the line as its geometry. Always written with its qualifier, as Building-Segment is |
-| Ducting | Modeled duct runs, their segments and the ventilation systems they serve |
+| Duct Type | A named ventilation duct specification kept in the Model: a **Shape**, Round (the default) or Rectangular, with a **Diameter** for Round (160 mm by default) or a **Width** and **Height** for Rectangular, never both, and its **Insulation**: thickness, conductivity and reflective facing. A duct's direction and length are not on it. Not a library kind |
+| Duct | One drawn SketchUp line inside a Ducting group that carries a Duct Type, a Direction and a quantity. Only the two cold runs between a ventilator and the outside are drawn |
+| Ducting group | A SketchUp group at the Model root, or in a plain wrapper, never inside a Zone, that holds drawn Ducts and is linked to one Ventilator. A copy keeps its Ventilator |
+| Direction | Which cold run a Duct belongs to: **Outdoor air** or **Exhaust air**. honeybee-ph's `duct_type` 1 (supply) and 2 (exhaust); "supply" is not used, since room supply air is another duct |
+| Outdoor air | The Direction of the intake run, from the outside to the ventilator |
+| Exhaust air | The Direction of the discharge run, from the ventilator to the outside |
+| Duct run | The Ducts of one Ducting group placement with one Direction, one Duct Type and one quantity, whether they touch or not |
+| Duct-Segment | honeybee-ph's duct segment, one per Duct at export, carrying the Duct Type's values in metres and the line as its geometry. Always written with its qualifier, as Pipe-Segment is |
 
 ## Export
 

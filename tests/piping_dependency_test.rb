@@ -22,9 +22,10 @@ class PipingDependencyTest < PhComposerTestCase
     assert_empty offenders.map { |path| path.delete_prefix("#{ROOT}/") }
   end
 
-  def test_piping_requires_mechanical_and_zones_and_installs_last
+  def test_piping_requires_mechanical_and_zones_and_installs_after_mechanical
     assert_equal %w[ph_composer.mechanical ph_composer.zones],
                  PhComposer::Registry.current.features.fetch("ph_composer.piping").requires
-    assert_equal PhComposer::Piping, PhComposer::FEATURES.last
+    features = PhComposer::FEATURES
+    assert_operator features.index(PhComposer::Piping), :>, features.index(PhComposer::Mechanical)
   end
 end

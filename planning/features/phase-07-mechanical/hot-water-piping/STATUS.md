@@ -1,7 +1,7 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: Implemented on branch: P4-13a merged (#576); P4-13b merged (#577); P4-13c merged (#578); P4-13d merged (#579); P4-13e in review. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
+STATUS: Merged to main, host cases owed to MS3: P4-13a merged (#576); P4-13b merged (#577); P4-13c merged (#578); P4-13d merged (#579); P4-13e merged (#580). Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -29,7 +29,7 @@ This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
 [P4-13b](../phases/p4-13b-piping-groups-and-assignment.md), Piping groups and the pipe assignment, is merged (#577), and
 [P4-13c](../phases/p4-13c-tree-and-schedule.md), the chain rule in `core/`, the tree and the schedule, is merged (#578), and
 [P4-13d](../phases/p4-13d-piping-export.md), the piping export, is merged (#579), and
-[P4-13e](../phases/p4-13e-piping-view.md), the Piping pills, Colour-by and the pipe tool, is in review
+[P4-13e](../phases/p4-13e-piping-view.md), the Piping pills, Colour-by and the pipe tool, is merged (#580)
 ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
 [phase ledger](../STATUS.md).
 
@@ -75,3 +75,4 @@ P4-13a offline: [p4-13a-pipe-types](../evidence/p4-13a-pipe-types.md). P4-13b of
 | 2026-11-24 | P4-13b merged (#577). P4-13c implemented on `feat/phase-07-mechanical-p4-13c` and in review: the chain rule moved to `core/edge_runs.rb`, the tree by connection, the recirculation sum, findings and the schedule; host case `M13c` owed to MS3. |
 | 2026-11-24 | P4-13c merged (#578). P4-13d implemented on `feat/phase-07-mechanical-p4-13d` and in review: the piping export into each Hot Water System's hot water systems, conformance and a PHX round trip; host case `M13d` owed to MS3. |
 | 2026-11-24 | P4-13d merged (#579). P4-13e implemented on `feat/phase-07-mechanical-p4-13e` and in review: the Pipe Types and Piping pills, the assign bar and pipe tool, the schedule, the Systems table's recirculation columns, the two Colour-by modes; host case `M13e` owed to MS3. |
+| 2026-11-25 | P4-13e merged (#580). Every sub-stage is on `main`; host cases `M13a` to `M13e` owed to MS3. |

@@ -443,6 +443,20 @@ into the Hot Water System it belongs to. Scripts and assistants reach the same s
 6. The palette in the schedule's **Role** header colours the pipes in the viewport by role, and the one in
    the Pipe Types **Tag** header by Pipe Type. The legend sums each colour's length.
 
+## Draw ERV ducting
+
+ERV ducting is the two cold runs between each ventilator and the outside, Outdoor air and Exhaust air,
+traced as lines over the model and exported into the ventilator's system. It is being built in steps. What
+exists now is the Duct Type, available to scripts and assistants through the
+[agent guide](AGENT_GUIDE.md#erv-ducting); the panel's Duct Types table, the Ducting groups that hold drawn
+lines, assignment and the schedule follow.
+
+A **Duct Type** is one duct specification kept in the model: its **Shape**, Round or Rectangular, with a
+**Diameter** for a round duct or a **Width** and **Height** for a rectangular one, and its insulation:
+thickness, conductivity and a reflective facing. A new type is a 160 mm round duct with 25.4 mm of
+reflective insulation at 0.04 W/(m K). Changing a type's shape asks for the new shape's size. A type with
+insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
+
 ## Reuse library definitions
 
 Use **Libraries** to add a file, a folder of files or a connection supplied by a hosted provider.

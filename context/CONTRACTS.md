@@ -833,7 +833,7 @@ Segment's set points and its Dwellings' units and counts from the Python result.
 ## Mechanical equipment
 
 `ph_composer.mechanical` (`features/mechanical/`) requires Zones, Spaces, Programs and Climate, and no other feature
-names it but Piping, which requires it (`tests/mechanical_dependency_test.rb` reads that from the registry). Each
+names it but Piping and Ducting, which require it (`tests/mechanical_dependency_test.rb` reads that from the registry). Each
 equipment family is a folder of catalog kinds that name nothing they are used by; a test holds that no family folder
 names Zones, Spaces, Programs, the Zone record or `serves/` (`tests/mechanical_dependency_test.rb`). Serves
 (`features/mechanical/serves/`) sits above the families and names them.
@@ -1245,7 +1245,7 @@ the room temperature and the bypass mode and not mechanical cooling
 ## Hot water piping
 
 `ph_composer.piping` (`features/piping/`) requires Mechanical, which owns the Hot Water System its pipes export into,
-and Zones, and installs last. Nothing under `features/mechanical/` or `html/features/mechanical/` names it
+and Zones, and installs after Mechanical. Nothing under `features/mechanical/` or `html/features/mechanical/` names it
 (`tests/piping_dependency_test.rb`); Mechanical's own words for piping, such as `piping_calc_method`, stay. Codes are
 under the noun `piping` (`features/piping/codes.rb`).
 
@@ -1359,6 +1359,37 @@ pipe segment carries its pipe's.
   `API.invoke`, one Undo step; Escape, deactivation, suspension, a lost release and an edit-path change cancel and
   write nothing. Menu items `pipe_tool.arm_menu` (re-arms with the last choice) and `pipe_tool.stop_menu` sit under
   "Hot water piping".
+
+## ERV ducting
+
+`ph_composer.ducting` (`features/ducting/`) requires Mechanical, which owns the Ventilator its ducts export into, and
+Zones, and installs last. Nothing under Mechanical's or Piping's folders, Ruby or panel, names it, and nothing under
+its own names Piping (`tests/ducting_dependency_test.rb`). Codes are under the noun `ducting`
+(`features/ducting/codes.rb`).
+
+- **Duct Type** (`ph_composer.ducting.duct_type`, `dct_`, `schema_version` 1, `features/ducting/type/`), a Model-owned
+  definition stored by `DictionaryStore` in the Model dictionary `ph_composer.records.ph_composer.ducting.duct_type`:
+  the shared name (shown as Tag), notes, datasheet links and source; `shape`, `round` (the default) or `rectangular`;
+  the shape's dimensions in mm, above 0: `diameter_mm` for a round type (default 160) or `width_mm` and `height_mm`
+  for a rectangular one (no default); `insulation_thickness_mm` (at least 0, default 25.4);
+  `insulation_conductivity_w_mk` (W/(m K), above 0, or absent; default 0.04); `insulation_reflective` (default
+  true); and `color`, stored only once authored, read as a ramp colour by id until then. The defaults are
+  honeybee-ph's duct segment's. A shape's dimensions are required and the other shape's absent: the kind refuses
+  any other stored record, and `create` and `update` refuse such values `params.invalid` before writing. An
+  `update` that changes `shape` removes the old shape's dimensions in the same write and must give the new
+  shape's. A duct's direction and length are not on the type. It names no Edge, group or run, and it is not a
+  library kind.
+
+`ph_composer.ducting.duct_types.create`, `update`, `duplicate` and `delete` are one Undo step each, through
+Mechanical's `CatalogOperations`, with Mechanical's catalog param shapes: names are unique, `update` is guarded by
+`expected_values` (a stale value refuses `target.changed` before the shape is checked) and a null removes an optional
+value, `duplicate` gives a new id, the source `derived` and a copy of the `user_data`, and `delete` is the engine's
+guarded delete. `delete` takes `replacement_id`, another existing type or null, which refuses `params.invalid` when
+it names the type itself. `duct_types.list` and `duct_types.all` (also the snapshot section
+`ph_composer.ducting.duct_types`) answer each record's view with `display.color`, `export_ready` and
+`export_blockers`: `ducting.insulation_conductivity_missing` for a type with insulation above 0 mm and no
+conductivity, which blocks the export only of a duct that uses it; a bare duct needs no conductivity. Its
+`user_data` is written with `ph_composer.records.update_metadata` and kept in the Model.
 
 ## This computer's settings file
 

@@ -53,7 +53,7 @@ stages, the bindings, the decisions and the one ledger.
 | [P4-08](phases/p4-08-heat-pumps.md), [P4-09](phases/p4-09-electric-heaters.md), [P4-10](phases/p4-10-pumps.md), [P4-11](phases/p4-11-fans.md), [P4-12](phases/p4-12-appliances.md) | Families 3 to 6, each after its interview. P4-12, appliances, is superseded by Phase 6's Equipment Sets |
 | [P4-08b](phases/p4-08b-segment-mechanical-settings.md) | Mechanical cooling, the mechanical room temperature and summer ventilation on the Building Segment, handed over by Phase 6 |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping as five sub-stages, P4-13a to P4-13e: Pipe Types, Piping groups and assignment, the tree and schedule (with the chain rule moved to `core/`), the export into the Hot Water System, and the Piping pills |
-| [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting, the second drawn packet, after its plan |
+| [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting as six sub-stages, P4-14a to P4-14f: Duct Types, the shared line-group layer extracted from piping, Ducting groups and assignment, runs and the schedule, the export into the ventilation system, and the Ducting pills with the Ventilators columns |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Integrated acceptance, context, docs, the metr-export handoff; the phase close |
 
 ## What this packet needs from elsewhere
