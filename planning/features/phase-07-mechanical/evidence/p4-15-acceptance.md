@@ -77,8 +77,8 @@ Each row's offline evidence is its stage's evidence file; nothing is Pass. "Sitt
 | M15 | P4-15 | This file | MS3 | `M15` (added to `cases.json` by this stage) | the integrated run; the stale cases below that Ed assigns to it |
 | M16 | P4-08b, post-cap fixes | [p4-08b-segment-mechanical-settings](p4-08b-segment-mechanical-settings.md), [post-cap-review](post-cap-review.md) | MS3 | `M16` | |
 
-Two clauses need a word at the sitting. M04, M14e and M16 (and their cases) ask that "save, reopen and re-export give
-the same HBJSON". P4-13d's review noted, not reproduced, that two Python processes give canonical HBJSON differing in
+One clause needs a word at the sitting. The cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e` and `M16` ask that save,
+reopen and re-export give the same HBJSON (`M14e` already narrows it to the same ventilation systems). P4-13d's review noted, not reproduced, that two Python processes give canonical HBJSON differing in
 `team` identifiers, `bldg_segments` and list order, so a whole-file byte comparison cannot hold; P4-13d compared the
 hot water systems and piping, which were identical. The sitting should compare those clauses' sections, not the
 file's bytes, unless Ed rules otherwise ("For Ed" below).
@@ -86,7 +86,7 @@ file's bytes, unless Ed rules otherwise ("For Ed" below).
 ## Owed host cases, by sitting
 
 From `acceptance_ledger.py status` on this head, with `--changed` for each of the 449 paths
-`git diff --name-only 73936d2a^ HEAD` names (every Phase 7 change): 165 cases with `M15`, of which 113 `needs_recheck`, 36
+`git diff --name-only 73936d2a^ 44ca8237` names (every Phase 7 change up to #590): 165 cases with `M15`, of which 113 `needs_recheck`, 36
 `not_run`, 10 `historical_affected`, 5 `source_unchanged_environment_unchecked` and 1 `deferred`.
 
 | Sitting | Cases | Count |
@@ -176,7 +176,7 @@ Rows marked "not re-verified" were collected from the evidence files and not che
 | --- | --- | --- |
 | 1 | Reset the installed-size baseline to this head's size (proposed above), and say whether the 2,500,000 growth allowance or the 28,000,000 ceiling moves; under the ceiling the next phase has the headroom above | This file, step 1; stage document step 1 |
 | 2 | Which of the 48 stale cases Phase 7's changes name the MS3 sitting repeats (no stage document names them) | This file, "Owed host cases" |
-| 3 | "Same HBJSON" on re-export (M04, M14e, M16 and their cases): compare the sections, as P4-13d did, or the whole file, which differs across Python processes (noted in review, not reproduced) | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 |
+| 3 | "Same HBJSON" on re-export (cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e`, `M16`): compare the sections, as P4-13d did, or the whole file, which differs across Python processes (noted in review, not reproduced) | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 |
 | 4 | A duct run of quantity N exports as N identical elements, so METr lists N rows of quantity 1; built as inferred. The alternative is carrying it in `user_data` | p4-14e-ducting-export, "Recorded at implementation"; phases/p4-14-erv-ducting, "Inferred in planning" |
 | 5 | Whether a Ventilator's own Quantity should multiply its ducts (a Ventilator of Quantity 40 exports the ducts drawn for it) | phases/p4-14-erv-ducting, "Inferred in planning" |
 | 6 | A large duct quantity multiplies the HBJSON, each element once per served Room; only the 10,000 cap bounds it | p4-14e-ducting-export, "Review" (not re-verified) |

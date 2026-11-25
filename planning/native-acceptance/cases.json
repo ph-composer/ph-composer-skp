@@ -5930,7 +5930,7 @@
     },
     {
       "id": "M15",
-      "label": "Phase 7 integrated run on the reference model in a fresh process with the normal installed RBZ, Ed at the mouse: two Ventilators, the Hot Water System with its heaters and tanks, and one heat pump set, Electric Heater, Pump and Fan authored from scratch through the panel; one Building Segment's mechanical settings saved; a nested Zone and a copied Zone served, and one served Zone in no Building Segment; pipes and ducts drawn in their groups and assigned; two Models open; native Undo and Redo across the session; save, close, reopen; export, reload the exact HBJSON in the pinned honeybee stack and compare with ACCEPTANCE's reference model, hot water piping and ERV ducting tables; one recorded agent client session per new family discovering, enumerating, reading, editing, reading back and locating through the installed connection only; the stale cases the ledger screens repeated",
+      "label": "Phase 7 integrated run on the reference model in a fresh process with the normal installed RBZ, Ed at the mouse, with M08's climate set (the twelve monthly mean temperatures and both design temperatures, so the blend exports): two Ventilators, the Hot Water System with its heaters and tanks, and one heat pump set, Electric Heater, Pump and Fan authored from scratch through the panel; one Building Segment's mechanical settings saved; a nested Zone and a copied Zone served, and one served Zone in no Building Segment; pipes and ducts drawn in their groups and assigned; two Models open; native Undo and Redo across the session; save, close, reopen; export, reload the exact HBJSON in the pinned honeybee stack and compare each family with its register row's expected values (ACCEPTANCE's reference model, M08's blend, M09 to M11's devices, M16's Segment settings, and the hot water piping and ERV ducting tables); one recorded agent client session per new family discovering, enumerating, reading, editing, reading back and locating through the installed connection only; the stale cases the ledger screens repeated",
       "mode": "mixed",
       "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
       "paths": [
@@ -5946,10 +5946,14 @@
         "src/ph_composer/html/features/ducting/*",
         "src/ph_composer/html/line_groups/*",
         "src/ph_composer/agent_access/*",
-        "src/ph_composer/shell/api.rb",
         "src/ph_composer/export/*",
         "src/ph_composer/python/ph_composer_translation/*",
-        "src/ph_composer/vendor/manifest.json"
+        "src/ph_composer/vendor/manifest.json",
+        "src/ph_composer/features/zones/*",
+        "src/ph_composer/html/features/zones/*",
+        "src/ph_composer/features/climate/*",
+        "src/ph_composer/html/sections/*",
+        "src/ph_composer/shell/*"
       ],
       "native_control_required": true
     },

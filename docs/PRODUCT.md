@@ -353,11 +353,14 @@ Hot water flow stays in L/h per m².
 5. **Blended result** shows, for each Building Segment an indoor unit serves, the one air-source heat
    pump the export writes, worked out by the Phius estimator's method from the outdoor models serving
    that Segment and laid out in the estimator's sections. It needs the model's climate: the twelve
-   monthly mean temperatures and both design temperatures. **Copy for the estimator** copies its rows.
+   monthly mean temperatures and both design temperatures. Without them, or while no outdoor model
+   serving the Segment has the values the blend needs, there is no blend and the export writes no heat
+   pump for that Segment. **Copy for the estimator** copies its rows.
 6. The Export pane notes an indoor unit serving no Zone, an outdoor unit with no indoor unit serving
    one, an outdoor unit whose Zones sit in two Building Segments, and a Segment whose cooling passes
-   200 kW (682 kBtu/h), which is still exported as one heat pump. None of these stops the export; a Zone or
-   unit naming a unit or model that is no longer in the model does.
+   200 kW (682 kBtu/h), which is still exported as one heat pump. None of these stops the export. An exported Zone
+   naming an indoor unit that is no longer in the model does, and so does a served indoor unit whose
+   outdoor unit, or that unit's outdoor model, is gone.
 7. Deleting a model or unit that another record or a Zone names asks which takes its place.
 
 ## Add hot water systems, heaters and tanks
