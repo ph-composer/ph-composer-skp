@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 103
+    MINOR = 104
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -644,7 +644,15 @@ module PhComposer
       { "minor" => 103, "date" => "2026-11-25",
         "change" => "ph_composer.ducting is new: the Duct Type kind, duct_types.list, duct_types.all and its " \
                     "snapshot section, and duct_types.create, duct_types.update, duct_types.duplicate and " \
-                    "duct_types.delete, with the code ducting.insulation_conductivity_missing." }
+                    "duct_types.delete, with the code ducting.insulation_conductivity_missing." },
+      { "minor" => 104, "date" => "2026-11-25",
+        "change" => "ph_composer.ducting adds Ducting groups and ducts: the reference targets " \
+                    "ph_composer.ducting.group and ph_composer.ducting.duct, groups.create, groups.link, " \
+                    "groups.unlink, groups.list, groups.all, ducts.assign, ducts.clear, ducts.selection, " \
+                    "ducts.selection_all and its snapshot section, with the codes ducting.outside_group, " \
+                    "ducting.group_in_zone and ducting.group_nested. duct_types.delete moves or nulls the ducts " \
+                    "using a type. A Ventilator delete with a replacement_id, or null, now also moves or clears " \
+                    "every other feature's record naming it, through the registered reference retargeters." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

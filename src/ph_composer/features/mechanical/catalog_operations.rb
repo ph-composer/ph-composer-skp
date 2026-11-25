@@ -61,6 +61,15 @@ module PhComposer
         end
       end
 
+      # `plan` with every other feature's records naming `kind`'s `from` moved to `to`, or cleared with nil, through
+      # the foundation's registered retargeters (context/CONTRACTS.md, "A definition delete handler"). Mechanical
+      # names none of them.
+      def with_retargeted(request, plan, kind, from:, to:)
+        foreign = request.retarget_references(kind, :from => from, :to => to)
+        Records::ReferencePlan.new(:entries => plan.entries + foreign.entries,
+                                   :removals => plan.removals + foreign.removals)
+      end
+
       # The engine's guarded delete: a record another still names refuses as reference.in_use. `reference_plan`
       # projects the entity records a caller moved off it in the same proposal.
       def delete(request, proposal, kind, id:, expected_values: {}, reference_plan: nil)

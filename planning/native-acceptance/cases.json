@@ -5797,6 +5797,31 @@
       "native_control_required": true
     },
     {
+      "id": "M14c",
+      "label": "Ducting groups and duct assignment with the panel closed, on the installed RBZ (tools/examples/authoring/ducting_assignment_walkthrough.rb), run after M13b's H1 and H2 in the same sitting: groups.create linked to ERV-1 leaves an empty Group at the root that survives the commit and is the active path, and the native Line tool drawing in it puts its Edges in the group's entities; assign the selection DT-2 as Outdoor air and then quantity 2 keeping both, and clear it, over a native selection, one Undo step each, Undo and Redo restoring each; a pasted Ducting group shares storage, keeps ERV-1, and its assign refuses until made unique; deleting ERV-1 with ERV-2 as replacement retargets the group and the Zone ERV-1 served in one Undo step, which Undo restores",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/features/ducting/install.rb",
+        "src/ph_composer/features/ducting/codes.rb",
+        "src/ph_composer/features/ducting/line_group.rb",
+        "src/ph_composer/features/ducting/group/*",
+        "src/ph_composer/features/ducting/assignment/*",
+        "src/ph_composer/features/ducting/declarations/*",
+        "src/ph_composer/features/mechanical/catalog_operations.rb",
+        "src/ph_composer/features/mechanical/declarations/ventilators.rb",
+        "src/ph_composer/line_groups/*",
+        "src/ph_composer/session/edit_context.rb",
+        "src/ph_composer/shell/handler_request.rb",
+        "src/ph_composer/core/records/entity_store.rb",
+        "src/ph_composer/core/operations/entity_scope.rb",
+        "tools/examples/authoring/ducting_assignment_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

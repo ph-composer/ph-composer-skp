@@ -1333,8 +1333,8 @@ A pipe's `user_data` rides on its segment; a Piping group's and a Pipe Type's ar
 ### ERV ducting
 
 ERV ducting is its own feature beside Mechanical, its operations named `ph_composer.ducting.*`. Only the
-two cold runs between each ventilator and the outside are drawn, as lines; today only the Duct Types
-exist.
+two cold runs between each ventilator and the outside are drawn, as lines inside a Ducting group, each
+given a Duct Type, a direction and a quantity.
 
 A Duct Type is one duct specification kept in the Model. Read `ph_composer.ducting.duct_types.list`, a
 bounded page at a time; names are unique. Create one with `ph_composer.ducting.duct_types.create`,
@@ -1353,9 +1353,35 @@ duct using the type. A bare duct, `insulation_thickness_mm` 0, needs no conducti
 colour the type draws in under `display.color`; set `color` to store one, or null to return to the
 default. Edit with `ph_composer.ducting.duct_types.update`, copying `expected_values` from the values
 you read; `ph_composer.ducting.duct_types.duplicate` copies one with its `user_data`.
-`ph_composer.ducting.duct_types.delete` deletes one; a `replacement_id` you give must be another
-existing type or null, which matters once ducts use the type. Each is one Undo step. Write a type's
+`ph_composer.ducting.duct_types.delete` deletes one. A type in use refuses as `reference.in_use` unless
+`replacement_id` names another type to take its place on every duct using it, or is null to leave those
+ducts with no type, which blocks their export. A duct the delete cannot rewrite (outside a Ducting group,
+or behind a locked or shared Group) refuses the whole delete. Each is one Undo step. Write a type's
 `user_data` with `ph_composer.records.update_metadata`.
+
+A Ducting group is a SketchUp Group that holds ducts and names the Ventilator they belong to. Create one
+with `ph_composer.ducting.groups.create`, giving `ventilator_id`: it adds an empty Group at the Model
+root and opens it, so the lines drawn next land inside it, in one Undo step; read its `group_id`. Read
+`ph_composer.ducting.groups.list`, a bounded page at a time, for every group with its `values`
+(`ventilator_id`, null while unlinked), `duct_count`, `copied` (a pasted copy, which keeps its
+Ventilator, shares storage and refuses writes until made unique) and `findings`. A group may sit at the
+Model root or inside plain Groups, never inside a Zone (`ducting.group_in_zone`) or another Ducting
+group (`ducting.group_nested`). Change the Ventilator with `ph_composer.ducting.groups.link` or clear it
+with `ph_composer.ducting.groups.unlink`, sending each row's `reference` and its `values` as
+`expected_values`. Deleting a Ventilator a group names refuses unless `replacement_id` names another
+Ventilator, which the group then names, or is null, which unlinks it.
+
+Only an Edge directly inside a Ducting group can be a duct. Select Edges in the open group natively, then
+read `ph_composer.ducting.ducts.selection`: each Edge's `reference`, its `group` with the Ventilator, its
+`values` and the `write_refusal` a write would meet; an Edge in no Ducting group has no reference and
+reads `reason` `outside_group`. Assign with `ph_composer.ducting.ducts.assign`, sending the rows'
+references with their `values` as `expected_values`, and any of `duct_type_id`, `direction`
+(`outdoor_air`, shown Outdoor air, or `exhaust_air`, shown Exhaust air) and `quantity` (a whole number of
+identical ducts the line stands for). A line with no assignment needs a type and a direction and takes
+quantity 1 unless you give one; an assigned line keeps whatever you leave out, so sending only
+`quantity` 2 keeps its type and direction. `ph_composer.ducting.ducts.clear` removes the assignment.
+Each command takes at most 250 Edges, is refused whole if one target is stale or unwritable, and is one
+Undo step. A split line keeps one assignment on both halves, read as `copied`.
 
 ### Library records
 

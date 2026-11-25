@@ -4,7 +4,8 @@ module PhComposer
   module Mechanical
     # What the Ventilator catalog registers: the kind, two reads, the panel's snapshot section and four actions.
     # Every write goes through the record engine, one native Undo step each. The reads add what each Ventilator
-    # serves, and the delete moves or clears the Zones naming it, from Serves.
+    # serves, and the delete moves or clears the Zones naming it, from Serves, and hands every other referrer to the
+    # foundation's reference retargeting, which names no feature.
     module VentilatorRegistration
       PREFIX = "#{FEATURE_ID}.ventilators".freeze
       KIND = Ventilators::KIND
@@ -38,8 +39,9 @@ module PhComposer
       end.freeze
       DELETE_PARAMS = Shapes.delete(KIND).then do |params|
         params["properties"]["replacement_id"] =
-          Shapes.id(KIND.id_prefix, "The #{KIND.label} that takes this one's place on every Zone, or null to empty " \
-                                    "those slots. Needed while a Zone names it.", :nullable => true)
+          Shapes.id(KIND.id_prefix, "The #{KIND.label} that takes this one's place on every Zone and other record " \
+                                    "naming it, or null to empty the Zones' slots and clear other features' " \
+                                    "records. Needed while anything names it.", :nullable => true)
         params
       end.freeze
       CREATE_EXAMPLE = { "values" => { "name" => "ERV-1", "sensible_heat_recovery" => 0.85,
@@ -117,15 +119,17 @@ module PhComposer
                                                                :name => request.params["name"])
         end
         feature.action("#{PREFIX}.delete",
-                       :description => "Delete one #{KIND.label}. While a Zone names it, name a replacement_id, " \
-                                       "which takes its place on every Zone, or null, which empties those slots; " \
-                                       "without one it refuses as reference.in_use, naming the Zones.",
+                       :description => "Delete one #{KIND.label}. While a Zone or another record names it, name a " \
+                                       "replacement_id, which takes its place on each of them, or null, which " \
+                                       "empties the Zones' slots and clears the other records; without one it " \
+                                       "refuses as reference.in_use, naming what still refers to it.",
                        :refuses => DELETE, :params => DELETE_PARAMS,
                        :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :participants => [Serves::State::STAGE],
                        :undo_name => "Delete #{KIND.label}", :preconditions => EXISTS,
                        :side_effects => "Deletes one definition and its metadata, and rewrites the Zones that name " \
-                                        "it; Undo restores all of them.",
+                                        "it and, with replacement_id or null, any other feature's records that " \
+                                        "name it; Undo restores all of them.",
                        :examples => [{ "id" => Shapes.example_id(KIND) },
                                      { "id" => Shapes.example_id(KIND),
                                        "replacement_id" => "vnt_Zy98Xw76Vu54" }]) do |request, proposal|
@@ -135,6 +139,9 @@ module PhComposer
           replacement = params.fetch("replacement_id", Serves::Operations::KEEP)
           Serves::Operations.delete(request, proposal, KIND.id, :id => id, :expected_values => expected,
                                                                 :replacement => replacement) do |plan|
+            unless replacement.equal?(Serves::Operations::KEEP)
+              plan = CatalogOperations.with_retargeted(request, plan, KIND.id, :from => id, :to => replacement)
+            end
             Ventilators::Operations.delete(request, proposal, :id => id, :expected_values => expected,
                                                               :reference_plan => plan)
           end

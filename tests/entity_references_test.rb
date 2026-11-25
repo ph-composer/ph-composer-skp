@@ -534,6 +534,7 @@ class EntityReferencesTest < PhComposerTestCase
                   PhComposer::Programs::Settings::KIND,
                   *PhComposer::Spaces::KINDS.keys, PhComposer::ThermalBridges::EDGE_KIND,
                   PhComposer::Piping::GROUP_KIND, PhComposer::Piping::PIPE_KIND,
+                  PhComposer::Ducting::GROUP_KIND, PhComposer::Ducting::DUCT_KIND,
                   PhComposer::ModelMetadata::REFERENCE_KIND].sort,
                  inventory.map { |target| target.fetch("id") }.sort
     found = PhComposer::API.describe(:name => FACE::REFERENCE_KIND)

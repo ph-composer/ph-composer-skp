@@ -1,7 +1,7 @@
 # ERV ducting: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). In progress: P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, in review.
+STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). In progress: P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, merged (#582); P4-14c, Ducting groups and the duct assignment, in review.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -23,8 +23,8 @@ edge stages merged on 2026-10-26.
 
 ## Next step
 
-P4-14b in review (the shared line-group layer, under Ed's standing approval for consolidation); then P4-14c, Ducting
-groups and the duct assignment, over it.
+P4-14c in review (Ducting groups and the duct assignment, over the shared line-group layer); then P4-14d, duct runs
+and the schedule.
 
 ## Blockers
 
@@ -37,7 +37,7 @@ groups and the duct assignment, over it.
 
 ## Verification
 
-P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md). No host evidence yet; the host cases run in MS3.
+P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md); P4-14c offline: [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md). No host evidence yet; the host cases run in MS3.
 
 ## Ledger
 
@@ -51,3 +51,4 @@ P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md). No host e
 | 2026-11-24 | Planned in full as P4-14a to P4-14f from D4-37 and this PRD; register rows M14a to M14f. Two inferences for Ed: the shared line-group layer and how a run quantity exports. No implementation. |
 | 2026-11-25 | P4-14a implemented on `feat/phase-07-mechanical-p4-14` and in review (#581): the `ph_composer.ducting` feature and the Duct Type kind, panel closed; host case `M14a` owed to MS3. |
 | 2026-11-25 | P4-14a merged (#581). P4-14b implemented on `feat/phase-07-mechanical-p4-14b` and in review: the foundation `line_groups/` package with piping moved onto it, no behavior change. |
+| 2026-11-25 | P4-14b merged (#582). P4-14c implemented on `feat/phase-07-mechanical-p4-14c` and in review: Ducting groups linked to a Ventilator and the duct assignment (Duct Type, direction, quantity) on the shared layer, panel closed; host case `M14c` owed to MS3. |

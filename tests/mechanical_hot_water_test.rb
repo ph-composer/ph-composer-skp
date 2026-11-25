@@ -3,6 +3,7 @@
 require_relative "test_helper"
 require_relative "support/space_fixtures"
 require_relative "support/zone_options"
+require_relative "support/referrer_probe"
 
 # The hot water catalogs with the panel closed (context/CONTRACTS.md, "Mechanical equipment"): Systems, and the
 # Heaters and Tanks that name one; the variant rule, the slotting rule, a System's guarded delete over the Zones,
@@ -316,87 +317,20 @@ class MechanicalHotWaterTest < PhComposerTestCase
   # Another feature's entity records naming a System: its registered retargeter moves them to the replacement, or
   # clears them with null, in the delete's one Undo step, and Mechanical names no such feature.
   def test_a_system_delete_retargets_another_features_referrer_through_the_engine
-    install_foreign_referrer
+    ReferrerProbe.install(M::HOT_WATER_SYSTEM_KIND, "hot_water_system_id")
     one = create(SYSTEMS, "name" => "HWS-1")
     two = create(SYSTEMS, "name" => "HWS-2")
-    holder = Sketchup::Group.new(9000, Sketchup::Entities.new([]))
-    holder.set_attribute(FOREIGN_DICTIONARY, "record", JSON.generate("id" => "probe_1", "hot_water_system_id" => one))
-    @model.entities << holder
+    @model.entities << ReferrerProbe.holder(9000, "hot_water_system_id", one)
     assert_equal %w[refused reference.in_use], invoke("#{SYSTEMS}.delete", "id" => one).values_at("status", "code")
     assert_equal "committed", invoke("#{SYSTEMS}.delete", "id" => one, "replacement_id" => two)["effect"]
-    assert_equal two, foreign_system(9000)
+    assert_equal two, ReferrerProbe.named(@model, 9000, "hot_water_system_id")
     @model.undo
-    assert_equal one, foreign_system(9000)
+    assert_equal one, ReferrerProbe.named(@model, 9000, "hot_water_system_id")
     assert_equal "committed", invoke("#{SYSTEMS}.delete", "id" => one, "replacement_id" => nil)["effect"]
-    assert_nil foreign_system(9000)
+    assert_nil ReferrerProbe.named(@model, 9000, "hot_water_system_id")
   end
 
   private
-
-  FOREIGN_DICTIONARY = "ph_composer.test_hot_water_referrer"
-
-  # A probe feature requiring Mechanical: a record on a root Group naming a System, its reference target and its
-  # retargeter, which rewrites the record in a step of its own.
-  def install_foreign_referrer
-    reference = PhComposer::Records::Reference.new(:key => "hot_water_system_id",
-                                                   :target_kind => M::HOT_WATER_SYSTEM_KIND, :cardinality => "one")
-    entries = lambda do |model|
-      model.entities.to_a.filter_map do |entity|
-        text = entity.get_attribute(FOREIGN_DICTIONARY, "record")
-        text && PhComposer::Records::ReferenceEntry.new(:kind => "test.referrer.entity", :key => [entity.persistent_id],
-                                                        :record => JSON.parse(text))
-      end
-    end
-    target = PhComposer::Records::ReferenceTarget.new(:id => "test.referrer.entity", :label => "Referrer",
-                                                      :records => entries, :validate => ->(_record) { [] },
-                                                      :references => [reference])
-    probe = Module.new
-    probe.define_singleton_method(:name) { "HotWaterReferrerProbe" }
-    probe.define_singleton_method(:install) do |registry|
-      scope = registry.feature("test.referrer", :contract_version => 1, :requires => ["ph_composer.mechanical"])
-      scope.reference_target(target)
-      retarget = "test.referrer.retarget"
-      scope.reference_retargeter(retarget, :target_kind => M::HOT_WATER_SYSTEM_KIND) do |request, proposal, from:, to:|
-        named = entries.call(request.model).select { |entry| entry.record["hot_water_system_id"] == from }
-        moved = named.map do |entry|
-          PhComposer::Records::ReferenceEntry.new(:kind => entry.kind, :key => entry.key,
-                                                  :record => entry.record.merge("hot_water_system_id" => to))
-        end
-        moved.each do |entry|
-          proposal.add_step(ForeignRetargetStep.new(entry.key.first, entry.record),
-                            :scopes => [PhComposer::Operations::EntityScope.new([])])
-        end
-        PhComposer::Records::ReferencePlan.new(:entries => moved)
-      end
-    end
-    PhComposer::Registry.install([probe])
-  end
-
-  def foreign_system(persistent_id)
-    holder = @model.entities.to_a.find { |entity| entity.persistent_id == persistent_id }
-    JSON.parse(holder.get_attribute(FOREIGN_DICTIONARY, "record")).fetch("hot_water_system_id")
-  end
-
-  # Writes one probe record on a root Group.
-  class ForeignRetargetStep
-    def initialize(persistent_id, record)
-      @persistent_id = persistent_id
-      @record = record
-    end
-
-    def apply(model, _slots)
-      holder = model.entities.to_a.find { |entity| entity.persistent_id == @persistent_id }
-      holder.set_attribute(FOREIGN_DICTIONARY, "record", JSON.generate(@record))
-    end
-
-    def descriptor
-      { "persistent_id" => @persistent_id, "record" => @record }
-    end
-
-    def affected
-      [{ "kind" => "test.referrer.entity", "id" => @record.fetch("id"), "change" => "updated" }]
-    end
-  end
 
   def zone(base, letter, name, (x0, y0, width, depth))
     space = space_group(base + 10, space_record(letter, :number => "1", :name => name),

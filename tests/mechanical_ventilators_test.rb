@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require_relative "support/referrer_probe"
 
 # The Ventilator kind with the panel closed: its stored shape and defaults, the values it refuses, guarded edits,
 # Duplicate and Delete, each one Undo step, and its user_data and extension payloads kept through each of them,
@@ -209,6 +210,23 @@ class MechanicalVentilatorsTest < PhComposerTestCase
       r.values_at("kind", "id", "schema_version",
                   "export_ready")
     }
+  end
+
+  # Another feature's entity records naming a Ventilator: its registered retargeter moves them to the replacement,
+  # or clears them with null, in the delete's one Undo step, and Mechanical names no such feature.
+  def test_a_delete_retargets_another_features_referrer_through_the_engine
+    ReferrerProbe.install(KIND, "ventilator_id")
+    one = create("name" => "ERV-1")
+    two = create("name" => "ERV-2")
+    @model.entities << ReferrerProbe.holder(9000, "ventilator_id", one)
+    assert_equal %w[refused reference.in_use], invoke("delete", "id" => one).values_at("status", "code")
+    invoke!("delete", "id" => one, "replacement_id" => two)
+    assert_equal two, ReferrerProbe.named(@model, 9000, "ventilator_id")
+    @model.undo
+    assert_equal one, ReferrerProbe.named(@model, 9000, "ventilator_id")
+    invoke!("delete", "id" => one, "replacement_id" => nil)
+    assert_nil ReferrerProbe.named(@model, 9000, "ventilator_id")
+    assert_equal [two], query("all").fetch("records").map { |record| record.fetch("id") }
   end
 
   # ---------------------------------------------------------------- helpers
