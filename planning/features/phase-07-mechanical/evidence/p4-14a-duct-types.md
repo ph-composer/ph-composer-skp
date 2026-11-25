@@ -62,8 +62,8 @@ operations.
 ## Gate
 
 - `make ci` on Ruby 3.2.2 on `ed5d9b9b`: "Ruby suite, 10 processes: 3554 runs, 49931 assertions, 0 failures, 0
-  errors, 2 skips"; JS "pass 1226", "fail 0"; Python "460 passed, 17 skipped" (the worktree lacks the private
-  corpora); hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 835 files, 9033294 bytes, 27778788 bytes
+  errors, 2 skips"; JS "pass 1226", "fail 0"; Python "460 passed, 17 skipped" (before the worktree's `phx`
+  group was synced; "486 passed, 1 skipped" on later heads); hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 835 files, 9033294 bytes, 27778788 bytes
   installed".
 - `make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby` on `ed5d9b9b`: "Ruby suite, 10 processes: 3554 runs, 49931
   assertions, 0 failures, 0 errors, 2 skips"; JS "pass 1226"; Python "460 passed, 17 skipped"; "RBZ verified: 835
