@@ -358,3 +358,27 @@ test("IP U-values keep four decimals, enough to tell with-films from constructio
   assert.strictEqual(units.format(0.1192, uValue, profile), "0.021 Btu/(h ft² °F)");
   assert.strictEqual(units.format(0.1217, uValue, profile), "0.0214 Btu/(h ft² °F)");
 });
+
+test("a value too large to round to the nanounit is kept as typed, never sent as infinity", function () {
+  var power = field("electric_power", "w");
+  var result = parse("1e300", power, "w");
+  assert.strictEqual(result.ok, true, result.message);
+  assert.strictEqual(result.value, 1e300);
+});
+
+test("the exact text reads back the stored value in either system, with no more digits than it needs", function () {
+  var power = field("electric_power", "w"), share = field("percent", "1"), uValue = field("u_value", "w_m2k");
+  var si = { system: "SI", numberFormat: US }, ip = { system: "IP", numberFormat: US };
+  assert.strictEqual(units.formatEdit(45.04, power, si), "45", "the edit seed keeps the display precision");
+  assert.strictEqual(units.formatExact(45.04, power, si), "45.04");
+  assert.strictEqual(units.formatExact(45, power, si), "45");
+  assert.strictEqual(units.formatExact(0.421234567, share, ip), "42.1234567");
+  assert.strictEqual(units.formatExact(null, power, si), "");
+  [[45.04, power], [0.421234567, share], [0.15, uValue], [0.1217, uValue]].forEach(function (entry) {
+    [si, ip].forEach(function (profile) {
+      var text = units.formatExact(entry[0], entry[1], profile);
+      var back = units.parse(text, entry[1], units.parseContext(entry[1], profile));
+      assert.strictEqual(back.value, entry[0], profile.system + " " + text);
+    });
+  });
+});

@@ -77,8 +77,9 @@ class PipingColourModeTest < PhComposerTestCase
     assert_equal @trunk + @loop, @model.selection.to_a
   end
 
-  # Two placements of one wrapper share the Piping group's storage: each draws at its own place, and while an edit
-  # context is open, whose rebased transforms could place one at the other's, neither draws.
+  # Two placements of one wrapper share the Piping group's storage: each draws at its own place, and while the
+  # wrapper's edit context is open, whose rebased transforms could place one at the other's, neither draws. An open
+  # Group or component placed once rebases nothing.
   def test_shared_storage_draws_once_a_placement_and_is_withheld_while_a_context_is_open
     @vertices = {}
     group = Sketchup::Group.new(500, Sketchup::Entities.new(line("branch", @copper, [[0, 0, 0], [3, 0, 0]])))
@@ -94,6 +95,11 @@ class PipingColourModeTest < PhComposerTestCase
     @model.entities << unrelated
     @model.active_path = [unrelated]
     assert_equal [2], activate(P::ColourModes::BY_ROLE).rows.map(&:count), "an unrelated open Group rebases nothing"
+    single = Sketchup::ComponentInstance.new(950, Sketchup::ComponentDefinition.new(Sketchup::Entities.new([])))
+    @model.entities << single
+    @model.active_path = [single]
+    assert_equal [2], activate(P::ColourModes::BY_ROLE).rows.map(&:count),
+                 "a component placed once rebases nothing either"
     @model.active_path = [wrappers.first]
     assert_empty activate(P::ColourModes::BY_ROLE).rows
   ensure

@@ -1081,6 +1081,19 @@
         return JSON.stringify(zone.reference) === JSON.stringify(row.reference);
       })[0];
     }
+    // Any slot read before another write refuses the whole Serves command, whichever slot it writes, as the host's
+    // guard does.
+    function servesChanged(rows, picked) {
+      return rows.some(function (row, index) {
+        var zone = picked[index].id, expected = row.expected_values || {};
+        var current = { ventilator_id: data.serves[zone] || null, hot_water_system_id: hotWater.serves[zone] || null,
+          hp_indoor_unit_ids: heatPumps.serves[zone] || [], heater_ids: data.electricHeaters.serves[zone] || [],
+          pump_ids: data.pumps.serves[zone] || [], fan_ids: data.fans.serves[zone] || [] };
+        return Object.keys(expected).some(function (slot) {
+          return JSON.stringify(expected[slot]) !== JSON.stringify(current[slot]);
+        });
+      });
+    }
     if (spec && params.id && !target) {
       return refused("target.not_found", "That " + spec.label + " is unavailable.", this.revision);
     }
@@ -1173,21 +1186,15 @@
       if (chosen.some(function (zone) { return !zone; })) {
         return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
       }
-      // Any slot read before another write refuses the whole command, as the host's guard does.
-      if (params.zones.some(function (row, index) {
-        var zone = chosen[index].id, expected = row.expected_values || {};
-        var current = { ventilator_id: data.serves[zone] || null, hot_water_system_id: hotWater.serves[zone] || null,
-          hp_indoor_unit_ids: heatPumps.serves[zone] || [], heater_ids: data.electricHeaters.serves[zone] || [],
-          pump_ids: data.pumps.serves[zone] || [], fan_ids: data.fans.serves[zone] || [] };
-        return Object.keys(expected).some(function (slot) {
-          return JSON.stringify(expected[slot]) !== JSON.stringify(current[slot]);
-        });
-      })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
+      if (servesChanged(params.zones, chosen)) {
+        return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
+      }
+      // A list that already holds the item keeps it where it is, as the host's does.
       chosen.forEach(function (zone) {
         var list = (lists[zone.id] || []).filter(function (id) {
-          return name === "serves.assign" ? id !== params.item_id : params.item_id && id !== params.item_id;
+          return name === "serves.assign" || params.item_id && id !== params.item_id;
         });
-        if (name === "serves.assign") list.push(params.item_id);
+        if (name === "serves.assign" && list.indexOf(params.item_id) < 0) list.push(params.item_id);
         lists[zone.id] = list;
       });
     } else if (name === "serves.assign" || name === "serves.clear") {
@@ -1197,10 +1204,9 @@
       if (picked.some(function (zone) { return !zone; })) {
         return refused("target.not_found", "A Zone is unavailable. " + NOTHING_WRITTEN, this.revision);
       }
-      if (params.zones.some(function (row, index) {
-        return (row.expected_values || {})[slot] !== undefined &&
-          (map[picked[index].id] || null) !== row.expected_values[slot];
-      })) return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
+      if (servesChanged(params.zones, picked)) {
+        return refused("target.changed", "A Zone changed since it was read. " + NOTHING_WRITTEN, this.revision);
+      }
       if (name === "serves.assign" && !params.replace) {
         var filled = picked.filter(function (zone) {
           return map[zone.id] && map[zone.id] !== params.item_id;

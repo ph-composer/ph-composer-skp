@@ -399,6 +399,20 @@ test("a box put back drops its change, a Zone replaced at its path drops it too,
     assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 0, "no edit leaves beside it");
   });
 
+test("a Zone replaced at a checked path shows unchecked at once, and checking it assigns the new Zone", function () {
+  var o = setup();
+  press(row(o, fixtures.ERV1.id).querySelector(".mech-serves-cell"));
+  var picker = o.ventilators().picker, zones = o.state.sections[PREFIX + "serves"].value.zones;
+  toggle(zoneBox(picker, fixtures.ZONES.C), true);
+  zones[2].zone_id = "zon_NEWNEWNEWNEW"; zones[2].reference = { zone_id: "zon_NEWNEWNEWNEW", zone_path: [3000] };
+  o.paint();
+  assert.strictEqual(zoneBox(picker, fixtures.ZONES.C).checked, false, "the replacement is not served");
+  toggle(zoneBox(picker, fixtures.ZONES.C), true);
+  press(picker.held.apply);
+  assert.strictEqual(named(o, PREFIX + "serves.assign")[0].payload.params.zones[0].reference.zone_id,
+    "zon_NEWNEWNEWNEW");
+});
+
 test("an optional field typed back drops its guard, and a refusal stays with the typed text", function () {
   var o = setup();
   press(row(o, fixtures.ERV2.id).querySelectorAll("button").filter(function (node) {
@@ -418,6 +432,92 @@ test("an optional field typed back drops its guard, and a refusal stays with the
   assert.strictEqual(unit.input.value, "0.4", "the typed text stays");
   assert.strictEqual(unit.error.textContent, "The value is out of range.", "and the reason with it");
   assert.ok(optional.guard(), "the refused draft holds the tab");
+});
+
+function openOptional(o) {
+  press(row(o, fixtures.ERV2.id).querySelectorAll("button").filter(function (node) {
+    return /^Optional values of/.test(node.getAttribute("aria-label") || "");
+  })[0]);
+  return o.ventilators().optional;
+}
+
+test("a refused optional value keeps the guard it was sent with, so closing over a newer value cannot overwrite it",
+  function () {
+    var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+    unit.input.value = "0.4"; unit.input.listeners.input({}); key(unit.input, "Enter");
+    var first = named(o, PREFIX + "ventilators.update")[0];
+    o.state.sections[PREFIX + "ventilators"].value.records[1].values.subsoil_heat_exchange_efficiency = 0.25;
+    answer(o, first, { status: "refused", code: "revision.stale", message: "The Model changed since it was read." });
+    assert.strictEqual(unit.input.value, "0.4", "the refused draft stays");
+    optional.close(false);
+    var retry = named(o, PREFIX + "ventilators.update")[1];
+    assert.deepStrictEqual(clone(retry.payload.params.expected_values), { subsoil_heat_exchange_efficiency: 0.2 },
+      "guarded by the value the user saw, so the host refuses rather than overwrite 0.25");
+  });
+
+test("closing while a value is out sends no other draft, and its answer lands on its own field", function () {
+  var o = setup(), optional = openOptional(o), subsoil = optional.held.fields[0], intake = optional.held.fields[1];
+  subsoil.unit.input.value = "0.4"; subsoil.unit.input.listeners.input({}); key(subsoil.unit.input, "Enter");
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "refused", code: "validation.failed",
+    message: "The value is out of range." });
+  intake.unit.input.value = "5"; intake.unit.input.listeners.input({}); key(intake.unit.input, "Enter");
+  var second = named(o, PREFIX + "ventilators.update")[1];
+  assert.strictEqual(optional.close(false), false, "the bubble waits for the write");
+  assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 2, "the refused draft is not sent beside it");
+  answer(o, second, { status: "refused", code: "validation.failed", message: "Too warm." });
+  assert.strictEqual(intake.unit.error.textContent, "Too warm.");
+  assert.strictEqual(subsoil.unit.error.textContent, "The value is out of range.");
+  assert.strictEqual(subsoil.unit.input.value, "0.4");
+});
+
+test("a refused value gives back the digits typed, and a retry sends them", function () {
+  var o = setup(), optional = openOptional(o), intake = optional.held.fields[1].unit;
+  intake.input.value = "4.567"; intake.input.listeners.input({}); key(intake.input, "Enter");
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "refused", code: "validation.failed",
+    message: "Not saved." });
+  assert.strictEqual(intake.input.value, "4.567");
+  key(intake.input, "Enter");
+  var retry = named(o, PREFIX + "ventilators.update")[1];
+  assert.deepStrictEqual(clone(retry.payload.params.values), { preheated_intake_temperature_c: 4.567 });
+  o.state.sections[PREFIX + "ventilators"].value.records[1].values.preheated_intake_temperature_c = 4.567;
+  answer(o, retry, { status: "completed", value: {} });
+  assert.strictEqual(intake.error.textContent, "", "a retry that lands clears the refusal");
+});
+
+test("a refusal stays beside its field through a unit switch", function () {
+  var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+  unit.input.value = "0.4"; unit.input.listeners.input({}); key(unit.input, "Enter");
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "refused", code: "target.changed",
+    message: "The Ventilator changed." });
+  o.modules.unit_preferences.set("unit_system", "IP");
+  assert.strictEqual(unit.error.textContent, "The Ventilator changed.");
+  o.paint();
+  assert.strictEqual(unit.error.textContent, "The Ventilator changed.");
+  assert.strictEqual(unit.error.hidden, false);
+});
+
+test("a draft that ends without a write shows the Model's value, so the next edit is guarded by what is shown",
+  function () {
+    var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+    var values = o.state.sections[PREFIX + "ventilators"].value.records[1].values;
+    unit.input.value = "0.3"; unit.input.listeners.input({});
+    values.subsoil_heat_exchange_efficiency = 0.25; o.paint();
+    key(unit.input, "Escape");
+    assert.strictEqual(unit.input.value, "0.25", "Escape shows the value the Model holds now");
+    unit.input.value = "0.2"; unit.input.listeners.input({});
+    values.subsoil_heat_exchange_efficiency = 0.3; o.paint();
+    unit.input.value = "0.25"; unit.input.listeners.input({}); unit.input.listeners.blur({});
+    assert.strictEqual(unit.input.value, "0.3", "and so does a draft typed back");
+    assert.strictEqual(named(o, PREFIX + "ventilators.update").length, 0);
+  });
+
+test("leaving a refused field unchanged keeps its refusal", function () {
+  var o = setup(), optional = openOptional(o), unit = optional.held.fields[0].unit;
+  unit.input.value = "0.4"; unit.input.listeners.input({}); key(unit.input, "Enter");
+  answer(o, named(o, PREFIX + "ventilators.update")[0], { status: "refused", code: "target.changed",
+    message: "The Ventilator changed." });
+  unit.input.listeners.blur({});
+  assert.strictEqual(unit.error.textContent, "The Ventilator changed.");
 });
 
 test("a Locate's cleared search survives a refused search edit", function () {

@@ -70,11 +70,14 @@ function (panel, snapshot, ui, fields, systems, equipment) {
   /* Delete with a replacement for a record that others name (inventory_forms ReplacementForm): `referrers` are
      [section, field, label] for each kind of record naming it, and `zones` counts the Zones a record serves. A
      replacement takes its place on all of them; clearing is offered only while nothing names it through a required
-     reference (`clearable(record, state)`). */
+     reference (`clearable(record, state)`). A referring record that cannot be read may name it too, so its uses
+     are then not all known (`incomplete`); the host's delete checks what each stored record names. */
   function replacement(options) {
     function usage(state, id) {
-      var named = [];
+      var named = [], unread = 0;
       (options.referrers || []).forEach(function (referrer) {
+        var payload = snapshot.value(state, referrer[0]);
+        unread += payload ? (payload.unreadable || []).length : 1;
         records(state, referrer[0]).forEach(function (record) {
           if (record.values[referrer[1]] === id) named.push(record.values.name);
         });
@@ -87,7 +90,9 @@ function (panel, snapshot, ui, fields, systems, equipment) {
       if (named.length) parts.push(named.sort(ui.compareText).join(", ") + (named.length === 1 ? " names it." :
         " name it."));
       if (zones.length) parts.push("Serves " + zones.join(", ") + ".");
-      return { count: named.length + zones.length, description: parts.join(" ") };
+      return { count: named.length + zones.length, description: parts.join(" "),
+        incomplete: unread ? "Some of the " + options.usedOn + "s cannot be read, so whether they use it is not " +
+          "known: the delete is refused while one still names it." : null };
     }
     return { replacement: true, usedOn: options.usedOn, usage: usage,
       allowClear: function (record) { return options.clearable(record); } };

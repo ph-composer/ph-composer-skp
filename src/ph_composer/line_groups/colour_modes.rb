@@ -31,10 +31,9 @@ module PhComposer
         end
       end
 
-      # A component, or a Group whose definition another Group shares: opening it rebases its children.
+      # A component or Group whose definition is placed more than once: opening it rebases its children. One placed
+      # once has no other occurrence to misplace.
       def repeated?(entity)
-        return true if entity.is_a?(Sketchup::ComponentInstance)
-
         definition = entity.respond_to?(:definition) ? entity.definition : nil
         definition.respond_to?(:instances) && definition.instances.length > 1
       end

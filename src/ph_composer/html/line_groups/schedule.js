@@ -111,8 +111,8 @@ function (request, ui, tables, viewControls, fields, units, preferences, colourB
     });
     function field(run, name) { return name === "group" ? self.groupName(run) : view.field(run, name); }
     var projected = this.controls.project(this.runs, { id: function (run) { return run.key; },
-      value: function (run, name) {
-        return name === "group" ? run.group.group_path.join("/") + "\u0000" + field(run, name) : field(run, name);
+      value: field, groupKey: function (run, name) {
+        return name === "group" ? run.group.group_path.join("/") : field(run, name);
       }, search: view.search, group: function (run, name) {
         var label = String(field(run, name) || "None"), path = run.group.group_path.join("/");
         return { label: name === "group" && Object.keys(named[label] || {}).length > 1 ? label + " (" + path + ")" :

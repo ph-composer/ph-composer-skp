@@ -125,10 +125,21 @@ PhComposerUI.define("unit_field", ["unit_preferences", "units", "workspace"], fu
       this.input.setAttribute("aria-invalid", "true");
       return parsed;
     }
+    // What was typed and the units it was read in, so an owner whose write is refused can give the draft back.
+    var draft = { text: this.input.value, profile: this.startProfile || cloneProfile(this.field) };
     this.editing = false; this.startProfile = null; this.clearError();
     if (parsed.value === this.baseline) { this.repaint(); return { ok: true, changed: false, value: this.baseline }; }
-    this.baseline = parsed.value; this.repaint(); this.onCommit(parsed.value);
+    this.baseline = parsed.value; this.repaint(); this.onCommit(parsed.value, draft);
     return { ok: true, changed: true, value: parsed.value };
+  };
+
+  /* Puts a committed `draft` (onCommit's second argument) back over the baseline, read in the units it was typed
+     in: the owner's write was refused and the user may retry it. */
+  Field.prototype.restore = function (draft) {
+    this.editing = true; this.startProfile = draft.profile;
+    this.seed = units.formatEdit(this.baseline, this.field, draft.profile);
+    this.unit.textContent = units.displayUnit(this.field, draft.profile);
+    this.input.value = draft.text;
   };
 
   Field.prototype.cancel = function () {

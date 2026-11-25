@@ -410,6 +410,19 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     item_id: "${EH3}" } }).code`);
   assert.equal(staleOther, "target.changed", "a stale guard on another slot refuses too");
   assert.deepEqual((await electric("serves")).zon_apt2, [EH1], "and writes nothing");
+  const apt2 = `window.previewHost.zones.filter(z => z.id === "zon_apt2")[0].reference`;
+  const apt2Ventilator = await host("window.previewHost.mechanical.serves.zon_apt2 || null");
+  const staleList = await host(`window.previewHost.mechanicalAction({ name: "${PREFIX}serves.clear", params: {
+    zones: [{ reference: ${apt2}, expected_values: { ventilator_id: ${JSON.stringify(apt2Ventilator)}, heater_ids: [] } }],
+    slot: "ventilator_id" } }).code`);
+  assert.equal(staleList, "target.changed", "a single slot's write refuses a stale list guard, as the host does");
+  assert.equal(await host("window.previewHost.mechanical.serves.zon_apt2 || null"), apt2Ventilator,
+    "and clears nothing");
+  await host(`window.previewHost.mechanicalAction({ name: "${PREFIX}serves.assign", params: {
+    zones: [{ reference: window.previewHost.zones.filter(z => z.id === "zon_apt1")[0].reference,
+      expected_values: {} }], slot: "heater_ids", item_id: "${EH1}" } }); window.previewHost.snapshot()`);
+  assert.deepEqual((await electric("serves")).zon_apt1, [EH1, "ehr_Dd44Ee55Ff66", EH3],
+    "assigning a heater a Zone already lists keeps its place");
   await pane.getByRole("button", { name: "+ New Electric Heater", exact: true }).click();
   const newHeater = page.getByRole("dialog", { name: "New Electric Heater" });
   await newHeater.getByRole("textbox", { name: "Tag", exact: true }).fill("EH-4");

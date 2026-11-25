@@ -48,10 +48,10 @@ function (ui, lineBars, shared) {
   AssignBar.prototype.params = function () {
     return { duct_type_id: this.type.value, direction: this.direction, quantity: Number(this.quantity.value.trim()) };
   };
-  /* A quantity sent is no longer a draft, so the next selection shows its own. */
+  /* A quantity sent is no longer a draft, so the next selection shows its own; Clear sends none. */
   AssignBar.prototype.submit = function (action) {
     Bar.prototype.submit.call(this, action);
-    if (this.requests.busy()) this.typed = false;
+    if (action === "assign" && this.requests.busy()) this.typed = false;
   };
   AssignBar.prototype.done = function (params, type, lines) {
     return "Assigned " + type + " as " + shared.directionLabel(params.direction).toLowerCase() + " to " + lines + ".";
@@ -61,16 +61,18 @@ function (ui, lineBars, shared) {
   AssignBar.prototype.render = function (state, types) {
     if (this.disposed) return;
     this.read(state, types);
-    var key = this.selectionKey();
+    var key = this.selectionKey(), paths = this.selectionPaths();
     if (key !== this.key) {
       this.key = key;
       var type = this.common("duct_type_id"), direction = this.common("direction"), quantity = this.common("quantity");
       if (type !== undefined) this.chosen = type;
       if (direction === "outdoor_air" || direction === "exhaust_air") this.direction = direction;
-      // Only a quantity typed for the selection before it is kept; otherwise the new lines' own one shows.
+      // Only a quantity typed for the selection before it is kept; otherwise the new lines' own one shows. A change
+      // to the same lines (an edit elsewhere, a Clear) keeps the typed one a draft for the next selection.
       if (quantity !== undefined && !this.typed) this.quantity.value = String(quantity);
-      this.typed = false;
+      if (paths !== this.paths) this.typed = false;
     }
+    this.paths = paths;
     this.paintTypes();
     this.paint();
   };

@@ -323,6 +323,75 @@ test("a tool armed without a value shows its default, typing repaints Assign, an
     assert.ok(form.submitButton.disabled);
   });
 
+/* The tool as the host reports it after a choose: running, with `role` and `values`, and the choose settled. */
+function armed(o, role, values) {
+  var choose = last(o, PREFIX + "pipe_tool.choose");
+  o.state.sections[PREFIX + "pipe_tool"].value = { active: true, pipe_type_id: fixtures.PT1, role: role,
+    values: values, gesture_limit: 250 };
+  if (choose) {
+    o.state.ui.viewResults[choose.payload.request_id] = { request_id: choose.payload.request_id, session: "session",
+      outcome: { status: "completed", value: {} } };
+  }
+  o.paint();
+}
+
+test("a running tool switched from Trunk to Branch and back keeps the trunk's multiplier and demand", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: true });
+  assert.deepStrictEqual([bar.multiplier.value, bar.demand.checked], ["12", true]);
+  change(bar.role, "branch");
+  armed(o, "branch", {});
+  change(bar.role, "trunk");
+  assert.deepStrictEqual(clone(last(o, PREFIX + "pipe_tool.choose").payload.params), { pipe_type_id: fixtures.PT1,
+    role: "trunk", multiplier: 12, demand_recirculation: true });
+});
+
+test("a tool armed while Multiplier has focus shows its value once the field is left", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: false });
+  bar.multiplier.focus();
+  armed(o, "trunk", {});
+  assert.strictEqual(bar.multiplier.value, "12", "a focused field is not changed under the user");
+  bar.multiplier.blur();
+  o.paint();
+  assert.strictEqual(bar.multiplier.value, "1", "the default the tool now assigns to a new trunk");
+});
+
+test("two re-arms while Multiplier has focus leave every field showing the last", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: true });
+  bar.multiplier.focus();
+  armed(o, "trunk", { multiplier: 1, demand_recirculation: false });
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: true });
+  bar.multiplier.blur(); o.paint();
+  assert.deepStrictEqual([bar.multiplier.value, bar.demand.checked], ["12", true]);
+});
+
+test("Escape on an invalid recirculation draft restores the value and Assign with it", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  change(bar.type, fixtures.PT1);
+  change(bar.role, "recirculation");
+  bar.hours.input.value = "30"; bar.hours.input.listeners.input({});
+  assert.ok(bar.assign.disabled);
+  key(bar.hours.input, "Escape");
+  assert.strictEqual(bar.hours.input.value, "24");
+  assert.strictEqual(bar.assign.disabled, false);
+  assert.doesNotMatch(bar.reason._reason, /hours/, "the stale reason is gone");
+});
+
+test("ordering by Piping group follows the group names, not where the groups are stored", function () {
+  var o = setup(), value = fixtures.schedule();
+  value.runs = value.runs.slice(0, 2);
+  value.runs[0].group = { group_id: "ppg_ZZZZZZZZZZZZ", group_path: [500], name: "Zulu" };
+  value.runs[1].group = { group_id: "ppg_AAAAAAAAAAAA", group_path: [501], name: "Alfa" };
+  answer(o, last(o, PREFIX + "schedule.all"), { status: "completed", revision: 1, value: value });
+  var schedule = o.view(PIPING).schedule;
+  schedule.controls.groupBy.value = ""; schedule.controls.orderBy.value = "group"; schedule.paint();
+  assert.deepStrictEqual(schedule.mount.querySelectorAll("td").filter(function (td) {
+    return /col-group/.test(td.className);
+  }).map(function (td) { return td.textContent; }), ["Alfa", "Zulu"]);
+});
+
 test("Group by Piping group keeps two groups of one name apart", function () {
   var o = setup(), value = fixtures.schedule();
   value.runs[1] = Object.assign(value.runs[1], { group: { group_id: "ppg_BBBBBBBBBBBB", group_path: [510],

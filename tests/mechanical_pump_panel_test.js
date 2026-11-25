@@ -130,6 +130,36 @@ test("power and operation read and take the regional number format, the same uni
     values: { annual_period_operation_khrs: 4.5 }, expected_values: { annual_period_operation_khrs: 8.76 } });
 });
 
+test("a copied power and operation keep every stored digit, so pasting them back sends nothing", function () {
+  var o = setup(), values = o.state.sections[PUMPS].value.records[0].values;
+  values.norm_energy_demand_w = 45.04; values.annual_period_operation_khrs = 8.7654;
+  o.paint();
+  var power = cell(o, P1.id, "norm_energy_demand_w"), grid = o.view.inventory.grid;
+  assert.strictEqual(power.input.value, "45", "the cell shows the display precision");
+  ["SI", "IP"].forEach(function (system) {
+    o.modules.unit_preferences.set("unit_system", system); o.paint();
+    grid.refresh();
+    grid.select(power, false); grid.select(cell(o, P1.id, "annual_period_operation_khrs"), true);
+    var copy = new dom.ClipboardEvent("copy");
+    o.view.inventory.scroll.listeners.copy(copy);
+    assert.strictEqual(copy.clipboardData.getData("text/plain"), "45.04\t8.7654", system);
+    grid.paste([["45.04", "8.7654"]]);
+    assert.strictEqual(named(o, PUMPS + ".update").length, 0, system + ": pasting the copy back changes nothing");
+  });
+});
+
+test("a power stored past the nanowatt pastes back as itself, sending nothing", function () {
+  var o = setup();
+  o.state.sections[PUMPS].value.records[0].values.norm_energy_demand_w = 45.0400000004;
+  o.paint();
+  var grid = o.view.inventory.grid, power = cell(o, P1.id, "norm_energy_demand_w");
+  grid.refresh(); grid.select(power, false);
+  var copy = new dom.ClipboardEvent("copy");
+  o.view.inventory.scroll.listeners.copy(copy);
+  grid.paste([[copy.clipboardData.getData("text/plain")]]);
+  assert.strictEqual(named(o, PUMPS + ".update").length, 0);
+});
+
 test("the internal heat gains sit behind the row's disclosure, the profile following the type until one is chosen",
   function () {
     var o = setup();

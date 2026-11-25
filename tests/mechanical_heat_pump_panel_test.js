@@ -209,6 +209,32 @@ test("a delete in use asks for a replacement, and offers clearing only where not
   assert.strictEqual(clone(named(p, INDOOR_UNITS + ".delete")[0].payload.params).replacement_id, null);
 });
 
+test("an unreadable outdoor unit leaves a model's uses unknown: Delete says so and leaves the check to the host",
+  function () {
+    var o = setup();
+    o.state.sections[OUTDOOR_UNITS].value.unreadable = [{ id: "hpo_UNREADABLEUN",
+      message: "Its quantity is invalid." }];
+    o.paint();
+    var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
+    form.open(models[1], models);
+    assert.strictEqual(form.inUse, false, "no known use, so a guarded plain Delete stays");
+    assert.match(form.uses.textContent, /cannot be read, so whether they use it is not known/);
+    assert.strictEqual(form.submitButton.disabled, false);
+    form.open(models[0], models);
+    assert.match(form.uses.textContent, /HP-1 names it\. .*cannot be read/);
+    assert.ok(!form.select.querySelectorAll("option").some(function (node) { return node.value === "__clear__"; }));
+  });
+
+test("a model in use with nothing to replace it says to create one first", function () {
+  var o = setup();
+  var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
+  form.open(models[0], [models[0]]);
+  assert.strictEqual(form.inUse, true);
+  assert.ok(form.submitButton.disabled);
+  assert.match(form.explanation.textContent,
+    /^No other .* can take its place\. Cancel, create one, then delete ODU-A\.$/);
+});
+
 test("the Blended result shows each Segment's estimator sections and copies their rows", function () {
   var o = setup(BLENDED), view = o.view(BLENDED);
   assert.strictEqual(o.root._view.header.root.querySelector(".primary").textContent, "Copy for the estimator");
