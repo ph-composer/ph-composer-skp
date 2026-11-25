@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
 # One feature owns hot water piping: the Pipe Type catalog, the Piping groups that hold drawn pipes and the assignment
-# on each pipe, the tree they form, and later their export into the Hot Water System. It requires Mechanical,
+# on each pipe, the tree they form, and their export into the Hot Water System. It requires Mechanical,
 # which owns the Hot Water System and its export, and Zones; no file of theirs, nor any other feature's, names it
 # (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
 #   type/           the Pipe Type kind, its operations and reads; names no Edge, group or run
 #   group/          the Piping group record on a Group, its reference target, create, link and the occurrence rows
 #   assignment/     the pipe record on an Edge, its reference target, assign, clear, the type rewrite and the selection
-#   runs/           pure Ruby: runs by the core chain rule, the tree, the recirculation sum, findings and the schedule
+#   runs/           pure Ruby: runs by the core chain rule, the tree, the recirculation sum, findings, the schedule and
+#                   the export's records
 #   scan/           the live read: one walk for Piping groups and their pipes, the schedule over it, its pages
 #   run_locate.rb   runs.locate, which selects a run's pipes through the foundation's context.open
+#   export.rb       the export contributor over the snapshot, which adds each System's pipes to its hot water
+#                   objects, and its preflight
 #   codes.rb        the `piping` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -36,6 +39,7 @@ require_relative "runs/tree"
 require_relative "runs/recirculation"
 require_relative "runs/findings"
 require_relative "runs/schedule"
+require_relative "runs/extraction"
 require_relative "scan/occurrences"
 require_relative "scan/schedule_pages"
 require_relative "run_locate"
@@ -44,6 +48,7 @@ require_relative "declarations/pipe_types"
 require_relative "declarations/groups"
 require_relative "declarations/pipes"
 require_relative "declarations/schedule"
+require_relative "export"
 
 module PhComposer
   module Piping
@@ -56,6 +61,7 @@ module PhComposer
       GroupRegistration.install(feature)
       PipeRegistration.install(feature)
       ScheduleRegistration.install(feature)
+      ExportProjection.install(feature)
       Codes.install(feature)
     end
   end

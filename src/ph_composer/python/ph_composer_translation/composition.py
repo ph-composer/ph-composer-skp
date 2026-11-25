@@ -24,6 +24,7 @@ from .mechanical_sections import (
 from .mechanical_segment_sections import MechanicalSegmentSection
 from .model_metadata import ModelMetadataSection
 from .model_sections import FaceSection, ZoneSection
+from .piping_sections import PipingSection
 from .program_sections import ProgramTypeSection, RoomProgramSection, ScheduleSection, SetPointSection
 from .sections import Section
 from .shade_sections import ShadeSection
@@ -53,6 +54,7 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     ShadeSection(),
     VentilationSection(),
     HotWaterSection(),
+    PipingSection(),
     HeatPumpSection(),
     ElectricHeaterSection(),
     PumpSection(),

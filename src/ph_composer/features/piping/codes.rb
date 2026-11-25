@@ -17,6 +17,7 @@ module PhComposer
       PARENT_AMBIGUOUS = "piping.parent_ambiguous"
       SHARED_DEFINITION = "piping.shared_definition"
       HIDDEN = "piping.hidden"
+      SYSTEM_UNEXPORTED = "piping.system_unexported"
 
       DESCRIPTIONS = {
         INSULATION_CONDUCTIVITY_MISSING => "A Pipe Type has insulation and no insulation conductivity, so a pipe " \
@@ -34,7 +35,8 @@ module PhComposer
         PARENT_AMBIGUOUS => "A branch or twig touches two possible parents and hangs from the one whose identifier " \
                             "sorts first.",
         SHARED_DEFINITION => "Pipes are reached through two placements of one Piping group's storage, and both count.",
-        HIDDEN => "A pipe to locate, or a Group holding it, is hidden or on a hidden tag."
+        HIDDEN => "A pipe to locate, or a Group holding it, is hidden or on a hidden tag.",
+        SYSTEM_UNEXPORTED => "A Hot Water System with pipes serves no exported Zone, so its pipes are not exported."
       }.freeze
 
       module_function

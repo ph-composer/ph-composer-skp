@@ -231,7 +231,7 @@ class PipingRunsTest < Minitest::Test
   end
 
   def test_the_recirculation_sum_nests_as_honeybee_ph_does
-    sum = ->(*runs) { RUNS::Recirculation.call(runs.map { |pipes| Struct.new(:facts).new(pipes) }) }
+    sum = ->(*runs) { RUNS::Recirculation.call(RUNS::Tree.call(runs.flatten)) }
     recirculation = lambda do |length, temperature, hours, y = 0|
       pipe("recirculation", PT1, [0, y, 0], [length, y, 0],
            :values => { "water_temp_c" => temperature, "daily_period" => hours })
@@ -240,14 +240,16 @@ class PipingRunsTest < Minitest::Test
     assert_equal [15.0, 19, true], two.values_at("recirculation_length_m", "recirculation_hours", "from_piping")
     assert_in_delta 56.67, two.fetch("recirculation_temperature_c"), 0.005
 
-    # 3.3 m and 1.7 m at 24 h in one run, and runs of 0.1, 0.2 and 0.7 m: 24. honeybee-ph's arithmetic gives 23 for
-    # 3.3 m and 1.7 m as two runs (79.19999999999999 / 3.3), and so does this read, since it must equal the export.
+    # 3.3 m and 1.7 m at 24 h in one run: 24. honeybee-ph's arithmetic gives 23 for 3.3 m and 1.7 m as two runs
+    # (79.19999999999999 / 3.3), and so does this read, since it must equal the export. Runs of 0.1, 0.2 and 0.7 m
+    # give 23 or 24 by the order they are added in; a reloaded system adds them in identifier order, which gives 23
+    # for these identifiers (tests/python/test_piping_sections.py holds this read to the wheel's).
     one_run = [recirculation.call(3.3, 60.0, 24), pipe("recirculation", PT1, [3.3, 0, 0], [5.0, 0, 0],
                                                        :values => { "water_temp_c" => 60.0, "daily_period" => 24 })]
     assert_equal 24, sum.call(one_run).fetch("recirculation_hours")
     short = sum.call([recirculation.call(0.1, 60.0, 24, 1)], [recirculation.call(0.2, 60.0, 24, 2)],
                      [recirculation.call(0.7, 60.0, 24, 3)])
-    assert_equal 24, short.fetch("recirculation_hours")
+    assert_equal 23, short.fetch("recirculation_hours")
     split = sum.call([recirculation.call(3.3, 60.0, 24, 4)], [recirculation.call(1.7, 60.0, 24, 5)])
     assert_equal 23, split.fetch("recirculation_hours")
 

@@ -1009,7 +1009,8 @@ refuses while a Heater or Tank names it, so move or delete those first.
 
 System rows carry the Zones each serves, `heater_count`, `tank_count`, and `recirculation`
 (`temperature_c`, `hours`), read-only: honeybee-ph works them out from recirculation piping, and
-gives 60 °C and 24 h while there is none, which is what the export carries. Their `findings` add
+gives 60 °C and 24 h while there is none. These rows still read 60 °C and 24 h when the System has
+recirculation pipes; the export carries the pipes' values, which `ph_composer.piping.systems` reads. Their `findings` add
 `mechanical.hot_water_pooled`, info, when two served Systems share a Building Segment: WUFI-Passive
 and METr pool their tanks and heaters and keep one tap point count; and `mechanical.method_not_exported`,
 info, while the System sets a `piping_calc_method` (1 to 4) that the pinned honeybee-ph has no field
@@ -1309,6 +1310,16 @@ counted instead, and the `systems`, `types` and `unreadable` rows are left out, 
 with `ph_composer.piping.runs.members` (its `identifier`, the row's `index`, and `finding` for only a
 finding's pipes). Pass a run's or a finding's `edge_paths` to `ph_composer.piping.runs.locate`
 to select those pipes, opening their group; a hidden pipe or group refuses `piping.hidden`.
+
+The export adds each Hot Water System's pipes to the hot water system of every Room the System serves:
+each trunk run with its `multiplier`, its demand recirculation and the branch runs hanging from it, each
+branch with its twigs, and each recirculation run, one segment per line with its Pipe Type's values.
+Distribution pipes run at 60 °C for 24 h; a bare Pipe Type with no conductivity exports 0.04 W/(m K).
+`ph_composer.piping.export_preflight` lists what the export will say, each row with `locate` params for
+`ph_composer.piping.runs.locate`: every finding that blocks it, the warnings, an unreadable record, and
+`piping.system_unexported`, a warning, when no exported Zone takes the System, so its pipes go nowhere.
+A pipe's `user_data` rides on its segment; a Piping group's and a Pipe Type's are left out with
+`export.metadata_omitted`. With a System's tap points left blank, the export counts its twigs.
 
 ### Library records
 

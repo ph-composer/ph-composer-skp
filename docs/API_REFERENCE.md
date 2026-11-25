@@ -29348,6 +29348,128 @@ Example params:
 }
 ```
 
+### `ph_composer.piping.export_preflight`
+
+Piping export checks: each run's findings with the pipes each one locates, each pipe or Piping group record that cannot be read, and each Hot Water System whose pipes no exported Zone takes. Owner: `ph_composer.piping`.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.piping.groups.all`
 
 Every Piping group occurrence in one read. Owner: `ph_composer.piping`.
@@ -125020,6 +125142,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `piping.outside_group` | An Edge is not directly inside a Piping group, so it cannot be a pipe. |
 | `piping.parent_ambiguous` | A branch or twig touches two possible parents and hangs from the one whose identifier sorts first. |
 | `piping.shared_definition` | Pipes are reached through two placements of one Piping group's storage, and both count. |
+| `piping.system_unexported` | A Hot Water System with pipes serves no exported Zone, so its pipes are not exported. |
 | `piping.trunk_without_branches` | A trunk run no branch touches. |
 | `piping.twig_unconnected` | A twig run shares no vertex with a branch run in its Piping group, so it cannot export. |
 | `piping.type_missing` | A pipe has no Pipe Type, or names one that no longer exists, so it cannot export. |
@@ -125334,3 +125457,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.98 | 2026-11-24 | ph_composer.piping is new: the Pipe Type kind, pipe_types.list, pipe_types.all and its snapshot section, and pipe_types.create, pipe_types.update, pipe_types.duplicate and pipe_types.delete, with the code piping.insulation_conductivity_missing. |
 | 1.99 | 2026-11-24 | ph_composer.piping adds Piping groups and pipes: the reference targets ph_composer.piping.group and ph_composer.piping.pipe, groups.create, groups.link, groups.unlink, groups.list, groups.all, pipes.assign, pipes.clear, pipes.selection, pipes.selection_all and its snapshot section, with the codes piping.outside_group, piping.group_in_zone and piping.group_nested. pipe_types.delete moves or nulls the pipes using a type. A Hot Water System delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |
 | 1.100 | 2026-11-24 | ph_composer.piping adds the schedule: ph_composer.piping.schedule (runs by connection with their parents, lengths and findings, totals, each Hot Water System's distribution and recirculation and each Pipe Type's used length, with compact), ph_composer.piping.schedule.details, ph_composer.piping.runs.members, ph_composer.piping.systems and its snapshot section, and the view command ph_composer.piping.runs.locate, with the codes piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, piping.trunk_without_branches, piping.parent_ambiguous, piping.shared_definition and piping.hidden. pipe_types.list and pipe_types.all rows add used_length_m. A pipe's water_temp_c is 0 to 100. The thermal-bridge chain rule moves to core unchanged. |
+| 1.101 | 2026-11-24 | ph_composer.piping exports its pipes: the export section ph_composer.piping.export.piping adds each Hot Water System's trunks, branches, twigs and recirculation elements to its hot water systems, the query ph_composer.piping.export_preflight lists its checks, and the code piping.system_unexported notes a System whose pipes no exported Zone takes. The schedule's recirculation temperature and hours add runs and pipes in identifier order, as a reloaded honeybee-ph system does. |

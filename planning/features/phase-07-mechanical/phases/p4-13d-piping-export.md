@@ -1,7 +1,7 @@
 # P4-13d: piping export
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-09, D4-06, D4-18, D4-25, D4-36 and the [piping PRD](../hot-water-piping/PRD.md), "Export mapping" and "Acceptance shape". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13d` runs in the MS3 sitting (D4-31). Stronger review lane: it adds to the Hot Water System's objects before attach (D4-09), the first section to do so.
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13d`, on `main` after #578 merged; offline evidence in [p4-13d-piping-export](../evidence/p4-13d-piping-export.md), host case `M13d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-09, D4-06, D4-18, D4-25, D4-36 and the [piping PRD](../hot-water-piping/PRD.md), "Export mapping" and "Acceptance shape". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13d` runs in the MS3 sitting (D4-31). Stronger review lane: it adds to the Hot Water System's objects before attach (D4-09), the first section to do so.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -144,6 +144,22 @@ sub-stage's PR.
 
 The simplified hot water methods (honeybee_ph#135). METr's diameter enum, its `lTruncW` rows and the recirculation
 coefficient (metr-export). Screens (P4-13e).
+
+## Recorded at implementation (2026-11-24)
+
+- The canonical HBJSON sorts its keys, so a reloaded system sums recirculation elements and segments in identifier
+  order. P4-13c's Ruby read summed in schedule and run order; it now sums in identifier order, and the Python section
+  adds every keyed collection in identifier order, so Ruby, the translated system and the reloaded one agree to the
+  bit. Runs of 0.1, 0.2 and 0.7 m at 24 h can read 23, as honeybee-ph does.
+- The record carries `recirculation_temperature_c` and `recirculation_hours`, which conformance compares with; `id`
+  equals `system_id`.
+- The contributor also `requires` the Zones section (groups a Zone holds) and the hot water section (it reads the
+  Systems first).
+- A trunk's or branch's inner element takes the run's identifier and name, and a segment's name is its identifier, so
+  no random honeybee-ph identifier reaches the HBJSON. A bare Pipe Type with no conductivity exports 0.04.
+- The snapshot keeps no Group definition: a pipe is `shared` when a ComponentInstance holds it or its Edge is reached
+  at two paths.
+- Test 1 and M13d say "one recirculation element"; the case has two (P4-13c's correction), and the tests follow it.
 
 ## Done when
 

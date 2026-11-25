@@ -1,0 +1,22 @@
+{
+  "recirculation": [
+    "system_id",
+    "identifier",
+    "length_m"
+  ],
+  "systems": [
+    "system_id",
+    "room_count",
+    "recirculation_temperature_c",
+    "recirculation_hours"
+  ],
+  "trunks": [
+    "system_id",
+    "identifier",
+    "multiplier",
+    "demand_recirculation",
+    "length_m",
+    "branch_count",
+    "twig_counts"
+  ]
+}

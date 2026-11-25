@@ -51,8 +51,7 @@ module PhComposer
         end
 
         # One row per Hot Water System in id order, a System with no pipes included: its distribution length by role
-        # and its recirculation sum. Runs in a group linked to no existing System add to none. `runs` are in schedule
-        # order, which is the order the recirculation sum adds them in.
+        # and its recirculation sum. Runs in a group linked to no existing System add to none.
         def system_rows(runs, systems)
           systems.keys.sort.map do |id|
             mine = runs.select { |run| run.hot_water_system_id == id }

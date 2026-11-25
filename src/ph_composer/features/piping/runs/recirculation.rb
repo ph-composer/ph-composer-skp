@@ -12,8 +12,10 @@ module PhComposer
       # The arithmetic copies honeybee-ph's step for step so the values equal what the export reloads to, float noise
       # included: a segment's length is the square root of its three squared differences added in order, as
       # ladybug-geometry's Vector3D magnitude is, and every sum adds left to right, as CPython 3.11's `sum` does
-      # (the runtime's Python). Ruby's Array#sum compensates, so it is not used here. Runs are added in schedule order
-      # and a run's pipes in run order, which is the order the export writes them in.
+      # (the runtime's Python). Ruby's Array#sum compensates, so it is not used here. Runs are added in identifier
+      # order and a run's pipes in segment identifier order: the canonical HBJSON is written with its keys sorted, and
+      # honeybee-ph keys recirculation elements and segments by identifier, so that is the order a reloaded system sums
+      # them in, and the export's Python section adds them in the same order so its system sums them alike.
       module Recirculation
         DEFAULT_TEMPERATURE_C = 60.0
         DEFAULT_HOURS = 24
@@ -21,9 +23,9 @@ module PhComposer
 
         module_function
 
-        # `runs` are one System's recirculation runs in schedule order.
+        # `runs` are one System's recirculation runs, in any order.
         def call(runs)
-          elements = runs.map { |run| element(run) }
+          elements = runs.sort_by(&:identifier).map { |run| element(run) }
           total = add(elements.map(&:length_m))
           result = { "recirculation_length_m" => total, "recirculation_temperature_c" => DEFAULT_TEMPERATURE_C,
                      "recirculation_hours" => DEFAULT_HOURS, "from_piping" => !elements.empty? }
@@ -38,12 +40,13 @@ module PhComposer
         # One run as one pipe element: its length and its pipes' length-weighted temperature and hours, 60.0 and 24.0
         # when it has no length, as honeybee-ph's element does.
         def element(run)
-          lengths = run.facts.map { |fact| segment_length(*fact.points_m) }
+          facts = run.facts.zip(run.segments).sort_by(&:last).map(&:first)
+          lengths = facts.map { |fact| segment_length(*fact.points_m) }
           length = add(lengths)
           return Element.new(:length_m => length, :temperature_c => 60.0, :hours => 24.0) if length.zero?
 
-          temperature = add(run.facts.zip(lengths).map { |fact, each| each * fact.values.fetch("water_temp_c") })
-          hours = add(run.facts.zip(lengths).map { |fact, each| each * fact.values.fetch("daily_period") })
+          temperature = add(facts.zip(lengths).map { |fact, each| each * fact.values.fetch("water_temp_c") })
+          hours = add(facts.zip(lengths).map { |fact, each| each * fact.values.fetch("daily_period") })
           Element.new(:length_m => length, :temperature_c => temperature / length, :hours => hours / length)
         end
 

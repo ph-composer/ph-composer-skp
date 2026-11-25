@@ -929,7 +929,7 @@ pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mec
 "Mechanical: pumps", "Mechanical: the Pump export", "Mechanical: fans", "Mechanical: the Fan export" and "Mechanical
 settings", is the recipe.
 
-Hot water piping is the feature `ph_composer.piping` (API 1.98, groups and pipes 1.99, the schedule 1.100), which
+Hot water piping is the feature `ph_composer.piping` (API 1.98, groups and pipes 1.99, the schedule 1.100, export 1.101), which
 requires Mechanical and Zones. Its Pipe Types
 are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapshot section, `create`, `update`,
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a row's `export_blockers` names
@@ -947,6 +947,9 @@ Type and unreadable rows and `ph_composer.piping.runs.members` for one run's pip
 `ph_composer.piping.systems`, the snapshot section `ph_composer.piping.piping_systems`) and each Pipe Type's used length,
 which `pipe_types.list` and `pipe_types.all` rows also carry as `used_length_m`. The view command
 `ph_composer.piping.runs.locate` selects a run's pipes through `ph_composer.context.open` and refuses `piping.hidden`.
+The export section `ph_composer.piping.export.piping` (API 1.101) adds each System's pipes to its hot water systems;
+its preflight, the query `ph_composer.piping.export_preflight`, gives the export's findings with `runs.locate` params,
+each unreadable record and `piping.system_unexported` for a System no exported Zone takes.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)
