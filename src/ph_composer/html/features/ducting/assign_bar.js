@@ -26,7 +26,7 @@ function (ui, lineBars, shared) {
     this.quantity.setAttribute("aria-label", "Quantity");
     ui.tooltip(this.quantity, "How many identical ducts each line stands for");
     this.quantity.value = "1";
-    this.quantity.addEventListener("input", function () { self.paint(); });
+    this.quantity.addEventListener("input", function () { self.typed = true; self.paint(); });
     this.quantity.addEventListener("keydown", function (event) {
       if (event.key !== "Enter") return;
       event.preventDefault();
@@ -48,6 +48,11 @@ function (ui, lineBars, shared) {
   AssignBar.prototype.params = function () {
     return { duct_type_id: this.type.value, direction: this.direction, quantity: Number(this.quantity.value.trim()) };
   };
+  /* A quantity sent is no longer a draft, so the next selection shows its own. */
+  AssignBar.prototype.submit = function (action) {
+    Bar.prototype.submit.call(this, action);
+    if (this.requests.busy()) this.typed = false;
+  };
   AssignBar.prototype.done = function (params, type, lines) {
     return "Assigned " + type + " as " + shared.directionLabel(params.direction).toLowerCase() + " to " + lines + ".";
   };
@@ -62,7 +67,9 @@ function (ui, lineBars, shared) {
       var type = this.common("duct_type_id"), direction = this.common("direction"), quantity = this.common("quantity");
       if (type !== undefined) this.chosen = type;
       if (direction === "outdoor_air" || direction === "exhaust_air") this.direction = direction;
-      if (quantity !== undefined && document.activeElement !== this.quantity) this.quantity.value = String(quantity);
+      // Only a quantity typed for the selection before it is kept; otherwise the new lines' own one shows.
+      if (quantity !== undefined && !this.typed) this.quantity.value = String(quantity);
+      this.typed = false;
     }
     this.paintTypes();
     this.paint();

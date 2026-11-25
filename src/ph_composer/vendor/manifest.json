@@ -181,9 +181,9 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/ducting/assign_bar.js": {
-      "bytes": 4012,
+      "bytes": 4370,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6715287a10cf4d249d2d736f2cdeef094595490ce7191704cde50781fae776f5"
+      "sha256": "662322b1dfa819cba382eb2b21e27cb3f38f3bb022cdad85066e4e984eb8f7bc"
     },
     "html/features/ducting/duct_types.js": {
       "bytes": 7381,
@@ -221,9 +221,9 @@
       "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
     },
     "html/features/mechanical/equipment_table.js": {
-      "bytes": 24130,
+      "bytes": 24212,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "843b25dfd45f0ea7ff289e945ee1bf4fade5727fd1188746e7de123f7054d59e"
+      "sha256": "8354923cea664c17e3146fa7d1581016da9578964b8040be1210f4e0f91d3b0e"
     },
     "html/features/mechanical/fans.js": {
       "bytes": 8575,

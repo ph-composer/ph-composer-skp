@@ -81,6 +81,15 @@ layer (`html/line_groups/` and `choice_cell.js`) and 31 KB of piping; ducting's 
   move. P2: this evidence file was untracked on the reviewed head; committed. P2: `choice_cell.js` joins M13e's and
   M14f's dependency paths. P3: the ACCEPTANCE row names the registered modes, `ph_composer.ducting.by_direction` and
   `ph_composer.ducting.by_type` (the stage doc's `ducting_by_*` is the short form).
+- Codex gpt-6.2-sol cycle 2 on `630508f7` (the cap): 1 P1, 5 P2. Fixed in the final commit, which merges unreviewed
+  after the cap and is owed one Codex review before the phase archive: P1, a new selection now shows its own quantity
+  unless one was typed for the selection before it and not yet sent (a focused field no longer blocks it), tested;
+  P2, typing in a held Change Shape keeps the reason it is held, tested. Declined, each shared with piping's pill and
+  recorded as a follow-up for both features: a Duct Type whose only duct sits outside every Ducting group reads as
+  unused, so Delete shows the plain confirmation and the host refuses `reference.in_use` with its message; Locate on a
+  run of more than 10,000 lines sends more paths than `runs.locate` takes and is refused; the preview host's Assign
+  changes the selected lines but not its synthetic runs; a Ventilator tagged "No Ventilator" groups with unlinked
+  runs under one heading (piping's System column has the same key).
 
 ## Gate
 

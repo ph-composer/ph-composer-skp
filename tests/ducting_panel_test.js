@@ -136,6 +136,11 @@ test("the Ducting pill says which ducts are drawn, and Assign sends the type, di
         { reference: { group_path: [600], entity_path: [600, 602], entity_id: "dce_602" },
           expected_values: { duct_type_id: fixtures.DT2, direction: "exhaust_air", quantity: 2 } }] });
     act(o, assign, { status: "completed", value: { edge_ids: [] } });
+    var edges = o.state.sections[PREFIX + "ducts.selected"].value.edges;
+    edges.splice(0, 1);
+    edges[0].values = { duct_type_id: fixtures.DT2, direction: "exhaust_air", quantity: 3 };
+    o.paint();
+    assert.strictEqual(bar.quantity.value, "3", "a new selection shows its own quantity over one typed before");
     assert.deepStrictEqual(o.notices[o.notices.length - 1], { message: "Assigned DT-1 as exhaust air to 2 lines.",
       tone: "success" });
     press(bar.clear);
@@ -204,6 +209,8 @@ test("a Shape change held after the shape changed elsewhere sends nothing on Ent
   record.values.shape = "rectangular"; o.paint();
   record.values.shape = "round"; o.paint();
   assert.ok(form.submitButton.disabled, "the change is held once the shape moved");
+  form.units[0].unit.input.value = "260"; form.units[0].unit.input.listeners.input({});
+  assert.match(form.error.textContent, /is now Rectangular; cancel and choose its Shape again/, "typing keeps why");
   key(form.units[1].unit.input, "Enter");
   assert.strictEqual(named(o, TYPES + ".update").length, 0);
 });

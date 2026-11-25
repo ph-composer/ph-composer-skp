@@ -202,7 +202,8 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms, choiceCe
       var unit = new unitFields.UnitField({ field: entry.field, value: null,
         onCommit: function () { self.updateButton(); } });
       unit.input.setAttribute("aria-label", entry.label);
-      unit.input.addEventListener("input", function () { self.error.textContent = ""; });
+      // A held change keeps saying why until the dialog closes.
+      unit.input.addEventListener("input", function () { if (!self.stale) self.error.textContent = ""; });
       // Enter in any field submits, after the field has read what was typed.
       unit.input.addEventListener("keydown", function (event) { if (event.key === "Enter") self.submit(); });
       label.appendChild(ui.element("span", "", entry.label));
