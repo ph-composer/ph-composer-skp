@@ -49,15 +49,15 @@ module PhComposer
       end
 
       # One Model walk and one read of the types per rebuild: every readable pipe occurrence with its record and
-      # Pipe Type, or nil for a missing one. While an edit context is open, SketchUp rebases a repeated parent's
-      # shared child transforms, so a pipe in shared storage could draw at another placement's position
+      # Pipe Type, or nil for a missing one. While a repeated parent's edit context is open, SketchUp rebases its shared
+      # child transforms, so a pipe in shared storage could draw at another placement's position
       # (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit contexts"): those are withheld until it closes.
       def pipes(read)
         types = DefinitionLists.read(read.engine, PIPE_TYPE_KIND, read.engine.ids(PIPE_TYPE_KIND)).first
                                .to_h { |record| [record.fetch("id"), record] }
         groups, = Scan.walk(read.model)
-        open = !Array(read.model.active_path).empty?
-        groups.reject { |occurrence| open && occurrence.shared }.flat_map do |occurrence|
+        rebased = Array(read.model.active_path).any? { |entity| repeated?(entity) }
+        groups.reject { |occurrence| rebased && occurrence.shared }.flat_map do |occurrence|
           occurrence.edges.filter_map do |edge|
             record, problem = Group.read(edge, Assignment::STORE)
             next if problem || Assignment::RECORD_KIND.problems(record).any?
@@ -65,6 +65,14 @@ module PhComposer
             yield edge, occurrence, record, types[record.fetch("pipe_type_id")]
           end
         end
+      end
+
+      # A component, or a Group whose definition another Group shares: opening it rebases its children.
+      def repeated?(entity)
+        return true if entity.is_a?(Sketchup::ComponentInstance)
+
+        definition = entity.respond_to?(:definition) ? entity.definition : nil
+        definition.respond_to?(:instances) && definition.instances.length > 1
       end
 
       def entry(edge, occurrence, value, label, complete, colour: nil)

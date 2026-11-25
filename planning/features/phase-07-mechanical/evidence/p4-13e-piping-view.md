@@ -70,19 +70,35 @@ is owed to the MS3 sitting (D4-31), with the UI polish review on the host. M13e 
   thinner tool tests (four cases added); a new selection overwriting a running tool's choice on the bar (fixed, test
   added). Recorded, not changed: hours a day at precision 1; a Zone-held group refused at release (deliberate); the
   evidence file (this one).
-- Codex: see the PR.
+- Codex gpt-6.2-sol cycle 1 on `f08383c7`: 3 P1, 7 P2, 2 P3, all fixed in `a7e19e79`: Locate adopts only its own
+  answer's revision (the thermal-bridge Schedule keeps the older carry-forward flag, a follow-up); a refused or invalid
+  change to a running tool puts its armed values back on the bar; an unknown stored role no longer breaks the bar;
+  runs sharing an identifier each keep a row; a group's unreadable record offers no Locate; unnamed groups read by
+  path; Colour-by withholds shared pipes while a context is open; the tool reads its type without measuring used
+  length (`pipe_types.list` measures only when its fields ask); refusals alone become the tool's and the link's
+  notices; `schedule.all` describes its full unreadable list; a unit-switch draft test and a findings bubble at every
+  panel size.
+- Cycle 2 on `a7e19e79` (the cap): 2 P1, 6 P2. Fixed in the final commit, which merges unreviewed after the cap and is
+  owed one Codex review before the phase archive: the tool keeps a frozen copy of its armed values and answers a
+  copy; a tool armed without a value shows its default on the bar; Colour-by withholds shared pipes only while a
+  repeated parent is open; Group by Piping group keys on the occurrence path and labels a shared name with its path;
+  New Piping group follows the Systems snapshot; `pipe_tool.stop` says Select takes the viewport; typing in the
+  recirculation fields repaints Assign. Declined: Locate after an edit landing between the read and the Locate (the
+  read is stale at send in every ordering the panel can see; a narrower race than the snapshot cycle).
 
 ## Gate
 
-Head before the PR (tree equal to the rebased head):
+Final head (the cycle-2 fixes), on `main` after #579:
 
-- `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes: 3538 runs, 49546 assertions, 0 failures, 0 errors,
-  2 skips" (the two private corpora absent from a worktree); JS 1220 pass, 0 fail; Python 460 passed, 17 skipped;
-  hostkit 48 runs; "RBZ verified: 829 files, 9022990 bytes, 27749588 bytes installed".
-- Installed size: 27,749,588 bytes, 86,922 over P4-13d's 27,662,666 against the 85 KB estimate (87,040 bytes; within
-  it). 250,412 bytes under the 28,000,000 ceiling are left for P4-14 and P4-15.
+- `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes: 3540 runs, 49558 assertions, 0 failures, 0 errors,
+  2 skips" (the two private corpora absent from a worktree); JS 1226 pass, 0 fail; Python 460 passed, 17 skipped;
+  hostkit 48 runs; "RBZ verified: 829 files, 9024533 bytes, 27753971 bytes installed".
+- Installed size: 27,753,971 bytes, 91,305 over P4-13d's 27,662,666 against the 85 KB estimate (87,040 bytes; 4.9
+  percent over, inside the 25 percent stop line). 246,029 bytes under the 28,000,000 ceiling are left for P4-14 and
+  P4-15.
 - PHX: `uv run --group phx pytest tests/python`: 486 passed, 1 skipped (`test_map_borders.py`,
   `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: 26 passed.
-- Browser checks: `make ui-checks` 40 of 40 scripts pass, exit 0, none skipped (`piping_checks.cjs` new).
+- Browser checks: `make ui-checks` on the final head, 40 of 40 scripts pass, exit 0, none skipped
+  (`piping_checks.cjs` new).
 - Design System: owed. `hours_per_day` joins the unit registries and the equipment table gains `identity`; the re-sync
   from `main` follows this merge.

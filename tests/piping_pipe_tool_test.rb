@@ -57,6 +57,16 @@ class PipingPipeToolTest < PhComposerTestCase
     assert_equal [@copper, "branch", nil], values(@edges[0]), "a click reassigns, dropping the trunk's values"
   end
 
+  def test_the_armed_values_are_the_tools_own_copy
+    chosen = { "multiplier" => 12 }
+    tool.choose(@pex, "trunk", chosen)
+    chosen["multiplier"] = 3
+    tool.state.fetch("values")["multiplier"] = 4
+    point(:a, [@group, @edges[0]])
+    click(:a)
+    assert_equal [@pex, "trunk", 12], values(@edges[0])
+  end
+
   def test_escape_suspension_and_a_move_without_the_button_each_write_nothing
     @edges.each_with_index { |entity, index| point(index, [@group, entity]) }
     tool.choose(@pex, "twig")

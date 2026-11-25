@@ -298,3 +298,38 @@ test("a recirculation draft keeps the unit it was typed in through a unit switch
   var sent = named(o, PREFIX + "pipes.assign")[0].payload.params;
   assert.ok(Math.abs(sent.water_temp_c - 55) < 1e-9, String(sent.water_temp_c));
 });
+
+test("a tool armed without a value shows its default, typing repaints Assign, and New Piping group follows the Systems",
+  function () {
+    var o = setup(), bar = o.view(PIPING).bar;
+    bar.multiplier.value = "12"; bar.multiplier.listeners.input({});
+    o.state.sections[PREFIX + "pipe_tool"].value = { active: true, pipe_type_id: fixtures.PT1, role: "trunk",
+      values: {}, gesture_limit: 250 };
+    o.paint();
+    assert.strictEqual(bar.multiplier.value, "1", "the default a new trunk takes");
+    o.state.sections[PREFIX + "pipe_tool"].value.active = false; o.paint();
+    change(bar.role, "recirculation");
+    bar.hours.input.value = "30"; bar.hours.input.listeners.input({});
+    assert.ok(bar.assign.disabled);
+    bar.hours.input.value = "8"; bar.hours.input.listeners.input({});
+    assert.strictEqual(bar.assign.disabled, false, "Assign follows the text as typed");
+    press(bar.newGroup);
+    var form = o.view(PIPING).groupForm;
+    change(form.system, fixtures.mechanical.HWS2.id);
+    var systems = o.state.sections[MECHANICAL + "hot_water_systems"].value.records;
+    systems.splice(1, 1);
+    o.paint();
+    assert.strictEqual(form.system.value, "", "a deleted System is no longer chosen");
+    assert.ok(form.submitButton.disabled);
+  });
+
+test("Group by Piping group keeps two groups of one name apart", function () {
+  var o = setup(), value = fixtures.schedule();
+  value.runs[1] = Object.assign(value.runs[1], { group: { group_id: "ppg_BBBBBBBBBBBB", group_path: [510],
+    name: "Riser" } });
+  answer(o, last(o, PREFIX + "schedule.all"), { status: "completed", revision: 1, value: value });
+  var schedule = o.view(PIPING).schedule;
+  schedule.controls.groupBy.value = "group"; schedule.paint();
+  var labels = schedule.mount.querySelectorAll(".phc-group-label").map(function (node) { return node.textContent; });
+  assert.deepStrictEqual(labels.sort(), ["Riser (500)", "Riser (510)"]);
+});

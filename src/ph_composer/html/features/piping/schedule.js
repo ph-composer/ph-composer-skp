@@ -137,10 +137,24 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
       (this.read.stale(state) ? "Changed since read" : "");
     this.status.classList.toggle("piping-error", Boolean(this.read.error) && !this.read.busy());
     this.refresh.disabled = this.read.busy();
+    // Two Piping groups may share a name: grouping keys on the occurrence path, and a shared name shows its path.
+    var named = Object.create(null);
+    this.runs.forEach(function (run) {
+      var key = run.group.group_path.join("/"), name = field(run, "group");
+      named[name] = named[name] || Object.create(null);
+      named[name][key] = true;
+    });
+    function groupValue(run, name) {
+      return name === "group" ? run.group.group_path.join("/") + "\u0000" + field(run, name) : field(run, name);
+    }
     var projected = this.controls.project(this.runs, { id: function (run) { return run.key; },
-      value: field, search: function (run) {
+      value: groupValue, search: function (run) {
         return [run.display_name, field(run, "system"), run.pipe_type_name || ""].join(" ");
-      }, group: function (run, name) { return { label: String(field(run, name) || "None") }; },
+      }, group: function (run, name) {
+        var label = String(field(run, name) || "None"), path = run.group.group_path.join("/");
+        return { label: name === "group" && Object.keys(named[label] || {}).length > 1 ? label + " (" + path + ")" :
+          label };
+      },
       tie: function (a, b) { return a.order - b.order; } });
     var rows = projected.records.map(function (run) {
       return { key: run.key, record: run, tier: "Run", depth: 0, parent: null };

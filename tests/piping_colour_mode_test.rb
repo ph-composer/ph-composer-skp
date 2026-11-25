@@ -90,6 +90,10 @@ class PipingColourModeTest < PhComposerTestCase
     end
     wrappers.each { |wrapper| @model.entities << wrapper }
     assert_equal [2], activate(P::ColourModes::BY_ROLE).rows.map(&:count)
+    unrelated = Sketchup::Group.new(900, Sketchup::Entities.new([]))
+    @model.entities << unrelated
+    @model.active_path = [unrelated]
+    assert_equal [2], activate(P::ColourModes::BY_ROLE).rows.map(&:count), "an unrelated open Group rebases nothing"
     @model.active_path = [wrappers.first]
     assert_empty activate(P::ColourModes::BY_ROLE).rows
   ensure

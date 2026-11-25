@@ -58,7 +58,7 @@ module PhComposer
           choose(request)
         end
         feature.view_command("#{PREFIX}.stop",
-                             :description => "Give the viewport back to whatever tool the user had.",
+                             :description => "End the pipe tool; SketchUp's Select tool takes the viewport.",
                              :refuses => [], :params => Shapes::NONE, :result => STATE,
                              :side_effects => "Abandons a pending gesture and puts back the Colour-by mode from " \
                                               "before the tool, unless another was chosen meanwhile.",

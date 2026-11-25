@@ -82,7 +82,10 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
     this.type.addEventListener("change", function () { self.chosen = self.type.value; self.changed(); });
     this.role.addEventListener("change", function () { self.changed(); });
     this.demand.addEventListener("change", function () { self.changed(); });
-    this.multiplier.addEventListener("input", function () { self.paint(); });
+    // Typing repaints, so Assign follows the text; the tool re-arms only on a commit.
+    [this.multiplier, this.temperature.input, this.hours.input].forEach(function (input) {
+      input.addEventListener("input", function () { self.paint(); });
+    });
     this.multiplier.addEventListener("change", function () { if (self.tool.active()) self.armTool(); });
     this.multiplier.addEventListener("keydown", function (event) {
       if (event.key !== "Enter") return;
@@ -198,8 +201,9 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
     var armed = JSON.stringify(this.tool.state);
     if (this.tool.active() && !this.tool.busy() && this.armed !== armed) {
       this.armed = armed;
-      this.apply(Object.assign({ pipe_type_id: this.tool.state.pipe_type_id, role: this.tool.state.role },
-        this.tool.state.values));
+      // A value the tool was armed without takes its default on a new pipe, so the bar shows the default.
+      this.apply(Object.assign({}, DEFAULTS, { pipe_type_id: this.tool.state.pipe_type_id,
+        role: this.tool.state.role }, this.tool.state.values));
     }
     var catalog = JSON.stringify(this.types.map(function (type) { return [type.id, type.values.name]; }));
     if (catalog !== this.catalog) {

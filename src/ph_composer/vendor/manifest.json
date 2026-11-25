@@ -261,14 +261,14 @@
       "sha256": "37ba2034b7031e4bae11905eb3ca063da8c88ed7ae3dc732c6c360c150c2fe33"
     },
     "html/features/piping/assign_bar.js": {
-      "bytes": 15367,
+      "bytes": 15666,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "5e37efd067d592856a22efd14f4ac9c8bc08aadd8c0608803c79d08bd2635f42"
+      "sha256": "65bcfdd72c577a5d58de866c3a2d37de07ea5ff4bd65d6ba0b3ef4cb0c4f9900"
     },
     "html/features/piping/groups.js": {
-      "bytes": 6997,
+      "bytes": 7473,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b7bc9bfcb2f5ea67cdf7655f0ecc875e823c187d6f97309166b2636932cfd263"
+      "sha256": "906253a445f7a0d161dfd5f6fbfb952e80ddf92c3d267a98693c052197250c78"
     },
     "html/features/piping/pipe_tool.js": {
       "bytes": 3279,
@@ -286,9 +286,9 @@
       "sha256": "15272a999d3c3c75b477b9a489866add1ac416ef8459d852d91d206bbf9932dd"
     },
     "html/features/piping/schedule.js": {
-      "bytes": 16472,
+      "bytes": 17178,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e0ea97f66c567eba23234ad5342acd42cbf8c1005425d3450007c50523979c93"
+      "sha256": "a80e4fbc0919996e26349eab7966a2a4d649c893667b00febfd380a089e2f1e6"
     },
     "html/features/piping/section.js": {
       "bytes": 3171,

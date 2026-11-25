@@ -32,13 +32,19 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, equipment, ho
   GroupForm.prototype.updateButton = function () {
     this.submitButton.disabled = !this.enabled || this.busy() || !this.system.value;
   };
-  GroupForm.prototype.open = function (state) {
-    if (!this.enabled) return;
-    var rows = systemRows(state);
+  /* The Systems as the snapshot has them; the choice is kept while its System exists. */
+  GroupForm.prototype.paintSystems = function (state, fresh) {
+    var rows = systemRows(state), chosen = this.system.value;
     this.system.replaceChildren(ui.option("", rows.length ? "Choose a Hot Water System" :
       "Create a Hot Water System first"));
     rows.forEach(function (row) { this.system.appendChild(ui.option(row.id, row.values.name)); }, this);
-    this.system.value = rows.length === 1 ? rows[0].id : "";
+    // Only a form just opened takes the sole choice for the user.
+    if (fresh) this.system.value = rows.length === 1 ? rows[0].id : "";
+    else this.system.value = rows.some(function (row) { return row.id === chosen; }) ? chosen : "";
+  };
+  GroupForm.prototype.open = function (state) {
+    if (!this.enabled) return;
+    this.paintSystems(state, true);
     this.error.textContent = "";
     this.updateButton(); this.show(); this.system.focus();
   };
@@ -48,6 +54,7 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, equipment, ho
   };
   GroupForm.prototype.refresh = function (state) {
     var outcome = forms.refreshForm(this, state, SYSTEMS);
+    if (!this.root.hidden && !this.busy()) this.paintSystems(state, false);
     if (outcome && outcome.status === "completed") this.hide(outcome.value);
     this.updateButton();
   };

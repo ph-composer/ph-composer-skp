@@ -46,7 +46,7 @@ module PhComposer
         type = read_type(pipe_type_id)
         @pipe_type_id = pipe_type_id
         @role = role
-        @values = values
+        @values = DeepCopy.frozen(values)
         @type = type
         model = @session.model
         model.select_tool(self) if !active? && model.respond_to?(:select_tool)
@@ -70,7 +70,7 @@ module PhComposer
       end
 
       def state
-        { "active" => active?, "pipe_type_id" => @pipe_type_id, "role" => @role, "values" => @values }
+        { "active" => active?, "pipe_type_id" => @pipe_type_id, "role" => @role, "values" => DeepCopy.call(@values) }
       end
 
       # Sketchup::Tool. The host calls these; nothing else does.

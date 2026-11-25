@@ -118354,7 +118354,7 @@ Example params:
 
 ### `ph_composer.piping.pipe_tool.stop`
 
-Give the viewport back to whatever tool the user had. Owner: `ph_composer.piping`.
+End the pipe tool; SketchUp's Select tool takes the viewport. Owner: `ph_composer.piping`.
 
 Side effects: Abandons a pending gesture and puts back the Colour-by mode from before the tool, unless another was chosen meanwhile.
 
