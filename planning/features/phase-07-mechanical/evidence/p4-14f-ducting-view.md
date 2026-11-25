@@ -56,9 +56,9 @@ and its browser check only in its selectors; `docs/API_REFERENCE.md` is unchange
 
 ## Size
 
-Installed RBZ 27,935,173 bytes on `e11e6dbf` (`make ci`, "RBZ verified: 877 files, 9094448 bytes, 27935173 bytes
-installed"), 38,344 over P4-14e's 27,896,829 against the 52 KB estimate (53,248 bytes): 28 percent under. 64,827 bytes
-are left under the 28,000,000 ceiling, about 25 KB above P4-15's 40 KB reserve. The extraction alone, measured
+Installed RBZ 27,936,193 bytes on the final head `fccb84e4` (`make ci`, "RBZ verified: 877 files, 9094777 bytes,
+27936193 bytes installed"), 39,364 over P4-14e's 27,896,829 against the 52 KB estimate (53,248 bytes): 26 percent
+under. 63,807 bytes are left under the 28,000,000 ceiling, about 24 KB above P4-15's 40 KB reserve. The extraction alone, measured
 before any ducting code, cost about 11 KB installed. On the code head piping's former 63 KB of panel code is 41 KB of
 layer (`html/line_groups/` and `choice_cell.js`) and 31 KB of piping; ducting's panel files are 21 KB.
 
@@ -101,6 +101,15 @@ layer (`html/line_groups/` and `choice_cell.js`) and 31 KB of piping; ducting's 
   51078 assertions, 0 failures, 0 errors, 2 skips"; JS "pass 1234", "fail 0"; Python "477 passed, 18 skipped";
   hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 877 files, 9094634 bytes, 27935753 bytes installed"
   (+38,924 against the estimate; 64,247 left).
+- Final head `fccb84e4` (the cycle-2 fixes): `make ci` on Ruby 3.2.2, chained before the commit: "Ruby suite, 10
+  processes: 3617 runs, 51078 assertions, 0 failures, 0 errors, 2 skips"; JS "pass 1234", "fail 0"; Python "477
+  passed, 18 skipped"; hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 877 files, 9094777 bytes,
+  27936193 bytes installed". `make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby` on the same head: the same Ruby, JS,
+  Python and hostkit lines, "RBZ verified: 877 files, 9094771 bytes, 27936187 bytes installed" (6 bytes under).
+- Browser checks: `make ui-checks` on `fccb84e4`: 41 of 41 scripts pass, exit 0, none skipped (`ducting_checks.cjs`
+  new; `piping_checks.cjs` and `mechanical_checks.cjs` pass on the shared layer).
+- PHX: `uv run --group phx pytest tests/python` on `fccb84e4`: 506 passed, 1 skipped (`test_map_borders.py`,
+  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: 29 passed, 0 skipped (this stage exports nothing new).
 - Panel manifest: `make panel-manifest` current; runtime manifest refreshed (`vendor.py --refresh-manifest`, "Runtime
   verified: 238 assets, 8 wheels").
 - Design System: not re-synced. No token, type style or existing kit part's look changed: `choice_cell.js` moves
