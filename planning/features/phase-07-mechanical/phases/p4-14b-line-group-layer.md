@@ -1,7 +1,7 @@
 # P4-14b: the shared line-group layer
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14b`, on `main`; offline evidence in [p4-14b-line-group-layer](../evidence/p4-14b-line-group-layer.md); no host case of its own (M13b to M13e owed to MS3). Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), "Size" and "Inferred in planning", P4-13e's recorded handover ([its evidence](../evidence/p4-13e-piping-view.md), "Recorded at implementation") and `context/EXTENSIBILITY.md`. Scoped. Waits on Ed's answer to the shared-layer inference in P4-14; authorized with every stage on 2026-11-23 (STATUS, "Entry gates") once he has. No host case of its own: the MS3 sitting runs M13b to M13e on the moved code.
+STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14b` (#582), on `main`; offline evidence in [p4-14b-line-group-layer](../evidence/p4-14b-line-group-layer.md); no host case of its own (M13b to M13e owed to MS3). Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), "Size" and "Inferred in planning", P4-13e's recorded handover ([its evidence](../evidence/p4-13e-piping-view.md), "Recorded at implementation") and `context/EXTENSIBILITY.md`. Scoped. Waits on Ed's answer to the shared-layer inference in P4-14; authorized with every stage on 2026-11-23 (STATUS, "Entry gates") once he has. No host case of its own: the MS3 sitting runs M13b to M13e on the moved code.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

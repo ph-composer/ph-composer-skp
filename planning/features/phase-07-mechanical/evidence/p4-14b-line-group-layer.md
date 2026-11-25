@@ -4,7 +4,7 @@ DATE: 2026-11-25
 Register row: [M14b](../ACCEPTANCE.md). Stage: [P4-14b](../phases/p4-14b-line-group-layer.md), under the parent index
 [P4-14](../phases/p4-14-erv-ducting.md).
 Base: `main` at `295a4a15` (#581 merged before this PR opened; the branch was cut from #581's head `95b1be8f`, whose
-tree equals `295a4a15`). Code and evidence in the PR's first commit; review and ledger commits follow.
+tree equals `295a4a15`). Code commit `f0f5923d`; PR [#582](https://github.com/ph-composer/ph-composer-skp/pull/582).
 
 Offline evidence only. No SketchUp process ran during this stage (`pgrep -x SketchUp` empty before each gate). This
 stage has no host case of its own: the MS3 sitting runs `M13b` to `M13e` on the build carrying the moved code, which
@@ -101,3 +101,7 @@ Edge noun is one word and the Spec says the noun is also the step name; two comm
 EXTENSIBILITY names the session beside the shell. Declined: memoizing the Edge id pattern (one Regexp per selected
 Edge, at most 250 a gesture, not measurable); a layer that never says "Zone" (a Zone-held group is a line group's own
 refusal, and the containment read stays the caller's); the glossary's Ducting group (P4-14a added the term).
+
+Codex, gpt-6-astra (the strong lane), cycle 1 on `f0f5923d`: no findings, verdict approve; its residual gaps are that
+its read-only sandbox could not run the focused tests (it read the gate evidence) and the owed MS3 cases. No code
+changed after it, so no second cycle.
