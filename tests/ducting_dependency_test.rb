@@ -13,13 +13,16 @@ class DuctingDependencyTest < PhComposerTestCase
   end.freeze
   DUCTING = [File.join(ROOT, "features", "ducting"), File.join(ROOT, "html", "features", "ducting")].freeze
   # A feature's id, Ruby module or folders.
-  NAMES_DUCTING = %r{ph_composer\.ducting\b|\bDucting(::|\.)|\bducting/|features/ducting\b|\bducting\.[a-z_]+}
-  NAMES_PIPING = %r{ph_composer\.piping\b|\bPiping(::|\.)|\bpiping/}
+  NAMES_DUCTING = %r{ph_composer\.ducting\b|\bDucting(::|\.)|PhComposer::Ducting\b|\bducting/|features/ducting\b|
+                     \bducting\.[a-z_]+}x
+  NAMES_PIPING = %r{ph_composer\.piping\b|\bPiping(::|\.)|PhComposer::Piping\b|\bpiping/|features/piping\b|
+                    \bpiping\.[a-z_]+}x
 
   def test_nothing_under_mechanical_or_piping_names_ducting
     ["ph_composer.ducting.duct_types", "Ducting::DuctType", "require_relative \"../ducting/install\"",
      "html/features/ducting/section.js", "ducting.insulation_conductivity_missing",
-     "features/ducting"].each { |text| assert_match NAMES_DUCTING, text }
+     "features/ducting", "PhComposer::Ducting", "[Piping, PhComposer::Ducting]"]
+      .each { |text| assert_match NAMES_DUCTING, text }
     ["(Ventilation's Ventilators, later Ducting).", "ph_composer.ductingx", "supply_ducting.length",
      "ERV ducting. Then"]
       .each { |text| refute_match NAMES_DUCTING, text }
@@ -27,6 +30,8 @@ class DuctingDependencyTest < PhComposerTestCase
   end
 
   def test_nothing_under_ducting_names_piping
+    ["PhComposer::Piping", "[Mechanical, PhComposer::Piping]", "Piping::PipeType", "piping.type_missing",
+     "features/piping"].each { |text| assert_match NAMES_PIPING, text }
     assert_empty offenders(DUCTING, NAMES_PIPING)
   end
 

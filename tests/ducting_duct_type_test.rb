@@ -93,8 +93,9 @@ class DuctingDuctTypeTest < PhComposerTestCase
     @model.undo
     assert_equal COMMON.merge("name" => "DT-1").merge(ROUND), values(id)
     @model.redo
-    completed(invoke("update", "id" => id, "values" => { "shape" => "round", "diameter_mm" => 125.0 },
-                               "expected_values" => { "shape" => "rectangular" }))
+    # A null for the other shape's dimension removes it, as a null removes any optional value.
+    round = { "shape" => "round", "diameter_mm" => 125.0, "width_mm" => nil }
+    completed(invoke("update", "id" => id, "values" => round, "expected_values" => { "shape" => "rectangular" }))
     assert_equal({ "shape" => "round", "diameter_mm" => 125.0 },
                  values(id).slice("shape", "diameter_mm", "width_mm", "height_mm"))
   end

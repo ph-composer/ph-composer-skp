@@ -1343,8 +1343,9 @@ giving at least `name` (shown as Tag). Unless you give them, it is a round duct 
 (`insulation_reflective` true) at `insulation_conductivity_w_mk` 0.04 W/mK. A rectangular duct sends
 `shape` `rectangular` with `width_mm` and `height_mm` and no diameter. A type holds its shape's
 dimensions and never the other shape's: one missing or extra, a dimension of 0 or less, a negative
-thickness or a conductivity of 0 is refused as `params.invalid` and nothing is written. To change the
-shape, send the new `shape` with its dimensions; the old ones are removed in the same edit.
+thickness or a conductivity of 0 is refused as `params.invalid` and nothing is written; a null for the
+other shape's dimension is the same as leaving it out. To change the shape, send the new `shape` with
+its dimensions; the old ones are removed in the same edit.
 
 Setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then reads
 `export_ready: false` with `ducting.insulation_conductivity_missing`, which blocks the export of a duct
