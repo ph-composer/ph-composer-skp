@@ -82,6 +82,13 @@ MOCKUP_DIR=planning/features/<slug>/mockups` and build on the mockup kit (`tools
   push once per topic, when the owner moves on, not after every pick.
 - Write the PRD and phase plans from the reviewed mockup, and link its scene table from them.
 
+**Boards instead of a clickable page.** The mockup kit is the default. Only when the owner asks for boards
+(many states side by side), draw them on a Design canvas with the PH-Composer Design System and keep the
+source in `planning/features/<slug>/mockups/canvas/project/`: `canvas.json` plus one `*.dc.html` per board.
+Publish with `root` set to the `canvas` folder, and read the published files before overwriting them. Ask
+each decision as one dialog of two or three options, recommendation first. Decisions still go in the
+packet's `DECISIONS.md`, never only on the canvas.
+
 ## Verify the result
 
 1. Add deterministic tests for structure, accessible names, state transitions, and preserved commands. Test the behavior rather than exact decorative markup.
