@@ -10,7 +10,7 @@ module PhComposer
       OBJECT = { "type" => "object" }.freeze
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
-      CREATE = %w[target.not_found validation.failed].freeze
+      CREATE = %w[record.unreadable target.not_found validation.failed].freeze
       LINK = (LOCATE + %W[gesture.too_large #{Codes::GROUP_IN_ZONE} #{Codes::GROUP_NESTED}]).freeze
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
@@ -35,8 +35,9 @@ module PhComposer
         "values" => Shapes.described(OBJECT, "The record's values as stored: ventilator_id, null while unlinked."),
         "duct_count" => { "type" => "integer", "minimum" => 0,
                           "description" => "Edges directly inside it carrying a duct assignment." },
-        "copied" => Shapes.described({ "type" => "boolean" }, "Another occurrence carries the same id: a pasted " \
-                                                              "copy sharing its storage, which keeps its Ventilator."),
+        "copied" => Shapes.described({ "type" => "boolean" }, "Another occurrence carries the same id, as a pasted " \
+                                                              "copy does, keeping its Ventilator. It says nothing " \
+                                                              "of writability: read write_refusal."),
         "findings" => Shapes.described(Shapes.list(Shapes::TEXT), "#{Codes::GROUP_IN_ZONE} or " \
                                                                   "#{Codes::GROUP_NESTED} where it sits somewhere " \
                                                                   "ducts may not."),

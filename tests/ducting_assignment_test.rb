@@ -167,6 +167,43 @@ class DuctingAssignmentTest < PhComposerTestCase
     assert_match(/still refers to #{D::DUCT_KIND} #{named}/, cleared["message"])
   end
 
+  # A removed id is checked whatever else is wrong with its record: one of a newer schema version, and one whose
+  # every copy this clear removes though one copy is invalid, still refuse while a record names it.
+  def test_clear_checks_every_removed_id_against_its_referrers
+    named = lambda do |entity, id|
+      envelope = { "schema_version" => 1, "payload" => { "duct" => id }, "export_relevance" => "local_only",
+                   "references" => [{ "path" => "$.duct", "target_kind" => D::DUCT_KIND, "cardinality" => "one" }] }
+      STORE.write(entity, STORE.read(entity).merge("extension_data" => { "other.tool" => envelope }))
+    end
+    values = { "duct_type_id" => @dt1, "direction" => "exhaust_air" }
+    assign(@edges.map { |entity| target(entity) }, values)
+    STORE.write(@edges.first, STORE.read(@edges.first).merge("schema_version" => 2))
+    named.call(@edges[2], STORE.read(@edges.first).fetch("id"))
+    assert_equal %w[refused reference.in_use], invoke("#{PREFIX}.ducts.clear", "targets" => [target(@edges.first)])
+      .values_at("status", "code")
+
+    STORE.write(@edges[1], STORE.read(@edges[1]).merge("direction" => "bogus"))
+    copy = edge(604)
+    STORE.write(copy, STORE.read(@edges[1]).merge("direction" => "exhaust_air"))
+    @group.entities << copy
+    named.call(@edges[2], STORE.read(@edges[1]).fetch("id"))
+    both = invoke("#{PREFIX}.ducts.clear", "targets" => [target(@edges[1]), target(copy)])
+    assert_equal %w[refused reference.in_use], both.values_at("status", "code")
+  end
+
+  def test_a_stale_duct_type_delete_refuses_target_changed_before_a_stranded_duct
+    assign([target(@edges.first)], "duct_type_id" => @dt1, "direction" => "exhaust_air")
+    @model.entities << Sketchup::Group.new(800, Sketchup::Entities.new([ducting_group(801, "dcg_LLLLLLLLLLLL",
+                                                                                      [tagged = edge(802)])]),
+                                           :locked => true)
+    STORE.write(tagged, STORE.read(@edges.first).merge("id" => "dce_LOCKEDLOCKED"))
+    stale = invoke("#{PREFIX}.duct_types.delete", "id" => @dt1, "replacement_id" => @dt2,
+                                                  "expected_values" => { "name" => "DT-0" })
+    assert_equal %w[refused target.changed], stale.values_at("status", "code")
+    fresh = invoke("#{PREFIX}.duct_types.delete", "id" => @dt1, "replacement_id" => @dt2)
+    assert_equal %w[refused reference.in_use], fresh.values_at("status", "code")
+  end
+
   def test_deleting_a_duct_type_in_use_refuses_moves_or_nulls_every_duct_in_one_undo_step
     assign(@edges.map { |entity| target(entity) }, "duct_type_id" => @dt1, "direction" => "exhaust_air")
     assert_equal %w[refused reference.in_use], invoke("#{PREFIX}.duct_types.delete", "id" => @dt1)

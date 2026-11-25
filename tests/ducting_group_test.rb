@@ -44,6 +44,11 @@ class DuctingGroupTest < PhComposerTestCase
       .values_at("status", "code")
     @model.undo
     assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+    engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+    kind = PhComposer::Mechanical::VENTILATOR_KIND
+    engine.kind(kind).store.write(@model, engine.find(kind, @erv2).merge("schema_version" => 9))
+    assert_equal %w[refused record.unreadable], invoke("#{PREFIX}.create", "ventilator_id" => @erv2)
+      .values_at("status", "code")
   end
 
   def test_link_and_unlink_are_guarded_and_each_one_undo_step
@@ -75,7 +80,8 @@ class DuctingGroupTest < PhComposerTestCase
       assert_equal ["refused", code], invoke("#{PREFIX}.link", "targets" => [{ "reference" => reference }],
                                                                "ventilator_id" => @erv2)
         .values_at("status", "code")
-      assert_equal [code], all.find { |row| row.fetch("path") == path }.fetch("findings")
+      row = all.find { |entry| entry.fetch("path") == path }
+      assert_equal [[code], code], [row.fetch("findings"), row.dig("write_refusal", "code")]
     end
     assert_equal @erv1, STORE.read(in_zone).fetch("ventilator_id")
   end

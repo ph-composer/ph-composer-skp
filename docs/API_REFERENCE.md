@@ -18248,7 +18248,7 @@ Result:
           },
           "copied": {
             "type": "boolean",
-            "description": "Another occurrence carries the same id: a pasted copy sharing its storage, which keeps its Ventilator."
+            "description": "Another occurrence carries the same id, as a pasted copy does, keeping its Ventilator. It says nothing of writability: read write_refusal."
           },
           "findings": {
             "type": "array",
@@ -18398,7 +18398,7 @@ Result:
           },
           "copied": {
             "type": "boolean",
-            "description": "Another occurrence carries the same id: a pasted copy sharing its storage, which keeps its Ventilator."
+            "description": "Another occurrence carries the same id, as a pasted copy does, keeping its Ventilator. It says nothing of writability: read write_refusal."
           },
           "findings": {
             "type": "array",
@@ -77156,7 +77156,7 @@ Undo step: New Ducting Group. Adds a Group at the root with a Ducting group reco
 
 Before calling: The Ventilator exists.
 
-Refuses: `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 

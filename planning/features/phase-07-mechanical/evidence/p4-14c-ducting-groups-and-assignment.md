@@ -53,7 +53,7 @@ M14c stays Open.
 
 ## Tests
 
-`tests/ducting_group_test.rb` (8), `tests/ducting_assignment_test.rb` (9), `tests/ducting_assignment_walkthrough_test.rb`
+`tests/ducting_group_test.rb` (8), `tests/ducting_assignment_test.rb` (11), `tests/ducting_assignment_walkthrough_test.rb`
 (1), and one in `tests/mechanical_ventilators_test.rb` (a probe feature's record retargeted by a Ventilator delete
 with an id and with null, one Undo step). The group test serves Zone A from ERV-1 and proves the replacement lands on
 both the group and the Zone's slot in one Undo step. `tests/entity_references_test.rb` and
@@ -76,7 +76,12 @@ changes are the 16 `context/`, `docs/`, `planning/` and `cases.json` paths. Noth
 
 ## Gate
 
-Recorded after the run.
+- `make ci` on Ruby 3.2.2 on the tree of `449482f0`: "Ruby suite, 10 processes: 3582 runs, 50481 assertions, 0
+  failures, 0 errors, 2 skips"; JS "pass 1226", "fail 0"; Python "460 passed, 17 skipped" (the worktree's `phx`
+  group unsynced); hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 851 files, 9055296 bytes, 27837718
+  bytes installed".
+- Installed size: 27,837,718 bytes, 51,590 over the base's 27,786,128 against the 45 KB estimate (12 percent over,
+  under the 25 percent stop line). Final-head figures follow below.
 
 ## Review
 
@@ -88,3 +93,15 @@ test; CONTRACTS now says a Duct Type delete rewrites ducts and a Ventilator dele
 in the `refuses` lists (it is in every action's common set, `shell/refusals.rb`); the repeated replacement check in
 `delete_type` (piping's shape); a `minProperties` on assign (a no-op assign writes nothing); the missing `:hidden`
 code (P4-14d's, above).
+
+## Codex review
+
+- Cycle 1, gpt-6.2-sol on `449482f0`: 1 P1, 4 P2, 1 P3. Fixed in the next commit: `ducts.clear` checks every removed
+  `dce_` id against its referrers, a record of another schema version or a batch removing every copy of an id
+  included, and counts as surviving only Edges the command leaves; a stale `expected_values` on `duct_types.delete`
+  refuses `target.changed` before a stranded duct can refuse `reference.in_use`; a group row's `write_refusal` names
+  its placement (nested, then in a Zone, then the path's own), as a write meets them; `groups.create` declares
+  `record.unreadable`; `copied` is described as a shared id, with writability in `write_refusal`, in the schema and
+  the guide. Declined: one engine reference check per cleared id (the engine has no batch removal check; piping's and
+  thermal bridges' clears share it, a core follow-up, as P4-13b recorded). Piping's clear, Pipe Type delete and group
+  rows have the same three gaps; they are a follow-up for Ed, not changed here.

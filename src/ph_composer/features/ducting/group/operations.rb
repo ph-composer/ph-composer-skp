@@ -136,16 +136,22 @@ module PhComposer
           end.sort_by { |row| row.fetch("path") }
         end
 
+        # A misplaced group's write refusal is its placement's, in the order a write meets them: nested, in a Zone,
+        # then the path's own.
         def row(group, path, along, record, problem, copied:, zone:)
           id = Group.identity(record)
+          nested = LineGroups::GroupTarget.nested_refusal(LINE_GROUP, along[0...-1])
+          in_zone = zone && { "code" => Codes::GROUP_IN_ZONE,
+                              "message" => "The Ducting group sits inside Zone #{zone.fetch('name')}; move it out " \
+                                           "first." }
           findings = []
           findings << Codes::GROUP_IN_ZONE if zone
-          findings << Codes::GROUP_NESTED if LineGroups::GroupTarget.nested_refusal(LINE_GROUP, along[0...-1])
+          findings << Codes::GROUP_NESTED if nested
           { "path" => path, "reference" => id && { "group_id" => id, "group_path" => path }, "name" => group.name.to_s,
             "values" => Group.values(record), "duct_count" => Assignment.ducts_in(group), "copied" => copied,
             "findings" => findings,
             "record_problem" => problem || (record && RECORD_KIND.problems(record).first),
-            "write_refusal" => LineGroups::GroupTarget.write_refusal(LINE_GROUP, along) }
+            "write_refusal" => nested || in_zone || LineGroups::GroupTarget.write_refusal(LINE_GROUP, along) }
         end
       end
     end

@@ -59,8 +59,16 @@ module PhComposer
 
         # Delete a Duct Type and, in the same proposal and Undo step, move every duct naming it to `replacement_id`,
         # or null their type when it is nil. Without a replacement the engine refuses a type in use.
+        # A stale `expected_values` refuses as target.changed before any duct is planned, so a duct the rewrite cannot
+        # reach never hides it.
         def delete_type(request, proposal, id:, expected_values:, replacement_id:)
           keep = replacement_id.equal?(DuctType::Operations::KEEP)
+          type = request.engine.find(DUCT_TYPE_KIND, id)
+          changed = expected_values.keys.reject { |key| type[key] == expected_values[key] }
+          unless changed.empty?
+            raise CodedError.new("target.changed", "The Duct Type changed since it was read (#{changed.join(', ')}).")
+          end
+
           DuctType::Operations.check_replacement!(request, id, replacement_id) unless keep
           plan = replace_type(request, proposal, :from => id, :to => replacement_id) unless keep
           DuctType::Operations.delete(request, proposal, :id => id, :expected_values => expected_values,
@@ -139,19 +147,19 @@ module PhComposer
             "after" => after, "change" => change }
         end
 
-        # Refuses reference.in_use when a record still names an assignment id these updates remove and no other Edge
-        # keeps (a copy keeps it alive). Each record is checked as the reference scan reads it (LineGroups.scannable),
-        # so one whose metadata map is malformed is still checked; one invalid otherwise can be no reference target.
+        # Refuses reference.in_use when a record still names an assignment id these updates remove and no Edge the
+        # command leaves keeps (a copy keeps it alive). Every removed record with a `dce_` id is checked, whatever else
+        # is wrong with it, since a referrer can name it; the plan the check projects holds the valid ones, read as
+        # the reference scan reads them (LineGroups.scannable), since the engine refuses an invalid planned record.
         def check_removals!(request, proposal, updates)
-          removed = updates.map { |row| row.merge("before" => LineGroups.scannable(row.fetch("before"))) }
-                           .select { |row| RECORD_KIND.problems(row.fetch("before")).empty? }
-          return if removed.empty?
+          return if updates.empty?
 
+          removed = updates.map { |row| row.merge("before" => LineGroups.scannable(row.fetch("before"))) }
           gone = removed.map { |row| row.dig("reference", "entity_path") }
           kept = LineGroups::EdgeTarget.entries(LINE_GROUP, request.model).reject { |entry| gone.include?(entry.key) }
                                        .map { |entry| entry.record["id"] }
-          checked = plan(removed)
-          (removed.map { |row| row.fetch("before").fetch("id") }.uniq - kept).each do |id|
+          checked = plan(removed.select { |row| RECORD_KIND.problems(row.fetch("before")).empty? })
+          (removed.filter_map { |row| LINE_GROUP.edge_identity(row.fetch("before")) }.uniq - kept).each do |id|
             request.engine.check_identity_removal!(DUCT_KIND, id, :change_set => proposal.record_changes,
                                                                   :reference_plan => checked)
           end

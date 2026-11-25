@@ -1363,8 +1363,9 @@ A Ducting group is a SketchUp Group that holds ducts and names the Ventilator th
 with `ph_composer.ducting.groups.create`, giving `ventilator_id`: it adds an empty Group at the Model
 root and opens it, so the lines drawn next land inside it, in one Undo step; read its `group_id`. Read
 `ph_composer.ducting.groups.list`, a bounded page at a time, for every group with its `values`
-(`ventilator_id`, null while unlinked), `duct_count`, `copied` (a pasted copy, which keeps its
-Ventilator, shares storage and refuses writes until made unique) and `findings`. A group may sit at the
+(`ventilator_id`, null while unlinked), `duct_count`, `copied` (another group carries the same id, as a
+pasted copy does, keeping its Ventilator), `findings` and `write_refusal` (a pasted copy shares storage
+and refuses writes until made unique; a misplaced group refuses with its placement code). A group may sit at the
 Model root or inside plain Groups, never inside a Zone (`ducting.group_in_zone`) or another Ducting
 group (`ducting.group_nested`). Change the Ventilator with `ph_composer.ducting.groups.link` or clear it
 with `ph_composer.ducting.groups.unlink`, sending each row's `reference` and its `values` as
