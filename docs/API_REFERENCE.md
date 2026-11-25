@@ -1593,6 +1593,87 @@ Values:
 }
 ```
 
+### `ph_composer.ducting.duct`
+
+Duct, a entity kind owned by `ph_composer.ducting`, schema version 1.
+
+References: `duct_type_id` names one `ph_composer.ducting.duct_type`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "duct_type_id",
+    "direction",
+    "quantity"
+  ],
+  "properties": {
+    "duct_type_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Duct Type; null once its type was deleted with null, which blocks export."
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "outdoor_air",
+        "exhaust_air"
+      ],
+      "description": "outdoor_air (shown Outdoor air) or exhaust_air (shown Exhaust air)."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical ducts this line stands for; 1 by default."
+    }
+  }
+}
+```
+
+Occurrence reference:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_path",
+    "entity_path",
+    "entity_id"
+  ],
+  "properties": {
+    "group_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The root-to-Group path of the Ducting group holding the Edge."
+    },
+    "entity_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+    },
+    "entity_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Edge's assignment id, or null for an Edge with none."
+    }
+  }
+}
+```
+
 ### `ph_composer.ducting.duct_type`
 
 Duct Type, a catalog kind owned by `ph_composer.ducting`, schema version 1.
@@ -1815,6 +1896,60 @@ Values:
     "color": {
       "type": "string",
       "pattern": "^#[0-9A-Fa-f]{6}$"
+    }
+  }
+}
+```
+
+### `ph_composer.ducting.group`
+
+Ducting group, a entity kind owned by `ph_composer.ducting`, schema version 1.
+
+References: `ventilator_id` names one `ph_composer.mechanical.ventilator`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ventilator_id"
+  ],
+  "properties": {
+    "ventilator_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The Ventilator its ducts connect to the outside; null while unlinked, which blocks their export."
+    }
+  }
+}
+```
+
+Occurrence reference:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id",
+    "group_path"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "The Ducting group's dcg_ id."
+    },
+    "group_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The root-to-Group persistent-id path, one per placement."
     }
   }
 }
@@ -17581,6 +17716,754 @@ Example params:
     "values",
     "export_ready"
   ]
+}
+```
+
+### `ph_composer.ducting.ducts.selection`
+
+One bounded page of the selected Edges under the active path, each with the Ducting group holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.ducting`.
+
+Refuses: `gesture.too_large`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "next_cursor",
+    "total",
+    "ignored",
+    "ignored_total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "group",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Ducting group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when it is not directly in a Ducting group."
+          },
+          "group": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "ventilator_id"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Ducting group holding it, or null outside one or when the group's record cannot be read."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "outside_group"
+            ],
+            "description": "outside_group when the Edge's parent is no Ducting group; null otherwise."
+          },
+          "values": {
+            "type": "object",
+            "description": "The assignment's values as stored; empty with none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another Edge carries the same assignment id, as a split or copy leaves it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored record is invalid or unreadable, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write to the Edge meets, or null."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Edges, the first 50; never assigned."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
+}
+```
+
+### `ph_composer.ducting.ducts.selection_all`
+
+Every selected Edge in one read, for the panel. Owner: `ph_composer.ducting`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.ducts.selection` instead.
+
+Refuses: `gesture.too_large`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "ignored",
+    "ignored_total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "group",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Ducting group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when it is not directly in a Ducting group."
+          },
+          "group": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "ventilator_id"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "ventilator_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Ducting group holding it, or null outside one or when the group's record cannot be read."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "outside_group"
+            ],
+            "description": "outside_group when the Edge's parent is no Ducting group; null otherwise."
+          },
+          "values": {
+            "type": "object",
+            "description": "The assignment's values as stored; empty with none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another Edge carries the same assignment id, as a split or copy leaves it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored record is invalid or unreadable, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write to the Edge meets, or null."
+          }
+        }
+      }
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Edges, the first 50; never assigned."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.ducting.groups.all`
+
+Every Ducting group occurrence in one read. Owner: `ph_composer.ducting`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.groups.list` instead.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "name",
+          "values",
+          "duct_count",
+          "copied",
+          "findings",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Ducting group's dcg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            },
+            "description": "The group's reference, or null when its record holds no valid id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "description": "The record's values as stored: ventilator_id, null while unlinked."
+          },
+          "duct_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Edges directly inside it carrying a duct assignment."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another occurrence carries the same id, as a pasted copy does, keeping its Ventilator. It says nothing of writability: read write_refusal."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ducting.group_in_zone or ducting.group_nested where it sits somewhere ducts may not."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why its record is invalid, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write through its path meets, or null."
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.ducting.groups.list`
+
+One bounded page of the Ducting group occurrences in path order, each with its Ventilator, duct count, copies and placement findings. Owner: `ph_composer.ducting`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "name",
+          "values",
+          "duct_count",
+          "copied",
+          "findings",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Ducting group's dcg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            },
+            "description": "The group's reference, or null when its record holds no valid id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "description": "The record's values as stored: ventilator_id, null while unlinked."
+          },
+          "duct_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Edges directly inside it carrying a duct assignment."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Another occurrence carries the same id, as a pasted copy does, keeping its Ventilator. It says nothing of writability: read write_refusal."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ducting.group_in_zone or ducting.group_nested where it sits somewhere ducts may not."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why its record is invalid, or null."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What a write through its path meets, or null."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
 }
 ```
 
@@ -75173,7 +76056,7 @@ Example params:
 
 Delete one Duct Type. A type a duct still uses refuses as reference.in_use unless replacement_id names another type to take its place, or is null to clear it. Owner: `ph_composer.ducting`.
 
-Undo step: Delete Duct Type. Deletes one definition and its metadata; Undo restores both.
+Undo step: Delete Duct Type. Deletes one definition and its metadata and, with replacement_id or null, rewrites every duct assignment naming it; Undo restores all of them.
 
 Before calling: The Duct Type exists and is readable.
 
@@ -75438,7 +76321,7 @@ Params:
         "null"
       ],
       "pattern": "^dct_[A-Za-z0-9]{12}$",
-      "description": "Another existing Duct Type to take this one's place on every duct using it, or null to clear them; while no duct uses it, there is nothing to move."
+      "description": "Another existing Duct Type to take this one's place on every duct using it, or null to leave those ducts with no type, which blocks their export."
     }
   }
 }
@@ -75984,6 +76867,551 @@ Example params:
   "expected_values": {
     "shape": "round"
   }
+}
+```
+
+### `ph_composer.ducting.ducts.assign`
+
+Give explicit Edges in Ducting groups a Duct Type, a direction and a quantity, or change any of them; a stale or unwritable target refuses the whole command. Owner: `ph_composer.ducting`.
+
+Undo step: Assign Duct. Writes one duct assignment record on each Edge.
+
+Before calling: Each Edge sits directly in a Ducting group outside every Zone, reached through no locked or shared storage. Each target carries the reference and values ducts.selection last read.
+
+Refuses: `ducting.group_in_zone`, `ducting.group_nested`, `ducting.outside_group`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Ducting group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Explicit Edges, as ducts.selection returns them; at most 250."
+    },
+    "duct_type_id": {
+      "type": "string",
+      "pattern": "^dct_[A-Za-z0-9]{12}$",
+      "description": "The Duct Type every Edge gets. An Edge already assigned keeps it when not given; an Edge with none needs it."
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "outdoor_air",
+        "exhaust_air"
+      ],
+      "description": "outdoor_air (shown Outdoor air) or exhaust_air (shown Exhaust air). An Edge already assigned keeps it when not given; an Edge with none needs it."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many identical ducts each line stands for. An Edge already assigned keeps its own when not given; an Edge with none takes 1."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_ids"
+  ],
+  "properties": {
+    "edge_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Assignment ids written; empty when nothing changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_path": [
+          1301
+        ],
+        "entity_path": [
+          1301,
+          1305
+        ],
+        "entity_id": null
+      }
+    }
+  ],
+  "duct_type_id": "dct_Ab12Cd34Ef56",
+  "direction": "outdoor_air"
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_path": [
+          1301
+        ],
+        "entity_path": [
+          1301,
+          1305
+        ],
+        "entity_id": "dce_Ab12Cd34Ef56"
+      },
+      "expected_values": {
+        "quantity": 1
+      }
+    }
+  ],
+  "quantity": 2
+}
+```
+
+### `ph_composer.ducting.ducts.clear`
+
+Remove the duct assignment from explicit Edges. Owner: `ph_composer.ducting`.
+
+Undo step: Clear Duct. Removes the duct assignment record from each Edge.
+
+Before calling: Each Edge sits directly in a Ducting group outside every Zone, reached through no locked or shared storage. Each target carries the reference and values ducts.selection last read.
+
+Refuses: `copy.rule_missing`, `ducting.group_in_zone`, `ducting.group_nested`, `ducting.outside_group`, `gesture.too_large`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group path of the Ducting group holding the Edge."
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "description": "The root-to-Edge path: group_path and the Edge's persistent id."
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Explicit Edges, as ducts.selection returns them; at most 250."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cleared"
+  ],
+  "properties": {
+    "cleared": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_path": [
+          1301
+        ],
+        "entity_path": [
+          1301,
+          1305
+        ],
+        "entity_id": "dce_Ab12Cd34Ef56"
+      }
+    }
+  ]
+}
+```
+
+### `ph_composer.ducting.groups.create`
+
+Add one empty Ducting group at the Model root linked to a Ventilator and open it, so lines drawn next land inside it. Owner: `ph_composer.ducting`.
+
+Undo step: New Ducting Group. Adds a Group at the root with a Ducting group record and moves the edit path into it, closing any Group open before.
+
+Before calling: The Ventilator exists. SketchUp shows this Model.
+
+Refuses: `record.unreadable`, `session.inactive`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ventilator_id"
+  ],
+  "properties": {
+    "ventilator_id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator whose ducts the group holds."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "ventilator_id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.ducting.groups.link`
+
+Link explicit Ducting groups to one Ventilator, replacing any link. Owner: `ph_composer.ducting`.
+
+Undo step: Link Ducting Group. Rewrites each group's ventilator_id.
+
+Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Ducting group. Each target carries the reference and values groups.all last read.
+
+Refuses: `ducting.group_in_zone`, `ducting.group_nested`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets",
+    "ventilator_id"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Ducting group's dcg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The group's values as last read; a changed one refuses as target.changed. {} skips the check."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Explicit Ducting group occurrences, as groups.all returns them."
+    },
+    "ventilator_id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator whose ducts the group holds."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_ids"
+  ],
+  "properties": {
+    "group_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Groups rewritten; empty when none changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_id": "dcg_Ab12Cd34Ef56",
+        "group_path": [
+          1301
+        ]
+      }
+    }
+  ],
+  "ventilator_id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.ducting.groups.unlink`
+
+Unlink explicit Ducting groups from their Ventilator, which blocks their ducts' export until linked again. Owner: `ph_composer.ducting`.
+
+Undo step: Unlink Ducting Group. Sets each group's ventilator_id to null.
+
+Before calling: Each group sits at the Model root or in plain Groups, outside every Zone and Ducting group. Each target carries the reference and values groups.all last read.
+
+Refuses: `ducting.group_in_zone`, `ducting.group_nested`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "description": "The Ducting group's dcg_ id."
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-Group persistent-id path, one per placement."
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "description": "The group's values as last read; a changed one refuses as target.changed. {} skips the check."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Explicit Ducting group occurrences, as groups.all returns them."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_ids"
+  ],
+  "properties": {
+    "group_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Groups rewritten; empty when none changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "reference": {
+        "group_id": "dcg_Ab12Cd34Ef56",
+        "group_path": [
+          1301
+        ]
+      }
+    }
+  ]
 }
 ```
 
@@ -87646,9 +89074,9 @@ Example params:
 
 ### `ph_composer.mechanical.ventilators.delete`
 
-Delete one Ventilator. While a Zone names it, name a replacement_id, which takes its place on every Zone, or null, which empties those slots; without one it refuses as reference.in_use, naming the Zones. Owner: `ph_composer.mechanical`.
+Delete one Ventilator. While a Zone or another record names it, name a replacement_id, which takes its place on each of them, or null, which empties the Zones' slots and clears the other records; without one it refuses as reference.in_use, naming what still refers to it. Owner: `ph_composer.mechanical`.
 
-Undo step: Delete Ventilator. Deletes one definition and its metadata, and rewrites the Zones that name it; Undo restores all of them.
+Undo step: Delete Ventilator. Deletes one definition and its metadata, and rewrites the Zones that name it and, with replacement_id or null, any other feature's records that name it; Undo restores all of them.
 
 Before calling: The Ventilator exists and is readable.
 
@@ -87947,7 +89375,7 @@ Params:
         "null"
       ],
       "pattern": "^vnt_[A-Za-z0-9]{12}$",
-      "description": "The Ventilator that takes this one's place on every Zone, or null to empty those slots. Needed while a Zone names it."
+      "description": "The Ventilator that takes this one's place on every Zone and other record naming it, or null to empty the Zones' slots and clear other features' records. Needed while anything names it."
     }
   }
 }
@@ -127850,7 +129278,10 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `ducting.group_in_zone` | A Ducting group sits inside a Zone; ducts live outside Zones. |
+| `ducting.group_nested` | A Ducting group sits inside another Ducting group. |
 | `ducting.insulation_conductivity_missing` | A Duct Type has insulation and no insulation conductivity, so a duct using it cannot export. |
+| `ducting.outside_group` | An Edge is not directly inside a Ducting group, so it cannot be a duct. |
 
 ### `ph_composer.mechanical`
 
@@ -128204,3 +129635,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.101 | 2026-11-24 | ph_composer.piping exports its pipes: the export section ph_composer.piping.export.piping adds each Hot Water System's trunks, branches, twigs and recirculation elements to its hot water systems, the query ph_composer.piping.export_preflight lists its checks, and the code piping.system_unexported notes a System whose pipes no exported Zone takes. The schedule's recirculation temperature and hours add runs and pipes in identifier order, as a reloaded honeybee-ph system does. |
 | 1.102 | 2026-11-24 | ph_composer.piping adds the panel's whole schedule read ph_composer.piping.schedule.all, the pipe tool (ph_composer.piping.pipe_tool.state and its snapshot section, the view commands pipe_tool.choose and pipe_tool.stop, and their menu items) and the Colour-by modes ph_composer.piping.by_role and ph_composer.piping.by_type. ph_composer.mechanical.hot_water_systems rows drop recirculation, which the piping Systems read gives. Units add hours_per_day. |
 | 1.103 | 2026-11-25 | ph_composer.ducting is new: the Duct Type kind, duct_types.list, duct_types.all and its snapshot section, and duct_types.create, duct_types.update, duct_types.duplicate and duct_types.delete, with the code ducting.insulation_conductivity_missing. |
+| 1.104 | 2026-11-25 | ph_composer.ducting adds Ducting groups and ducts: the reference targets ph_composer.ducting.group and ph_composer.ducting.duct, groups.create, groups.link, groups.unlink, groups.list, groups.all, ducts.assign, ducts.clear, ducts.selection, ducts.selection_all and its snapshot section, with the codes ducting.outside_group, ducting.group_in_zone and ducting.group_nested. duct_types.delete moves or nulls the ducts using a type. A Ventilator delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |

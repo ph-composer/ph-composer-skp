@@ -38,15 +38,6 @@ module PhComposer
                                                                :from => from, :to => to)
         end
 
-        # `plan` with every other feature's records naming System `from` moved to `to`, or cleared with nil, through
-        # the foundation's registered retargeters (context/CONTRACTS.md, "A definition delete handler"). Mechanical
-        # names none of them.
-        def with_retargeted(request, plan, from:, to:)
-          foreign = request.retarget_references(HOT_WATER_SYSTEM_KIND, :from => from, :to => to)
-          Records::ReferencePlan.new(:entries => plan.entries + foreign.entries,
-                                     :removals => plan.removals + foreign.removals)
-        end
-
         def delete(request, proposal, kind, id:, expected_values: {}, reference_plan: nil)
           CatalogOperations.delete(request, proposal, kind, :id => id, :expected_values => expected_values,
                                                             :reference_plan => reference_plan)

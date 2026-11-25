@@ -998,8 +998,11 @@ takes the replacement, and with null each is emptied, staged through `stage_exte
 handed to `propose_delete` as a `Records::ReferencePlan`, one Undo step. Only an understood payload is moved; any
 other stays as stored and the engine refuses the delete. A Zone this feature staged earlier in the same proposal
 reads as staged, so the move builds from that write, and the plan projects every Zone the proposal rewrote. A Zone whose two occurrences share an id, a copy not yet
-made independent, refuses the move as `target.ambiguous`. Every route through the engine, the generic metadata
-routes included, refuses a slot naming no stored item as `reference.invalid`.
+made independent, refuses the move as `target.ambiguous`. With an id or null, `ventilators.delete` also moves or
+clears every other feature's record naming the Ventilator (a Ducting group's `ventilator_id`) through the registered
+reference retargeters (`request.retarget_references`, "A definition delete handler"), whose plan joins Serves' in the
+same proposal, as `hot_water_systems.delete` does; Mechanical names none of them. Every route through the engine, the
+generic metadata routes included, refuses a slot naming no stored item as `reference.invalid`.
 
 `serves.all` (the snapshot section `ph_composer.mechanical.serves`) and the bounded `serves.list` answer each Zone
 occurrence with its `slots`, the `items` they name with their names, the stored payload's status and `findings`
@@ -1391,6 +1394,35 @@ it names the type itself. `duct_types.list` and `duct_types.all` (also the snaps
 conductivity, which blocks the export only of a duct that uses it; a bare duct needs no conductivity. Its
 `user_data` is written with `ph_composer.records.update_metadata` and kept in the Model.
 
+Ducting groups and ducts stand on the foundation's line-group layer (`context/EXTENSIBILITY.md`, "Line groups") with
+ducting's spec (`features/ducting/line_group.rb`), so their targets, writes, walk and selection rows follow Piping
+groups' and pipes' rules (see "Hot water piping") with these differences.
+
+- **Ducting group** (reference target `ph_composer.ducting.group`, `features/ducting/group/`): the record in the
+  storage table on a SketchUp Group, occurrence reference `{group_id, group_path}`. Membership is the direct parent;
+  a Ducting group sits at the Model root or in plain Groups (Q5): `groups.link`, `groups.unlink`, `ducts.assign` and
+  `ducts.clear` refuse `ducting.group_in_zone` where `ph_composer.zones.containment` says a Zone holds it, and
+  `ducting.group_nested` inside another Ducting group; a Duct Type delete still rewrites a duct, and a Ventilator
+  delete a group, that a Zone holds. `groups.create` adds an empty Group at the root with a new record naming an
+  existing Ventilator and opens it through `EditContext.enter`, in one Undo step, refusing `session.inactive` for a
+  Model SketchUp is not showing; whether the host keeps an empty Group through the commit is owed to
+  the host cases M13b and M14c. A pasted copy keeps its Ventilator. `groups.all` and the bounded `groups.list` give
+  every occurrence in path order with `values` (`ventilator_id`), `duct_count`, `copied`, `findings` and
+  `write_refusal`.
+- **Duct** (reference target `ph_composer.ducting.duct`, `features/ducting/assignment/`): the assignment on an Edge,
+  occurrence reference `{group_path, entity_path, entity_id}`. `direction` is `outdoor_air` or `exhaust_air` and
+  `quantity` an integer at least 1. `ducts.assign` takes any of `duct_type_id`, `direction` and `quantity`: an Edge
+  already assigned keeps what it is not given, and an Edge with none needs a type and a direction, refusing
+  `params.invalid` otherwise, and takes quantity 1, so a stored duct always has a direction. `ducts.assign` and
+  `ducts.clear` take at most 250 explicit Edges and refuse as a whole for a stale target, an Edge outside a Ducting
+  group (`ducting.outside_group`), a misplaced group, a locked or shared step or one Edge too many
+  (`gesture.too_large`), one Undo step each. `ducts.selection` (bounded), `ducts.selection_all` and its snapshot
+  section `ph_composer.ducting.ducts.selected` read the native selection under the active path, each Edge with its
+  group and Ventilator, values, `copied` and `write_refusal`. `duct_types.delete` with `replacement_id` rewrites
+  every duct naming the type, with null nulls its `duct_type_id`, in the delete's proposal; a duct the rewrite cannot
+  reach refuses the whole delete as `reference.in_use`. A Ventilator delete with an id or null moves or clears the
+  Ducting groups naming it through ducting's retargeter `ph_composer.ducting.groups.retarget_ventilator`.
+
 ## This computer's settings file
 
 Settings that belong to the computer and not to a Model, and that every SketchUp version must read,
@@ -1494,6 +1526,8 @@ access and never fall back to selection, display name, proximity or the active M
 | Primary definition index | `ph_composer.window_definitions`, key `index` | Model | None; `{ "schema_version": 1, "definitions": { "wnt_...": persistent_id } }` |
 | Piping group | `ph_composer.piping.group` | A Group at the Model root or in plain Groups, outside every Zone and Piping group | `ppg_` id; `hot_water_system_id` (a core reference to `ph_composer.mechanical.hot_water_system`, null while unlinked). Claims its Group. A paste carries the id, which reads mark `copied` (see "Hot water piping") |
 | Pipe assignment | `ph_composer.piping` | A `Sketchup::Edge` directly inside a Piping group | `ppe_` id; `pipe_type_id` (a core reference to `ph_composer.piping.pipe_type`, null after a type delete with null), `role` and the role's values. A split or copy carries the id, which reads mark `copied` |
+| Ducting group | `ph_composer.ducting.group` | A Group at the Model root or in plain Groups, outside every Zone and Ducting group | `dcg_` id; `ventilator_id` (a core reference to `ph_composer.mechanical.ventilator`, null while unlinked). Claims its Group. A paste carries the id and the Ventilator, which reads mark `copied` (see "ERV ducting") |
+| Duct assignment | `ph_composer.ducting` | A `Sketchup::Edge` directly inside a Ducting group | `dce_` id; `duct_type_id` (a core reference to `ph_composer.ducting.duct_type`, null after a type delete with null), `direction` (`outdoor_air` or `exhaust_air`) and `quantity` (integer, at least 1). A split or copy carries the id, which reads mark `copied` |
 | Shading mark | `ph_composer.shading` | A Face, Group or ComponentInstance, inside a Zone or not | None; `{ "schema_version": 1 }` with optional `user_data` and `extension_data`. Claims nothing; excludes from the envelope (see "The shading mark") |
 
 The Face values include an optional `assembly_id` reference to

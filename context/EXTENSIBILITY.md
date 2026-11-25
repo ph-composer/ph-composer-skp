@@ -1361,7 +1361,7 @@ Unexpected exceptions retain the generic message; their internal details are not
 
 A line group is a SketchUp Group outside every Zone that holds loose drawn lines and carries one record linking it
 to one record of its feature; an Edge directly in it may carry the feature's assignment record. Piping groups are
-one, and Ducting groups the next. Both features need the same mechanics and neither owns the other, so they sit in a
+one, and Ducting groups another. Both features need the same mechanics and neither owns the other, so they sit in a
 foundation package, `src/ph_composer/line_groups/` (`LineGroups`), loaded with the other foundation directories. It
 calls the shell and session (`Pages`, `EditContext`, `ph_composer.context.open`), which is why it is not in `core/`, and it names
 no feature (`tests/line_groups_test.rb`).
@@ -1384,8 +1384,8 @@ a group a Zone holds and a hidden Edge, and a factory for the one-read child ind
 
 The feature keeps its schemas and record shapes, its operations and declarations, its reference targets' declared
 descriptors, its runs, findings, schedule rows and export, its Colour-by modes and any tool. Piping's files call the
-layer from where they always were (`features/piping/line_group.rb` holds its spec), as thermal bridges and piping
-call the chain rule in `core/edge_runs.rb`.
+layer from where they always were (`features/piping/line_group.rb` holds its spec), and ducting's the same way
+(`features/ducting/line_group.rb`), as thermal bridges and piping call the chain rule in `core/edge_runs.rb`.
 
 ## Scripting as an entry point
 

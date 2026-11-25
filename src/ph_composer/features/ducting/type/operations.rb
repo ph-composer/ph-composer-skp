@@ -37,8 +37,8 @@ module PhComposer
         end
 
         # The engine's guarded delete: a type a duct still names refuses as reference.in_use. A `replacement_id`
-        # must be another type that exists, or null. `reference_plan` is what a caller that rewrote the ducts in
-        # this proposal hands the engine, so this module names no Edge.
+        # must be another type that exists, or null. `reference_plan` is what the caller that rewrote the ducts in
+        # this proposal hands the engine (Assignment::Operations.delete_type), so this module names no Edge.
         def delete(request, proposal, id:, expected_values: {}, replacement_id: KEEP, reference_plan: nil)
           check_replacement!(request, id, replacement_id) unless replacement_id.equal?(KEEP)
           Mechanical::CatalogOperations.delete(request, proposal, KIND_ID, :id => id,

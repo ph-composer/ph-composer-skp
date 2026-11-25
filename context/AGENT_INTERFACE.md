@@ -958,12 +958,20 @@ gestures are each one `pipes.assign` through `API.invoke`; the Colour-by modes a
 `ph_composer.piping.by_type`. Piping contributes the Systems table's recirculation columns
 (`html/features/piping/systems_columns.js`) from `piping_systems`; `hot_water_systems` rows carry no recirculation.
 
-ERV ducting is the feature `ph_composer.ducting` (API 1.103), which requires Mechanical and Zones. Its Duct Types are
+ERV ducting is the feature `ph_composer.ducting` (API 1.103, groups and ducts 1.104), which requires Mechanical and
+Zones. Its Duct Types are
 the catalog `ph_composer.ducting.duct_types`, with `list`, `all`, the snapshot section, `create`, `update`,
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a missing or other-shape dimension refuses
 `params.invalid`, and a row's `export_blockers` names `ducting.insulation_conductivity_missing` for an insulated type
 with no conductivity. The [Duct Types walkthrough](../tools/examples/authoring/duct_types_walkthrough.rb) authors
-with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
+with the panel closed. Ducting groups are `ph_composer.ducting.groups` (`create`, which opens the new group, `link`,
+`unlink`, `list`, `all`) and ducts `ph_composer.ducting.ducts` (`assign` and `clear` over explicit Edges, at most
+250, and `selection`, `selection_all` with the snapshot section `ph_composer.ducting.ducts.selected`); the reference
+targets are `ph_composer.ducting.group` and `ph_composer.ducting.duct`, and the codes `ducting.outside_group`,
+`ducting.group_in_zone` and `ducting.group_nested`. A Ventilator delete with an id or null moves or clears the
+groups naming it through the registered reference retargeters. The
+[ducting assignment walkthrough](../tools/examples/authoring/ducting_assignment_walkthrough.rb) creates a group,
+draws, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

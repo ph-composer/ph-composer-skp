@@ -1,7 +1,7 @@
 # P4-14c: Ducting groups and the duct assignment
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14c` (#583), on `main`; offline evidence in [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md), host case `M14c` owed to MS3. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -63,6 +63,17 @@ Paths are relative to `src/ph_composer/`.
 - **Selection.** `ducts.selection` and the `ducts.selected` snapshot section: the native selection under the active
   path, Edges only, each as a reference with its group, Ventilator, current assignment and write refusal; anything
   else ignored. P4-14f's bar reads it.
+
+## Inferred in implementation
+
+- **Assign's params.** `duct_type_id`, `direction` and `quantity` are each optional; an Edge with no assignment needs
+  a type and a direction (`params.invalid` otherwise) and takes quantity 1, and an assigned Edge keeps what it is not
+  given, so both "requires a direction" and the quantity-only reassign above hold.
+- **One retarget join for both deletes.** The Ventilator delete and the Hot Water System delete call one generic
+  `CatalogOperations.with_retargeted`; `HotWater::Operations.with_retargeted` is gone.
+- **No selection client and no `ducting.hidden` yet**: piping's client has no shipped caller, and the hidden code is
+  Locate's, which P4-14d adds.
+- The evidence names a consolidation candidate for Ed: ducting's operations and declarations twin piping's.
 
 ## Steps
 

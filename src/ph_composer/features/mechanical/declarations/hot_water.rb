@@ -249,7 +249,7 @@ module PhComposer
               HotWater::Operations.move_members(request, proposal, :from => id, :to => replacement)
             end
             unless replacement.equal?(Serves::Operations::KEEP)
-              plan = HotWater::Operations.with_retargeted(request, plan, :from => id, :to => replacement)
+              plan = CatalogOperations.with_retargeted(request, plan, SYSTEMS.id, :from => id, :to => replacement)
             end
             HotWater::Operations.delete(request, proposal, SYSTEMS.id, :id => id, :expected_values => expected,
                                                                        :reference_plan => plan)

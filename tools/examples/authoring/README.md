@@ -496,3 +496,23 @@ uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.selection'
 uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.clear'
 uv run tools/hostkit/host_bridge.py eval 'PipingAssignmentWalkthrough.groups'
 ```
+
+## Ducting groups and ducts with the panel closed
+
+`ducting_assignment_walkthrough.rb` creates a Ducting group linked to a Ventilator and opens it, draws two connected
+lines in it (on the host, draw them with the Line tool instead, case M14c), assigns the selection a Duct Type and
+the Outdoor air direction, sets their quantity to 2 keeping both, and clears them, each a registered action and one
+native Undo step, and reads the selection back through `ph_composer.ducting.ducts.selection`.
+`tests/ducting_assignment_walkthrough_test.rb` runs it offline. It needs a Ventilator named ERV-1 and the Duct Type
+DT-2 (`DuctTypesWalkthrough.run`).
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/ducting_assignment_walkthrough.rb"; DuctingAssignmentWalkthrough.create("ERV-1")'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.draw'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.assign("DT-2", "outdoor_air")'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.assign(nil, nil, 2)'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.selection'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.clear'
+uv run tools/hostkit/host_bridge.py eval 'DuctingAssignmentWalkthrough.groups'
+```
