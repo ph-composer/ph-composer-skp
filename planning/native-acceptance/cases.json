@@ -5953,7 +5953,11 @@
         "src/ph_composer/html/features/zones/*",
         "src/ph_composer/features/climate/*",
         "src/ph_composer/html/sections/*",
-        "src/ph_composer/shell/*"
+        "src/ph_composer/shell/api.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/shell/handler_request.rb",
+        "src/ph_composer/shell/panel.rb",
+        "src/ph_composer/shell/refusals.rb"
       ],
       "native_control_required": true
     },
