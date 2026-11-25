@@ -20,4 +20,12 @@ class RecordNamesTest < PhComposerTestCase
     assert_equal "Trimmed (copy 3)", NAMES.copy_name(" Trimmed ", records)
     assert_equal "Wall (copy)", NAMES.copy_name("Wall", ROWS)
   end
+
+  def test_unique_and_copy_name_compare_accented_letters_without_case_alike
+    rows = [{ "id" => "a", "name" => "ÉRV" }, { "id" => "b", "name" => "érv (copy)" }]
+    error = assert_raises(PhComposer::CodedError) { NAMES.unique!("érv", rows) }
+    assert_equal "validation.failed", error.code
+    assert_raises(PhComposer::CodedError) { NAMES.unique!("ÉRV (COPY)", rows) }
+    assert_equal "ÉRV (copy 2)", NAMES.copy_name("ÉRV", rows)
+  end
 end
