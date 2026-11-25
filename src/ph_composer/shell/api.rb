@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 104
+    MINOR = 105
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -652,7 +652,13 @@ module PhComposer
                     "ducts.selection_all and its snapshot section, with the codes ducting.outside_group, " \
                     "ducting.group_in_zone and ducting.group_nested. duct_types.delete moves or nulls the ducts " \
                     "using a type. A Ventilator delete with a replacement_id, or null, now also moves or clears " \
-                    "every other feature's record naming it, through the registered reference retargeters." }
+                    "every other feature's record naming it, through the registered reference retargeters." },
+      { "minor" => 105, "date" => "2026-11-25",
+        "change" => "ph_composer.piping.groups.create refuses session.inactive for a Model SketchUp is not " \
+                    "showing and declares record.unreadable. piping.groups.all and groups.list rows give the " \
+                    "write_refusal a link meets, a nested group or one a Zone holds included; pipes.clear checks " \
+                    "every removed pipe id against its referrers; a pipe_types.delete with stale expected_values " \
+                    "refuses target.changed first." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

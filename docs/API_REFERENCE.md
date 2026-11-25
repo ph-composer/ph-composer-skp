@@ -90064,9 +90064,9 @@ Add one empty Piping group at the Model root linked to a Hot Water System and op
 
 Undo step: New Piping Group. Adds a Group at the root with a Piping group record and moves the edit path into it, closing any Group open before.
 
-Before calling: The Hot Water System exists.
+Before calling: The Hot Water System exists. SketchUp shows this Model.
 
-Refuses: `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `session.inactive`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -129636,3 +129636,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.102 | 2026-11-24 | ph_composer.piping adds the panel's whole schedule read ph_composer.piping.schedule.all, the pipe tool (ph_composer.piping.pipe_tool.state and its snapshot section, the view commands pipe_tool.choose and pipe_tool.stop, and their menu items) and the Colour-by modes ph_composer.piping.by_role and ph_composer.piping.by_type. ph_composer.mechanical.hot_water_systems rows drop recirculation, which the piping Systems read gives. Units add hours_per_day. |
 | 1.103 | 2026-11-25 | ph_composer.ducting is new: the Duct Type kind, duct_types.list, duct_types.all and its snapshot section, and duct_types.create, duct_types.update, duct_types.duplicate and duct_types.delete, with the code ducting.insulation_conductivity_missing. |
 | 1.104 | 2026-11-25 | ph_composer.ducting adds Ducting groups and ducts: the reference targets ph_composer.ducting.group and ph_composer.ducting.duct, groups.create, groups.link, groups.unlink, groups.list, groups.all, ducts.assign, ducts.clear, ducts.selection, ducts.selection_all and its snapshot section, with the codes ducting.outside_group, ducting.group_in_zone and ducting.group_nested. duct_types.delete moves or nulls the ducts using a type. A Ventilator delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |
+| 1.105 | 2026-11-25 | ph_composer.piping.groups.create refuses session.inactive for a Model SketchUp is not showing and declares record.unreadable. piping.groups.all and groups.list rows give the write_refusal a link meets, a nested group or one a Zone holds included; pipes.clear checks every removed pipe id against its referrers; a pipe_types.delete with stale expected_values refuses target.changed first. |

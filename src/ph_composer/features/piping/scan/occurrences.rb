@@ -48,7 +48,8 @@ module PhComposer
         groups, unreadable = walked
         unreadable = unreadable.dup
         paths = zones ? groups.map(&:path) : []
-        held = Group::Operations.contained(request, paths).to_h { |row| [row.fetch("path"), !row["zone"].nil?] }
+        held = LineGroups::GroupOperations.contained(LINE_GROUP, request, paths)
+                                          .to_h { |row| [row.fetch("path"), !row["zone"].nil?] }
         facts = groups.flat_map do |occurrence|
           path = occurrence.path
           detached = { "group_id" => occurrence.record.fetch("id"), "group_path" => path, "name" => occurrence.name,

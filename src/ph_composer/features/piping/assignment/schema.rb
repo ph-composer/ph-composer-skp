@@ -76,14 +76,6 @@ module PhComposer
         extra.map { |key| "a #{role} pipe does not take #{key}" } + missing.map { |key| "a #{role} pipe needs #{key}" }
       end
 
-      def validate!(record)
-        found = RECORD_KIND.problems(record)
-        return record if found.empty?
-
-        raise CodedError.new("validation.failed", "A pipe assignment record is invalid: #{found.first}.",
-                             "findings" => found)
-      end
-
       def identity(record)
         id = record && record["id"]
         ID_PATTERN.match?(id.to_s) ? id : nil
@@ -91,18 +83,6 @@ module PhComposer
 
       def values(record)
         record ? RECORD_KIND.values(record) : {}
-      end
-
-      def check_limit!(count)
-        limit = gesture_edge_limit
-        return if count <= limit
-
-        raise CodedError.new("gesture.too_large", "One command changes at most #{limit} Edges; this one has #{count}.")
-      end
-
-      # How many Edges directly inside `group` carry a pipe record.
-      def pipes_in(group)
-        group.entities.count { |entity| entity.is_a?(Sketchup::Edge) && STORE.marks?(entity) }
       end
     end
   end

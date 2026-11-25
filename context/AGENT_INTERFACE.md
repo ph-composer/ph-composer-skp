@@ -930,7 +930,7 @@ pumps", "Mechanical: the heat pump export", "Mechanical: electric heaters", "Mec
 settings", is the recipe.
 
 Hot water piping is the feature `ph_composer.piping` (API 1.98, groups and pipes 1.99, the schedule 1.100, export 1.101,
-the pipe tool and Colour-by modes 1.102), which
+the pipe tool and Colour-by modes 1.102, the line-group operations shared with ducting 1.105), which
 requires Mechanical and Zones. Its Pipe Types
 are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapshot section, `create`, `update`,
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a row's `export_blockers` names
@@ -940,7 +940,8 @@ Piping groups are `ph_composer.piping.groups` (`create`, which opens the new gro
 and pipes `ph_composer.piping.pipes` (`assign` and `clear` over explicit Edges, at most 250, and `selection`,
 `selection_all` with the snapshot section `ph_composer.piping.pipes.selected`); the reference targets are
 `ph_composer.piping.group` and `ph_composer.piping.pipe`, and the codes `piping.outside_group`,
-`piping.group_in_zone` and `piping.group_nested`. The
+`piping.group_in_zone` and `piping.group_nested`. As ducting's, `groups.create` refuses `session.inactive` for a
+Model SketchUp is not showing and a group row's `write_refusal` is the one `groups.link` meets. The
 [piping assignment walkthrough](../tools/examples/authoring/piping_assignment_walkthrough.rb) creates a group, draws,
 assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
 The bounded read `ph_composer.piping.schedule` (with `compact`, `ph_composer.piping.schedule.details` for its System, Pipe

@@ -11,7 +11,6 @@ module PhComposer
     # claims its Group (Records::EntityStore.claimed?), so no other feature turns it into something else.
     module Group
       STORE = Records::EntityStore.new(GROUP_KIND, :claims_entity => true)
-      ID_PATTERN = Records::Identity.pattern("ppg")
       SYSTEM_REFERENCE = Records::Reference.new(:key => "hot_water_system_id",
                                                 :target_kind => Mechanical::HOT_WATER_SYSTEM_KIND,
                                                 :cardinality => "one")
@@ -27,26 +26,12 @@ module PhComposer
 
       module_function
 
-      def validate!(record)
-        LINE_GROUP.validate_group!(record)
-      end
-
-      def identity(record)
-        id = record && record["id"]
-        ID_PATTERN.match?(id.to_s) ? id : nil
-      end
-
       def values(record)
         record ? RECORD_KIND.values(record) : {}
       end
 
       def new_record(id, system_id)
-        { "id" => id, "schema_version" => 1, "hot_water_system_id" => system_id, "user_data" => {},
-          "extension_data" => {} }
-      end
-
-      def scannable(record)
-        LineGroups.scannable(record)
+        LINE_GROUP.new_group(id, system_id)
       end
 
       def piping_group?(entity)

@@ -6,9 +6,10 @@
 # no file of theirs, nor any other feature's, names it (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
 #   type/           the Duct Type kind, its operations and reads; names no Edge, group or run
-#   group/          the Ducting group record on a Group, its reference target, create, link and the occurrence rows
-#   assignment/     the duct record on an Edge, its reference target, assign, clear, the type rewrite and the selection
-#   line_group.rb   the spec the foundation's line_groups/ layer reads ducting by
+#   group/          the Ducting group record on a Group and its reference target
+#   assignment/     the duct record on an Edge, its reference target, assign and the selection
+#   line_group.rb   the spec the foundation's line_groups/ layer reads ducting by; create, link, clear, the type
+#                   rewrite and the occurrence rows are that layer's
 #   codes.rb        the `ducting` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -25,7 +26,6 @@ require_relative "group/schema"
 require_relative "assignment/schema"
 require_relative "line_group"
 require_relative "group/reference_target"
-require_relative "group/operations"
 require_relative "assignment/reference_target"
 require_relative "assignment/operations"
 require_relative "assignment/selection"

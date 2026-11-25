@@ -77,6 +77,32 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal @hws1, STORE.read(in_zone).fetch("hot_water_system_id")
   end
 
+  # Opening the new group moves the edit path, which SketchUp does only in the Model it shows.
+  def test_create_refuses_session_inactive_for_a_model_sketchup_is_not_showing
+    Sketchup.active_model = Sketchup::Model.new
+    assert_equal %w[refused session.inactive], invoke("#{PREFIX}.create", "hot_water_system_id" => @hws1)
+      .values_at("status", "code")
+    assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+  end
+
+  # A group row's write_refusal is what link meets, in its order: nested, the path's own, then in a Zone.
+  def test_a_group_row_shows_the_placement_refusal_a_write_meets
+    in_zone = piping_group(510, "ppg_BBBBBBBBBBBB", @hws1)
+    zone = Sketchup::Group.new(100, Sketchup::Entities.new([in_zone]))
+    PhComposer::Zones::ZONE_STORE.write(zone, "id" => "zon_AAAAAAAAAAAA", "schema_version" => 1, "name" => "Zone A",
+                                              "building_segment" => "Building", "level" => nil,
+                                              "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {})
+    @model.entities << zone << piping_group(520, "ppg_CCCCCCCCCCCC", @hws1,
+                                            [piping_group(521, "ppg_DDDDDDDDDDDD", @hws1)])
+    { [100, 510] => "piping.group_in_zone", [520, 521] => "piping.group_nested" }.each do |path, code|
+      assert_equal code, all.find { |row| row.fetch("path") == path }.dig("write_refusal", "code")
+    end
+    zone.locked = true
+    row = all.find { |entry| entry.fetch("path") == [100, 510] }
+    locked = invoke("#{PREFIX}.link", "targets" => [row.slice("reference")], "hot_water_system_id" => @hws2)
+    assert_equal %w[target.locked target.locked], [row.dig("write_refusal", "code"), locked["code"]]
+  end
+
   def test_a_pasted_copy_reads_copied_and_refuses_a_write_through_its_shared_storage
     group = piping_group(530, "ppg_EEEEEEEEEEEE", @hws1)
     copy = Sketchup::Group.new(531, group.entities)

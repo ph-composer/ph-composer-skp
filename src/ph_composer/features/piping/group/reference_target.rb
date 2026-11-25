@@ -22,19 +22,6 @@ module PhComposer
           LineGroups::GroupTarget.entries(LINE_GROUP, model)
         end
 
-        def each_group(model, &block)
-          LineGroups::GroupTarget.each_group(LINE_GROUP, model, &block)
-        end
-
-        def write_refusal(containers)
-          LineGroups::GroupTarget.write_refusal(LINE_GROUP, containers)
-        end
-
-        # Inside another Piping group. Inside a Zone is Zones' to say (ph_composer.zones.containment).
-        def nested_refusal(above)
-          LineGroups::GroupTarget.nested_refusal(LINE_GROUP, above)
-        end
-
         def locate(model, reference, mutable:, index: nil)
           LineGroups::GroupTarget.locate(LINE_GROUP, model, reference, :mutable => mutable, :index => index)
         end

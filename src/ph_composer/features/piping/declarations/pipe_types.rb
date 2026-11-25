@@ -130,9 +130,10 @@ module PhComposer
                                        "replacement_id" => "ppt_Zy98Xw76Vu54" }]) do |request, proposal|
           params = request.params
           replacement = params.fetch("replacement_id", PipeType::Operations::KEEP)
-          Assignment::Operations.delete_type(request, proposal, :id => params.fetch("id"),
-                                                                :expected_values => params.fetch("expected_values", {}),
-                                                                :replacement_id => replacement)
+          LineGroups::EdgeOperations.delete_type(LINE_GROUP, request, proposal,
+                                                 :types => PipeType::Operations, :id => params.fetch("id"),
+                                                 :expected_values => params.fetch("expected_values", {}),
+                                                 :replacement_id => replacement)
         end
       end
     end

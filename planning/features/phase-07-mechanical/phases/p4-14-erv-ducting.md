@@ -82,6 +82,24 @@ Each follows the stub, D4-37, the PRD, D4-09, piping's built shape or the source
 - **No duct tool.** Neither the stub's "Owns" nor D4-37 names one; select then Assign is the primary route (PRD), and the tool, about 20 KB in the pipe tool's shape, does not fit the budget. It is a later item if P4-15 closes with room.
 - **Lengths and units.** A Duct-Segment's geometry is the Edge's world endpoints in metres from the snapshot; the type's millimetres divide by 1,000. Diameter, width, height and insulation thickness display in the shipped `length_mm` quantity (millimetres, inches under IP), the units packet's ducting row.
 
+## P4-14c2: line-group operations consolidated
+
+Not a planned sub-stage: a consolidation pull request between P4-14c and P4-14d (issue #584), under Ed's standing
+approval to consolidate duplicate code (2026-11-25), numbered so that nothing above moves. P4-14c built ducting's
+group and assignment operations as near-copies of piping's. P4-14c2 moves the parts that name no feature into
+`line_groups/`: `GroupOperations` (create, link and unlink, the retarget a linked record's delete runs, the Zone
+containment read, the occurrence rows) and `EdgeOperations` (clear, the type delete and its rewrite, and the resolve,
+update and step an assign builds on), each taking the feature's `LineGroups::Spec`, which gains the linked record's
+kind and label, the type's kind, field and label, and the containment query. Each feature keeps its own assign and
+its declarations. The move closes four piping gaps P4-14c's review fixed only in ducting, each first reproduced by a
+failing piping test: the clear's reference check, a stale Pipe Type delete reporting `reference.in_use` before
+`target.changed`, group rows not showing the placement refusal, and `groups.create` lacking `session.inactive`. API
+1.105 records them. Every other piping and ducting test, golden and `docs/API_REFERENCE.md` line is unchanged. P4-14d
+reads Zone containment through `LineGroups::GroupOperations.contained` with ducting's spec, as piping's scan now does.
+Its row is in [STATUS](../STATUS.md) and its evidence in
+[p4-14c2-line-group-operations](../evidence/p4-14c2-line-group-operations.md); host verification rides on M13b and
+M14c in the MS3 sitting.
+
 ## Host cases owed to MS3
 
 Measured and cited, not owed: an Edge's dictionary survives split, copy and paste, weld, Undo, Redo and reopen ([B4, T01](../../../../context/SKETCHUP_HOST_BEHAVIOR.md#components-glue-and-edge-attributes)); a pasted Group carries its dictionary and shares storage (SD01).

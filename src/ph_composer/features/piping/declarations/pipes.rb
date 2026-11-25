@@ -116,7 +116,8 @@ module PhComposer
                        :examples => [{ "targets" => [{ "reference" => EXAMPLE.merge(
                          "entity_id" => "ppe_Ab12Cd34Ef56"
                        ) }] }]) do |request, proposal|
-          Assignment::Operations.clear(request, proposal, :targets => request.params.fetch("targets"))
+          LineGroups::EdgeOperations.clear(LINE_GROUP, request, proposal, request.params.fetch("targets"),
+                                           :limit => Assignment.gesture_edge_limit)
         end
       end
     end

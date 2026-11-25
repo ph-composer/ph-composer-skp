@@ -174,6 +174,42 @@ class PipingAssignmentTest < PhComposerTestCase
     refute_nil STORE.read(split)
   end
 
+  # A removed id is checked whatever else is wrong with its record: one of a newer schema version, and one whose
+  # every copy this clear removes though one copy is invalid, still refuse while a record names it.
+  def test_clear_checks_every_removed_id_against_its_referrers
+    named = lambda do |entity, id|
+      envelope = { "schema_version" => 1, "payload" => { "pipe" => id }, "export_relevance" => "local_only",
+                   "references" => [{ "path" => "$.pipe", "target_kind" => P::PIPE_KIND, "cardinality" => "one" }] }
+      STORE.write(entity, STORE.read(entity).merge("extension_data" => { "other.tool" => envelope }))
+    end
+    assign(@edges.map { |entity| target(entity) }, @pex, "twig")
+    STORE.write(@edges.first, STORE.read(@edges.first).merge("schema_version" => 2))
+    named.call(@edges[2], STORE.read(@edges.first).fetch("id"))
+    assert_equal %w[refused reference.in_use], invoke("#{PREFIX}.pipes.clear", "targets" => [target(@edges.first)])
+      .values_at("status", "code")
+
+    STORE.write(@edges[1], STORE.read(@edges[1]).merge("role" => "bogus"))
+    copy = edge(604)
+    STORE.write(copy, STORE.read(@edges[1]).merge("role" => "twig"))
+    @group.entities << copy
+    named.call(@edges[2], STORE.read(@edges[1]).fetch("id"))
+    both = invoke("#{PREFIX}.pipes.clear", "targets" => [target(@edges[1]), target(copy)])
+    assert_equal %w[refused reference.in_use], both.values_at("status", "code")
+  end
+
+  # A stale expected_values refuses before any pipe is planned, so a pipe the rewrite cannot reach never hides it.
+  def test_a_stale_pipe_type_delete_refuses_target_changed_before_a_stranded_pipe
+    assign([target(@edges.first)], @pex, "twig")
+    tagged = live(620, 621, 622)
+    STORE.write(tagged, STORE.read(@edges.first).merge("id" => "ppe_LOCKEDLOCKED"))
+    stale = invoke("#{PREFIX}.pipe_types.delete", "id" => @pex, "replacement_id" => @copper,
+                                                  "expected_values" => { "name" => "PEX 1/2" })
+    assert_equal [%w[name], "refused", "target.changed"], [stale.dig("detail", "fields")] +
+                                                          stale.values_at("status", "code")
+    fresh = invoke("#{PREFIX}.pipe_types.delete", "id" => @pex, "replacement_id" => @copper)
+    assert_equal %w[refused reference.in_use], fresh.values_at("status", "code")
+  end
+
   def test_deleting_a_pipe_type_in_use_refuses_moves_or_nulls_every_pipe_in_one_undo_step
     assign(@edges.map { |entity| target(entity) }, @pex, "branch")
     assert_equal %w[refused reference.in_use], invoke("#{PREFIX}.pipe_types.delete", "id" => @pex)

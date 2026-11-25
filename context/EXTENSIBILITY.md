@@ -1370,22 +1370,27 @@ A feature describes its line group once as a `LineGroups::Spec`: the label its m
 noun for an assigned Edge ("pipe"), the two reference target ids, their `Records::EntityStore`s and
 `Records::RecordKind`s, the group record's linked-record key, its codes for an Edge outside a group, a nested group,
 a group a Zone holds and a hidden Edge, and a factory for the one-read child index the steps resolve with at apply
-(piping passes `Zones::ChildLookup`). Each call takes the spec:
+(piping passes `Zones::ChildLookup`); for the operations, the linked record's kind and label, the type an assigned
+Edge names (its kind, field and label) and the query answering which Zone holds a Group path
+(`ph_composer.zones.containment`). Each call takes the spec:
 
 | Part | What it does |
 | --- | --- |
 | `GroupTarget` | Every group occurrence by root-to-Group path, through Groups and components, once per placement; `along!`, the strict `locate` and the nested and write refusals |
 | `EdgeTarget` | Edge records directly in a group by root-to-Edge path; refuses an Edge outside one with the feature's code |
 | `CreateStep`, `GroupWriteStep`, `EdgeWriteStep` | Create an empty group at the root with its record and open it; rewrite group records; write and clear Edge records, each one operation |
+| `GroupOperations` | `create` (refusing a Model SketchUp is not showing), `link` and unlink, the retarget a linked record's delete runs, the Zone containment read, and the occurrence rows with their placement findings and the `write_refusal` link meets |
+| `EdgeOperations` | `clear`, checking every removed id against its referrers; `delete_type` with the rewrite of every Edge naming the type, a stale type refusing first; and the `resolve`, `update` and `propose` a feature's own assign builds on |
 | `Scan.walk` | Each readable occurrence's path, record, name, direct assigned Edges, transform and `shared`, and the unreadable groups as rows |
 | `Selection` | The native selection under the active path as Edge references, with ignored entities counted; the caller passes its gesture limit and Zones' containment |
 | `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
 | `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
 
-The feature keeps its schemas and record shapes, its operations and declarations, its reference targets' declared
-descriptors, its runs, findings, schedule rows and export, its Colour-by modes and any tool. Piping's files call the
-layer from where they always were (`features/piping/line_group.rb` holds its spec), and ducting's the same way
-(`features/ducting/line_group.rb`), as thermal bridges and piping call the chain rule in `core/edge_runs.rb`.
+The feature keeps its schemas and record shapes, its assign (the values an Edge takes are its own), its type
+operations, its declarations, its reference targets' declared descriptors, its runs, findings, schedule rows and
+export, its Colour-by modes and any tool. Its declarations call the operations with its spec
+(`features/piping/line_group.rb`, `features/ducting/line_group.rb`), as thermal bridges and piping call the chain
+rule in `core/edge_runs.rb`.
 
 ## Scripting as an entry point
 
