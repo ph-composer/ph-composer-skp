@@ -89,24 +89,26 @@ changes are the 16 `context/`, `docs/`, `planning/` and `cases.json` paths. Noth
 - Installed size on the final head: 27,839,302 bytes, 53,174 over the base against the 45 KB estimate (46,080), 15
   percent over and under the 25 percent stop line (57,600). 160,698 bytes are left under the 28,000,000 ceiling;
   less P4-14d to P4-14f's estimates (30, 30 and 52 KB, 114,688 bytes) that leaves 46,010 bytes, about 45 KB, for
-  P4-15 and any overrun: above the 40 KB line, by about 6 KB.
+  P4-15 and any overrun: above the 40 KB line by about 5 KB. This stage ran 15 percent over its estimate; the same
+  overrun on P4-14d to P4-14f (about 17 KB) would take the figure under 40 KB.
 - Browser checks: `make ui-checks` on `9e4e0889`: 40 of 40 scripts pass, exit 0, none skipped (no panel change).
-- PHX: `uv run --group phx pytest tests/python` on `9e4e0889`: "486 passed, 1 skipped" (`test_map_borders.py`,
-  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: "26 passed, 461 deselected", none skipped (this stage exports
-  nothing).
+- PHX: `uv run --group phx pytest tests/python` on `e1e9b706` (the tree of `9e4e0889` plus this ledger): "486
+  passed, 1 skipped" (`test_map_borders.py`, `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: "26 passed, 461
+  deselected", none skipped (this stage exports nothing).
 - Design System: not needed. P4-14a re-synced it from `main@98ba249c` as version 41; this stage changes no kit CSS,
   shared kit part or unit quantity.
 
 ## Review
 
-Sonnet adversarial read before the gate: no blocking defect, 12 findings. Fixed: tests for `groups.list` paging, a
+Sonnet adversarial read before the gate: no blocking defect, 12 findings, 7 fixed and 5 declined. Fixed: tests for `groups.list` paging, a
 shared group stranding the Ventilator delete, a group with no id refusing it by path, assign through a pasted group's
 shared storage, unreadable Edge and group records, a clear refusing for a referenced duct with a malformed map and for
 one Edge over the limit, the mixed clear's code, the second Edge's Undo and the Ventilator's removal in the probe
 test; CONTRACTS now says a Duct Type delete rewrites ducts and a Ventilator delete groups. Declined: `params.invalid`
 in the `refuses` lists (it is in every action's common set, `shell/refusals.rb`); the repeated replacement check in
-`delete_type` (piping's shape); a `minProperties` on assign (a no-op assign writes nothing); the missing `:hidden`
-code (P4-14d's, above).
+`delete_type` (piping's shape); the `values.key?` guard before the type lookup (a nit: the schema never sends a
+null type); a `minProperties` on assign (a no-op assign writes nothing); the missing `:hidden` code (P4-14d's,
+above).
 
 ## Codex review
 

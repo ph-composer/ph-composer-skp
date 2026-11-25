@@ -1,7 +1,7 @@
 # P4-14c: Ducting groups and the duct assignment
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14c`, on `main`; offline evidence in [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md), host case `M14c` owed to MS3. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14c` (#583), on `main`; offline evidence in [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md), host case `M14c` owed to MS3. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
