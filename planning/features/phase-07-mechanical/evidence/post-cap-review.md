@@ -60,7 +60,22 @@ Red runs on unmodified source were kept with the conductor's local logs.
 - Browser check `make ui-checks UI_CHECKS=tools/ui-preview/mechanical_checks.cjs` passes with the two new host.js
   assertions; the full run on the final head is below.
 
-Final head: recorded once the review is answered.
+Final head `17b07275`, after the last review fix:
+
+- `make ci` on Ruby 3.2.2: "Ruby suite, 10 processes: 3618 runs, 51083 assertions, 0 failures, 0 errors, 2 skips";
+  JS "tests 1253", "pass 1253", "fail 0"; Python "514 passed, 1 skipped"; hostkit "48 runs, 268 assertions, 0
+  failures"; "RBZ verified: 877 files, 9097032 bytes, 27943250 bytes installed".
+- `make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby`: the same Ruby, JS, Python and hostkit counts; "RBZ verified: 877
+  files, 9097026 bytes, 27943244 bytes installed". Installed size: 7,057 bytes over P4-14f's 27,936,193 and 16,750
+  under 27,960,000, the line that keeps P4-15's reserve. `vendor.py --refresh-manifest`: "Runtime verified: 238
+  assets, 8 wheels, 23229238 bytes".
+- `make ui-checks`: 40 of 41 scripts pass. `header_checks.cjs` failed "pressed mode does not move label" (x 483.6 vs
+  480.6, the known 3 px flake); this diff touches no header code, and the script run alone passes ("Column header
+  checks passed").
+- PHX round trips: "29 passed"; the whole group "514 passed, 1 skipped" (`PH_COMPOSER_MAP_DATA` not set).
+- Design System re-sync from `main` at `4a835641`: version 42 of the artifact. No kit stylesheet or token changed
+  since its last sync at `98ba249c`; P4-14f's `line_groups.css` is a feature layer moved out of `piping.css`, and
+  `choice_cell.js` draws the existing enum pill. Only the change note was written.
 
 ## Review
 
@@ -73,4 +88,27 @@ Final head: recorded once the review is answered.
   Assemblies (they always allow Clear, so it never shows), the preview's unmapped slots, and the narrower SVG
   skip (no shipped path splits a `d` across lines).
 
-Codex: recorded once the review is answered.
+- Codex gpt-6.2-sol cycle 1 on `5da11cb5`: 2 P1, 1 P2, 3 P3, all fixed in `7fb25aaa`, test-first:
+  - a draft that ends without a write now shows the Model's value, so the next guard is what is shown;
+  - unknown uses no longer force Replace and delete, which an invalid referrer would also refuse; a guarded plain
+    Delete stays and the dialog says the uses are not all known;
+  - a cell's own copied text pastes back as itself past the nanounit;
+  - leaving a refused field keeps its refusal;
+  - M05 gains the edit and unit modules;
+  - the citation skip starts at the `d` value, so an attribute before it is linted.
+- Cycle 2 on `7fb25aaa`: 2 P2, 3 P3. Fixed in `17b07275`, which merges unreviewed after the cap:
+  - a focus-held piping field now leaves the armed state unmarked;
+  - the citation skip again needs a move to two coordinates;
+  - M05 gains `inventory_grid.js` and `unit_numbers.js`;
+  - the Ventilator delete wording defers to the general rule.
+- Declined in cycle 2:
+  - a value stored past the parser's nanounit pasted into another cell takes the parser's rounding. Every typed value
+    does, and carrying canonical values through the clipboard is a follow-up.
+  - `d` after another attribute or after two spaces is linted. A skip that starts at `<path` would hide the
+    attributes before `d`, and CI's PCRE2 reads no variable-length lookbehind. No shipped SVG writes it so.
+
+Follow-ups, not in this PR:
+- `incomplete` usage for the Ventilator, Pump, Fan and Electric heater delete dialogs.
+- Exact clipboard digits for lengths in a dimension format.
+- A refused duct Assign keeping its quantity draft.
+- The `names.rb` Unicode case check (#321).
