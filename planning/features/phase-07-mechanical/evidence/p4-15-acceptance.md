@@ -2,7 +2,7 @@
 
 DATE: 2026-11-25
 Issue: part of [#562](https://github.com/ph-composer/ph-composer-skp/issues/562).
-Base: `fix/phase-07-post-cap-review` at `d433b597` (PR #590, open, auto-merge armed). Branch
+Base: built on `fix/phase-07-post-cap-review` at `d433b597` (PR #590), rebased onto `main` at `44ca8237` after #590 merged (its squash). Branch
 `feat/phase-07-mechanical-p4-15`, worktree `.claude/worktrees/p4-15`.
 
 Offline evidence only. No SketchUp process was started and no host case ran: Ed is not at the Mac, so step 2 of the
@@ -13,7 +13,7 @@ code: documentation, the ledger and one native case.
 ## Step 1: offline gates
 
 Run on the tree that became this branch's commit (documentation only on top of `d433b597`, so the code under test is
-#590's head). Logs were saved as they ran and the figures below are read from them.
+#590's head, whose tree `main` at `44ca8237` carries). Logs were saved as they ran and the figures below are read from them.
 
 | Check | Result |
 | --- | --- |
@@ -24,7 +24,7 @@ Run on the tree that became this branch's commit (documentation only on top of `
 | `vendor.py --pins-check` | Wheel pins agree: 8 wheels |
 | `tools/rbz/build.py --check` (the packaged inventory) | RBZ verified: 877 files, 9,097,026 bytes, 27,943,244 bytes installed |
 | PHX round trips | 29 executed, 0 skipped (below) |
-| `make ci` on Ruby 3.2.2 and on 2.7.2 | **Not run.** A SketchUp process (pid 78776, not started by this stage) was running each time the gate was due, and the gate shares port 46110 with the host. A first attempt was stopped in its syntax step when the process was found. Owed on this head before merge |
+| `make ci` on Ruby 3.2.2 and on 2.7.2 | Pass on each, on `e372fa8f` (this commit rebased onto `main`) with the ledger lines recording #590's merge uncommitted: 3,618 runs, 51,083 assertions, 0 failures, 2 skips; JavaScript 1,253 pass; Python 514 passed, 1 skipped; hostkit 48 runs; RBZ 27,943,244 bytes installed. A first attempt on `4d2a6699` was stopped in its syntax step: a SketchUp process the stage had not started was running; the coordinator quit it before these runs |
 
 
 ### The installed size
