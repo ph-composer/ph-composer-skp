@@ -377,11 +377,11 @@ module PhComposer
       end
 
       def free_name(request, kind)
-        taken = Store.names(request, kind).map { |row| row.fetch("name").strip.downcase }
+        taken = Store.names(request, kind).map { |row| Records::Names.key(row.fetch("name")) }
         label = LABELS.fetch(kind)
         (1..).each do |index|
           candidate = "#{label} #{index}"
-          return candidate unless taken.include?(candidate.downcase)
+          return candidate unless taken.include?(Records::Names.key(candidate))
         end
       end
     end

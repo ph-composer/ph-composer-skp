@@ -136,6 +136,13 @@ class ProgramRecordsTest < PhComposerTestCase
     assert_equal "validation.failed", invoke("programs.create", "values" => { "name" => "Residential default" })["code"]
   end
 
+  def test_a_free_name_skips_a_name_taken_under_case_fold
+    invoke!("schedules.create", "values" => { "name" => "ſchedule 1", "start_h" => 7, "end_h" => 18 })
+    id = id_of(invoke!("schedules.create", "values" => { "start_h" => 7, "end_h" => 18 }))
+    row = query("schedules.all").fetch("records").find { |candidate| candidate["id"] == id }
+    assert_equal "Schedule 2", row.dig("values", "name")
+  end
+
   # ---------------------------------------------------------------- the residential default
 
   def test_a_fresh_model_reads_the_defaults_without_writing

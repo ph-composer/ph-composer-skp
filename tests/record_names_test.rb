@@ -28,4 +28,10 @@ class RecordNamesTest < PhComposerTestCase
     assert_raises(PhComposer::CodedError) { NAMES.unique!("ÉRV (COPY)", rows) }
     assert_equal "ÉRV (copy 2)", NAMES.copy_name("ÉRV", rows)
   end
+
+  def test_names_compare_by_case_fold_not_by_lowercase
+    rows = [{ "id" => "a", "name" => "Maße" }, { "id" => "b", "name" => "MASSE (copy)" }]
+    assert_raises(PhComposer::CodedError) { NAMES.unique!("MASSE", rows) }
+    assert_equal "Maße (copy 2)", NAMES.copy_name("Maße", rows)
+  end
 end
