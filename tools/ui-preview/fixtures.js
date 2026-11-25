@@ -1650,7 +1650,7 @@
           exhaust_flow_rate_m3h: 40, annual_runtime_minutes: 30000, norm_energy_demand_w: 8,
           in_conditioned_space: false, annual_period_operation_khrs: 2 })],
       serves: { zon_apt1: ["fan_Aa11Bb22Cc33", "fan_Dd44Ee55Ff66"], zon_apt2: ["fan_Dd44Ee55Ff66"] } }
-  }, piping: piping() });
+  }, piping: piping(), ducting: ducting() });
 
   /* Hot water piping on DHW-1 Central: the hot water piping case's riser trunk (x 12), three branches with two twigs
      each and a recirculation loop of two runs, in Piping group Riser; group Floor 2 linked to DHW-1 holds nothing
@@ -1721,6 +1721,58 @@
       from_piping: true },
       { hot_water_system_id: dhw2, name: "DHW-2 Retail", distribution_length_m: { trunk: 0, branch: 0, twig: 0 },
         recirculation_length_m: 0, recirculation_temperature_c: 60, recirculation_hours: 24, from_piping: false }]
+    };
+  }
+
+  /* ERV ducting on the ERV ducting case: DT-1 round 160 mm and DT-2 rectangular 200 by 100 mm; Ducting group DG-1
+     linked to ERV-1 with its two runs, DG-2 linked to ERV-2 with its Outdoor air run and an Exhaust air run at
+     quantity 2 whose type is missing, and Spare linked to no Ventilator. Two selected lines sit in DG-1, one outside
+     every Ducting group. ERV-3 and ERV-4 have no ducts. */
+  function ducting() {
+    var erv1 = "vnt_Aa11Bb22Cc33", erv2 = "vnt_Dd44Ee55Ff66";
+    function type(id, name, color, values) {
+      return { id: id, kind: "ph_composer.ducting.duct_type", schema_version: 1, user_data: {}, extension_data: {},
+        extension_status: {}, findings: [], export_ready: true, export_blockers: [], display: { color: color },
+        values: Object.assign({ name: name, notes: "", datasheet_links: [], source: { kind: "manual" },
+          insulation_thickness_mm: 25.4, insulation_conductivity_w_mk: 0.04, insulation_reflective: true }, values) };
+    }
+    function group(id, path, name, ventilator, count) {
+      return { path: [path], reference: { group_id: id, group_path: [path] }, name: name,
+        values: { ventilator_id: ventilator }, duct_count: count, copied: false, findings: [], record_problem: null,
+        write_refusal: null };
+    }
+    var count = 0;
+    function run(direction, ventilator, name, group, type, length, quantity, findings) {
+      count += 1;
+      return { identifier: "duct_preview" + String(count).padStart(4, "0"), direction: direction,
+        display_name: (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") + " 1", ventilator_id: ventilator,
+        ventilator_name: name, group: group, duct_type_id: type, length_m: length, quantity: quantity,
+        line_count: 2, shared: false, findings: findings || [], edge_paths: [[group.group_path[0], 600 + count]] };
+    }
+    var dg1 = { group_id: "dcg_DG1000000001", group_path: [600], name: "DG-1" };
+    var dg2 = { group_id: "dcg_DG2000000002", group_path: [700], name: "DG-2" };
+    function selected(id, values) {
+      var path = [600, id];
+      return { path: path, reference: { group_path: [600], entity_path: path, entity_id: values.direction ?
+        "dce_preview" + id : null }, group: { group_id: dg1.group_id, group_path: [600], ventilator_id: erv1 },
+      reason: null, values: values, copied: false, record_problem: null, write_refusal: null };
+    }
+    return {
+      types: [type("dct_Dd11Tt22Yy33", "DT-1 Round 160", "#4a7fb5", { shape: "round", diameter_mm: 160 }),
+        type("dct_Ee44Rr55Ss66", "DT-2 Rect 200x100", "#b5634a", { shape: "rectangular", width_mm: 200,
+          height_mm: 100, insulation_thickness_mm: 50.8, insulation_conductivity_w_mk: 0.035,
+          insulation_reflective: false })],
+      groups: [group(dg1.group_id, 600, "DG-1", erv1, 4), group(dg2.group_id, 700, "DG-2", erv2, 2),
+        group("dcg_Spare0000003", 720, "Spare", null, 0)],
+      runs: [run("outdoor_air", erv1, "ERV-1", dg1, "dct_Dd11Tt22Yy33", 2.5, 1),
+        run("exhaust_air", erv1, "ERV-1", dg1, "dct_Dd11Tt22Yy33", 1.8, 1),
+        run("outdoor_air", erv2, "ERV-2", dg2, "dct_Ee44Rr55Ss66", 2.5, 1),
+        run("exhaust_air", erv2, "ERV-2", dg2, null, 1.5, 2, [{ code: "ducting.type_missing",
+          message: "Exhaust air 1 in DG-2 has no Duct Type: assign one to its ducts.", blocks_export: true,
+          locate: { edge_paths: [[700, 604]] } }])],
+      selected: [selected(601, {}), selected(602, { duct_type_id: "dct_Dd11Tt22Yy33", direction: "outdoor_air",
+        quantity: 1 }), { path: [5], reference: null, group: null, reason: "outside_group", values: {},
+        copied: false, record_problem: null, write_refusal: null }]
     };
   }
 

@@ -1,7 +1,7 @@
 # P4-14f: the Ducting pills, the Ventilators columns and Colour-by
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-13, D4-30, D4-37 (Q1, Q2, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14f` runs in the MS3 sitting (D4-31).
+STATUS: In review (#PRNUM); offline evidence in [p4-14f-ducting-view](../evidence/p4-14f-ducting-view.md), host case `M14f` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-13, D4-30, D4-37 (Q1, Q2, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14f` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -113,6 +113,31 @@ the UI polish review. Record with `acceptance_case.py`.
 ## Out of scope
 
 A duct tool (P4-14). METr rows (metr-export).
+
+## Recorded at implementation (2026-11-25)
+
+- **The panel's line-group layer.** Piping's Piping pill code named no Hot Water System beyond its words, so it moves
+  to `html/line_groups/` (the panel side of `line_groups/`, naming no feature): the one read (`shared.js`), the groups
+  with New <group> (`groups.js`), the schedule shell with Locate, findings, totals and "Not in the schedule"
+  (`schedule.js`), the assign bar's frame (`assign_bar.js`, which a feature's bar inherits) and the pill
+  (`pill.js`), with `line_groups.css`. Piping's pills move onto it with their behavior unchanged; its panel test
+  renames two properties (the groups' link column and form field) and its browser check finds the shared classes
+  inside its own pill. Ducting's screens are its spec, its bar, its schedule's columns and totals, and Duct Types.
+  So there is no `html/features/ducting/groups.js`. `tests/line_groups_test.rb` holds the panel files to the same
+  no-feature rule.
+- **Two smaller seams.** The Heater's Change Type form becomes Mechanical's `VariantForm` (`equipment_table.js`),
+  which Duct Types' Shape change uses with the shape's sizes; `choiceCell` moves to a kit module, `choice_cell.js`, so
+  the layer needs nothing of Mechanical's. Ruby: piping's Colour-by entry building moves to
+  `LineGroups::ColourModes` and its `schedule.all` declaration to `LineGroups::ScheduleShapes.install_all`, both
+  features calling them; `docs/API_REFERENCE.md` is unchanged for piping.
+- **`ph_composer.ducting.schedule.all`** (API 1.108) is the panel's whole read, as piping's, which P4-14d left here.
+- **The direction** is two `phc-setting-choice` buttons in a labelled group, Outdoor air pressed by default; the kit
+  has no joined segmented control, so none was drawn (D4-30).
+- **The Ventilators columns read `ducting_ventilators` only.** P4-14d registered the section, so the schedule
+  fallback is not built. A length of 0 shows a dash; the schedule's By Ventilator totals show 0.
+- **The legend figure applies the quantity**, so a direction's row equals `totals.by_direction` and a type's its
+  `used_length_m`; a legend row's count is still its lines.
+- **The bar caps the quantity at 10,000**, the host's limit, before it sends.
 
 ## Done when
 

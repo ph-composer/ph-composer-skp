@@ -1459,6 +1459,16 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   serving no Zone has Mechanical's `mechanical.item_unserved` instead.
 - **`ph_composer.ducting.runs.locate`** (view command), as piping's: one run's or finding's `edge_paths` in one group
   occurrence, refusing `ducting.hidden` for a hidden duct, Group or tag.
+- **The panel's read** `ph_composer.ducting.schedule.all` answers the whole schedule unbounded (`prefer` names
+  `schedule`): every run, the totals, the `ventilators` and `types` rows and every unreadable record, uncut.
+- **Colour-by modes** (`features/ducting/colour_modes.rb`) `ph_composer.ducting.by_direction` ("Duct direction",
+  fixed colours, Outdoor air then Exhaust air) and `ph_composer.ducting.by_type` ("Duct Type", each type's
+  `display.color`; a missing or unset type is `Missing type`, incomplete), as piping's on the shared
+  `LineGroups::ColourModes`, except that the `figure` is each duct's length times its quantity, so a direction's
+  legend row equals `totals.by_direction` and a type's its `used_length_m`.
+- **The Ventilators columns.** Ducting contributes `Outdoor air duct` and `Exhaust air duct` to Mechanical's
+  Ventilators table through `table_contributions` (`html/features/ducting/ventilator_columns.js`), read only, from
+  `ducting_ventilators`; a length of 0 shows a dash.
 - **Export** `ph_composer.ducting.export.ducting` (`export.rb`, the pure `extraction.rb`; see "Translation sections and
   artifacts") and its preflight `ph_composer.ducting.export_preflight`: the export's findings, a run's with
   `runs.locate` params and a Ventilator's (`ducting.run_missing`, `ducting.ventilator_unexported`) with Mechanical's

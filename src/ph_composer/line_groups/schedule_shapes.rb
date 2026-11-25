@@ -77,6 +77,18 @@ module PhComposer
         end
       end
 
+      # The panel's whole-schedule read `name`: `result`'s `whole` parts with every run and every unreadable record.
+      # It prefers the bounded schedule `prefer`; the block answers it.
+      def install_all(feature, spec, name:, prefer:, result:, whole:, refuses:, description:, &block)
+        runs = list(result.dig("properties", "runs", "items")).merge("description" => "Every run in schedule order.")
+        unreadable = "Every unreadable group and #{spec.edge_noun} record."
+        lists = { "runs" => runs, "unreadable" => list(UNREADABLE).merge("description" => unreadable) }
+        feature.query(name, :description => description, :response => { "bounded" => false, "prefer" => prefer },
+                            :refuses => refuses, :params => object({}),
+                            :result => object(result.fetch("properties").slice(*whole).merge(lists)),
+                            :examples => [{}], &block)
+      end
+
       # The view command `name` over Locate, refusing the spec's hidden code with the path refusals.
       def install_locate(feature, spec, name)
         params = object({ "edge_paths" => EDGE_PATHS.merge(

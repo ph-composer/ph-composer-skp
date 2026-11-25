@@ -21,6 +21,7 @@
   var CLIMATE = "ph_composer.climate.";
   var MECHANICAL = "ph_composer.mechanical.";
   var PIPING = "ph_composer.piping.";
+  var DUCTING = "ph_composer.ducting.";
   var ZONE_LABELS = { 1: "Not defined", 11: "1", 12: "2", 13: "3", 14: "4", 141: "4C", 15: "5", 16: "6", 17: "7",
     18: "8" };
   var NOTHING_WRITTEN = "Nothing was written.";
@@ -94,6 +95,8 @@
     this.piping = JSON.parse(JSON.stringify(settings.piping || { types: [], selected: [], groups: [], runs: [],
       systems: [] }));
     this.pipeTool = { active: false, pipe_type_id: null, role: "trunk", values: {}, gesture_limit: 250 };
+    // ERV ducting: the Duct Types, the selected lines, the Ducting groups and the schedule's runs.
+    this.ducting = JSON.parse(JSON.stringify(settings.ducting || { types: [], selected: [], groups: [], runs: [] }));
     // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
     // for its geolocation; `climate.geolocation` stands in for the host read.
     this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
@@ -232,6 +235,10 @@
         [PIPING + "pipe_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.pipeTool)) },
         [PIPING + "piping_systems"]: { status: "completed", value: { systems: JSON.parse(JSON.stringify(
           this.piping.systems)) } },
+        [DUCTING + "duct_types"]: { status: "completed", value: { records: this.ductTypeRows(), unreadable: [] } },
+        [DUCTING + "ducts.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
+          this.ducting.selected)), ignored: [], ignored_total: 0 } },
+        [DUCTING + "ducting_ventilators"]: { status: "completed", value: { ventilators: this.ductVentilatorRows() } },
         [MECHANICAL + "serves"]: { status: "completed", value: { zones: this.servesRows() } },
         [MECHANICAL + "hot_water_systems"]: { status: "completed", value: { records: this.hotWaterSystemRows(),
           unreadable: [] } },
@@ -321,7 +328,9 @@
         { name: "ph_composer.mechanical.by_hot_water_system", label: "Hot Water System", entity_kind: "zone",
           group: null },
         { name: PIPING + "by_role", label: "Pipe role", entity_kind: "edge", group: null },
-        { name: PIPING + "by_type", label: "Pipe Type", entity_kind: "edge", group: null }],
+        { name: PIPING + "by_type", label: "Pipe Type", entity_kind: "edge", group: null },
+        { name: DUCTING + "by_direction", label: "Duct direction", entity_kind: "edge", group: null },
+        { name: DUCTING + "by_type", label: "Duct Type", entity_kind: "edge", group: null }],
       readouts: [["ph_composer.spaces.show", "Show Spaces", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],
@@ -336,6 +345,7 @@
     if (message.type === "query.invoke") {
       if (message.payload.name.indexOf(TB) === 0) this.scheduleQuery(message.payload);
       else if (message.payload.name.indexOf(PIPING) === 0) this.pipingQuery(message.payload);
+      else if (message.payload.name.indexOf(DUCTING) === 0) this.ductingQuery(message.payload);
       else if (message.payload.name === "ph_composer.programs.equipment_sets.device_types") {
         this.deviceTypesQuery(message.payload);
       } else if (message.payload.name.indexOf(CLIMATE) === 0) this.climateQuery(message.payload);
@@ -430,6 +440,7 @@
       if (payload.name === "ph_composer.windows.units.locate") this.selectedUnits = payload.params.units;
       if (payload.name === TB + "runs.locate") this.locatedEdges = payload.params.edge_paths;
       if (payload.name === PIPING + "runs.locate") this.locatedPipes = payload.params.edge_paths;
+      if (payload.name === DUCTING + "runs.locate") this.locatedDucts = payload.params.edge_paths;
       // The pipe tool arms, re-arms and stops; gestures happen only in SketchUp.
       if (payload.name === PIPING + "pipe_tool.choose") {
         var armed = Object.assign({}, payload.params);
@@ -612,6 +623,130 @@
         data.groups.forEach(function (group) {
           if (JSON.stringify(group.reference) !== JSON.stringify(row.reference)) return;
           group.values = { hot_water_system_id: params.hot_water_system_id || null };
+        });
+      });
+    } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
+    this.revision += 1;
+    return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
+      value: { id: id, group_id: id }, affected: [], findings: [], detail: null };
+  };
+
+  /* The fixture's duct runs with each type's current name, a missing type's null. */
+  Host.prototype.ductRuns = function () {
+    var types = this.ducting.types;
+    return this.ducting.runs.map(function (run) {
+      var type = types.filter(function (entry) { return entry.id === run.duct_type_id; })[0];
+      return Object.assign(JSON.parse(JSON.stringify(run)), { duct_type_name: type ? type.values.name : null });
+    });
+  };
+  /* Each length the runs give `matches`, each line times its quantity, as Ruby's totals apply it. */
+  function counted(runs, matches) {
+    return runs.filter(matches).reduce(function (sum, run) { return sum + run.length_m * run.quantity; }, 0);
+  }
+  /* The Duct Type rows, each with its colour and used length. */
+  Host.prototype.ductTypeRows = function () {
+    var runs = this.ducting.runs;
+    return this.ducting.types.map(function (type) {
+      return Object.assign(JSON.parse(JSON.stringify(type)), { used_length_m: counted(runs, function (run) {
+        return run.duct_type_id === type.id;
+      }) });
+    });
+  };
+  /* Every Ventilator's two duct lengths, 0 with none. */
+  Host.prototype.ductVentilatorRows = function () {
+    var runs = this.ducting.runs;
+    return this.mechanical.ventilators.map(function (record) {
+      function length(direction) {
+        return counted(runs, function (run) { return run.ventilator_id === record.id && run.direction === direction; });
+      }
+      return { ventilator_id: record.id, name: record.values.name, outdoor_air_length_m: length("outdoor_air"),
+        exhaust_air_length_m: length("exhaust_air") };
+    });
+  };
+  /* The ducting reads, answered on the next turn as the host does. Synthetic; Ruby builds the runs from the Model. */
+  Host.prototype.ductingQuery = function (payload) {
+    var host = this;
+    this.window.setTimeout(function () {
+      var value;
+      if (payload.name === DUCTING + "groups.all") {
+        value = { groups: JSON.parse(JSON.stringify(host.ducting.groups)) };
+      } else {
+        var runs = host.ductRuns(), byDirection = ["outdoor_air", "exhaust_air"].map(function (direction) {
+          var own = runs.filter(function (run) { return run.direction === direction; });
+          return { direction: direction, run_count: own.length, length_m: counted(own, function () { return true; }),
+            line_count: own.reduce(function (sum, run) { return sum + run.line_count; }, 0) };
+        });
+        value = { runs: runs, totals: { by_direction: byDirection, run_count: runs.length,
+          line_count: byDirection[0].line_count + byDirection[1].line_count,
+          length_m: byDirection[0].length_m + byDirection[1].length_m },
+        ventilators: host.ductVentilatorRows().map(function (row) {
+          var missing = ["outdoor_air", "exhaust_air"].filter(function (direction) {
+            return host.mechanical.serves && Object.keys(host.mechanical.serves).some(function (zone) {
+              return host.mechanical.serves[zone] === row.ventilator_id;
+            }) && !row[direction + "_length_m"];
+          });
+          return Object.assign({ findings: missing.map(function (direction) {
+            return { code: "ducting.run_missing", blocks_export: false, locate: {},
+              message: row.name + " has no " + (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") +
+                " run." };
+          }) }, row);
+        }), types: [], unreadable: [], unreadable_total: 0 };
+      }
+      host.publish("query.result", { request_id: payload.request_id, session: payload.session,
+        outcome: { status: "completed", code: "ok", revision: host.revision, value: value } });
+    }, 0);
+  };
+  /* Duct Types, the duct assignment on the selected lines and the Ducting groups, kept to what the pills send. */
+  Host.prototype.ductingAction = function (payload) {
+    var data = this.ducting, params = payload.params, name = payload.name.slice(DUCTING.length), id;
+    var target = data.types.filter(function (record) { return record.id === params.id; })[0];
+    function copy(value) { return JSON.parse(JSON.stringify(value)); }
+    if (params.id && !target) return refused("target.not_found", "That Duct Type is unavailable.", this.revision);
+    if (target && params.expected_values && Object.keys(params.expected_values).some(function (field) {
+      var current = target.values[field];
+      return JSON.stringify(current === undefined ? null : current) !== JSON.stringify(params.expected_values[field]);
+    })) return refused("target.changed", "The Duct Type changed. " + NOTHING_WRITTEN, this.revision);
+    if (name === "duct_types.create" || name === "duct_types.duplicate") {
+      id = "dct_preview" + String(++this.sequence).padStart(5, "0");
+      var values = name === "duct_types.create" ? Object.assign({ notes: "", datasheet_links: [], shape: "round",
+        diameter_mm: 160, insulation_thickness_mm: 25.4, insulation_conductivity_w_mk: 0.04,
+        insulation_reflective: true }, copy(params.values)) :
+        Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
+      data.types.push({ id: id, kind: DUCTING + "duct_type", schema_version: 1, user_data: {}, extension_data: {},
+        extension_status: {}, findings: [], values: values, display: { color: "#5f9a5a" }, export_ready: true,
+        export_blockers: [] });
+    } else if (name === "duct_types.update") {
+      Object.keys(params.values).forEach(function (field) {
+        if (params.values[field] === null) delete target.values[field];
+        else target.values[field] = params.values[field];
+      });
+    } else if (name === "duct_types.delete") {
+      data.runs.forEach(function (run) {
+        if (run.duct_type_id === target.id) run.duct_type_id = params.replacement_id || null;
+      });
+      data.types.splice(data.types.indexOf(target), 1);
+    } else if (name === "ducts.assign" || name === "ducts.clear") {
+      var assigned = copy(params);
+      delete assigned.targets;
+      params.targets.forEach(function (row) {
+        data.selected.forEach(function (edge) {
+          if (JSON.stringify(edge.reference) === JSON.stringify(row.reference)) {
+            edge.values = name === "ducts.clear" ? {} : assigned;
+          }
+        });
+      });
+    } else if (name === "groups.create") {
+      id = "dcg_preview" + String(++this.sequence).padStart(5, "0");
+      var path = [9500 + this.sequence];
+      data.groups.push({ path: path, reference: { group_id: id, group_path: path }, name: "",
+        values: { ventilator_id: params.ventilator_id }, duct_count: 0, copied: false, findings: [],
+        record_problem: null, write_refusal: null });
+    } else if (name === "groups.link" || name === "groups.unlink") {
+      params.targets.forEach(function (row) {
+        data.groups.forEach(function (group) {
+          if (JSON.stringify(group.reference) === JSON.stringify(row.reference)) {
+            group.values = { ventilator_id: params.ventilator_id || null };
+          }
         });
       });
     } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
@@ -1285,6 +1420,7 @@
     if (payload.name.indexOf(TB) === 0) return this.thermalBridgeAction(payload);
     if (payload.name.indexOf(MECHANICAL) === 0) return this.mechanicalAction(payload);
     if (payload.name.indexOf(PIPING) === 0) return this.pipingAction(payload);
+    if (payload.name.indexOf(DUCTING) === 0) return this.ductingAction(payload);
     if (payload.name.indexOf(CLIMATE) === 0) return this.climateAction(payload);
     if (payload.name === "ph_composer.library.copy") return this.libraryCopy(payload);
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||

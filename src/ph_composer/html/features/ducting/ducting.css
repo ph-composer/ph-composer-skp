@@ -1,0 +1,8 @@
+/* The ducting pills beyond the shared line-group pill (html/line_groups/line_groups.css): the direction choice on the
+   assign bar and the duct-length cells ducting adds to the Ventilators table. */
+.ducting-directions { display: inline-flex; gap: 4px; }
+.phc-workspace .line-group-table .phc-table :is(.col-ventilator, .col-ventilator_name, .col-direction,
+  .col-duct_type_name) {
+  text-align: left;
+}
+.phc-workspace .phc-table td.ducting-length { text-align: right; }

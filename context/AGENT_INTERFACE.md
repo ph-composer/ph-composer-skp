@@ -959,7 +959,7 @@ gestures are each one `pipes.assign` through `API.invoke`; the Colour-by modes a
 `ph_composer.piping.by_type`. Piping contributes the Systems table's recirculation columns
 (`html/features/piping/systems_columns.js`) from `piping_systems`; `hot_water_systems` rows carry no recirculation.
 
-ERV ducting is the feature `ph_composer.ducting` (API 1.103, groups and ducts 1.104, the schedule 1.106, export 1.107), which
+ERV ducting is the feature `ph_composer.ducting` (API 1.103, groups and ducts 1.104, the schedule 1.106, export 1.107, the panel 1.108), which
 requires Mechanical and Zones. Its Duct Types are the catalog `ph_composer.ducting.duct_types`, with `list`, `all`, the snapshot section, `create`, `update`,
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a missing or other-shape dimension refuses
 `params.invalid`, and a row's `export_blockers` names `ducting.insulation_conductivity_missing` for an insulated type
@@ -982,6 +982,11 @@ Ventilator's two lengths with `ducting.run_missing` (also `ph_composer.ducting.v
 ducts to its ventilation systems, a run of quantity N as N elements; its preflight, the query
 `ph_composer.ducting.export_preflight`, gives the export's findings with `runs.locate` params, `ducting.run_missing`
 and `ducting.ventilator_unexported` with Mechanical's Locate, and each unreadable record.
+The panel reads `ph_composer.ducting.schedule.all` (API 1.108), the whole schedule in one unbounded read that prefers
+`schedule`; the Colour-by modes are `ph_composer.ducting.by_direction` and `ph_composer.ducting.by_type`, whose legend
+lengths apply the quantity. Ducting contributes the Ventilators table's `Outdoor air duct` and `Exhaust air duct`
+columns (`html/features/ducting/ventilator_columns.js`) from `ducting_ventilators`. Both features' pills are the
+shared line-group screens (`html/line_groups/`), which name no feature.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

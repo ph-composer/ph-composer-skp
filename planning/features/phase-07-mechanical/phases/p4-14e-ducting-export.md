@@ -1,7 +1,7 @@
 # P4-14e: ducting export
 
 DATE: 2026-11-24
-STATUS: In review (#587); offline evidence in [p4-14e-ducting-export](../evidence/p4-14e-ducting-export.md), host case `M14e` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-09, D4-25, D4-37 (Q4, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Export mapping". The quantity bullet was built as inferred, at the conductor's direction, and still waits on Ed's answer to P4-14's quantity inference. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14e` runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-25 (#587, squash `dc3792e8`); offline evidence in [p4-14e-ducting-export](../evidence/p4-14e-ducting-export.md), host case `M14e` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-09, D4-25, D4-37 (Q4, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Export mapping". The quantity bullet was built as inferred, at the conductor's direction, and still waits on Ed's answer to P4-14's quantity inference. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14e` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

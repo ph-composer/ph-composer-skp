@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 107
+    MINOR = 108
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -672,7 +672,11 @@ module PhComposer
                     "appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run " \
                     "of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, " \
                     "and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone " \
-                    "takes." }
+                    "takes." },
+      { "minor" => 108, "date" => "2026-11-25",
+        "change" => "ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes " \
+                    "ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its " \
+                    "direction or Duct Type with legend lengths, quantity applied." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

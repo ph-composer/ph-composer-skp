@@ -2,15 +2,16 @@
 
 module PhComposer
   module Ducting
-    # What the schedule registers: the bounded read, its detail lists and a run's ducts a page at a time, runs.locate,
-    # and each Ventilator's two duct lengths for the panel snapshot. Each read walks the Model, so it shows the ducts as
-    # they are. The schedule is asked for on opening and on Refresh (context/TECH_STACK.md, "Edge-owned
-    # assignments"); the Ventilators read, the walk and the runs without findings or Zones, measured under the refresh
-    # budget, is a snapshot section.
+    # What the schedule registers: the bounded read, its detail lists and a run's ducts a page at a time, the panel's
+    # whole read, runs.locate, and each Ventilator's two duct lengths for the panel snapshot. Each read walks the
+    # Model, so it shows the ducts as they are. The schedule is asked for on opening and on Refresh
+    # (context/TECH_STACK.md, "Edge-owned assignments"); the Ventilators read, the walk and the runs without findings
+    # or Zones, measured under the refresh budget, is a snapshot section.
     module ScheduleRegistration
       LOCATE = "#{FEATURE_ID}.runs.locate".freeze
       VENTILATORS = "#{FEATURE_ID}.ventilators".freeze
       VENTILATORS_SECTION = "#{FEATURE_ID}.ducting_ventilators".freeze
+      ALL = "#{FEATURE_ID}.schedule.all".freeze
       Shapes = Mechanical::Shapes
       PATH = LineGroups::PATH
       # An unreadable Duct Type or Ventilator refuses the read, as it refuses its own; the schedule also reads which
@@ -117,6 +118,13 @@ module PhComposer
           SchedulePages::PAGES.page(request)
         end
         install_pages(feature)
+        whole = "Every ERV duct run in one read, for the panel, with the totals, Ventilator and Duct Type rows and " \
+                "unreadable records. It walks the Model."
+        Common.install_all(feature, LINE_GROUP, :name => ALL, :prefer => SchedulePages::PAGE, :result => RESULT,
+                                                :whole => %w[totals ventilators types unreadable unreadable_total],
+                                                :refuses => SCHEDULE, :description => whole) do |request|
+          Scan.schedule(request)
+        end
         feature.query(VENTILATORS,
                       :description => "Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times " \
                                       "its quantity, 0 with none, for the panel. It walks the Model.",

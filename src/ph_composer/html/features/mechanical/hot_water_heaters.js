@@ -6,12 +6,11 @@
    paste across them is refused whole. Coverage is stored as a fraction and shown and entered as a percentage (the
    `percent` quantity), so its drafts, guards and readback stay in the stored fraction.
 
-   A Type is changed in the shared form dialog, since the new Type needs its own values and the old Type's values
-   go: the dialog asks for the new ones, names what goes, and sends one guarded update with both, one Undo step. */
-PhComposerUI.define("features/mechanical/hot_water_heaters", ["panel", "snapshot", "workspace", "fields",
-  "record_form", "unit_field", "inventory_forms", "features/mechanical/systems", "features/mechanical/equipment_table",
-  "features/mechanical/hot_water"],
-function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, equipment, hotWater) {
+   A Type is changed in the shared form dialog (equipment_table.js, VariantForm), since the new Type needs its own
+   values and the old Type's values go. */
+PhComposerUI.define("features/mechanical/hot_water_heaters", ["panel", "workspace", "fields",
+  "features/mechanical/systems", "features/mechanical/equipment_table", "features/mechanical/hot_water"],
+function (panel, ui, fields, systems, equipment, hotWater) {
   "use strict";
   var SECTION = hotWater.SECTIONS.heaters, LABEL = "Hot Water Heater";
   var FRACTION = fields.FRACTION, TEMPERATURE = fields.TEMPERATURE_C;
@@ -48,124 +47,18 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
     var type = TYPES.filter(function (entry) { return entry.value === value; })[0];
     return type ? type.label : value;
   }
-  function present(value) { return value !== null && value !== undefined; }
   /* Whether a Heater takes `field`: a value of another Type is read only. */
   function inactive(record, field) {
     return Boolean(EFFICIENCY[field]) && (TYPE_FIELDS[record.values.variant] || []).indexOf(field) < 0;
   }
 
-  /* The one update a Type change sends: the new Type and its values, a null for each value of the old Type, each
-     guarded by what the row showed. */
-  function typeChange(record, variant, entered) {
-    var values = { variant: variant }, expected = { variant: record.values.variant };
-    EFFICIENCY_FIELDS.forEach(function (field) {
-      if (TYPE_FIELDS[variant].indexOf(field) >= 0) values[field] = entered[field];
-      else if (present(record.values[field])) {
-        values[field] = null;
-        expected[field] = record.values[field];
-      }
-    });
-    return { id: record.id, values: values, expected_values: expected };
-  }
-
-  /* Change Type: the new Type's values, each required, and what the old Type's values were. */
-  function TypeForm(session, send, changed) {
-    RecordForm.call(this, session, send, { title: "Change Type", action: SECTION + ".update",
-      label: "hot-water-heater-type", submitLabel: "Change Type", pendingText: "Changing...",
-      failureText: "The Type was not changed.", changed: changed });
-    this.explanation = ui.element("p");
-    this.form.appendChild(this.explanation);
-    this.fieldsRoot = ui.element("div", "mech-type-fields");
-    this.form.appendChild(this.fieldsRoot);
-    this.units = [];
-    this.finish();
-  }
-  RecordForm.extend(TypeForm);
-  TypeForm.prototype.open = function (record, variant) {
-    if (!this.enabled) return;
-    var self = this;
-    this.record = record; this.variant = variant; this.stale = false; this.from = record.values.variant;
-    this.release();
-    this.title.textContent = "Change " + record.values.name + " to " + typeLabel(variant);
-    var going = EFFICIENCY_FIELDS.filter(function (field) {
-      return TYPE_FIELDS[variant].indexOf(field) < 0 && present(record.values[field]);
-    }).map(function (field) { return EFFICIENCY[field].label; });
-    this.explanation.textContent = going.length ? "Removes its " + going.join(", ") + "." :
-      TYPE_FIELDS[variant].length ? "" : "An electric heater takes no efficiency value.";
-    this.explanation.hidden = !this.explanation.textContent;
-    this.units = TYPE_FIELDS[variant].map(function (field) {
-      var entry = EFFICIENCY[field], label = ui.element("label", "mech-type-field");
-      var unit = new unitFields.UnitField({ field: entry.field, value: null,
-        onCommit: function () { self.updateButton(); } });
-      unit.input.setAttribute("aria-label", entry.label);
-      unit.input.addEventListener("input", function () { self.error.textContent = ""; });
-      // Enter in any field submits, after the field has read what was typed.
-      unit.input.addEventListener("keydown", function (event) { if (event.key === "Enter") self.submit(); });
-      label.appendChild(ui.element("span", "", entry.label));
-      label.appendChild(unit.root);
-      RecordForm.required(label, unit.input);
-      self.fieldsRoot.appendChild(label);
-      return { key: field, unit: unit };
-    });
-    this.error.textContent = "";
-    this.updateButton();
-    this.show();
-    if (this.units.length) this.units[0].unit.input.focus(); else this.submitButton.focus();
-  };
-  TypeForm.prototype.updateButton = function () {
-    this.submitButton.disabled = !this.enabled || this.busy() || Boolean(this.stale);
-  };
-  /* Each value read as typed, or the first field's reason it cannot be. */
-  TypeForm.prototype.entered = function () {
-    var entered = {}, failed = false;
-    this.units.forEach(function (held) {
-      var outcome = held.unit.commit(), value = outcome.ok ? held.unit.baseline : null;
-      var reason = !outcome.ok ? outcome.message : value === null ? "Enter the " + EFFICIENCY[held.key].label + "." :
-        POSITIVE.indexOf(held.key) >= 0 && value <= 0 ? "Enter a number above 0." : "";
-      if (reason) {
-        held.unit.error.textContent = reason; held.unit.error.hidden = false;
-        held.unit.input.setAttribute("aria-invalid", "true");
-        if (!failed) held.unit.input.focus();
-        failed = true;
-      }
-      entered[held.key] = value;
-    });
-    return failed ? null : entered;
-  };
-  TypeForm.prototype.submit = function () {
-    if (!this.record || this.busy()) return;
-    var entered = this.entered();
-    if (entered) this.run(typeChange(this.record, this.variant, entered));
-  };
-  TypeForm.prototype.refresh = function (state) {
-    var outcome = forms.refreshForm(this, state, SECTION);
-    if (outcome && outcome.status === "completed") { this.hide(); this.release(); return; }
-    var record = this.record, records = (snapshot.value(state, SECTION) || {}).records || [];
-    var now = record && records.filter(function (entry) { return entry.id === record.id; })[0];
-    if (!this.root.hidden && record && !this.busy()) {
-      // The Heater went: nothing is left to change.
-      if (!now) { this.hide(); this.release(); return; }
-      // Its Type changed elsewhere: the change no longer means what it said. The typed values and any refusal stay
-      // in view; Change Type is held, and Cancel lets the user choose again from the Type now shown.
-      if (now.values.variant !== this.from && !this.stale) {
-        this.stale = true;
-        this.error.textContent = (this.error.textContent ? this.error.textContent + " " : "") +
-          record.values.name + " is now " + typeLabel(now.values.variant) + "; cancel and choose its Type again.";
-      }
-    }
-    this.updateButton();
-  };
-  TypeForm.prototype.release = function () {
-    this.units.forEach(function (held) { held.unit.dispose(); });
-    this.units = [];
-    this.fieldsRoot.replaceChildren();
-  };
-  TypeForm.prototype.dispose = function () { this.enabled = false; this.withdraw(); this.release(); };
-
   function Heaters(root, context) {
     var self = this;
     this.state = null;
-    this.typeForm = new TypeForm(context.session, context.send, function () { panel.repaint(); });
+    this.typeForm = new equipment.VariantForm(context.session, context.send, { section: SECTION,
+      label: "hot-water-heater-type", key: "variant", word: "Type", choices: TYPES, values: EFFICIENCY,
+      fields: TYPE_FIELDS, positive: POSITIVE, none: "An electric heater takes no efficiency value.",
+      changed: function () { panel.repaint(); } });
     var table = this.table = new equipment.EquipmentTable(root, context, {
       section: SECTION, label: LABEL, className: "mech-hot-water-heaters", locate: "hot_water_heater_ids",
       parent: { key: "hot_water_system_id", label: "Hot Water System", section: hotWater.SECTIONS.systems },
@@ -239,5 +132,5 @@ function (panel, snapshot, ui, fields, RecordForm, unitFields, forms, systems, e
 
   systems.table({ system: hotWater.SYSTEM, id: SECTION, label: "Heaters", order: 20,
     build: function (surface, context) { return new Heaters(surface, context); } });
-  return { Heaters: Heaters, TypeForm: TypeForm, typeChange: typeChange, TYPE_FIELDS: TYPE_FIELDS };
+  return { Heaters: Heaters, TYPE_FIELDS: TYPE_FIELDS };
 });
