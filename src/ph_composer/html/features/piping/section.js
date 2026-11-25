@@ -25,7 +25,7 @@ function (panel, snapshot, ui, systems, hotWater, shared, bars, groups, schedule
     root.appendChild(surface);
     this.schedule = new schedules.Schedule(surface, session, send, this.read, function () {
       if (self.read.read()) panel.repaint();
-    });
+    }, panel.notify);
     root.appendChild(this.groupForm.root);
     this.create = null;
   }

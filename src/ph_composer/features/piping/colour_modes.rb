@@ -49,12 +49,15 @@ module PhComposer
       end
 
       # One Model walk and one read of the types per rebuild: every readable pipe occurrence with its record and
-      # Pipe Type, or nil for a missing one.
+      # Pipe Type, or nil for a missing one. While an edit context is open, SketchUp rebases a repeated parent's
+      # shared child transforms, so a pipe in shared storage could draw at another placement's position
+      # (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit contexts"): those are withheld until it closes.
       def pipes(read)
         types = DefinitionLists.read(read.engine, PIPE_TYPE_KIND, read.engine.ids(PIPE_TYPE_KIND)).first
                                .to_h { |record| [record.fetch("id"), record] }
         groups, = Scan.walk(read.model)
-        groups.flat_map do |occurrence|
+        open = !Array(read.model.active_path).empty?
+        groups.reject { |occurrence| open && occurrence.shared }.flat_map do |occurrence|
           occurrence.edges.filter_map do |edge|
             record, problem = Group.read(edge, Assignment::STORE)
             next if problem || Assignment::RECORD_KIND.problems(record).any?

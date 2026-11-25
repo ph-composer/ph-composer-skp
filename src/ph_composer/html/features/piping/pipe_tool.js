@@ -24,7 +24,8 @@ function (request, snapshot, ui, shared) {
     this.enabled = Boolean(value);
     this.state = value || { active: false };
     var outcome = this.channel.consume(state);
-    if (outcome && outcome.status !== "completed") this.refused(outcome.message || "The pipe tool did not start.");
+    // A failure reaches the user through the panel's own notice, with its incident; a refusal is the tool's to say.
+    if (outcome && outcome.status === "refused") this.refused(outcome.message || "The pipe tool did not start.");
   };
   /* Arms the tool, or re-arms a running one for its next gesture. `params` are pipe_type_id, role and its values. */
   PipeToolControls.prototype.choose = function (params) {

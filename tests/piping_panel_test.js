@@ -141,10 +141,10 @@ test("opening Piping reads the schedule and groups once; the tree orders twigs u
     var rows = schedule.mount.querySelectorAll("[data-row-key]").map(function (row) {
       return row.getAttribute("data-row-key");
     });
-    assert.deepStrictEqual(rows, ["pipe_trunk", "pipe_branch", "pipe_twig", "pipe_recirc"]);
-    var twig = schedule.mount.querySelector("[data-row-key=pipe_twig]");
+    assert.deepStrictEqual(rows, ["pipe_trunk#0", "pipe_branch#3", "pipe_twig#2", "pipe_recirc#1"]);
+    var twig = schedule.mount.querySelector("[data-row-key='pipe_twig#2']");
     assert.strictEqual(twig.querySelector(".col-display_name").style.paddingLeft, "40px");
-    assert.strictEqual(schedule.mount.querySelector("[data-row-key=pipe_trunk]").querySelector(".col-values")
+    assert.strictEqual(schedule.mount.querySelector("[data-row-key='pipe_trunk#0']").querySelector(".col-values")
       .textContent, "× 12");
     schedule.mount.listeners.click({ target: twig.querySelector(".col-role") });
     var locate = named(o, PREFIX + "runs.locate")[0];
@@ -234,3 +234,67 @@ test("the Systems table shows piping's recirculation columns in the unit read, m
     assert.match(header(), /Recirc\. °F/);
     assert.strictEqual(hws1.querySelector(".col-recirculation_temperature_c").textContent, "129.4");
   });
+
+test("a Locate that opens a group keeps the read current only through its own revision", function () {
+  var o = setup();
+  read(o);
+  var schedule = o.view(PIPING).schedule;
+  schedule.sendLocate([[500, 9]]);
+  var locate = named(o, PREFIX + "runs.locate")[0];
+  o.state.revision = 2;
+  o.state.ui.viewResults[locate.payload.request_id] = { request_id: locate.payload.request_id, session: "session",
+    outcome: { status: "completed", revision: 2, value: {} } };
+  o.paint();
+  assert.strictEqual(schedule.status.textContent, "", "Locate changed no data");
+  o.state.revision = 3; o.paint();
+  assert.strictEqual(schedule.status.textContent, "Changed since read", "the next change is not adopted");
+});
+
+test("two runs sharing an identifier both show, and a group's unreadable record offers no Locate", function () {
+  var o = setup(), value = fixtures.schedule();
+  value.runs.push(Object.assign(JSON.parse(JSON.stringify(value.runs[1])), { edge_paths: [[510, 1]] }));
+  value.unreadable = [{ path: [500], code: "record.unreadable", message: "Its record is not JSON." },
+    { path: [500, 3], code: "record.unreadable", message: "A pipe record is not JSON." }];
+  value.unreadable_total = 2;
+  answer(o, last(o, PREFIX + "groups.all"), { status: "completed", revision: 1, value: { groups: fixtures.groups() } });
+  answer(o, last(o, PREFIX + "schedule.all"), { status: "completed", revision: 1, value: value });
+  var schedule = o.view(PIPING).schedule;
+  assert.strictEqual(schedule.mount.querySelectorAll("[data-row-key]").length, 5);
+  var lines = schedule.others.querySelectorAll("li");
+  assert.deepStrictEqual(lines.map(function (line) { return line.querySelectorAll("button").length; }), [0, 1]);
+  assert.match(lines[0].querySelector("span").textContent, /^Riser: Its record/);
+});
+
+test("the bar survives an unknown stored role and shows the tool's values after a refused or invalid change",
+  function () {
+    var o = setup(), bar = o.view(PIPING).bar;
+    o.state.sections[PREFIX + "pipes.selected"].value.edges[1].values = { pipe_type_id: fixtures.PT2, role: "riser" };
+    o.paint();
+    assert.strictEqual(bar.role.value, "trunk", "an unknown role leaves the bar's choice");
+    o.state.sections[PREFIX + "pipe_tool"].value = { active: true, pipe_type_id: fixtures.PT1, role: "trunk",
+      values: { multiplier: 1, demand_recirculation: false }, gesture_limit: 250 };
+    o.paint();
+    assert.strictEqual(bar.multiplier.value, "1");
+    bar.multiplier.value = "12"; bar.multiplier.listeners.change({});
+    var choose = named(o, PREFIX + "pipe_tool.choose")[0];
+    o.state.ui.viewResults[choose.payload.request_id] = { request_id: choose.payload.request_id, session: "session",
+      outcome: { status: "refused", code: "target.not_found", message: "That Pipe Type is gone." } };
+    o.paint();
+    assert.strictEqual(bar.multiplier.value, "1", "the bar shows what the tool still assigns");
+    bar.multiplier.value = "0"; bar.multiplier.listeners.change({});
+    assert.strictEqual(named(o, PREFIX + "pipe_tool.choose").length, 1, "an invalid value is not sent");
+    assert.match(o.notices[o.notices.length - 1].message, /keeps its last values/);
+    assert.strictEqual(bar.multiplier.value, "1");
+  });
+
+test("a recirculation draft keeps the unit it was typed in through a unit switch", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  change(bar.type, fixtures.PT1);
+  change(bar.role, "recirculation");
+  o.modules.unit_preferences.set("unit_system", "IP"); o.paint();
+  bar.temperature.input.value = "131"; bar.temperature.input.listeners.input({});
+  o.modules.unit_preferences.set("unit_system", "SI"); o.paint();
+  press(bar.assign);
+  var sent = named(o, PREFIX + "pipes.assign")[0].payload.params;
+  assert.ok(Math.abs(sent.water_temp_c - 55) < 1e-9, String(sent.water_temp_c));
+});

@@ -257,7 +257,7 @@ module PhComposer
 
       # The armed type's row as `pipe_types.list` reads it, or nil when it is gone or unreadable.
       def read_type(id)
-        result = API.query(:context => context, :name => TYPES, :params => { "ids" => [id] })
+        result = API.query(:context => context, :name => TYPES, :params => { "ids" => [id], "fields" => ["values"] })
         raise CodedError.new(result.fetch("code"), result.fetch("message")) unless result.fetch("status") == "completed"
 
         result.dig("value", "records").first

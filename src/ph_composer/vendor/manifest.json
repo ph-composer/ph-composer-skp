@@ -261,19 +261,19 @@
       "sha256": "37ba2034b7031e4bae11905eb3ca063da8c88ed7ae3dc732c6c360c150c2fe33"
     },
     "html/features/piping/assign_bar.js": {
-      "bytes": 14750,
+      "bytes": 15367,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "876c9718cb8a861ecdc2332c96b22daeb9fc7f40fa30835f12227b2526b6210b"
+      "sha256": "5e37efd067d592856a22efd14f4ac9c8bc08aadd8c0608803c79d08bd2635f42"
     },
     "html/features/piping/groups.js": {
-      "bytes": 6967,
+      "bytes": 6997,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a9ca8ce07b10262d301e6c5c7556145da5a44a0b75b5c2f8c2fd9723c1404a40"
+      "sha256": "b7bc9bfcb2f5ea67cdf7655f0ecc875e823c187d6f97309166b2636932cfd263"
     },
     "html/features/piping/pipe_tool.js": {
-      "bytes": 3164,
+      "bytes": 3279,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "36001a7a0331af5796e58290e8a867449321e4db62e6720f940bd9b1c1e1ff78"
+      "sha256": "4067a5def0ba073a1b8f59da68849a141ada8f63290b0c76ca5a876c27415a9b"
     },
     "html/features/piping/pipe_types.js": {
       "bytes": 6781,
@@ -286,19 +286,19 @@
       "sha256": "15272a999d3c3c75b477b9a489866add1ac416ef8459d852d91d206bbf9932dd"
     },
     "html/features/piping/schedule.js": {
-      "bytes": 15453,
+      "bytes": 16472,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1c1b5fb492e5449d9cd7695bc3641f5ea7857ef92c92f8e2d76ec8af9f47bab0"
+      "sha256": "e0ea97f66c567eba23234ad5342acd42cbf8c1005425d3450007c50523979c93"
     },
     "html/features/piping/section.js": {
-      "bytes": 3157,
+      "bytes": 3171,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "0c898c9f165e028b2c26bb1d46008b509fb9f2cd4d94097e3180f2f40b12325a"
+      "sha256": "94717ba8a43ff9bc5e9113b6378557fcbde58791748ad231ab3a9857a577707c"
     },
     "html/features/piping/shared.js": {
-      "bytes": 3376,
+      "bytes": 3373,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b01c21515a8d09529cdec0c0a63e36d0e999bbd892b04447d5164a36e0eebe47"
+      "sha256": "f51426f1602e62512e28354c3152d32da8b0f2057f2c1851a852cbf987623f2f"
     },
     "html/features/piping/systems_columns.js": {
       "bytes": 2504,

@@ -77,6 +77,25 @@ class PipingColourModeTest < PhComposerTestCase
     assert_equal @trunk + @loop, @model.selection.to_a
   end
 
+  # Two placements of one wrapper share the Piping group's storage: each draws at its own place, and while an edit
+  # context is open, whose rebased transforms could place one at the other's, neither draws.
+  def test_shared_storage_draws_once_a_placement_and_is_withheld_while_a_context_is_open
+    @vertices = {}
+    group = Sketchup::Group.new(500, Sketchup::Entities.new(line("branch", @copper, [[0, 0, 0], [3, 0, 0]])))
+    P::Group::STORE.write(group, P::Group.new_record("ppg_PG1000000001", @hws))
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([group]))
+    wrappers = [0, 10].map do |x|
+      Sketchup::ComponentInstance.new(800 + x, definition,
+                                      :transformation => Geom::Transformation.translation([x * INCHES, 0, 0]))
+    end
+    wrappers.each { |wrapper| @model.entities << wrapper }
+    assert_equal [2], activate(P::ColourModes::BY_ROLE).rows.map(&:count)
+    @model.active_path = [wrappers.first]
+    assert_empty activate(P::ColourModes::BY_ROLE).rows
+  ensure
+    @model.active_path = nil
+  end
+
   def test_turning_a_mode_on_and_off_writes_nothing
     the_case
     before = [@model.operations.length, @session.revision, STORE.read(@branch.first)]

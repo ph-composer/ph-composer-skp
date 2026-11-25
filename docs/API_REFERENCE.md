@@ -31804,7 +31804,7 @@ Result:
           }
         }
       },
-      "description": "The first 50 group and pipe records that cannot be read; not counted, and each blocks export."
+      "description": "Every unreadable group and pipe record."
     },
     "unreadable_total": {
       "type": "integer",

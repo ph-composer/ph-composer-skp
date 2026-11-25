@@ -76,7 +76,7 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, equipment, ho
   Groups.prototype.render = function (state) {
     var self = this, outcome = this.links.consume(state);
     this.state = state;
-    if (outcome && outcome.status !== "completed") {
+    if (outcome && outcome.status === "refused") {
       panel.notify(snapshot.message(outcome, "The Piping group was not changed."), "warning");
     }
     var rows = this.read.groupRows || [], systems = systemRows(state);
@@ -94,12 +94,13 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, equipment, ho
   };
   Groups.prototype.cell = function (td, group, name, choices) {
     var self = this;
-    if (name === "group_name") { td.textContent = group.name || "Piping group"; return true; }
+    if (name === "group_name") { td.textContent = shared.groupLabel(group.name, group.path); return true; }
     if (name === "system") {
       var current = (group.values || {}).hot_water_system_id || "";
       var listed = choices.some(function (choice) { return choice.value === current; }) ? choices :
         choices.concat([{ value: current, label: "Missing Hot Water System" }]);
-      var select = equipment.choiceCell(td, { choices: listed, value: current, label: (group.name || "Piping group") +
+      var select = equipment.choiceCell(td, { choices: listed, value: current, label: shared.groupLabel(group.name,
+        group.path) +
         " Hot Water System", disabled: this.links.busy() || !group.reference || Boolean(group.write_refusal),
       choose: function (chosen) { self.link(group, chosen); } });
       ui.tooltip(select, group.write_refusal ? group.write_refusal.message : "");

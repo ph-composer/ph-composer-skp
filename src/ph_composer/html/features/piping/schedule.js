@@ -32,29 +32,37 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
   }
   function field(run, name) {
     if (name === "system") return run.hot_water_system_name || "No Hot Water System";
-    if (name === "group") return run.group.name || "Piping group";
+    if (name === "group") return shared.groupLabel(run.group.name, run.group.group_path);
     if (name === "role") return shared.roleLabel(run.role);
     if (name === "values") return roleValues(run);
     return run[name];
   }
-  /* The runs in schedule order with each trunk's branches and each branch's twigs moved beneath it, with depth. */
+  /* The runs in schedule order with each trunk's branches and each branch's twigs moved beneath it, with depth. Two
+     runs may share a derived identifier (two placements of one group), so each row is keyed by its place in the read;
+     a child goes under the first run bearing its parent's identifier. */
   function treeOrder(runs) {
-    var children = Object.create(null), placed = Object.create(null), ordered = [];
-    runs.forEach(function (run) { if (run.parent) (children[run.parent] = children[run.parent] || []).push(run); });
+    var children = Object.create(null), placed = Object.create(null), first = Object.create(null), ordered = [];
+    var keyed = runs.map(function (run, index) { return Object.assign({ key: run.identifier + "#" + index }, run); });
+    keyed.forEach(function (run) { if (!first[run.identifier]) first[run.identifier] = run.key; });
+    keyed.forEach(function (run) {
+      var parent = run.parent && first[run.parent];
+      if (parent) (children[parent] = children[parent] || []).push(run);
+    });
     function place(run, depth) {
-      if (placed[run.identifier]) return;
-      placed[run.identifier] = true;
+      if (placed[run.key]) return;
+      placed[run.key] = true;
       ordered.push(Object.assign({ order: ordered.length, depth: depth }, run));
-      (children[run.identifier] || []).forEach(function (child) { place(child, depth + 1); });
+      (children[run.key] || []).forEach(function (child) { place(child, depth + 1); });
     }
-    runs.forEach(function (run) { if (!run.parent) place(run, 0); });
-    runs.forEach(function (run) { place(run, 0); });
+    keyed.forEach(function (run) { if (!(run.parent && first[run.parent])) place(run, 0); });
+    keyed.forEach(function (run) { place(run, 0); });
     return ordered;
   }
 
-  function Schedule(root, session, send, read, refresh) {
+  /* `notify(message, tone)` raises the panel's notice. */
+  function Schedule(root, session, send, read, refresh, notify) {
     var self = this;
-    this.read = read; this.runs = [];
+    this.read = read; this.runs = []; this.notify = notify;
     this.locate = request.channel(session, send, "piping-locate", "view.invoke");
     this.toggles = new colourBy.HeaderToggles({ role: shared.BY_ROLE, pipe_type_name: shared.BY_TYPE });
     this.controls = new viewControls.ViewControls({ label: "piping runs", placeholder: "Run, System or Pipe Type",
@@ -78,7 +86,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
       var target = event.target;
       if (!target || !target.closest || target.closest("button, input, select, a, .col-actions")) return;
       var row = target.closest("[data-row-key]"), key = row && row.getAttribute("data-row-key");
-      var run = self.runs.filter(function (entry) { return entry.identifier === key; })[0];
+      var run = self.runs.filter(function (entry) { return entry.key === key; })[0];
       if (run) self.sendLocate(run.edge_paths);
     });
     root.appendChild(this.mount);
@@ -97,21 +105,21 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
     root.appendChild(this.layer);
   }
   Schedule.prototype.guard = function () { return this.locate.busy() ? "Wait for Locate to finish." : null; };
-  /* Locate is an Undo step of its own and so a new revision, but changes no data: a current read stays current. */
+  /* Locate may open a group, an Undo step of its own and so a new revision, but changes no data: a read current when
+     it was sent takes the revision Locate answers with, and only that one. A refusal is a notice. */
   Schedule.prototype.sendLocate = function (paths) {
     if (this.disposed || this.locate.busy()) return;
-    var read = this.read, current = this.state && !read.stale(this.state);
+    var read = this.read, current = this.state && !read.stale(this.state) ? read.result : null;
     this.locate.run(shared.PREFIX + "runs.locate", { edge_paths: JSON.parse(JSON.stringify(paths)) }, {
-      onDone: function () { if (current) read.carryForward = true; } });
+      onDone: function (outcome) {
+        if (current && read.result === current && outcome.revision !== undefined) current.revision = outcome.revision;
+      } });
     this.paint();
   };
   Schedule.prototype.render = function (state, shown) {
     if (this.disposed) return;
-    this.locate.consume(state);
-    if (this.read.carryForward && this.read.result && this.read.result.revision !== state.revision) {
-      this.read.result.revision = state.revision;
-      this.read.carryForward = false;
-    }
+    var located = this.locate.consume(state);
+    if (located && located.status === "refused") this.notify(located.message, "warning");
     this.state = state;
     if (!shown) return;
     var value = this.read.value();
@@ -129,13 +137,13 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
       (this.read.stale(state) ? "Changed since read" : "");
     this.status.classList.toggle("piping-error", Boolean(this.read.error) && !this.read.busy());
     this.refresh.disabled = this.read.busy();
-    var projected = this.controls.project(this.runs, { id: function (run) { return run.identifier; },
+    var projected = this.controls.project(this.runs, { id: function (run) { return run.key; },
       value: field, search: function (run) {
         return [run.display_name, field(run, "system"), run.pipe_type_name || ""].join(" ");
       }, group: function (run, name) { return { label: String(field(run, name) || "None") }; },
       tie: function (a, b) { return a.order - b.order; } });
     var rows = projected.records.map(function (run) {
-      return { key: run.identifier, record: run, tier: "Run", depth: 0, parent: null };
+      return { key: run.key, record: run, tier: "Run", depth: 0, parent: null };
     });
     tables.table(this.mount, this.runs, { rows: rows, defaultWidths: WIDTHS,
       columns: [["actions", "Actions"]].concat(COLUMNS.map(function (column) {
@@ -176,7 +184,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
   /* A run's findings behind one alert glyph, each with what to do and a Locate, in a bubble mounted outside the
      table so its scroller and sticky cells never clip it. */
   Schedule.prototype.findingsCell = function (td, run) {
-    var self = this, findings = run.findings || [], bubble = this.bubbles[run.identifier];
+    var self = this, findings = run.findings || [], bubble = this.bubbles[run.key];
     if (!findings.length) {
       if (td._findings) td._findings.hidden = true;
       if (bubble) bubble.close(false);
@@ -186,7 +194,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
       if (bubble) bubble.root.remove();
       var trigger = ui.iconButton("", "alert");
       trigger.classList.add("row-icon");
-      bubble = this.bubbles[run.identifier] = new ui.Bubble(trigger, "Findings", { detachedTrigger: true });
+      bubble = this.bubbles[run.key] = new ui.Bubble(trigger, "Findings", { detachedTrigger: true });
       bubble.root.classList.add("piping-findings");
       this.layer.appendChild(bubble.root);
       if (td._findings) td._findings.remove();
@@ -214,7 +222,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
   };
   Schedule.prototype.pruneBubbles = function () {
     var kept = Object.create(null);
-    this.runs.forEach(function (run) { kept[run.identifier] = true; });
+    this.runs.forEach(function (run) { kept[run.key] = true; });
     Object.keys(this.bubbles).forEach(function (key) {
       if (kept[key]) return;
       this.bubbles[key].close(false);
@@ -262,10 +270,15 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared,
     this.others.hidden = !items.length;
     if (!items.length) { this.others.replaceChildren(); return; }
     var list = ui.element("ul", "piping-other-findings");
+    // Locate selects pipes, so a Piping group's own record names its place instead.
+    var groups = this.read.groupRows || [];
     items.forEach(function (item) {
-      var line = ui.element("li");
-      line.appendChild(ui.element("span", "", item.message));
-      line.appendChild(ui.button("Locate", function () { self.sendLocate([item.path]); }));
+      var line = ui.element("li"), group = groups.filter(function (row) {
+        return row.path.join("/") === item.path.join("/");
+      })[0];
+      line.appendChild(ui.element("span", "", (group ? shared.groupLabel(group.name, group.path) + ": " : "") +
+        item.message));
+      if (!group) line.appendChild(ui.button("Locate", function () { self.sendLocate([item.path]); }));
       list.appendChild(line);
     });
     this.others.replaceChildren(ui.element("h2", "", "Not in the schedule (" + value.unreadable_total + ")"), list);

@@ -12,6 +12,9 @@ PhComposerUI.define("features/piping/shared", ["request", "snapshot"], function 
     return role ? role.label : value || "No role";
   }
 
+  /* A Piping group's name, or for an unnamed one its place in the Model, so two never read alike. */
+  function groupLabel(name, path) { return name || "Piping group " + path.join("/"); }
+
   /* The schedule and the groups walk the Model, so they are read on request and never on a panel refresh
      (context/TECH_STACK.md, "Edge-owned assignments"): when the Piping pill opens and on Refresh. The last completed
      read stays with the revision it was read at, so the screen can say when the Model has changed since. */
@@ -20,9 +23,6 @@ PhComposerUI.define("features/piping/shared", ["request", "snapshot"], function 
     this.groups = request.channel(session, send, "piping-groups", "query.invoke");
     this.result = null; this.groupRows = null;
     this.error = "";
-    // Set by a view command that changed the revision but no data (Locate), so the next snapshot's revision is
-    // adopted rather than marking the read stale.
-    this.carryForward = false;
   }
   Read.prototype.read = function () {
     if (this.busy()) return false;
@@ -37,7 +37,7 @@ PhComposerUI.define("features/piping/shared", ["request", "snapshot"], function 
     if (groups && groups.status === "completed") this.groupRows = groups.value.groups;
     if (outcome && outcome.status === "completed") {
       this.result = { value: outcome.value, revision: outcome.revision };
-      this.error = ""; this.carryForward = false;
+      this.error = "";
     } else if (outcome) this.error = snapshot.message(outcome, "The schedule could not be read.");
     if (groups && groups.status !== "completed") {
       this.error = snapshot.message(groups, "The Piping groups could not be read.");
@@ -53,5 +53,6 @@ PhComposerUI.define("features/piping/shared", ["request", "snapshot"], function 
 
   return { PREFIX: PREFIX, TYPES: PREFIX + "pipe_types", SELECTED: PREFIX + "pipes.selected",
     TOOL: PREFIX + "pipe_tool", SYSTEMS: PREFIX + "piping_systems", ROLES: ROLES, roleLabel: roleLabel,
+    groupLabel: groupLabel,
     BY_ROLE: { mode: PREFIX + "by_role" }, BY_TYPE: { mode: PREFIX + "by_type" }, Read: Read };
 });

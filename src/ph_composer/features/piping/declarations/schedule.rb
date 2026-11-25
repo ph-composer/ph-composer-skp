@@ -111,9 +111,11 @@ module PhComposer
       }, :optional => %w[systems types unreadable system_count type_count])
       ALL = "#{FEATURE_ID}.schedule.all".freeze
       WHOLE = %w[totals systems types unreadable unreadable_total].freeze
-      ALL_RESULT = Shapes.object(RESULT.fetch("properties").slice(*WHOLE)
-                                       .merge("runs" => Shapes.list(RUN).merge("description" => "Every run in " \
-                                                                                                "schedule order.")))
+      WHOLE_LISTS = {
+        "runs" => Shapes.list(RUN).merge("description" => "Every run in schedule order."),
+        "unreadable" => Shapes.list(UNREADABLE).merge("description" => "Every unreadable group and pipe record.")
+      }.freeze
+      ALL_RESULT = Shapes.object(RESULT.fetch("properties").slice(*WHOLE).merge(WHOLE_LISTS))
       DETAILS_PARAMS = Shapes.object({
         "part" => { "type" => "string", "enum" => SchedulePages::PARTS.keys,
                     "description" => "systems, types or unreadable: which of the schedule's lists to page." },

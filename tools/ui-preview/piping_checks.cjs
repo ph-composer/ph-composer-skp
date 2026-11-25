@@ -102,16 +102,16 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
 
   step("the schedule: branches under their trunk, a finding, totals, and a row that Locates");
   const schedule = pane.locator(".piping-schedule");
-  await schedule.locator("[data-row-key='pipe_preview0002']").waitFor();
+  await schedule.locator("[data-row-key='pipe_preview0002#1']").waitFor();
   const order = await schedule.locator("tbody tr[data-row-key]").evaluateAll(rows =>
     rows.map(row => row.getAttribute("data-row-key")));
-  assert.deepEqual(order.slice(0, 4), ["pipe_preview0001", "pipe_preview0002", "pipe_preview0003",
-    "pipe_preview0004"], "the trunk, its first branch and that branch's twigs");
+  assert.deepEqual(order.slice(0, 4), ["pipe_preview0001#0", "pipe_preview0002#1", "pipe_preview0003#2",
+    "pipe_preview0004#3"], "the trunk, its first branch and that branch's twigs");
   await schedule.getByRole("button", { name: "1 finding for Branch 3" }).click();
   await page.locator(".piping-findings").getByText(/reaches no trunk/).waitFor();
   await page.keyboard.press("Escape");
   await pane.locator(".piping-totals").getByText("By Hot Water System").waitFor();
-  await schedule.locator("[data-row-key='pipe_preview0001'] .col-length_m").click();
+  await schedule.locator("[data-row-key='pipe_preview0001#0'] .col-length_m").click();
   await page.waitForFunction(() => Array.isArray(window.previewHost.locatedPipes));
   await page.screenshot({ path: path.join(output, "piping.png"), fullPage: true });
 
@@ -130,6 +130,23 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
       assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
         `${pill} never scrolls the pane sideways at ${width} x ${height}`);
       await page.screenshot({ path: path.join(output, `${pill.toLowerCase().replace(" ", "-")}-${width}x${height}.png`) });
+      if (pill !== "Piping") continue;
+      // A run's findings bubble fits the panel, clear of the table's header, with its Locate in reach.
+      const trigger = schedule.getByRole("button", { name: "1 finding for Branch 3" });
+      await trigger.scrollIntoViewIfNeeded();
+      // A scroll closes an open bubble, so the click waits for the scroll to settle.
+      await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+      await trigger.click();
+      const bubble = page.locator(".piping-findings .piping-finding");
+      await bubble.getByRole("button", { name: "Locate" }).waitFor();
+      const box = await bubble.boundingBox(), head = await schedule.locator("thead").boundingBox();
+      assert.ok(box.x >= 0 && box.x + box.width <= width, `the findings bubble fits ${width} px`);
+      assert.ok(box.y >= head.y + head.height - 1 || box.y + box.height <= head.y + 1,
+        `the findings bubble clears the header at ${width} x ${height}`);
+      const locate = await bubble.getByRole("button", { name: "Locate" }).boundingBox();
+      assert.ok(locate.x >= 0 && locate.x + locate.width <= width && locate.y + locate.height <= height,
+        `the bubble's Locate is in reach at ${width} x ${height}`);
+      await page.keyboard.press("Escape");
     }
   }
 });

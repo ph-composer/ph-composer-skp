@@ -63,7 +63,11 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
     this.clear = ui.button("Clear", function () { self.submit("clear"); });
     this.clear.setAttribute("aria-label", "Clear pipe from selected lines");
     this.reason = ui.element("span", "piping-assign-reason");
-    this.tool = new pipeTool.PipeToolControls(session, send, function (reason) { notify(reason, "warning"); });
+    this.tool = new pipeTool.PipeToolControls(session, send, function (reason) {
+      // The tool keeps what it was armed with, so the bar shows that again.
+      self.armed = null;
+      notify(reason, "warning");
+    });
     this.tool.arm.addEventListener("click", function () {
       if (self.tool.active()) self.tool.stopTool(); else self.armTool();
     });
@@ -130,9 +134,16 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
   };
   AssignBar.prototype.armTool = function () {
     if (this.disposed) return;
-    var reason = this.guard();
-    if (reason) { this.notify(reason, "warning"); return; }
-    if (!this.armBlocked()) this.tool.choose(this.params());
+    var reason = this.guard() || this.armBlocked();
+    if (reason && this.tool.active()) {
+      // A change the tool cannot take leaves it assigning what it was armed with, which the bar shows again.
+      this.notify("The pipe tool keeps its last values: " + reason, "warning");
+      this.armed = null;
+      this.render(this.state, this.typeRows);
+      return;
+    }
+    if (reason) { if (this.guard()) this.notify(reason, "warning"); return; }
+    this.tool.choose(this.params());
     this.paint();
   };
   AssignBar.prototype.submit = function (action) {
@@ -159,6 +170,7 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
   /* `types` are the Model's Pipe Type rows. */
   AssignBar.prototype.render = function (state, types) {
     if (this.disposed) return;
+    this.state = state; this.typeRows = types;
     var section = snapshot.section(state, shared.SELECTED), value = snapshot.value(state, shared.SELECTED);
     this.requests.consume(state);
     this.tool.render(state);
@@ -201,7 +213,8 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
   /* Takes the given choices; an undefined one leaves the bar's own. */
   AssignBar.prototype.apply = function (chosen) {
     if (chosen.pipe_type_id !== undefined) this.chosen = chosen.pipe_type_id;
-    if (chosen.role !== undefined) this.role.value = chosen.role;
+    // A stored role this version does not know is left for Assign or Clear to replace.
+    if (chosen.role !== undefined && ROLE_KEYS[chosen.role]) this.role.value = chosen.role;
     if (chosen.multiplier !== undefined && document.activeElement !== this.multiplier) {
       this.multiplier.value = String(chosen.multiplier);
     }
@@ -216,7 +229,7 @@ function (request, snapshot, ui, fields, unitFields, shared, pipeTool) {
       plural(total, "line") + " selected" + (writable < total ? ", " + writable + " assignable" : "");
     if (this.count.textContent !== text) this.count.textContent = text;
     Object.keys(this.fields).forEach(function (key) {
-      self.fields[key].hidden = ROLE_KEYS[role].indexOf(key) < 0;
+      self.fields[key].hidden = (ROLE_KEYS[role] || []).indexOf(key) < 0;
     });
     var blocked = this.blocked();
     var reason = blocked || (writable < total ? plural(total - writable, "selected line") + " will be left as " +
