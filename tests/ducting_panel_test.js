@@ -149,6 +149,26 @@ test("the Ducting pill says which ducts are drawn, and Assign sends the type, di
     })), [[600, 602]], "Clear reaches only the assigned line");
   });
 
+test("an unsent quantity outlives a change to the same lines and a Clear, and carries to the next selection",
+  function () {
+    var o = setup(), bar = o.view(DUCTING).bar, edges = o.state.sections[PREFIX + "ducts.selected"].value.edges;
+    bar.quantity.value = "7"; bar.quantity.listeners.input({});
+    edges[1].values = { duct_type_id: fixtures.DT1, direction: "exhaust_air", quantity: 2 };
+    o.paint();
+    press(bar.clear);
+    act(o, named(o, PREFIX + "ducts.clear")[0], { status: "completed", value: { edge_ids: [] } });
+    edges[1].values = {};
+    o.paint();
+    assert.strictEqual(bar.quantity.value, "7");
+    edges.splice(0, 1);
+    edges[0].values = { duct_type_id: fixtures.DT2, direction: "exhaust_air", quantity: 3 };
+    o.paint();
+    assert.strictEqual(bar.quantity.value, "7", "the quantity typed for the lines before carries to these");
+    edges[0].path = [600, 603];
+    o.paint();
+    assert.strictEqual(bar.quantity.value, "3", "and only to them: the next selection shows its own");
+  });
+
 test("opening Ducting reads once; a row Locates, totals apply the quantity, and Refresh reads again", function () {
   var o = setup();
   assert.strictEqual(named(o, PREFIX + "schedule.all").length, 1);

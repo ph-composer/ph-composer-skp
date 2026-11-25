@@ -53,8 +53,10 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
       label + " must be at least " + min + suffix + ".");
     if (max !== undefined && value > max) return errorResult("out_of_range",
       label + " must be at most " + max + suffix + ".");
-    // Rounding in the canonical unit removes floating-point noise before a value reaches a command.
-    return { ok: true, value: Math.round(value * 1000000000) / 1000000000 };
+    // Rounding in the canonical unit removes floating-point noise before a value reaches a command. A value too
+    // large to scale has no noise at that place and is kept as it is, never turned into infinity.
+    var rounded = Math.round(value * 1000000000) / 1000000000;
+    return { ok: true, value: isFinite(rounded) ? rounded : value };
   }
 
   function parseValue(trimmed, field, definition, settings) {
@@ -193,6 +195,20 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
 
   function format(value, field, profile, options) { return render(value, field, profile, options, false); }
   function formatEdit(value, field, profile, options) { return render(value, field, profile, options, true); }
+  /* Edit text that reads back as exactly `value` in `settings`, with no more digits than that takes: what a copy
+     puts on the clipboard and a refused draft gives back, where the display's rounding would change the value. A
+     value no text reads back exactly (stored past the parser's nanounit) takes fifteen decimals, and a length in a
+     dimension format takes that format's edit digits. */
+  function formatExact(value, field, settings, options) {
+    var resolved = profile(field, settings), context = parseContext(field, resolved), text, read;
+    if (value === null || value === undefined || value === "") return "";
+    for (var digits = 0; digits <= 15; digits += 1) {
+      text = render(value, field, resolved, Object.assign({}, options, { precision: digits }), true);
+      read = parse(text, field, context);
+      if (read.ok && read.value === Number(value)) return text;
+    }
+    return text;
+  }
 
   /* Convert the preference-store shape into the stateless formatter/parser profile. A field that names
      a dimension scope (`field.scope`) takes that scope's remembered format, or the system's default format
@@ -272,6 +288,7 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     parse: parse,
     format: format,
     formatEdit: formatEdit,
+    formatExact: formatExact,
     profile: profile,
     displayUnit: displayUnit,
     parseContext: parseContext,

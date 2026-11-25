@@ -29,10 +29,11 @@ function (ui, fields, unitFields, lineBars, shared, pipeTool) {
     this.demand = ui.element("input");
     this.demand.type = "checkbox";
     this.demand.setAttribute("aria-label", "Demand recirculation");
+    // Escape puts a field back at its value, so Assign and its reason follow it.
     this.temperature = new unitFields.UnitField({ field: TEMPERATURE, value: DEFAULTS.water_temp_c,
-      commitOnBlur: true, onCommit: function () { self.changed(); } });
+      commitOnBlur: true, onCommit: function () { self.changed(); }, onCancel: function () { self.paint(); } });
     this.hours = new unitFields.UnitField({ field: HOURS, value: DEFAULTS.daily_period, commitOnBlur: true,
-      onCommit: function () { self.changed(); } });
+      onCommit: function () { self.changed(); }, onCancel: function () { self.paint(); } });
     this.fields = { multiplier: labelled("Multiplier", this.multiplier),
       demand_recirculation: labelled("Demand recirculation", this.demand),
       water_temp_c: labelled("Water temperature", this.temperature.root),
@@ -54,6 +55,12 @@ function (ui, fields, unitFields, lineBars, shared, pipeTool) {
       input.addEventListener("input", function () { self.paint(); });
     });
     this.multiplier.addEventListener("change", function () { if (self.tool.active()) self.armTool(); });
+    // A tool armed while the field had focus shows its multiplier once the field is left unchanged.
+    this.multiplier.addEventListener("blur", function () {
+      if (self.state && self.tool.active() && self.armed !== JSON.stringify(self.tool.state)) {
+        self.render(self.state, self.typeRows);
+      }
+    });
     this.multiplier.addEventListener("keydown", function (event) {
       if (event.key !== "Enter") return;
       event.preventDefault();
@@ -125,28 +132,34 @@ function (ui, fields, unitFields, lineBars, shared, pipeTool) {
         multiplier: this.common("multiplier"), demand_recirculation: this.common("demand_recirculation"),
         water_temp_c: this.common("water_temp_c"), daily_period: this.common("daily_period") });
     }
-    // A running tool shows what it assigns, unless a change to it is on its way.
-    var armed = JSON.stringify(this.tool.state);
+    // A running tool shows what it assigns, unless a change to it is on its way. It counts as shown once every
+    // field shows it: a field with focus keeps the user's text until they leave it.
+    var armed = JSON.stringify(this.tool.state), role = this.tool.state.role;
     if (this.tool.active() && !this.tool.busy() && this.armed !== armed) {
-      this.armed = armed;
-      // A value the tool was armed without takes its default on a new pipe, so the bar shows the default.
-      this.apply(Object.assign({}, DEFAULTS, { pipe_type_id: this.tool.state.pipe_type_id,
-        role: this.tool.state.role }, this.tool.state.values));
+      // A value of its role the tool was armed without takes its default on a new pipe, so the bar shows the
+      // default; another role's values are left as the user set them.
+      var defaults = {};
+      (ROLE_KEYS[role] || []).forEach(function (key) { defaults[key] = DEFAULTS[key]; });
+      if (this.apply(Object.assign(defaults, { pipe_type_id: this.tool.state.pipe_type_id, role: role },
+        this.tool.state.values))) this.armed = armed;
     }
     this.paintTypes();
     this.paint();
   };
-  /* Takes the given choices; an undefined one leaves the bar's own. */
+  /* Takes the given choices; an undefined one leaves the bar's own. Answers false when Multiplier has focus and
+     so still shows another value. */
   AssignBar.prototype.apply = function (chosen) {
+    var multiplier = chosen.multiplier === undefined ? undefined : String(chosen.multiplier);
+    var held = multiplier !== undefined && document.activeElement === this.multiplier &&
+      this.multiplier.value !== multiplier;
     if (chosen.pipe_type_id !== undefined) this.chosen = chosen.pipe_type_id;
     // A stored role this version does not know is left for Assign or Clear to replace.
     if (chosen.role !== undefined && ROLE_KEYS[chosen.role]) this.role.value = chosen.role;
-    if (chosen.multiplier !== undefined && document.activeElement !== this.multiplier) {
-      this.multiplier.value = String(chosen.multiplier);
-    }
+    if (multiplier !== undefined && !held) this.multiplier.value = multiplier;
     if (chosen.demand_recirculation !== undefined) this.demand.checked = chosen.demand_recirculation;
     if (chosen.water_temp_c !== undefined) this.temperature.setValue(chosen.water_temp_c);
     if (chosen.daily_period !== undefined) this.hours.setValue(chosen.daily_period);
+    return !held;
   };
   AssignBar.prototype.paint = function () {
     var self = this, busy = this.requests.busy() || this.tool.busy(), role = this.role.value;

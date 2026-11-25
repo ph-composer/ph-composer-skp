@@ -88,6 +88,11 @@ PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", 
       var quantity = this.quantities[field];
       return quantity ? units.formatEdit(value, quantity, this.profile(field)) : display(value);
     };
+    /* A copied cell's text: a quantity keeps every digit it stores, so pasting it back changes nothing. */
+    Controller.prototype.copyText = function (field, value) {
+      var quantity = this.quantities[field];
+      return quantity ? units.formatExact(value, quantity, this.profile(field)) : this.display(field, value);
+    };
     Controller.prototype.normalize = function (field, rawValue, options) {
       if (options && options.canonical) return rawValue;
       var text = rawValue === null || rawValue === undefined ? "" : String(rawValue).trim();

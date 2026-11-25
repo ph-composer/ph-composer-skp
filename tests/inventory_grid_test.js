@@ -21,6 +21,7 @@ function owner() {
   var edits = { enabled: true, pending: null, queue: [], cells: {},
     fieldAttribute: "data-test-field", fields: ["width", "height"],
     display: function (field, value) { return String(value); },
+    copyText: function (field, value) { return String(value); },
     normalize: function (field, value) { return Number(value); },
     validate: function () { return ""; }, cancel: function () {} };
   var rows = [{ key: "a", record: { id: "rec_a" } }, { key: "b", record: { id: "rec_b" } }];

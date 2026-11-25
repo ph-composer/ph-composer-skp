@@ -155,6 +155,8 @@ function (snapshot, ui, request) {
   Picker.prototype.paint = function () {
     var self = this, held = this.held;
     if (!held) return;
+    // A change to a Zone that is gone lapses before any box is drawn: its replacement shows as the Model has it.
+    this.changes();
     var slot = this.options.slot, record = held.record, words = held.find.value.trim().toLowerCase();
     var rows = zoneRows(held.state).filter(function (row) {
       return !words || String(row.name || "").toLowerCase().indexOf(words) >= 0;

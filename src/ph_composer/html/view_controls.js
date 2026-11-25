@@ -32,7 +32,10 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
      top-level record and `config.rowMatch(row, filters)` for a row beneath one.
 
      `config.queryMatch(row, query, record)`, when given, says whether a row beneath the top-level `record`
-     the text filter matched still shows. */
+     the text filter matched still shows.
+
+     `config.groupKey(record, field)`, when given, tells two groups apart that share the value `config.value`
+     sorts by (two groups of one name, by where each is stored). */
   function ViewControls(options, changed) {
     var self = this, filtered = "";
     this.changed = changed;
@@ -155,7 +158,8 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
     function id(record) { return config.id ? config.id(record) : record.id; }
     function group(record) {
       var raw = config.value(record, groupField), info = config.group(record, groupField);
-      return { key: JSON.stringify([groupField, raw]), label: info.label, tone: info.tone || "neutral",
+      var identity = config.groupKey ? config.groupKey(record, groupField) : raw;
+      return { key: JSON.stringify([groupField, identity]), label: info.label, tone: info.tone || "neutral",
         blank: blank(raw) };
     }
     var byId = Object.create(null), matches = Object.create(null), retained = Object.create(null),

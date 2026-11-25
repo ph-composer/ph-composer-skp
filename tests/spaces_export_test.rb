@@ -20,13 +20,17 @@ class SpacesExportTest < PhComposerTestCase
     @context = API.connect(:session_id => @session.id)
   end
 
-  def records
+  def reader
     snapshot = PhComposer::Export::GeometrySnapshot.capture(@model, :revision => 0)
     catalog = PhComposer::Registry.current.catalog
-    reader = PhComposer::Export::SnapshotReader.new(
+    PhComposer::Export::SnapshotReader.new(
       PhComposer::Export::RecordReader.new(PhComposer::Records::Engine.new(@model, catalog), catalog), snapshot
     )
-    reader.within(X::SECTION) { X.records(reader) }
+  end
+
+  def records
+    read = reader
+    read.within(X::SECTION) { X.records(read) }
   end
 
   def test_each_space_leaves_with_its_zone_its_stored_airflows_and_its_volumes
@@ -230,6 +234,28 @@ class SpacesExportTest < PhComposerTestCase
     assert_equal [["spc_FFFFFFFFFFFF", false]], offset.map { |row| row.values_at("object_id", "blocks_export") }
     assert_equal({ "spc_FFFFFFFFFFFF" => true, "spc_LLLLLLLLLLLL" => false },
                  records.to_h { |row| [row["id"], row["offset_from_zone"]] })
+  end
+
+  # The Zone totals measure only Spaces in exported Zones: a Space beside its Zone naming one in no Building Segment
+  # leaves with it before its Volumes are measured, so a Floor Segment there that cannot be measured stops nothing.
+  def test_zone_totals_leave_out_a_space_naming_a_zone_in_no_building_segment_before_measuring_it
+    @model.entities << zone_group(1000, "A", [space_group(1100, space_record("L", :number => "101"),
+                                                          [volume_group(1110, volume_record("L"),
+                                                                        [floor_face(1111, rectangle(0, 0, 2, 3),
+                                                                                    segment_record("L"))])])])
+    left_out = zone_group(2000, "O", [])
+    record = PhComposer::Zones::ZONE_STORE.read(left_out)
+    PhComposer::Zones::ZONE_STORE.write(left_out, record.merge("schema_version" => 3, "building_segment_id" => nil))
+    @model.entities << left_out
+    unmeasurable = segment_record("B").reject { |key, _| key == "weighting_factor" }
+    beside = space_group(3000, space_record("B", :number => "201").merge("zone_id" => "zon_OOOOOOOOOOOO"),
+                         [volume_group(3010, volume_record("B"),
+                                       [floor_face(3011, rectangle(10, 0, 1, 1), unmeasurable)])])
+    @model.entities << beside
+    read = reader
+    totals = read.within(X::SECTION) { X.zone_totals(read) }
+    assert_equal [["zon_AAAAAAAAAAAA", 1, 6.0]],
+                 totals.map { |row| row.values_at("zone_id", "space_count", "floor_area_m2") }
   end
 
   # A Face that has left the Zone's envelope sets none of its extents, live or in the snapshot.

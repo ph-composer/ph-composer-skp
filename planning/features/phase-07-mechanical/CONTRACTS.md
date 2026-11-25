@@ -232,7 +232,7 @@ explicit null stages the slot emptied, each one Undo step, as Programs' deletes 
 one (section 8). The engine does the scan; the move is this feature's code, as it is Programs': read the Zones
 through `ph_composer.zones.all`, stage each changed payload through `stage_extension`, and hand the returned
 `zone_entries` to `propose_delete` as a `Records::ReferencePlan`. A list that already holds the replacement keeps it
-once, since the validator refuses an id twice. Like Programs', the move reads only a payload whose status is `understood`; one that is invalid, outdated or unsupported is left as stored, and the engine's incoming check then refuses the delete. The move reads the stored payloads; a delete that writes the same payload earlier in its own proposal builds the move from that write instead.
+once, since the validator refuses an id twice. Like Programs', the move reads only a payload whose status is `understood`; any other is left as stored. The engine's incoming check then refuses the delete as `copy.rule_missing` for an unreadable envelope or an invalid payload, and scans an outdated, unmigratable, newer-version or uninstalled one through its stored reference declarations, refusing as `reference.in_use` only while it still names the item ([context/CONTRACTS.md](../../../context/CONTRACTS.md), "A Zone payload that names records"). The move reads the stored payloads; a delete that writes the same payload earlier in its own proposal builds the move from that write instead.
 
 **A copied Zone (D4-04).** The payload is part of the Zone record and travels with a native copy,
 so the copy keeps what serves it. The feature declares no transition contributor and re-issues

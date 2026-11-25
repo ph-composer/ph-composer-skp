@@ -10,7 +10,8 @@
    unit field applies on Enter or leaving, a
    choice when it changes, each as its own guarded update (`expected_values` the value it showed), one Undo step; a
    blank removes the value. Escape restores a unit field, and Escape again closes. A refusal stays in the bubble
-   beside its field until the next edit.
+   beside its field until the next edit, through a repaint or a unit switch; a refused unit field keeps the text
+   typed, still guarded by the value it was sent against. One value is out at a time.
 
    new OptionalValues(session, send, { action, family, title, unset, fields: [{ key, label, field | choices, parse,
    placeholder, defaultValue }], notify }): `title` heads the bubble before the record's name ("Optional values"),
@@ -95,15 +96,18 @@ function (ui, unitFields, units, preferences, request, snapshot) {
   };
   OptionalValues.prototype.open = function (record, trigger, layer) {
     if (this.held && this.held.record.id === record.id) { this.close(true); return; }
-    this.close(false);
+    if (!this.close(false)) return;
     var self = this, bubble = new ui.Bubble(trigger, (this.options.title || "Optional values") + " of " +
       record.values.name,
       { detachedTrigger: true, ownTrigger: true });
     bubble.root.classList.add("mech-optional-values");
     var originalClose = bubble.close;
     // Closing applies a field's draft, as leaving it does; an invalid one, or the write it sends, keeps it open.
+    // While a value is out nothing else is sent: the bubble waits for its answer.
     bubble.close = function (focus) {
-      if (self.held) self.held.fields.forEach(function (entry) { if (entry.unit.editing) entry.unit.commit(); });
+      if (self.held && !self.busy()) {
+        self.held.fields.forEach(function (entry) { if (entry.unit.editing) entry.unit.commit(); });
+      }
       // A draft the close just sent closes the bubble once its write lands; an invalid one keeps it open.
       if (self.busy() && self.held) self.held.closing = focus !== false;
       if (self.guard()) return false;
@@ -114,7 +118,7 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     var fields = this.options.fields.map(function (entry) {
       var label = ui.element("label", "mech-optional-field"), held = { key: entry.key, entry: entry };
       if (entry.choices) {
-        held.unit = new ChoiceField(entry, record, function (value) { held.refused = false; self.apply(held, value); });
+        held.unit = new ChoiceField(entry, record, function (value) { held.refusal = null; self.apply(held, value); });
         held.unit.input.setAttribute("aria-label", entry.label);
         label.appendChild(ui.element("span", "", entry.label));
         label.appendChild(held.unit.root);
@@ -122,8 +126,8 @@ function (ui, unitFields, units, preferences, request, snapshot) {
         return held;
       }
       held.unit = new unitFields.UnitField({ field: entry.field, value: record.values[entry.key], commitOnBlur: true,
-        onCommit: function (value) { self.apply(held, value); },
-        onCancel: function () { held.base = undefined; held.refused = false; } });
+        onCommit: function (value, draft) { self.apply(held, value, draft); },
+        onCancel: function () { held.base = undefined; held.refusal = null; } });
       held.unit.input.setAttribute("aria-label", entry.label);
       if (entry.placeholder) {
         held.hint = ui.element("span", "", entry.placeholder(record));
@@ -137,7 +141,7 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       // The value the draft started from is its guard, whatever a snapshot shows meanwhile. A draft that ends
       // without a write (typed back, Escape) drops it, and typing clears a refusal shown on the field.
       held.unit.input.addEventListener("input", function () {
-        held.refused = false;
+        held.refusal = null;
         if (held.base === undefined && self.held) held.base = stored(self.held.record, entry.key);
       });
       function ended() { if (!held.unit.editing && self.pending !== held) held.base = undefined; }
@@ -151,6 +155,8 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     bubble.content.replaceChildren.apply(bubble.content, fields.map(function (held) { return held.label; }));
     (layer || document.body).appendChild(bubble.root);
     this.held = { record: record, bubble: bubble, fields: fields };
+    // A unit switch repaints each field, which clears its message, so the refusals are shown again after it.
+    this.held.unsubscribe = preferences.subscribe(function () { self.paint(); });
     bubble.open();
   };
   OptionalValues.prototype.close = function (focus) {
@@ -161,19 +167,32 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     var held = this.held;
     this.held = null;
     if (!held) return;
+    held.unsubscribe();
     held.fields.forEach(function (entry) { entry.unit.dispose(); });
     if (held.bubble.root.parentNode) held.bubble.root.parentNode.removeChild(held.bubble.root);
   };
-  /* One value, guarded by what the field showed before the edit. */
-  OptionalValues.prototype.apply = function (held, value) {
+  /* One value, guarded by what the field showed before the edit; `draft` is what a unit field had typed. A value
+     committed while another is out is not sent: it stays a draft. */
+  OptionalValues.prototype.apply = function (held, value, draft) {
     var record = this.held.record, values = {}, expected = {};
     values[held.key] = value;
     expected[held.key] = held.base !== undefined ? held.base : stored(record, held.key);
-    held.base = undefined;
+    if (this.busy()) { this.redraft(held, draft, expected[held.key]); return; }
+    held.base = undefined; held.refusal = null;
+    held.sent = { guard: expected[held.key], draft: draft };
     this.pending = held;
     this.requests.run(this.options.action, { id: record.id, values: values, expected_values: expected });
     this.paint();
     if (this.options.changed) this.options.changed();
+  };
+  /* A unit field's draft back over the Model's value, guarded by `guard`; a choice holds no draft, so it shows the
+     Model's value. */
+  OptionalValues.prototype.redraft = function (held, draft, guard) {
+    var record = this.held.record, model = record.values[held.key];
+    if (held.entry.choices) { held.unit.paint(record); return; }
+    held.unit.baseline = present(model) ? model : null;
+    held.unit.restore(draft);
+    held.base = guard;
   };
   OptionalValues.prototype.paint = function () {
     var self = this, held = this.held;
@@ -183,23 +202,24 @@ function (ui, unitFields, units, preferences, request, snapshot) {
       // The value being written shows until its answer arrives.
       if (self.pending === entry && self.busy()) return;
       // A choice holds no draft, so it always shows the Model's value; its refusal message stays beside it.
-      if (entry.entry.choices) { entry.unit.paint(held.record); return; }
+      if (entry.entry.choices) { entry.unit.paint(held.record); refuse(entry); return; }
       if (entry.hint) {
         entry.hint.textContent = entry.entry.placeholder(held.record);
         entry.unit.input.placeholder = entry.hint.textContent;
       }
       // A refusal stays on a unit field, with what the user typed, until they edit or cancel it. A field holding no
       // draft follows the snapshot, so its next write is guarded by the value it shows; its message stays.
-      if (entry.unit.editing) return;
-      var message = entry.refused ? entry.unit.error.textContent : "";
-      entry.unit.setValue(held.record.values[entry.key]);
-      if (message) {
-        entry.unit.error.textContent = message;
-        entry.unit.error.hidden = false;
-        entry.unit.input.setAttribute("aria-invalid", "true");
-      }
+      if (!entry.unit.editing) entry.unit.setValue(held.record.values[entry.key]);
+      refuse(entry);
     });
   };
+  /* A field's refusal beside it, from the bubble's own record of it. */
+  function refuse(entry) {
+    if (!entry.refusal) return;
+    entry.unit.error.textContent = entry.refusal;
+    entry.unit.error.hidden = false;
+    entry.unit.input.setAttribute("aria-invalid", "true");
+  }
   OptionalValues.prototype.refresh = function (state, records) {
     var outcome = this.requests.consume(state), held = this.held, pending = this.pending;
     if (outcome) this.pending = null;
@@ -209,21 +229,12 @@ function (ui, unitFields, units, preferences, request, snapshot) {
     if (record) held.record = record;
     if (outcome && outcome.status !== "completed" && pending) {
       held.closing = false;
-      var unit = pending.unit, model = held.record.values[pending.key];
-      if (outcome.code === "target.changed" || pending.entry.choices) {
-        // The value changed meanwhile, or a choice holds no draft: start again from the Model's.
-        if (pending.entry.choices) unit.paint(held.record);
-        else unit.setValue(model);
-      } else {
-        // Anything else keeps the typed text as a draft over the Model's value, guarded by it.
-        unit.editing = false; unit.baseline = present(model) ? model : null; unit.begin();
-        pending.base = stored(held.record, pending.key);
-      }
-      pending.refused = true;
+      // The value changed meanwhile: start again from the Model's. Anything else keeps the typed text as a draft,
+      // still guarded by the value it was sent against, so a retry over a value changed since refuses too.
+      if (outcome.code === "target.changed") pending.unit.setValue(held.record.values[pending.key]);
+      else this.redraft(pending, pending.sent.draft, pending.sent.guard);
+      pending.refusal = snapshot.message(outcome, "The value was not saved.");
       this.paint();
-      unit.error.textContent = snapshot.message(outcome, "The value was not saved.");
-      unit.error.hidden = false;
-      unit.input.setAttribute("aria-invalid", "true");
       return;
     }
     this.paint();

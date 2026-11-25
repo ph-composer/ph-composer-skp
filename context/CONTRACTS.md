@@ -701,7 +701,10 @@ payload and so names the same records. A delete with a replacement is the owning
 it reads the Zones through `ph_composer.zones.all`, stages each changed payload through
 `ph_composer.zones.stage_extension` in the delete's proposal, and passes the returned `zone_entries` to
 `propose_delete` as a `Records::ReferencePlan`, so the incoming check reads the moved payloads. It moves only a
-payload whose status is `understood`; any other stays as stored, and the incoming check refuses the delete. A list that already
+payload whose status is `understood`; any other stays as stored. The incoming check then refuses the delete as
+`copy.rule_missing` for an envelope it cannot read or an `invalid` payload. Any other (outdated, a version no
+migration reaches, a newer version, or a namespace not installed) it scans through the payload's stored reference declarations, so the delete refuses as
+`reference.in_use` only while that payload still names the record. A list that already
 holds the replacement keeps it once. A locked Zone refuses the whole delete. `tests/zone_payload_references_test.rb`
 runs each of these over a test-only feature, `tests/support/zone_payload_probe.rb`.
 
@@ -996,7 +999,8 @@ The declared references put each named item in the engine's incoming-reference s
 `replacement_id` refuses `reference.in_use`, its message naming the Zones; with an id, every slot naming the item
 takes the replacement, and with null each is emptied, staged through `stage_extension` in the delete's proposal and
 handed to `propose_delete` as a `Records::ReferencePlan`, one Undo step. Only an understood payload is moved; any
-other stays as stored and the engine refuses the delete. A Zone this feature staged earlier in the same proposal
+other stays as stored, and the engine refuses the delete as the incoming check does (a Zone payload that names
+records, above). A Zone this feature staged earlier in the same proposal
 reads as staged, so the move builds from that write, and the plan projects every Zone the proposal rewrote. A Zone whose two occurrences share an id, a copy not yet
 made independent, refuses the move as `target.ambiguous`. With an id or null, `ventilators.delete` also moves or
 clears every other feature's record naming the Ventilator (a Ducting group's `ventilator_id`) through the registered

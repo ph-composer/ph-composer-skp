@@ -209,6 +209,29 @@ test("a delete in use asks for a replacement, and offers clearing only where not
   assert.strictEqual(clone(named(p, INDOOR_UNITS + ".delete")[0].payload.params).replacement_id, null);
 });
 
+test("an unreadable outdoor unit leaves a model's uses unknown, so Delete asks for a replacement and says why",
+  function () {
+    var o = setup();
+    o.state.sections[OUTDOOR_UNITS].value.unreadable = [{ id: "hpo_UNREADABLEUN",
+      message: "Its quantity is invalid." }];
+    o.paint();
+    var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
+    form.open(models[1], models);
+    assert.strictEqual(form.inUse, true, "ODU-B may still be named by the unit that cannot be read");
+    assert.match(form.uses.textContent, /cannot be read/);
+    assert.strictEqual(form.submitButton.textContent, "Replace and delete");
+  });
+
+test("a model in use with nothing to replace it says to create one first", function () {
+  var o = setup();
+  var form = o.view(OUTDOOR).table.replacement, models = o.state.sections[OUTDOOR].value.records;
+  form.open(models[0], [models[0]]);
+  assert.strictEqual(form.inUse, true);
+  assert.ok(form.submitButton.disabled);
+  assert.match(form.explanation.textContent,
+    /^No other .* can take its place\. Cancel, create one, then delete ODU-A\.$/);
+});
+
 test("the Blended result shows each Segment's estimator sections and copies their rows", function () {
   var o = setup(BLENDED), view = o.view(BLENDED);
   assert.strictEqual(o.root._view.header.root.querySelector(".primary").textContent, "Copy for the estimator");

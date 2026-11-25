@@ -20,7 +20,8 @@ function (RecordForm, request, snapshot, ui) {
     return form.settle(state);
   }
   /* What another feature knows about the uses of a section's records: `usage(state, id)` answers
-     `{ count, description }`. Every way into that section's ReplacementForm then lists the same uses. */
+     `{ count, description, incomplete }`, `incomplete` saying why the uses are not all known (a referring record
+     that cannot be read), or null. Every way into that section's ReplacementForm then lists the same uses. */
   var usageSources = Object.create(null);
   function contributeUsage(section, usage) { usageSources[section] = usage; }
   function ReplacementForm(session, send, changed, options) {
@@ -49,23 +50,33 @@ function (RecordForm, request, snapshot, ui) {
       Boolean(this.options.allowClear);
     var source = this.options.usage || usageSources[this.options.section];
     var usage = source ? source(this.state, record.id) : null;
-    this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
+    // Uses not all known are treated as uses: no plain Delete, and nothing cleared that may still be named.
+    var unknown = usage && usage.incomplete;
+    if (unknown) clear = false;
+    this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement || unknown ||
       (usage ? usage.count : record.use_count)));
+    var candidates = records.filter(function (candidate) { return candidate.id !== record.id; });
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
     this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count));
     this.explanation.textContent = this.explanation.hidden ? "" : "Moves every " + this.options.usedOn + " that uses " +
       record.values.name + " to the " + this.options.label + " you choose" +
       (clear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
+    // With nothing to choose, the dialog says how to get something.
+    if (this.inUse && !clear && !candidates.length) {
+      this.explanation.hidden = false;
+      this.explanation.textContent = "No other " + this.options.label + " can take its place. Cancel, create one, " +
+        "then delete " + record.values.name + ".";
+    }
     var uses = (record.uses || []).map(function (use) { return use.name; }).join(", ");
-    this.uses.textContent = this.inUse ? (usage && usage.count ? usage.description : uses ? "Used by: " + uses :
-      "Choose a replacement or clear existing uses.") :
+    this.uses.textContent = this.inUse ? [usage && usage.count ? usage.description : uses ? "Used by: " + uses :
+      unknown ? "" : "Choose a replacement or clear existing uses.", unknown || ""].filter(Boolean).join(" ") :
       "Delete " + this.options.label + ' "' + record.values.name + '"?';
     this.select.parentNode.hidden = !this.inUse;
     var selected = this.select.value;
     this.select.setAttribute("aria-label", "Replacement " + this.options.label.toLowerCase());
     this.select.replaceChildren(ui.option("", "Choose a replacement"));
     if (clear) this.select.appendChild(ui.option("__clear__", "Clear existing uses"));
-    records.filter(function (candidate) { return candidate.id !== record.id; }).forEach(function (candidate) {
+    candidates.forEach(function (candidate) {
       this.select.appendChild(ui.option(candidate.id, candidate.values.name));
     }, this);
     this.select.value = (selected === "__clear__" && clear) || records.some(function (candidate) {

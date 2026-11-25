@@ -320,7 +320,14 @@ module PhComposer
           snapshot.records(dictionary, :kind => kind)
                   .reject { |entry, _record| Zones::ExportProjection.left_out?(reader, entry.path) }
         end
+        # A Space beside its Zone, naming one in no Building Segment, leaves with it before anything in it is
+        # measured, as the records leave it out.
+        exported = Hash.new do |hash, zone_id|
+          found = Zones::ExportProjection.zone_entry(reader, zone_id)
+          hash[zone_id] = found ? Zones::Schema.exported?(found.last) : false
+        end
         spaces = kept.call(SPACE_STORE.dictionary, "group").to_h { |entry, record| [entry.path, record] }
+                     .select { |_path, record| record["zone_id"] && exported[record["zone_id"]] }
         segments_in = kept.call(FLOOR_SEGMENT_STORE.dictionary, "face").group_by { |entry, _| entry.path[0...-1] }
         totals = Hash.new { |hash, key| hash[key] = TOTALS.to_h { |total| [total, 0.0] } }
         kept.call(VOLUME_STORE.dictionary, "group").each do |entry, record|
@@ -334,13 +341,8 @@ module PhComposer
           TOTALS.each { |total| totals[zone_id][total] += volume.fetch(total) || 0.0 }
         end
         # Space occurrences per Zone id: a Zone copied but not yet made independent counts its Spaces once a copy.
-        counts = spaces.values.filter_map { |record| record["zone_id"] }.tally
-        # Rows for exported Zones only: a Space beside its Zone, naming one in no Building Segment, leaves with it.
-        exported = lambda do |zone_id|
-          found = Zones::ExportProjection.zone_entry(reader, zone_id)
-          found && Zones::Schema.exported?(found.last)
-        end
-        (counts.keys | totals.keys).select(&exported).sort.map do |zone_id|
+        counts = spaces.values.map { |record| record["zone_id"] }.tally
+        (counts.keys | totals.keys).sort.map do |zone_id|
           { "zone_id" => zone_id, "space_count" => counts.fetch(zone_id, 0) }.merge(totals[zone_id])
         end
       end

@@ -105,6 +105,10 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
   Bar.prototype.selectionKey = function () {
     return JSON.stringify(this.writable.map(function (row) { return [row.path, row.values]; }));
   };
+  /* The writable lines alone, so a feature can tell other lines from a change to the same ones. */
+  Bar.prototype.selectionPaths = function () {
+    return JSON.stringify(this.writable.map(function (row) { return row.path; }));
+  };
   /* A value every writable line holds alike, or undefined. */
   Bar.prototype.common = function (field) {
     var held = this.writable.map(function (row) { return (row.values || {})[field]; });
