@@ -1,0 +1,47 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-25T14:00:00Z"},
+  "title": "PH-Composer Brand Exploration",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1800, "title": "A · Strata"},
+    "B-Score.dc.html": {"x": 1520, "y": 0, "w": 1440, "h": 1800, "title": "B · Score"},
+    "C-OpenGrid.dc.html": {"x": 3040, "y": 0, "w": 1440, "h": 1800, "title": "C · Open Grid"},
+    "D-Beaver.dc.html": {"x": 0, "y": 2260, "w": 900, "h": 1040, "title": "D · Beaver"},
+    "E-Songbirds.dc.html": {"x": 980, "y": 2260, "w": 900, "h": 1040, "title": "E · Songbirds"},
+    "F-Tortoise.dc.html": {"x": 1960, "y": 2260, "w": 900, "h": 1040, "title": "F · Tortoise"},
+    "G-House.dc.html": {"x": 2940, "y": 2260, "w": 900, "h": 1040, "title": "G · House"},
+    "H-Colour.dc.html": {"x": 3920, "y": 2260, "w": 900, "h": 1040, "title": "Colour beside Phius"},
+    "J-BeaverMarks.dc.html": {"x": 0, "y": 3760, "w": 1440, "h": 880, "title": "Beaver · three marks"},
+    "K-BeaverSystem.dc.html": {"x": 1520, "y": 3760, "w": 1440, "h": 880, "title": "Beaver · in use"},
+    "L-StrataHiVis.dc.html": {"x": 0, "y": 5100, "w": 1440, "h": 1180, "title": "Strata · 1 Hi-vis"},
+    "M-StrataEmber.dc.html": {"x": 1520, "y": 5100, "w": 1440, "h": 1180, "title": "Strata · 2 Ember"},
+    "N-StrataCounter.dc.html": {"x": 3040, "y": 5100, "w": 1440, "h": 1180, "title": "Strata · 3 Counterpart"},
+    "P-HiVisLogos.dc.html": {"x": 0, "y": 6740, "w": 1440, "h": 1120, "title": "Hi-vis · four logo variations"},
+    "Q-PixelCrane.dc.html": {"x": 1520, "y": 6740, "w": 1440, "h": 900, "title": "Pixel-art crane test"},
+    "R-AxonStack.dc.html": {"x": 0, "y": 8320, "w": 1440, "h": 1160, "title": "Axon block stack · four variations"},
+    "S-LiftNatural.dc.html": {"x": 1520, "y": 8320, "w": 1440, "h": 1260, "title": "Lift · natural palettes"},
+    "T-LiftBrand.dc.html": {"x": 0, "y": 10040, "w": 1440, "h": 1660, "title": "Brand direction · Lift on maple"},
+    "U-CraneSplash.dc.html": {"x": 1520, "y": 10040, "w": 1440, "h": 900, "title": "Splash · crane placing the green block"},
+    "V-TypeInApp.dc.html": {"x": 0, "y": 12160, "w": 1440, "h": 820, "title": "Type · inside SketchUp"},
+    "W-TypeBrand.dc.html": {"x": 1520, "y": 12160, "w": 2000, "h": 1020, "title": "Type · web, docs and tutorials"},
+    "X-InAppColour.dc.html": {"x": 0, "y": 13640, "w": 1840, "h": 1010, "title": "In the app · colour and logo"},
+    "Y-HeaderBar.dc.html": {"x": 1920, "y": 13640, "w": 1840, "h": 680, "title": "Espresso and green · the table header"}
+  },
+  "order": ["Main.dc.html", "B-Score.dc.html", "C-OpenGrid.dc.html", "D-Beaver.dc.html", "E-Songbirds.dc.html", "F-Tortoise.dc.html", "G-House.dc.html", "H-Colour.dc.html", "J-BeaverMarks.dc.html", "K-BeaverSystem.dc.html", "L-StrataHiVis.dc.html", "M-StrataEmber.dc.html", "N-StrataCounter.dc.html", "P-HiVisLogos.dc.html", "Q-PixelCrane.dc.html", "R-AxonStack.dc.html", "S-LiftNatural.dc.html", "T-LiftBrand.dc.html", "U-CraneSplash.dc.html", "V-TypeInApp.dc.html", "W-TypeBrand.dc.html", "X-InAppColour.dc.html", "Y-HeaderBar.dc.html"],
+  "notes": {
+    "round9": {"x": 0, "y": 13340, "text": "Round 9 · colour and logo in the app", "kind": "title1", "maxW": 3760},
+    "round8": {"x": 0, "y": 11860, "text": "Round 8 · type, in the app and on the web", "kind": "title1", "maxW": 3520},
+    "round7": {"x": 0, "y": 9740, "text": "Round 7 · brand direction", "kind": "title1", "maxW": 1440},
+    "round6": {"x": 0, "y": 8020, "text": "Round 6 · axon block stack", "kind": "title1", "maxW": 1440},
+    "round5": {"x": 0, "y": 6440, "text": "Round 5 · Hi-vis logo variations", "kind": "title1", "maxW": 1440},
+    "round4": {"x": 0, "y": 4800, "text": "Round 4 · Strata, one colour per product, Site-gear palettes", "kind": "title1", "maxW": 4480},
+    "round3": {"x": 0, "y": 3460, "text": "Round 3 · the beaver, less cute", "kind": "title1", "maxW": 2960},
+    "round2": {"x": 0, "y": 1960, "text": "Round 2 · illustrated marks", "kind": "title1", "maxW": 4820},
+    "round1": {"x": 0, "y": -300, "text": "Round 1 · three brand directions", "kind": "title1", "maxW": 4480}
+  },
+  "designSystems": [
+    {"title": "PH-Composer Design System", "namespace": "phcomposer", "artifact": "https://claude.ai/artifact/77GLrkZxtkxo9TksTbvodL", "version": "1795585398-eefe", "copiedAt": "2026-11-25T14:00:00Z"}
+  ]
+}

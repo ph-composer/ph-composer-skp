@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Direction B, Score</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+body{margin:0}
+a{color:#b5391f}a:hover{color:#8f2c18}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1800px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 40px; background: #ffffff; color: #1d2740; font-family: 'Inter', sans-serif">
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="b-mark" viewBox="0 0 48 48">
+<rect x="2" y="2" width="44" height="44" rx="10" fill="#1d2740"></rect>
+<line x1="8" y1="15" x2="40" y2="15" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.5"></line>
+<line x1="8" y1="24" x2="40" y2="24" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.5"></line>
+<line x1="8" y1="33" x2="40" y2="33" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.5"></line>
+<rect x="8" y="28" width="10" height="10" rx="2.5" fill="#e0563f"></rect>
+<rect x="19" y="19" width="10" height="10" rx="2.5" fill="#ffffff"></rect>
+<rect x="30" y="10" width="10" height="10" rx="2.5" fill="#f2b233"></rect>
+</symbol>
+<symbol id="b-mark-inv" viewBox="0 0 48 48">
+<rect x="2" y="2" width="44" height="44" rx="10" fill="#ffffff"></rect>
+<line x1="8" y1="15" x2="40" y2="15" stroke="#1d2740" stroke-opacity="0.25" stroke-width="1.5"></line>
+<line x1="8" y1="24" x2="40" y2="24" stroke="#1d2740" stroke-opacity="0.25" stroke-width="1.5"></line>
+<line x1="8" y1="33" x2="40" y2="33" stroke="#1d2740" stroke-opacity="0.25" stroke-width="1.5"></line>
+<rect x="8" y="28" width="10" height="10" rx="2.5" fill="#e0563f"></rect>
+<rect x="19" y="19" width="10" height="10" rx="2.5" fill="#1d2740"></rect>
+<rect x="30" y="10" width="10" height="10" rx="2.5" fill="#f2b233"></rect>
+</symbol>
+</svg>
+
+<div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #cfd5e3; padding-bottom: 20px">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 42px; font-weight: 800; letter-spacing: -0.02em">B · Score</h1>
+<p style="margin: 0; font-size: 18px; color: #48526b">Parts placed on a staff, the way a composer writes. Each part steps the model up.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; height: 300px">
+<div style="background: #eef1f8; border-radius: 20px; display: flex; align-items: center; justify-content: center">
+<svg width="220" height="220" role="img" aria-label="Score mark, large"><use href="#b-mark"></use></svg>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="flex-grow: 1; border: 1px solid #dfe4ee; border-radius: 20px; display: flex; align-items: center; justify-content: space-around; padding: 0 32px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="64" height="64" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-size: 12px; color: #48526b">64</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="32" height="32" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-size: 12px; color: #48526b">32</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="24" height="24" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-size: 12px; color: #48526b">24 toolbar</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="16" height="16" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-size: 12px; color: #48526b">16 favicon</span></div>
+</div>
+<div style="flex-grow: 1; background: #1d2740; border-radius: 20px; display: flex; align-items: center; justify-content: space-around; padding: 0 32px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="64" height="64" aria-hidden="true"><use href="#b-mark-inv"></use></svg><span style="font-size: 12px; color: #cfd5e3">64</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="32" height="32" aria-hidden="true"><use href="#b-mark-inv"></use></svg><span style="font-size: 12px; color: #cfd5e3">32</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="24" height="24" aria-hidden="true"><use href="#b-mark-inv"></use></svg><span style="font-size: 12px; color: #cfd5e3">24</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="16" height="16" aria-hidden="true"><use href="#b-mark-inv"></use></svg><span style="font-size: 12px; color: #cfd5e3">16</span></div>
+</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="border: 1px solid #dfe4ee; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 12px; font-weight: 600; color: #48526b">Suite</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">PH-Composer</span></div>
+</div>
+<div style="border: 1px solid #dfe4ee; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 12px; font-weight: 600; color: #48526b">Product</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#b-mark"></use></svg><div style="display: flex; flex-direction: column"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1">PH-Composer</span><span style="font-size: 14px; font-weight: 600; color: #b5391f">for SketchUp</span></div></div>
+</div>
+<div style="border: 1px solid #dfe4ee; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 12px; font-weight: 600; color: #48526b">Sibling</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#b-mark"></use></svg><div style="display: flex; flex-direction: column"><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1">PH-Composer</span><span style="font-size: 14px; font-weight: 600; color: #b5391f">REVIVE</span></div></div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<span style="font-size: 12px; font-weight: 600; color: #48526b">Colour</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 12px; background: #1d2740"></div><span style="font-size: 13px; font-weight: 600">Navy</span><span style="font-size: 12px; color: #48526b">#1d2740</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 12px; background: #e0563f"></div><span style="font-size: 13px; font-weight: 600">Coral</span><span style="font-size: 12px; color: #48526b">#e0563f</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 12px; background: #f2b233"></div><span style="font-size: 13px; font-weight: 600">Marigold</span><span style="font-size: 12px; color: #48526b">#f2b233</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 12px; background: #eef1f8"></div><span style="font-size: 13px; font-weight: 600">Mist</span><span style="font-size: 12px; color: #48526b">#eef1f8</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 12px; background: #b5391f"></div><span style="font-size: 13px; font-weight: 600">Coral text</span><span style="font-size: 12px; color: #48526b">#b5391f</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #48526b">
+<span>Current panel:</span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #075360"></span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #bf5560"></span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #132a2b"></span>
+<span>The panel teal would give way to navy, or stay as an in-app colour only.</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 12px; font-weight: 600; color: #48526b">Type · Bricolage Grotesque and Inter</span>
+<div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">Zones, Assemblies, Windows</div>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #48526b">Group envelope geometry into Zones. Classify Faces, solve adjacencies and assign Assemblies.</p>
+<div style="font-size: 14px; font-weight: 600; background: #eef1f8; border-radius: 999px; padding: 10px 18px; color: #1d2740; align-self: flex-start">Export → model.hbjson</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; font-weight: 600; color: #48526b">Tagline</span><p style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; line-height: 1.2">Compose a passive building, one part at a time.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; font-weight: 600; color: #48526b">What it is</span><p style="margin: 0; font-size: 17px; line-height: 1.5">A free, open-source SketchUp extension for Phius passive building models. Started by Passive House consultants and open to everyone who models.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; font-weight: 600; color: #48526b">Invitation</span><p style="margin: 0; font-size: 17px; line-height: 1.5">Missing something? Open an issue, send a pull request, or write your own extension on top. We will help you get it in.</p></div>
+</div>
+
+<div style="flex-grow: 1; background: #eef1f8; border-radius: 24px; padding: 32px 48px; display: flex; flex-direction: column; gap: 40px; color: #1d2740">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; align-items: center; gap: 12px"><svg width="34" height="34" aria-hidden="true"><use href="#b-mark"></use></svg><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700">PH-Composer</span></div>
+<div style="display: flex; gap: 32px; font-size: 15px; font-weight: 500"><a href="#docs" style="color: #1d2740; text-decoration: none">Docs</a><a href="#tutorials" style="color: #1d2740; text-decoration: none">Tutorials</a><a href="#contribute" style="color: #1d2740; text-decoration: none">Contribute</a><a href="#github" style="color: #1d2740; text-decoration: none">GitHub</a></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px">
+<h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 60px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.02">Compose a passive building, one part at a time.</h2>
+<p style="margin: 0; font-size: 19px; line-height: 1.5; color: #48526b">Free, open source, and waiting for your part.</p>
+<div style="display: flex; gap: 14px">
+<a href="#install" style="background: #1d2740; color: #ffffff; font-weight: 600; font-size: 16px; padding: 14px 24px; border-radius: 999px; text-decoration: none">Install for SketchUp</a>
+<a href="#contribute" style="background: #f2b233; color: #1d2740; font-weight: 600; font-size: 16px; padding: 14px 24px; border-radius: 999px; text-decoration: none">Write a part</a>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

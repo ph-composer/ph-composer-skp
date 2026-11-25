@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Direction C, Open Grid</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+a{color:#2f7d5b}a:hover{color:#235f45}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1800px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 40px; background: #ffffff; color: #1b1f24; font-family: 'Figtree', sans-serif">
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="c-mark" viewBox="0 0 48 48">
+<rect x="4" y="4" width="19" height="19" rx="4" fill="#2f7d5b"></rect>
+<rect x="25" y="4" width="19" height="19" rx="4" fill="#2b6cb0"></rect>
+<rect x="4" y="25" width="19" height="19" rx="4" fill="#e07a1f"></rect>
+<rect x="26.25" y="26.25" width="16.5" height="16.5" rx="3" fill="none" stroke="#1b1f24" stroke-width="2.5"></rect>
+<line x1="34.5" y1="30.5" x2="34.5" y2="38.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+<line x1="30.5" y1="34.5" x2="38.5" y2="34.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+</symbol>
+<symbol id="c-mark-inv" viewBox="0 0 48 48">
+<rect x="4" y="4" width="19" height="19" rx="4" fill="#4fae86"></rect>
+<rect x="25" y="4" width="19" height="19" rx="4" fill="#5a9bdc"></rect>
+<rect x="4" y="25" width="19" height="19" rx="4" fill="#f0943f"></rect>
+<rect x="26.25" y="26.25" width="16.5" height="16.5" rx="3" fill="none" stroke="#ffffff" stroke-width="2.5"></rect>
+<line x1="34.5" y1="30.5" x2="34.5" y2="38.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"></line>
+<line x1="30.5" y1="34.5" x2="38.5" y2="34.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"></line>
+</symbol>
+<symbol id="c-mark-skp" viewBox="0 0 48 48">
+<rect x="4" y="4" width="19" height="19" rx="4" fill="#2f7d5b"></rect>
+<rect x="25" y="4" width="19" height="19" rx="4" fill="#d3d7dd"></rect>
+<rect x="4" y="25" width="19" height="19" rx="4" fill="#d3d7dd"></rect>
+<rect x="26.25" y="26.25" width="16.5" height="16.5" rx="3" fill="none" stroke="#1b1f24" stroke-width="2.5"></rect>
+<line x1="34.5" y1="30.5" x2="34.5" y2="38.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+<line x1="30.5" y1="34.5" x2="38.5" y2="34.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+</symbol>
+<symbol id="c-mark-revive" viewBox="0 0 48 48">
+<rect x="4" y="4" width="19" height="19" rx="4" fill="#d3d7dd"></rect>
+<rect x="25" y="4" width="19" height="19" rx="4" fill="#d3d7dd"></rect>
+<rect x="4" y="25" width="19" height="19" rx="4" fill="#e07a1f"></rect>
+<rect x="26.25" y="26.25" width="16.5" height="16.5" rx="3" fill="none" stroke="#1b1f24" stroke-width="2.5"></rect>
+<line x1="34.5" y1="30.5" x2="34.5" y2="38.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+<line x1="30.5" y1="34.5" x2="38.5" y2="34.5" stroke="#1b1f24" stroke-width="2.5" stroke-linecap="round"></line>
+</symbol>
+</svg>
+
+<div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #d3d7dd; padding-bottom: 20px">
+<h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: -0.02em">C · Open Grid</h1>
+<p style="margin: 0; font-size: 18px; color: #4a525c">Each product is a tile. One tile is always empty and marked with a plus.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; height: 300px">
+<div style="background: #f4f5f7; border-radius: 16px; display: flex; align-items: center; justify-content: center">
+<svg width="220" height="220" role="img" aria-label="Open Grid mark, large"><use href="#c-mark"></use></svg>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="flex-grow: 1; border: 1px solid #e3e6ea; border-radius: 16px; display: flex; align-items: center; justify-content: space-around; padding: 0 32px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="64" height="64" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">64</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="32" height="32" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">32</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="24" height="24" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">24 toolbar</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="16" height="16" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">16 favicon</span></div>
+</div>
+<div style="flex-grow: 1; background: #1b1f24; border-radius: 16px; display: flex; align-items: center; justify-content: space-around; padding: 0 32px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="64" height="64" aria-hidden="true"><use href="#c-mark-inv"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #d3d7dd">64</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="32" height="32" aria-hidden="true"><use href="#c-mark-inv"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #d3d7dd">32</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="24" height="24" aria-hidden="true"><use href="#c-mark-inv"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #d3d7dd">24</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><svg width="16" height="16" aria-hidden="true"><use href="#c-mark-inv"></use></svg><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #d3d7dd">16</span></div>
+</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="border: 1px solid #e3e6ea; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Suite · every tile</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-size: 32px; font-weight: 800; letter-spacing: -0.02em">PH-Composer</span></div>
+</div>
+<div style="border: 1px solid #e3e6ea; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Product · its own tile lit</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#c-mark-skp"></use></svg><div style="display: flex; flex-direction: column"><span style="font-size: 25px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">PH-Composer</span><span style="font-size: 15px; font-weight: 600; color: #2f7d5b">for SketchUp</span></div></div>
+</div>
+<div style="border: 1px solid #e3e6ea; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Sibling · its own tile lit</span>
+<div style="display: flex; align-items: center; gap: 14px"><svg width="44" height="44" aria-hidden="true"><use href="#c-mark-revive"></use></svg><div style="display: flex; flex-direction: column"><span style="font-size: 25px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">PH-Composer</span><span style="font-size: 15px; font-weight: 600; color: #a8520a">REVIVE</span></div></div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Colour</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 10px; background: #2f7d5b"></div><span style="font-size: 13px; font-weight: 600">Green</span><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">#2f7d5b</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 10px; background: #2b6cb0"></div><span style="font-size: 13px; font-weight: 600">Blue</span><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">#2b6cb0</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 10px; background: #e07a1f"></div><span style="font-size: 13px; font-weight: 600">Orange</span><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">#e07a1f</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 10px; background: #1b1f24"></div><span style="font-size: 13px; font-weight: 600">Ink</span><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">#1b1f24</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 96px; border-radius: 10px; background: #f4f5f7"></div><span style="font-size: 13px; font-weight: 600">Paper</span><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">#f4f5f7</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a525c">
+<span>Current panel:</span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #075360"></span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #bf5560"></span>
+<span style="width: 18px; height: 18px; border-radius: 4px; background: #132a2b"></span>
+<span>The SketchUp tile could take the panel teal in place of this green.</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Type · Figtree and DM Mono</span>
+<div style="font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">Zones, Assemblies, Windows</div>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #4a525c">Group envelope geometry into Zones. Classify Faces, solve adjacencies and assign Assemblies.</p>
+<div style="font-family: 'DM Mono', monospace; font-size: 14px; background: #f4f5f7; border-radius: 10px; padding: 12px 16px; color: #1b1f24; align-self: flex-start">export → model.hbjson</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Tagline</span><p style="margin: 0; font-size: 26px; font-weight: 800; line-height: 1.2">Passive building modeling, built in the open.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">What it is</span><p style="margin: 0; font-size: 17px; line-height: 1.5">A free, open-source set of tools for Phius passive building models. The first tile is the SketchUp extension. More tiles are planned, and some of them are not ours to write.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'DM Mono', monospace; font-size: 12px; color: #4a525c">Invitation</span><p style="margin: 0; font-size: 17px; line-height: 1.5">The empty tile is yours. Start with a bug report, a library provider or an exporter, and we will review it with you.</p></div>
+</div>
+
+<div style="flex-grow: 1; background: #f4f5f7; border-radius: 20px; padding: 32px 48px; display: flex; flex-direction: column; gap: 40px; color: #1b1f24">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; align-items: center; gap: 12px"><svg width="34" height="34" aria-hidden="true"><use href="#c-mark"></use></svg><span style="font-size: 22px; font-weight: 800">PH-Composer</span></div>
+<div style="display: flex; gap: 32px; font-size: 15px; font-weight: 500"><a href="#docs" style="color: #1b1f24; text-decoration: none">Docs</a><a href="#tutorials" style="color: #1b1f24; text-decoration: none">Tutorials</a><a href="#contribute" style="color: #1b1f24; text-decoration: none">Contribute</a><a href="#github" style="color: #1b1f24; text-decoration: none">GitHub</a></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px">
+<h2 style="margin: 0; font-size: 60px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.02">Passive building modeling, built in the open.</h2>
+<p style="margin: 0; font-size: 19px; line-height: 1.5; color: #4a525c">Free and open source. The empty tile is yours.</p>
+<div style="display: flex; gap: 14px">
+<a href="#install" style="background: #2f7d5b; color: #ffffff; font-weight: 600; font-size: 16px; padding: 14px 24px; border-radius: 10px; text-decoration: none">Install for SketchUp</a>
+<a href="#contribute" style="border: 2px dashed #1b1f24; color: #1b1f24; font-weight: 600; font-size: 16px; padding: 12px 22px; border-radius: 10px; text-decoration: none">+ Add a tile</a>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

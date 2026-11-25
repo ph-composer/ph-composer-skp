@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Table header alternatives</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0}
+a{color:#8a4a12}a:hover{color:#6b390d}
+</style>
+</helmet>
+<div style="width: 1840px; height: 680px; box-sizing: border-box; padding: 56px; display: flex; flex-direction: column; gap: 28px; background: #ffffff; color: #33261d; font-family: 'Figtree', sans-serif">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="z-plain" viewBox="-87.1 -69.9 174.3 174.3">
+<polygon points="-83.1,40.0 0.0,88.0 0.0,96.0 -83.1,48.0" fill="#b88049"></polygon>
+<polygon points="83.1,40.0 0.0,88.0 0.0,96.0 83.1,48.0" fill="#9f6f40"></polygon>
+<polygon points="0.0,-8.0 83.1,40.0 0.0,88.0 -83.1,40.0" fill="#cf9d6a"></polygon>
+<polygon points="-31.9,-11.0 0.0,7.4 0.0,37.4 -31.9,19.0" fill="#e9e5dd"></polygon>
+<polygon points="31.9,-11.0 0.0,7.4 0.0,37.4 31.9,19.0" fill="#d6d1c9"></polygon>
+<polygon points="0.0,-29.4 31.9,-11.0 0.0,7.4 -31.9,-11.0" fill="#f9f7f3"></polygon>
+<polygon points="2.8,9.0 34.6,27.4 34.6,57.4 2.8,39.0" fill="#e9e5dd"></polygon>
+<polygon points="66.5,9.0 34.6,27.4 34.6,57.4 66.5,39.0" fill="#d6d1c9"></polygon>
+<polygon points="34.6,-9.4 66.5,9.0 34.6,27.4 2.8,9.0" fill="#f9f7f3"></polygon>
+<polygon points="-66.5,9.0 -34.6,27.4 -34.6,57.4 -66.5,39.0" fill="#e9e5dd"></polygon>
+<polygon points="-2.8,9.0 -34.6,27.4 -34.6,57.4 -2.8,39.0" fill="#d6d1c9"></polygon>
+<polygon points="-34.6,-9.4 -2.8,9.0 -34.6,27.4 -66.5,9.0" fill="#f9f7f3"></polygon>
+<polygon points="-31.9,29.0 0.0,47.4 0.0,77.4 -31.9,59.0" fill="#e9e5dd"></polygon>
+<polygon points="31.9,29.0 0.0,47.4 0.0,77.4 31.9,59.0" fill="#d6d1c9"></polygon>
+<polygon points="0.0,10.6 31.9,29.0 0.0,47.4 -31.9,29.0" fill="#f9f7f3"></polygon>
+<polygon points="-31.9,-43.0 0.0,-24.6 0.0,5.4 -31.9,-13.0" fill="#e9e5dd"></polygon>
+<polygon points="31.9,-43.0 0.0,-24.6 0.0,5.4 31.9,-13.0" fill="#d6d1c9"></polygon>
+<polygon points="0.0,-61.4 31.9,-43.0 0.0,-24.6 -31.9,-43.0" fill="#f9f7f3"></polygon>
+<polygon points="2.8,-23.0 34.6,-4.6 34.6,25.4 2.8,7.0" fill="#e9e5dd"></polygon>
+<polygon points="66.5,-23.0 34.6,-4.6 34.6,25.4 66.5,7.0" fill="#d6d1c9"></polygon>
+<polygon points="34.6,-41.4 66.5,-23.0 34.6,-4.6 2.8,-23.0" fill="#f9f7f3"></polygon>
+<polygon points="-66.5,-23.0 -34.6,-4.6 -34.6,25.4 -66.5,7.0" fill="#c99a63"></polygon>
+<polygon points="-2.8,-23.0 -34.6,-4.6 -34.6,25.4 -2.8,7.0" fill="#ac8355"></polygon>
+<polygon points="-34.6,-41.4 -2.8,-23.0 -34.6,-4.6 -66.5,-23.0" fill="#dfb483"></polygon>
+<polygon points="-31.9,-25.0 0.0,-6.6 0.0,23.4 -31.9,5.0" fill="#abc32e"></polygon>
+<polygon points="31.9,-25.0 0.0,-6.6 0.0,23.4 31.9,5.0" fill="#95a42a"></polygon>
+<polygon points="0.0,-43.4 31.9,-25.0 0.0,-6.6 -31.9,-25.0" fill="#c3db51"></polygon>
+</symbol>
+</svg>
+<div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #d8d2c6; padding-bottom: 16px">
+<h1 style="margin: 0; font-size: 36px; font-weight: 700; letter-spacing: -0.02em">Espresso and green · the table header</h1>
+<p style="margin: 0; font-size: 16px; color: #5b5148">Four ways to stop the header bar fighting the green rows.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-height: 98px"><span style="font-size: 21px; font-weight: 700">1 · As mocked</span><span style="font-size: 14px; line-height: 1.4; color: #5b5148">Our own cool blue-grey header (#f6f8f9) over yellow-green rows. This is the clash.</span></div>
+<div style="border: 1px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #ffffff; color: #2a211b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; box-shadow: 0 6px 20px #10242c1a">
+<div style="background: #ececec; border-bottom: 1px solid #c9cdd2; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #3a4046"><svg width="16" height="16" aria-hidden="true"><use href="#z-plain"></use></svg><span>PH-Composer</span></div>
+<div style="padding: 0 16px; display: flex; gap: 18px; border-bottom: 1px solid #e1e6e9"><span style="padding: 8px 2px; border-bottom: 2px solid #33261d; color: #33261d; font-weight: 600">Zones</span><span style="padding: 8px 2px; color: #5d6b73">Assemblies</span><span style="padding: 8px 2px; color: #5d6b73">Windows</span><span style="padding: 8px 2px; color: #5d6b73">Export</span></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Zones</span><div style="display: flex; gap: 8px"><a href="#solve" style="border: 1px solid #c9cdd2; border-radius: 5px; padding: 6px 10px; color: #2a211b; text-decoration: none">Solve</a><a href="#new" style="background: #33261d; border-radius: 5px; padding: 6px 12px; color: #ffffff; font-weight: 600; text-decoration: none">New Zone</a></div></div>
+<div style="border: 1px solid #e1e6e9; border-radius: 7px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 6px 10px; background: #f6f8f9; border-bottom: 0; font-size: 12px; font-weight: 600; color: #46565e"><span></span><span>Face</span><span>Type</span><span>Boundary</span><span style="text-align: right">m²</span></div>
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e1e6e9; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Living</span><span>Wall</span><span style="color: #5d6b73">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">42.6</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e1e6e9; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Kitchen</span><span>Floor</span><span style="color: #5d6b73">Ground</span><span style="text-align: right; font-variant-numeric: tabular-nums">18.2</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e1e6e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bedroom</span><span>Roof or ceiling</span><span style="color: #5d6b73">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">31.0</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e1e6e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bath</span><span>Wall</span><span style="background: #fff0c2; color: #785400; border: 1px solid #d8b45c; border-radius: 999px; padding: 0 8px; font-weight: 600; justify-self: start">?</span><span style="text-align: right; font-variant-numeric: tabular-nums">9.4</span></div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 11px; color: #5d6b73">2 of 4 Faces checked</span><a href="#assign" style="color: #33261d; font-weight: 600; text-decoration: none">Assign Assembly</a></div>
+</div>
+</div>
+</div><div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-height: 98px"><span style="font-size: 21px; font-weight: 700">2 · SketchUp greys, green in the check only</span><span style="font-size: 14px; line-height: 1.4; color: #5b5148">Header and lines take the greys SketchUp's own panels use (#f3f3f7, #e0e1e9). Checked rows go grey; only the checkbox is green.</span></div>
+<div style="border: 1px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #ffffff; color: #2a211b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; box-shadow: 0 6px 20px #10242c1a">
+<div style="background: #ececec; border-bottom: 1px solid #c9cdd2; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #3a4046"><svg width="16" height="16" aria-hidden="true"><use href="#z-plain"></use></svg><span>PH-Composer</span></div>
+<div style="padding: 0 16px; display: flex; gap: 18px; border-bottom: 1px solid #e0e1e9"><span style="padding: 8px 2px; border-bottom: 2px solid #33261d; color: #33261d; font-weight: 600">Zones</span><span style="padding: 8px 2px; color: #6a6e79">Assemblies</span><span style="padding: 8px 2px; color: #6a6e79">Windows</span><span style="padding: 8px 2px; color: #6a6e79">Export</span></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Zones</span><div style="display: flex; gap: 8px"><a href="#solve" style="border: 1px solid #c9cdd2; border-radius: 5px; padding: 6px 10px; color: #2a211b; text-decoration: none">Solve</a><a href="#new" style="background: #33261d; border-radius: 5px; padding: 6px 12px; color: #ffffff; font-weight: 600; text-decoration: none">New Zone</a></div></div>
+<div style="border: 1px solid #e0e1e9; border-radius: 7px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 6px 10px; background: #f3f3f7; border-bottom: 0; font-size: 12px; font-weight: 600; color: #4a4d57"><span></span><span>Face</span><span>Type</span><span>Boundary</span><span style="text-align: right">m²</span></div>
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #f3f3f7"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Living</span><span>Wall</span><span style="color: #6a6e79">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">42.6</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #f3f3f7"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Kitchen</span><span>Floor</span><span style="color: #6a6e79">Ground</span><span style="text-align: right; font-variant-numeric: tabular-nums">18.2</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bedroom</span><span>Roof or ceiling</span><span style="color: #6a6e79">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">31.0</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bath</span><span>Wall</span><span style="background: #fff0c2; color: #785400; border: 1px solid #d8b45c; border-radius: 999px; padding: 0 8px; font-weight: 600; justify-self: start">?</span><span style="text-align: right; font-variant-numeric: tabular-nums">9.4</span></div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 11px; color: #6a6e79">2 of 4 Faces checked</span><a href="#assign" style="color: #33261d; font-weight: 600; text-decoration: none">Assign Assembly</a></div>
+</div>
+</div>
+</div><div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-height: 98px"><span style="font-size: 21px; font-weight: 700">3 · No header fill</span><span style="font-size: 14px; line-height: 1.4; color: #5b5148">White header with a firm rule under it, so nothing sits next to the green rows. Lines stay SketchUp grey.</span></div>
+<div style="border: 1px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #ffffff; color: #2a211b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; box-shadow: 0 6px 20px #10242c1a">
+<div style="background: #ececec; border-bottom: 1px solid #c9cdd2; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #3a4046"><svg width="16" height="16" aria-hidden="true"><use href="#z-plain"></use></svg><span>PH-Composer</span></div>
+<div style="padding: 0 16px; display: flex; gap: 18px; border-bottom: 1px solid #e0e1e9"><span style="padding: 8px 2px; border-bottom: 2px solid #33261d; color: #33261d; font-weight: 600">Zones</span><span style="padding: 8px 2px; color: #6a6e79">Assemblies</span><span style="padding: 8px 2px; color: #6a6e79">Windows</span><span style="padding: 8px 2px; color: #6a6e79">Export</span></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Zones</span><div style="display: flex; gap: 8px"><a href="#solve" style="border: 1px solid #c9cdd2; border-radius: 5px; padding: 6px 10px; color: #2a211b; text-decoration: none">Solve</a><a href="#new" style="background: #33261d; border-radius: 5px; padding: 6px 12px; color: #ffffff; font-weight: 600; text-decoration: none">New Zone</a></div></div>
+<div style="border: 1px solid #e0e1e9; border-radius: 7px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 6px 10px; background: #ffffff; border-bottom: 1.5px solid #90939f; font-size: 12px; font-weight: 600; color: #2a211b"><span></span><span>Face</span><span>Type</span><span>Boundary</span><span style="text-align: right">m²</span></div>
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Living</span><span>Wall</span><span style="color: #6a6e79">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">42.6</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Kitchen</span><span>Floor</span><span style="color: #6a6e79">Ground</span><span style="text-align: right; font-variant-numeric: tabular-nums">18.2</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bedroom</span><span>Roof or ceiling</span><span style="color: #6a6e79">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">31.0</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e0e1e9; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bath</span><span>Wall</span><span style="background: #fff0c2; color: #785400; border: 1px solid #d8b45c; border-radius: 999px; padding: 0 8px; font-weight: 600; justify-self: start">?</span><span style="text-align: right; font-variant-numeric: tabular-nums">9.4</span></div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 11px; color: #6a6e79">2 of 4 Faces checked</span><a href="#assign" style="color: #33261d; font-weight: 600; text-decoration: none">Assign Assembly</a></div>
+</div>
+</div>
+</div><div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-height: 98px"><span style="font-size: 21px; font-weight: 700">4 · Warm neutrals</span><span style="font-size: 14px; line-height: 1.4; color: #5b5148">Header in the brand off-white (#f6f3ec) with warm lines. Sits best with the green, furthest from SketchUp.</span></div>
+<div style="border: 1px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #ffffff; color: #2a211b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; box-shadow: 0 6px 20px #10242c1a">
+<div style="background: #ececec; border-bottom: 1px solid #c9cdd2; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #3a4046"><svg width="16" height="16" aria-hidden="true"><use href="#z-plain"></use></svg><span>PH-Composer</span></div>
+<div style="padding: 0 16px; display: flex; gap: 18px; border-bottom: 1px solid #e6e0d6"><span style="padding: 8px 2px; border-bottom: 2px solid #33261d; color: #33261d; font-weight: 600">Zones</span><span style="padding: 8px 2px; color: #6b6259">Assemblies</span><span style="padding: 8px 2px; color: #6b6259">Windows</span><span style="padding: 8px 2px; color: #6b6259">Export</span></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Zones</span><div style="display: flex; gap: 8px"><a href="#solve" style="border: 1px solid #c9cdd2; border-radius: 5px; padding: 6px 10px; color: #2a211b; text-decoration: none">Solve</a><a href="#new" style="background: #33261d; border-radius: 5px; padding: 6px 12px; color: #ffffff; font-weight: 600; text-decoration: none">New Zone</a></div></div>
+<div style="border: 1px solid #e6e0d6; border-radius: 7px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 6px 10px; background: #f6f3ec; border-bottom: 0; font-size: 12px; font-weight: 600; color: #5b5148"><span></span><span>Face</span><span>Type</span><span>Boundary</span><span style="text-align: right">m²</span></div>
+<div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e6e0d6; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Living</span><span>Wall</span><span style="color: #6b6259">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">42.6</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e6e0d6; align-items: center; background: #f1f6d6"><span style="width: 13px; height: 13px; border-radius: 3px; background: #7d9415; display: inline-block"></span><span>Level 1 · Kitchen</span><span>Floor</span><span style="color: #6b6259">Ground</span><span style="text-align: right; font-variant-numeric: tabular-nums">18.2</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e6e0d6; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bedroom</span><span>Roof or ceiling</span><span style="color: #6b6259">Outdoors</span><span style="text-align: right; font-variant-numeric: tabular-nums">31.0</span></div><div style="display: grid; grid-template-columns: 16px 1.5fr 1fr 1fr 44px; gap: 8px; padding: 7px 10px; border-top: 1px solid #e6e0d6; align-items: center; background: #ffffff"><span style="width: 11px; height: 11px; border-radius: 3px; border: 1px solid #9aa0a6; display: inline-block"></span><span>Level 2 · Bath</span><span>Wall</span><span style="background: #fff0c2; color: #785400; border: 1px solid #d8b45c; border-radius: 999px; padding: 0 8px; font-weight: 600; justify-self: start">?</span><span style="text-align: right; font-variant-numeric: tabular-nums">9.4</span></div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 11px; color: #6b6259">2 of 4 Faces checked</span><a href="#assign" style="color: #33261d; font-weight: 600; text-decoration: none">Assign Assembly</a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1840,"height":680}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
