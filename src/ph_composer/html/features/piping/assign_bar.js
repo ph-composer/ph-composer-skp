@@ -140,8 +140,9 @@ function (ui, fields, unitFields, lineBars, shared, pipeTool) {
       // default; another role's values are left as the user set them.
       var defaults = {};
       (ROLE_KEYS[role] || []).forEach(function (key) { defaults[key] = DEFAULTS[key]; });
-      if (this.apply(Object.assign(defaults, { pipe_type_id: this.tool.state.pipe_type_id, role: role },
-        this.tool.state.values))) this.armed = armed;
+      // A field held back by focus leaves nothing marked shown, so a later state is applied whole.
+      this.armed = this.apply(Object.assign(defaults, { pipe_type_id: this.tool.state.pipe_type_id, role: role },
+        this.tool.state.values)) ? armed : null;
     }
     this.paintTypes();
     this.paint();

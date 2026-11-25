@@ -301,9 +301,9 @@
       "sha256": "b1f410e5e479269353893963d6024c8fdbd3e9779174f2658fd8f4d92efd19d7"
     },
     "html/features/piping/assign_bar.js": {
-      "bytes": 10957,
+      "bytes": 11061,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a1c822c3216448c02ad883e792165e5e416565816ff7cd921fd978933d8dbb46"
+      "sha256": "faf66f8cec111c799df9e9ad73a2a3e38cb9950b6ea9dd0802a242f9d083a141"
     },
     "html/features/piping/pipe_tool.js": {
       "bytes": 3279,

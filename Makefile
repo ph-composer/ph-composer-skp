@@ -114,9 +114,10 @@ lint-js:
 # B2, F8, F26). A review finding kept as a code comment is written `REVIEW F05` and is not a planning id.
 PLANNING_IDS := \b(P\d-[A-F]\d?|P\d+[a-z]\d*-\d+|P\d+-\d+[a-z]?|M\d\d[a-z]?|Q\d{1,2}|D\d{1,2}|D\d+[a-z]\d*-\d+|D-\d+|M\d[a-z]|R-D\d+|R0\d|A\d\d|S\d\d|T\d\d|B\d|C\d|I\d{1,2}|U\d|(?<!REVIEW )F\d\d?)\b
 # An SVG path's data (`<path d="M12 4v16"/>`) is skipped whole: its move commands read as register ids. Only the
-# value of a `d` written first in a `<path` tag, or a URL-encoded `%3Cpath` in a stylesheet, holding path data is
-# skipped; the lookbehind is fixed length, which every PCRE2 git links reads.
-SVG_PATH_DATA := (?<=<path |%3Cpath )d\s*=\s*([\x22\x27])\s*[Mm][-+\d\s,.eEMmLlHhVvCcSsQqTtAaZz]*\1(*SKIP)(*FAIL)|
+# value of a `d` written first in a `<path` tag, or a URL-encoded `%3Cpath` in a stylesheet, holding path data (a
+# move to two coordinates, then path characters) is skipped. The lookbehind is fixed length, which every PCRE2 git
+# links reads, so a `d` after another attribute is linted like any text: write `d` first.
+SVG_PATH_DATA := (?<=<path |%3Cpath )d\s*=\s*([\x22\x27])\s*[Mm]\s*[-+]?[\d.]+(?:[eE][-+]?\d+)?(?:[\s,]+|(?=[-+]))[-+]?[\d.][-+\d\s,.eEMmLlHhVvCcSsQqTtAaZz]*\1(*SKIP)(*FAIL)|
 # Planning moves when it is archived; a citation into it breaks. The vendored payload is exempt.
 lint-citations:
 	@if git grep $(CITATION_FLAGS) -nP '$(SVG_PATH_DATA)planning/|\bPRD\b|CONTRACTS\.md C\d|$(PLANNING_IDS)' -- $(CITATION_PATHS) \

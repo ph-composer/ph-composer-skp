@@ -5469,6 +5469,8 @@
         "src/ph_composer/html/units.js",
         "src/ph_composer/html/unit_field.js",
         "src/ph_composer/html/record_edits.js",
+        "src/ph_composer/html/inventory_grid.js",
+        "src/ph_composer/html/unit_numbers.js",
         "src/ph_composer/html/fields.js",
         "src/ph_composer/html/features/mechanical/*",
         "src/ph_composer/features/mechanical/install.rb",

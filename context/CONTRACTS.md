@@ -999,8 +999,7 @@ The declared references put each named item in the engine's incoming-reference s
 `replacement_id` refuses `reference.in_use`, its message naming the Zones; with an id, every slot naming the item
 takes the replacement, and with null each is emptied, staged through `stage_extension` in the delete's proposal and
 handed to `propose_delete` as a `Records::ReferencePlan`, one Undo step. Only an understood payload is moved; any
-other stays as stored, and the engine refuses the delete as the incoming check does (a Zone payload that names
-records, above). A Zone this feature staged earlier in the same proposal
+other stays as stored, and the incoming check then reads it as "A Zone payload that names records" above says. A Zone this feature staged earlier in the same proposal
 reads as staged, so the move builds from that write, and the plan projects every Zone the proposal rewrote. A Zone whose two occurrences share an id, a copy not yet
 made independent, refuses the move as `target.ambiguous`. With an id or null, `ventilators.delete` also moves or
 clears every other feature's record naming the Ventilator (a Ducting group's `ventilator_id`) through the registered

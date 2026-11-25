@@ -357,6 +357,16 @@ test("a tool armed while Multiplier has focus shows its value once the field is 
   assert.strictEqual(bar.multiplier.value, "1", "the default the tool now assigns to a new trunk");
 });
 
+test("two re-arms while Multiplier has focus leave every field showing the last", function () {
+  var o = setup(), bar = o.view(PIPING).bar;
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: true });
+  bar.multiplier.focus();
+  armed(o, "trunk", { multiplier: 1, demand_recirculation: false });
+  armed(o, "trunk", { multiplier: 12, demand_recirculation: true });
+  bar.multiplier.blur(); o.paint();
+  assert.deepStrictEqual([bar.multiplier.value, bar.demand.checked], ["12", true]);
+});
+
 test("Escape on an invalid recirculation draft restores the value and Assign with it", function () {
   var o = setup(), bar = o.view(PIPING).bar;
   change(bar.type, fixtures.PT1);
