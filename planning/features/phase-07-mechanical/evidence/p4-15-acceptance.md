@@ -229,7 +229,7 @@ P4-15 ledger row, roadmap rows 4.5 and 4.6 without their owed host cases, the ro
 pump product section not saying a missing record blocks, the stale split's rule unstated, and the gate logs uncited
 (this section's table). Left: a pre-existing stale sentence in STATUS "State" (P4-08 to P4-14 as stubs), not this
 stage's; and "neither names the other" for piping and ducting, true of `src/` and now stated in EXTENSIBILITY.
-Codex gpt-6.2-sol is owed on the PR, after the gate.
+Codex gpt-6.2-sol cycle 1 on `54c5544a` (PR #591): 6 P2, 3 P3, all fixed in `aa5e1efa` (M15's climate, expected values and dependency paths; the METr tree, duct list and Spaces rows and the per-Segment shared item; when the heat pump blend is omitted and what blocks; every case asking for the same HBJSON; the pinned path count; `capacity` at P4-08; the past-tense planning lines), each thread answered. The fixes are documentation and ledger only, so no second cycle ran.
 
 ## Not run
 
