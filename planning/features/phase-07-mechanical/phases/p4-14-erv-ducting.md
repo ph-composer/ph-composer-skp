@@ -7,7 +7,7 @@ ISSUE: #562
 
 ## Entry gates
 
-P4-04 merged (the ventilation section the ducts join, #567); P4-13's draw and assign behavior (P4-13a to P4-13d merged, #576 to #579; P4-13e in review, #580); Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08 merged, all met on 2026-10-26 (P3b-04's chain rule is not needed: only the sum of a run's lengths matters); the ERV ducting interview ([its PRD](../erv-ducting/PRD.md), Q1 to Q9), met 2026-11-23 (D4-37); D4-09 answered. P4-14a stacks on P4-13e (#580) while that is open.
+P4-04 merged (the ventilation section the ducts join, #567); P4-13's draw and assign behavior (P4-13a to P4-13e merged, #576 to #580); Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08 merged, all met on 2026-10-26 (P3b-04's chain rule is not needed: only the sum of a run's lengths matters); the ERV ducting interview ([its PRD](../erv-ducting/PRD.md), Q1 to Q9), met 2026-11-23 (D4-37); D4-09 answered. P4-14a stacked on P4-13e until #580 merged on 2026-11-25.
 
 ## Owns
 

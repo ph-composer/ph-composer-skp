@@ -1330,6 +1330,32 @@ Distribution pipes run at 60 °C for 24 h; a bare Pipe Type with no conductivity
 A pipe's `user_data` rides on its segment; a Piping group's and a Pipe Type's are left out with
 `export.metadata_omitted`. With a System's tap points left blank, the export counts its twigs.
 
+### ERV ducting
+
+ERV ducting is its own feature beside Mechanical, its operations named `ph_composer.ducting.*`. Only the
+two cold runs between each ventilator and the outside are drawn, as lines; today only the Duct Types
+exist.
+
+A Duct Type is one duct specification kept in the Model. Read `ph_composer.ducting.duct_types.list`, a
+bounded page at a time; names are unique. Create one with `ph_composer.ducting.duct_types.create`,
+giving at least `name` (shown as Tag). Unless you give them, it is a round duct (`shape` `round`) of
+`diameter_mm` 160 with `insulation_thickness_mm` 25.4 of reflective insulation
+(`insulation_reflective` true) at `insulation_conductivity_w_mk` 0.04 W/mK. A rectangular duct sends
+`shape` `rectangular` with `width_mm` and `height_mm` and no diameter. A type holds its shape's
+dimensions and never the other shape's: one missing or extra, a dimension of 0 or less, a negative
+thickness or a conductivity of 0 is refused as `params.invalid` and nothing is written. To change the
+shape, send the new `shape` with its dimensions; the old ones are removed in the same edit.
+
+Setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then reads
+`export_ready: false` with `ducting.insulation_conductivity_missing`, which blocks the export of a duct
+using the type. A bare duct, `insulation_thickness_mm` 0, needs no conductivity. Each row gives the
+colour the type draws in under `display.color`; set `color` to store one, or null to return to the
+default. Edit with `ph_composer.ducting.duct_types.update`, copying `expected_values` from the values
+you read; `ph_composer.ducting.duct_types.duplicate` copies one with its `user_data`.
+`ph_composer.ducting.duct_types.delete` deletes one; a `replacement_id` you give must be another
+existing type or null, which matters once ducts use the type. Each is one Undo step. Write a type's
+`user_data` with `ph_composer.records.update_metadata`.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

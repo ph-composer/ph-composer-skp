@@ -7,7 +7,7 @@ ISSUE: #562
 
 ## Entry and scope
 
-Requires P4-13e's head (the last feature registered before this one). Stacks on P4-13e's branch while #580 is open.
+Requires P4-13e's head (the last feature registered before this one), merged to `main` (#580) on 2026-11-25; the plan commits were rebased onto `main` and this sub-stage's code follows them on `feat/phase-07-mechanical-p4-14`.
 Needs nothing of P4-14b, and does not wait on Ed's answer about the shared layer.
 
 Owns:
