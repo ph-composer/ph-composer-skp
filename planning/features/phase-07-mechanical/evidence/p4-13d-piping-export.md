@@ -88,6 +88,36 @@ table:
 - PHX `tests/python/test_piping_phx_round_trip.py`: two tests.
 - Every other extraction golden gains only the empty `ph_composer.piping.export.piping` section.
 
+## Review
+
+- Sonnet adversarial read before the gate: 14 findings. Fixed: the `shared` check scanned every component path per
+  pipe (now a path lookup); the forced-failure test failed on the first build, so it could not see a half-added
+  system (now the second Room's build fails); untested conformance branches, the empty-object case, warnings against
+  the preflight's rows, blocking rows' objects and a twice-translated determinism check gained tests; an Edge outside
+  every Piping group with a malformed record blocked the export but not the preflight (no longer read); a Model with
+  no pipes read every Pipe Type (no longer); conformance accepted another System's trunk (now keyed by System);
+  `OverflowError` escaped `translate`; `user_data` was shallow-copied across Rooms; a finding named its run twice; the
+  preflight walked the Model three times (now once, `Scan.call(walked:)`). Declined: a `target_kind` on the Pipe Type
+  metadata check (the code passes none); an unreadable Piping group nested in another labelled a pipe (writes refuse
+  nesting); unpaged `edge_paths` in a finding's Locate (the thermal-bridge precedent, and `runs.members` pages a run).
+  It also noted, pre-existing and outside this stage, that two Python processes give canonical HBJSON differing in
+  `team` identifiers, `bldg_segments` and list order, so a whole-file byte comparison on re-export cannot hold; the
+  hot water systems and piping are identical (M13d's "same HBJSON" compares those).
+- Codex gpt-6-astra cycle 1 on `ec10578e`: 1 P1, 1 P2, both fixed in `8304dac6`: claimed extension payloads on pipes
+  and Piping groups were not captured for their claimant (the reads now pass the occurrence path; test added, which
+  fails without it), and a recirculation mean a float's width above 100 C refused the export (now any finite number;
+  the vectors gain such a System). Cycle 2 on `8304dac6`: no findings, approve.
+
 ## Gate
 
-Recorded after the review cycles, on the final head.
+Final head `8304dac6`, after both review cycles:
+
+- `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes: 3525 runs, 50060 assertions, 0 failures, 0 errors,
+  1 skips" each; JS 1214 pass, 0 fail; Python 486 passed, 1 skipped; hostkit 48 runs; "RBZ verified: 817 files,
+  8992321 bytes, 27662666 bytes installed".
+- Installed size: 27,662,666 bytes, 44,117 over P4-13c's 27,618,549 against the 35 KB estimate (23 percent over,
+  inside the 25 percent stop line); 337,334 under the 28,000,000 ceiling.
+- Browser checks: `make ui-checks` on `8304dac6`: 39 of 39 scripts pass, exit 0, none skipped (no panel change).
+- PHX: `uv run --group phx pytest tests/python` on `8304dac6`: 486 passed, 1 skipped (`test_map_borders.py`,
+  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: 26 passed, 0 skipped (24 before, and this stage's two).
+- Design System: not needed; no kit CSS, shared kit part or unit quantity changed.
