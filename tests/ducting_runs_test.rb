@@ -119,6 +119,17 @@ class DuctingRunsTest < Minitest::Test
     assert_equal [2.5, 1.8], lengths(result).fetch("ERV-1")
   end
 
+  def test_a_second_quantity_is_a_second_run_and_each_total_applies_its_own
+    facts = [duct("exhaust_air", DT1, [0, 0, 0], [1, 0, 0]),
+             duct("exhaust_air", DT1, [0, 1, 0], [2, 1, 0], :quantity => 2)]
+    result = schedule(facts)
+    assert_equal [[1.0, 1], [2.0, 2]],
+                 result.fetch("runs").map { |row| [row.fetch("length_m").round(3), row.fetch("quantity")] }
+                       .sort_by(&:last)
+    assert_equal [0.0, 5.0], lengths(result).fetch("ERV-1")
+    assert_equal 5.0, result.fetch("types").find { |row| row.fetch("duct_type_id") == DT1 }.fetch("used_length_m")
+  end
+
   def test_a_pasted_group_counts_twice_with_distinct_identifiers_and_the_shared_note
     copy = DG1.merge("group_path" => [601])
     facts = dg1_outdoor(:shared => true) + dg1_exhaust(:shared => true) +
