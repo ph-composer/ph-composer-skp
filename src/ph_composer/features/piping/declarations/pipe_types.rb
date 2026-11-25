@@ -65,7 +65,10 @@ module PhComposer
                             :refuses => PAGE, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
                             :examples => LIST_EXAMPLES) do |request|
-          PipeType::Reads.list(request, Scan.used_lengths(request))
+          # Used length walks the Model, so a read that leaves the field out does not pay for it.
+          fields = request.params["fields"]
+          measured = fields.nil? || fields.include?("used_length_m")
+          PipeType::Reads.list(request, measured ? Scan.used_lengths(request) : {})
         end
         feature.query("#{PREFIX}.all", :description => "Every Pipe Type with its values, export readiness and used " \
                                                        "length, for the panel snapshot.",

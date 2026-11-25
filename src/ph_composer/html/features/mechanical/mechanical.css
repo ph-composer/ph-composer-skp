@@ -54,11 +54,9 @@
 /* The optional values: label over field, one per value. */
 .phc-workspace .mech-optional-field { display: grid; gap: 4px; margin: 0 0 10px; }
 
-/* Read-only cells (a System's recirculation, a Tank's export slot) and the efficiency values a Heater's Type does not
-   take: plain text in the grid, numbers from the right, the inactive ones muted. */
+/* Read-only cells (a Tank's export slot, a column another feature contributes) and the efficiency values a Heater's
+   Type does not take: plain text in the grid, numbers from the right, the inactive ones muted. */
 .phc-workspace .phc-table td.mech-read-only { color: var(--ink); }
-.phc-workspace .phc-table td.col-recirculation_temperature_c,
-.phc-workspace .phc-table td.col-recirculation_hours { text-align: right; }
 .phc-workspace .phc-table td.mech-inactive { color: var(--muted-faint); text-align: right; }
 .phc-workspace .phc-table td.mech-muted { color: var(--muted); }
 /* A Tank its Role has no free slot for: amber, as a value the user must act on. */

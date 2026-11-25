@@ -1,30 +1,27 @@
 /* Hot Water › Systems: the Model's Hot Water Systems as an equipment table (equipment_table.js). Tag, the Zones each
-   serves, its tap points, the Heaters and Tanks that name it, its recirculation temperature and hours (read only:
-   honeybee-ph works them out from the recirculation piping, and gives its defaults until there is any), its piping
-   calculation method, then Manufacturer, Model and Notes. A System serving Zones that another System also serves in
-   one Building Segment is pooled downstream; that note, from the rows' findings, sits beneath the table. Delete
-   offers a replacement for the Zones, Heaters and Tanks that name it, and clearing only while no Heater or Tank does.
+   serves, its tap points, the Heaters and Tanks that name it, its piping calculation method, then Manufacturer, Model
+   and Notes; another feature may contribute columns through the table's section (html/table_contributions.js). A
+   System serving Zones that another System also serves in one Building Segment is pooled downstream; that note, from
+   the rows' findings, sits beneath the table. Delete offers a replacement for the Zones, Heaters and Tanks that name
+   it, and clearing only while no Heater or Tank does.
 
    The Hot Water subtab's Heaters and Tanks pills (hot_water_heaters.js, hot_water_tanks.js) share `systemCell`, the
    System a Heater or Tank names, chosen in place. */
-PhComposerUI.define("features/mechanical/hot_water", ["panel", "snapshot", "workspace", "fields", "units",
-  "unit_preferences", "sections/colour_by", "features/mechanical/systems", "features/mechanical/serves",
-  "features/mechanical/equipment_table"],
-function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, serves, equipment) {
+PhComposerUI.define("features/mechanical/hot_water", ["panel", "snapshot", "workspace", "sections/colour_by",
+  "features/mechanical/systems", "features/mechanical/serves", "features/mechanical/equipment_table"],
+function (panel, snapshot, ui, colourBy, systems, serves, equipment) {
   "use strict";
   var FEATURE = "ph_composer.mechanical", SYSTEM = FEATURE + ".hot_water";
   var SECTION = FEATURE + ".hot_water_systems", LABEL = "Hot Water System";
   var SECTIONS = { systems: SECTION, heaters: FEATURE + ".hot_water_heaters", tanks: FEATURE + ".hot_water_tanks" };
   var BY_HOT_WATER_SYSTEM = FEATURE + ".by_hot_water_system";
   var POOLED = "mechanical.hot_water_pooled", METHOD_NOT_EXPORTED = "mechanical.method_not_exported";
-  var TEMPERATURE = fields.TEMPERATURE_C;
   // PHX's four piping calculation methods (PhxHotWaterPipingCalcMethod), stored as their numbers.
   var METHODS = [{ value: "", label: "None" }, { value: "1", label: "Individual pipes (simplified)" },
     { value: "2", label: "Hot water calculator (simplified)" }, { value: "3", label: "Piping per unit" },
     { value: "4", label: "Piping per floor" }];
   var columns = [["serves", "Serves"], ["number_tap_points", "Tap points"], ["heaters", "Heaters"],
-    ["tanks", "Tanks"], ["recirculation_temperature_c", "Recirculation temperature"],
-    ["recirculation_hours", "Recirculation h/day"], ["piping_calc_method", "Calculation method"]];
+    ["tanks", "Tanks"], ["piping_calc_method", "Calculation method"]];
 
   function names(records) {
     return records.map(function (record) { return record.values.name; }).sort(ui.compareText);
@@ -72,7 +69,6 @@ function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, se
         usage: function (state, id) { return self.usage(id); } },
       parts: [this.picker], repainted: function () { self.repainted(); },
       inventory: {
-        quantities: { recirculation_temperature_c: TEMPERATURE },
         selectFields: { piping_calc_method: METHODS },
         normalize: function (field, text) {
           if (field === "number_tap_points") return equipment.wholeNumber(text, 1, true);
@@ -87,8 +83,7 @@ function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, se
           return [values.name, values.manufacturer, values.model, values.notes].concat((record.zones || []).map(
             function (zone) { return zone.name; })).filter(Boolean).join(" ");
         },
-        defaultWidths: { serves: 220, number_tap_points: 100, heaters: 150, tanks: 150,
-          recirculation_temperature_c: 210, recirculation_hours: 164, piping_calc_method: 250 },
+        defaultWidths: { serves: 220, number_tap_points: 100, heaters: 150, tanks: 150, piping_calc_method: 250 },
         columnMenus: { sort: ["name", "serves", "number_tap_points", "heaters", "tanks", "manufacturer", "model",
           "notes"], filter: ["name", "piping_calc_method", "manufacturer", "model"] },
         headerActions: function (field, state) { return toggles.actions(state, field); },
@@ -98,9 +93,6 @@ function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, se
       cell: function (td, row, field) {
         if (field === "serves") { self.servesCell(td, row.record); return true; }
         if (field === "heaters" || field === "tanks") { self.membersCell(td, row.record, field); return true; }
-        if (field === "recirculation_temperature_c" || field === "recirculation_hours") {
-          self.recirculationCell(td, row.record, field); return true;
-        }
         return false;
       } });
     this.note = ui.element("p", "mech-table-note");
@@ -116,8 +108,6 @@ function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, se
   Systems.prototype.value = function (record, field) {
     if (field === "serves") return (record.zones || []).map(function (zone) { return zone.name; }).join(", ");
     if (field === "heaters" || field === "tanks") return names(this.membersOf(record, field)).join(", ");
-    if (field === "recirculation_temperature_c") return (record.recirculation || {}).temperature_c;
-    if (field === "recirculation_hours") return (record.recirculation || {}).hours;
     var stored = record.values[field];
     return field === "piping_calc_method" ? (stored === null || stored === undefined ? "" : String(stored)) : stored;
   };
@@ -153,19 +143,6 @@ function (panel, snapshot, ui, fields, units, preferences, colourBy, systems, se
     td.classList.toggle("mech-muted", !listed.length);
     ui.tooltip(td, listed.length ? listed.join(", ") : "No " + (kind === "heaters" ? "Heater" : "Tank") +
       " names " + record.values.name + ".");
-  };
-  /* Recirculation as the export carries it, read only; muted, with its source in the tooltip, while it is
-     honeybee-ph's default rather than the piping's. */
-  Systems.prototype.recirculationCell = function (td, record, field) {
-    var recirculation = record.recirculation || {}, temperature = field === "recirculation_temperature_c";
-    var value = temperature ? recirculation.temperature_c : recirculation.hours;
-    td.textContent = value === null || value === undefined ? "—" : temperature ?
-      units.format(value, TEMPERATURE, units.profile(TEMPERATURE, preferences.current()), { showUnit: false }) :
-      String(value);
-    td.classList.add("mech-read-only");
-    td.classList.toggle("mech-muted", !recirculation.from_piping);
-    ui.tooltip(td, recirculation.from_piping ? "Read from the recirculation piping." :
-      "honeybee-ph's default until recirculation piping is drawn; read only.");
   };
   /* A calculation method the export leaves out carries the finding's sentence on an info badge in its cell. */
   Systems.prototype.methodBadge = function (td, record) {

@@ -1,0 +1,54 @@
+/* Hot Water's Piping pill: the assign bar over the Piping groups and the schedule with its totals and findings. The
+   tables, controls and bubbles are the kit's; these rules only place this screen's own parts. */
+/* One row that always shows, so a selection never moves what is under it; it wraps at narrow widths. */
+.piping-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0; }
+.piping-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.piping-assign-bar select { width: 160px; max-width: 100%; }
+.piping-bar-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.piping-bar-field[hidden], .piping-assign-reason[hidden] { display: none; }
+.phc-workspace .piping-multiplier { width: 4em; }
+.phc-workspace .piping-bar-field .phc-unit-field input { width: 5em; }
+.piping-multiplier[aria-invalid="true"] { border-color: var(--red); }
+.piping-assign-reason { margin-left: -8px; }
+.piping-tool-arm { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+/* The running pipe tool stays marked at rest, as an edge tool's button does, so the cue survives the
+   panel losing focus to SketchUp. */
+.phc-workspace .piping-assign-bar .piping-tool-arm[aria-pressed="true"] {
+  color: #fff; background: var(--interaction-highlight); border-color: var(--interaction-highlight);
+}
+.piping-new-group { margin-left: auto; }
+.piping-groups h2, .piping-schedule-title, .piping-totals h2, .piping-others h2 {
+  margin: 16px 0 4px; font-size: var(--text-md); font-weight: 600;
+}
+.piping-totals h3 { margin: 8px 0 2px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
+/* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
+.piping-table { min-width: 0; overflow: auto; }
+.piping-totals .piping-table { max-width: 900px; }
+.piping-schedule tbody tr { cursor: pointer; }
+.piping-schedule-section > .phc-inventory-controls { margin: 4px 0 8px; }
+.phc-workspace .phc-table td.piping-recirculation { text-align: right; }
+.piping-table .phc-table :is(.col-display_name, .col-system, .col-group, .col-role, .col-parent_name,
+  .col-pipe_type_name, .col-values, .col-group_name, .col-system_name, .col-note) { text-align: left; }
+.phc-workspace .phc-table td.piping-warning { color: var(--warning-ink); }
+.piping-status { font-size: 12px; color: var(--muted); }
+.piping-status.piping-error { color: var(--red); }
+.phc-workspace .phc-table .piping-blocks-export { color: var(--amber); }
+.piping-findings-layer .piping-findings { display: block; }
+.piping-finding { display: flex; align-items: baseline; gap: 10px; }
+.piping-finding p { flex: 1; margin: 0 0 6px; }
+.piping-finding-blocks { color: var(--warning-ink); font-weight: 600; }
+.piping-totals[hidden], .piping-others[hidden] { display: none; }
+.piping-other-findings { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line);
+  border-radius: var(--radius-md); }
+.piping-other-findings li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px;
+  border-bottom: 1px solid var(--line); }
+.piping-other-findings li:last-child { border-bottom: 0; }
+.piping-other-findings li span { flex: 1; }
+/* A narrow panel lays the bar out in deliberate rows and keeps the tool's button to its icon. */
+@media (max-width: 500px) {
+  .piping-assign-bar select { flex: 1 1 140px; width: auto; }
+  .piping-assign-bar { gap: 8px; }
+  .phc-workspace .piping-tool-arm { width: 30px; padding: 5px; }
+  .piping-tool-label { display: none; }
+  .piping-new-group { margin-left: 0; }
+}

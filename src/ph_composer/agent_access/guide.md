@@ -1007,10 +1007,9 @@ until you send `replace: true`. `ph_composer.mechanical.hot_water_systems.delete
 of them to another System in one Undo step; `replacement_id: null` empties the Zones but still
 refuses while a Heater or Tank names it, so move or delete those first.
 
-System rows carry the Zones each serves, `heater_count`, `tank_count`, and `recirculation`
-(`temperature_c`, `hours`), read-only: honeybee-ph works them out from recirculation piping, and
-gives 60 °C and 24 h while there is none. These rows still read 60 °C and 24 h when the System has
-recirculation pipes; the export carries the pipes' values, which `ph_composer.piping.systems` reads. Their `findings` add
+System rows carry the Zones each serves, `heater_count` and `tank_count`. A System's recirculation
+temperature and hours come from its recirculation pipes: read them with `ph_composer.piping.systems`. Their
+`findings` add
 `mechanical.hot_water_pooled`, info, when two served Systems share a Building Segment: WUFI-Passive
 and METr pool their tanks and heaters and keep one tap point count; and `mechanical.method_not_exported`,
 info, while the System sets a `piping_calc_method` (1 to 4) that the pinned honeybee-ph has no field
@@ -1310,6 +1309,16 @@ counted instead, and the `systems`, `types` and `unreadable` rows are left out, 
 with `ph_composer.piping.runs.members` (its `identifier`, the row's `index`, and `finding` for only a
 finding's pipes). Pass a run's or a finding's `edge_paths` to `ph_composer.piping.runs.locate`
 to select those pipes, opening their group; a hidden pipe or group refuses `piping.hidden`.
+`ph_composer.piping.schedule.all` is the whole schedule in one read, for the panel; prefer the pages.
+
+The pipe tool is the pointer route to `pipes.assign` for a user at the mouse.
+`ph_composer.piping.pipe_tool.choose` arms it with `pipe_type_id`, `role` and the role's values, as
+`pipes.assign` takes them, and turns on Colour by pipe role; each click or drag across lines in a Piping
+group is then one `pipes.assign`. `ph_composer.piping.pipe_tool.stop` ends it, and
+`ph_composer.piping.pipe_tool.state` reads what it is armed with. Assign over explicit references
+yourself; the tool is for the user. Two Colour-by modes, Pipe role and Pipe Type (mode names
+ph_composer.piping.by_role and ph_composer.piping.by_type), colour each pipe by its role or its Pipe Type;
+each legend row sums its pipes' length.
 
 The export adds each Hot Water System's pipes to the hot water system of every Room the System serves:
 each trunk run with its `multiplier`, its demand recirculation and the branch runs hanging from it, each

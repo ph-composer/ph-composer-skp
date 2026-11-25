@@ -120,7 +120,10 @@ module PhComposer
                        :factor => 1.0 },
       # A fan's runtime in minutes a year, the same in both systems, as honeybee-ph and WUFI-Passive take it.
       "annual_minutes" => { :si_label => "min/yr", :ip_label => "min/yr", :si_precision => 1, :ip_precision => 1,
-                            :factor => 1.0 }
+                            :factor => 1.0 },
+      # A recirculation pipe's hours a day, the same in both systems, as honeybee-ph's daily_period takes it.
+      "hours_per_day" => { :si_label => "h/day", :ip_label => "h/day", :si_precision => 1, :ip_precision => 1,
+                           :factor => 1.0 }
     }.freeze
 
     module_function

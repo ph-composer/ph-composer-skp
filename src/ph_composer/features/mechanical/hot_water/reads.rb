@@ -6,7 +6,7 @@ module PhComposer
       # Detached rows for the reads and the panel snapshot: each record as stored, with its metadata, its extension
       # payloads' status and whether it can export. `extra` adds what a caller composes beside a row, built from the
       # record. What a kind adds of its own comes from the hot water records alone: a System its Heater and Tank
-      # counts and its recirculation, a Tank the slot it fills.
+      # counts, a Tank the slot it fills.
       module Reads
         LISTS = { Systems::KIND_ID => "#{FEATURE_ID}.hot_water_systems.list",
                   Heaters::KIND_ID => "#{FEATURE_ID}.hot_water_heaters.list",
@@ -29,9 +29,7 @@ module PhComposer
                 .merge(extra ? extra.call(record) : {})
         end
 
-        # What a System row adds of the hot water records: how many readable Heaters and Tanks name it, and its
-        # recirculation temperature and hours, read-only. They come from recirculation piping, and until a System
-        # has any they are honeybee-ph's defaults, which is what the export carries.
+        # What a System row adds of the hot water records: how many readable Heaters and Tanks name it.
         def system_extra(request)
           counts = MEMBER_KINDS.to_h do |kind|
             [kind, members(request.engine, kind).map { |record| record.fetch("hot_water_system_id") }.tally]
@@ -39,8 +37,7 @@ module PhComposer
           lambda do |record|
             id = record.fetch("id")
             { "heater_count" => counts.fetch(Heaters::KIND_ID).fetch(id, 0),
-              "tank_count" => counts.fetch(Tanks::KIND_ID).fetch(id, 0),
-              "recirculation" => Systems::RECIRCULATION_DEFAULTS.merge("from_piping" => false) }
+              "tank_count" => counts.fetch(Tanks::KIND_ID).fetch(id, 0) }
           end
         end
 

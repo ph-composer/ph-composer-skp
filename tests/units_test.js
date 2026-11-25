@@ -60,7 +60,7 @@ test("the registry lists every quantity in its published order", function () {
     "temperature_difference", "air_permeance", "vapor_sd", "vapor_diffusion_resistance", "irradiation",
     "irradiance", "wind_speed", "distance", "power", "power_per_area", "people_per_area", "airflow_per_person",
     "airflow_per_area", "electric_efficiency", "volume_l", "percent", "capacity", "electric_power", "kilohours",
-    "annual_minutes"
+    "annual_minutes", "hours_per_day"
   ]);
 });
 

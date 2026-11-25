@@ -20,6 +20,7 @@
   var TB = "ph_composer.thermal_bridges.";
   var CLIMATE = "ph_composer.climate.";
   var MECHANICAL = "ph_composer.mechanical.";
+  var PIPING = "ph_composer.piping.";
   var ZONE_LABELS = { 1: "Not defined", 11: "1", 12: "2", 13: "3", 14: "4", 141: "4C", 15: "5", 16: "6", 17: "7",
     18: "8" };
   var NOTHING_WRITTEN = "Nothing was written.";
@@ -89,6 +90,10 @@
     this.mechanical.pumps = this.mechanical.pumps || { pumps: [], serves: {} };
     // The Fans and each Zone's list of them.
     this.mechanical.fans = this.mechanical.fans || { fans: [], serves: {} };
+    // Hot water piping: the Pipe Types, the selected lines, the Piping groups and the schedule's runs and Systems.
+    this.piping = JSON.parse(JSON.stringify(settings.piping || { types: [], selected: [], groups: [], runs: [],
+      systems: [] }));
+    this.pipeTool = { active: false, pipe_type_id: null, role: "trunk", values: {}, gesture_limit: 250 };
     // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
     // for its geolocation; `climate.geolocation` stands in for the host read.
     this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
@@ -221,6 +226,12 @@
         [TB + "edge_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.edgeTool)) },
         [MECHANICAL + "ventilators"]: { status: "completed", value: { records: this.ventilatorRows(),
           unreadable: [] } },
+        [PIPING + "pipe_types"]: { status: "completed", value: { records: this.pipeTypeRows(), unreadable: [] } },
+        [PIPING + "pipes.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
+          this.piping.selected)), ignored: [], ignored_total: 0 } },
+        [PIPING + "pipe_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.pipeTool)) },
+        [PIPING + "piping_systems"]: { status: "completed", value: { systems: JSON.parse(JSON.stringify(
+          this.piping.systems)) } },
         [MECHANICAL + "serves"]: { status: "completed", value: { zones: this.servesRows() } },
         [MECHANICAL + "hot_water_systems"]: { status: "completed", value: { records: this.hotWaterSystemRows(),
           unreadable: [] } },
@@ -308,7 +319,9 @@
           group: null },
         { name: "ph_composer.mechanical.by_ventilator", label: "Ventilator", entity_kind: "zone", group: null },
         { name: "ph_composer.mechanical.by_hot_water_system", label: "Hot Water System", entity_kind: "zone",
-          group: null }],
+          group: null },
+        { name: PIPING + "by_role", label: "Pipe role", entity_kind: "edge", group: null },
+        { name: PIPING + "by_type", label: "Pipe Type", entity_kind: "edge", group: null }],
       readouts: [["ph_composer.spaces.show", "Show Spaces", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],
@@ -322,6 +335,7 @@
     if (message.type === "action.invoke") this.invoke(message.payload);
     if (message.type === "query.invoke") {
       if (message.payload.name.indexOf(TB) === 0) this.scheduleQuery(message.payload);
+      else if (message.payload.name.indexOf(PIPING) === 0) this.pipingQuery(message.payload);
       else if (message.payload.name === "ph_composer.programs.equipment_sets.device_types") {
         this.deviceTypesQuery(message.payload);
       } else if (message.payload.name.indexOf(CLIMATE) === 0) this.climateQuery(message.payload);
@@ -415,6 +429,21 @@
       if (payload.name === "ph_composer.windows.place_tool.stop") this.windows.place_tool.active = false;
       if (payload.name === "ph_composer.windows.units.locate") this.selectedUnits = payload.params.units;
       if (payload.name === TB + "runs.locate") this.locatedEdges = payload.params.edge_paths;
+      if (payload.name === PIPING + "runs.locate") this.locatedPipes = payload.params.edge_paths;
+      // The pipe tool arms, re-arms and stops; gestures happen only in SketchUp.
+      if (payload.name === PIPING + "pipe_tool.choose") {
+        var armed = Object.assign({}, payload.params);
+        delete armed.pipe_type_id; delete armed.role;
+        // The tool leases Colour by pipe role and gives back the mode from before it, as ColourBy::Lease does.
+        if (!this.pipeTool.active) this.pipeToolLeased = this.colourBy;
+        this.pipeTool = { active: true, pipe_type_id: payload.params.pipe_type_id, role: payload.params.role,
+          values: armed, gesture_limit: 250 };
+        this.colourBy = { mode: PIPING + "by_role", isolated: null };
+      }
+      if (payload.name === PIPING + "pipe_tool.stop" && this.pipeTool.active) {
+        this.pipeTool.active = false;
+        this.colourBy = this.pipeToolLeased || { mode: null, isolated: null };
+      }
       // The edge tool arms, re-arms and stops; gestures happen only in SketchUp.
       if (payload.name === TB + "edge_tool.choose") {
         this.edgeTool = { active: true, thermal_bridge_type_id: payload.params.thermal_bridge_type_id,
@@ -498,6 +527,97 @@
             heat_loss_w_k: byGroup.reduce(function (sum, row) { return sum + row.heat_loss_w_k; }, 0) },
           units: { length_m: "m", psi_w_mk: "W/mK", heat_loss_w_k: "W/K" } } } });
     }, 0);
+  };
+
+  /* The Pipe Type rows, each with its colour and the drawn length of the fixture's runs naming it. */
+  Host.prototype.pipeTypeRows = function () {
+    var runs = this.piping.runs;
+    return this.piping.types.map(function (type) {
+      var used = runs.filter(function (run) { return run.pipe_type_id === type.id; })
+        .reduce(function (sum, run) { return sum + run.length_m; }, 0);
+      return Object.assign(JSON.parse(JSON.stringify(type)), { used_length_m: used });
+    });
+  };
+  /* The piping reads, answered on the next turn as the host does: the fixture's runs with each type's current name
+     and totals by role over them, and the Piping groups. Synthetic; Ruby builds the runs from the Model. */
+  Host.prototype.pipingQuery = function (payload) {
+    var host = this, data = this.piping;
+    this.window.setTimeout(function () {
+      var value;
+      if (payload.name === PIPING + "groups.all") value = { groups: JSON.parse(JSON.stringify(data.groups)) };
+      else {
+        var runs = data.runs.map(function (run) {
+          var type = data.types.filter(function (entry) { return entry.id === run.pipe_type_id; })[0];
+          return Object.assign(JSON.parse(JSON.stringify(run)), { pipe_type_name: type ? type.values.name : null });
+        });
+        var byRole = ["trunk", "branch", "twig", "recirculation"].map(function (role) {
+          var own = runs.filter(function (run) { return run.role === role; });
+          function total(field) { return own.reduce(function (sum, run) { return sum + run[field]; }, 0); }
+          return { role: role, run_count: own.length, line_count: total("line_count"), length_m: total("length_m") };
+        });
+        value = { runs: runs, totals: { by_role: byRole, run_count: runs.length,
+          line_count: byRole.reduce(function (sum, row) { return sum + row.line_count; }, 0),
+          distribution_length_m: byRole.slice(0, 3).reduce(function (sum, row) { return sum + row.length_m; }, 0),
+          recirculation_length_m: byRole[3].length_m },
+        systems: JSON.parse(JSON.stringify(data.systems)), types: [], unreadable: [], unreadable_total: 0 };
+      }
+      host.publish("query.result", { request_id: payload.request_id, session: payload.session,
+        outcome: { status: "completed", code: "ok", revision: host.revision, value: value } });
+    }, 0);
+  };
+  /* Pipe Types, the pipe assignment on the selected lines and the Piping groups, kept to what the pills send. */
+  Host.prototype.pipingAction = function (payload) {
+    var data = this.piping, params = payload.params, name = payload.name.slice(PIPING.length), id;
+    var target = data.types.filter(function (record) { return record.id === params.id; })[0];
+    function copy(value) { return JSON.parse(JSON.stringify(value)); }
+    if (params.id && !target) return refused("target.not_found", "That Pipe Type is unavailable.", this.revision);
+    if (target && params.expected_values && Object.keys(params.expected_values).some(function (field) {
+      var current = target.values[field];
+      return JSON.stringify(current === undefined ? null : current) !== JSON.stringify(params.expected_values[field]);
+    })) return refused("target.changed", "The Pipe Type changed. " + NOTHING_WRITTEN, this.revision);
+    if (name === "pipe_types.create" || name === "pipe_types.duplicate") {
+      id = "ppt_preview" + String(++this.sequence).padStart(5, "0");
+      var values = name === "pipe_types.create" ? Object.assign({ notes: "", datasheet_links: [], material: 2,
+        diameter_mm: 12.7, insulation_thickness_mm: 12.7, insulation_conductivity_w_mk: 0.04,
+        insulation_reflective: true, insulation_quality: 1 }, copy(params.values)) :
+        Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
+      data.types.push({ id: id, kind: PIPING + "pipe_type", schema_version: 1, user_data: {}, extension_data: {},
+        extension_status: {}, findings: [], values: values, display: { color: "#6b8f3a" }, export_ready: true,
+        export_blockers: [] });
+    } else if (name === "pipe_types.update") {
+      Object.keys(params.values).forEach(function (field) { target.values[field] = params.values[field]; });
+    } else if (name === "pipe_types.delete") {
+      data.runs.forEach(function (run) {
+        if (run.pipe_type_id === target.id) run.pipe_type_id = params.replacement_id || null;
+      });
+      data.types.splice(data.types.indexOf(target), 1);
+    } else if (name === "pipes.assign" || name === "pipes.clear") {
+      var assigned = copy(params);
+      delete assigned.targets;
+      params.targets.forEach(function (row) {
+        data.selected.forEach(function (edge) {
+          if (JSON.stringify(edge.reference) === JSON.stringify(row.reference)) {
+            edge.values = name === "pipes.clear" ? {} : assigned;
+          }
+        });
+      });
+    } else if (name === "groups.create") {
+      id = "ppg_preview" + String(++this.sequence).padStart(5, "0");
+      var path = [9000 + this.sequence];
+      data.groups.push({ path: path, reference: { group_id: id, group_path: path }, name: "",
+        values: { hot_water_system_id: params.hot_water_system_id }, pipe_count: 0, copied: false, findings: [],
+        record_problem: null, write_refusal: null });
+    } else if (name === "groups.link" || name === "groups.unlink") {
+      params.targets.forEach(function (row) {
+        data.groups.forEach(function (group) {
+          if (JSON.stringify(group.reference) !== JSON.stringify(row.reference)) return;
+          group.values = { hot_water_system_id: params.hot_water_system_id || null };
+        });
+      });
+    } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
+    this.revision += 1;
+    return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
+      value: { id: id, group_id: id }, affected: [], findings: [], detail: null };
   };
 
   /* Thermal Bridge Type records and Edge assignment, kept to what the tab sends. Synthetic outcomes. */
@@ -619,7 +739,6 @@
       }
       return Object.assign(JSON.parse(JSON.stringify(record)), { findings: found,
         heater_count: count(hotWater.heaters), tank_count: count(hotWater.tanks),
-        recirculation: { temperature_c: 60, hours: 24, from_piping: false },
         zones: served.map(function (zone) {
           return { zone_id: zone.id, reference: zone.reference, name: zone.values.name };
         }) });
@@ -1165,6 +1284,7 @@
     if (payload.name.indexOf("ph_composer.windows.") === 0) return this.windowAction(payload);
     if (payload.name.indexOf(TB) === 0) return this.thermalBridgeAction(payload);
     if (payload.name.indexOf(MECHANICAL) === 0) return this.mechanicalAction(payload);
+    if (payload.name.indexOf(PIPING) === 0) return this.pipingAction(payload);
     if (payload.name.indexOf(CLIMATE) === 0) return this.climateAction(payload);
     if (payload.name === "ph_composer.library.copy") return this.libraryCopy(payload);
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||

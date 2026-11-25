@@ -874,8 +874,8 @@ the Ventilator's rules for names, guards and copies. **Tank slots** are worked o
 over one System's Tanks: storage Tanks fill `tank_1` then `tank_2`, a buffer Tank `tank_buffer`, a solar Tank
 `tank_solar`, each role's Tanks taken by name ignoring case, then id; a Tank with no free slot of its role is unslotted. A Tank
 row carries its `slot` (null when unslotted, with `mechanical.tank_unslotted`); a System row carries the Zones it
-serves, `heater_count`, `tank_count`, read-only `recirculation` (`temperature_c` 60 and `hours` 24, honeybee-ph's
-values with no recirculation piping, `from_piping` false) and `findings`: `mechanical.item_unserved`,
+serves, `heater_count`, `tank_count` and `findings` (its recirculation is piping's `piping_systems` read, which the
+Systems table shows through piping's contributed columns): `mechanical.item_unserved`,
 `mechanical.zone_left_out` and `mechanical.hot_water_pooled` (info, two served Systems in one Building Segment).
 `hot_water_systems.delete` without `replacement_id` refuses `reference.in_use` while a Zone, Heater or Tank names the
 System; with an id, the Zones' slots move through Serves and each Heater and Tank is a guarded edit to the
@@ -1058,8 +1058,9 @@ pinned first, the family's columns, then Manufacturer, Model and Notes behind th
 (a form asking for the Tag and, for a kind that names a parent record, that record); Duplicate and Delete as row
 actions in the shared form dialog; and Locate's narrowing by Tag. Hot Water › Systems, Heaters and Tanks
 (`hot_water.js`, `hot_water_heaters.js`, `hot_water_tanks.js`) are three of them. A System row shows its Serves
-chips, tap points, the Tags of the Heaters and Tanks naming it, its `recirculation` read only (muted while
-`from_piping` is false), its `piping_calc_method` with an info badge carrying `mechanical.method_not_exported`, and
+chips, tap points, the Tags of the Heaters and Tanks naming it, its `piping_calc_method` with an info badge carrying
+`mechanical.method_not_exported`, then any columns another feature contributes to the table's section through
+`table_contributions` (piping's `Recirc.` temperature and hours, read only and muted at honeybee-ph's defaults), and
 beneath the table each Building Segment's `mechanical.hot_water_pooled` note once. A System's delete offers clearing
 only while no Heater or Tank names it (`ReplacementForm`'s `allowClear` as a function of the record). A Heater's
 System is chosen in place, one guarded update; its Type is changed in the shared form dialog, which asks for the new
@@ -1340,6 +1341,24 @@ pipe segment carries its pipe's.
   group occurrence, else `params.invalid`; a path not ending at a pipe in a Piping group refuses `target.wrong_kind`),
   refuses `piping.hidden` for a hidden pipe, Group or tag, opens the group
   through `ph_composer.context.open`, selects the pipes and frames them by world points.
+- **The panel's read** `ph_composer.piping.schedule.all` answers the whole schedule unbounded (`prefer` names
+  `schedule`): every run, the totals, the `systems` and `types` rows and every unreadable record, uncut.
+- **Colour-by modes** (`features/piping/colour_modes.rb`) `ph_composer.piping.by_role` ("Pipe role", fixed colours per
+  role in role order) and `ph_composer.piping.by_type` ("Pipe Type", each type's `display.color`; a missing type is
+  `Missing type`, incomplete): `entity_kind` `edge`, stroke 5 px as thermal bridges', one entry per readable pipe
+  occurrence with the Edge as `entity` and its world segment in `derived`; the `figure` is the drawn length, so a
+  role's legend row equals the schedule's `totals.by_role` length. A line with no assignment, or one whose record
+  cannot be read, draws nothing.
+- **The pipe tool** (`features/piping/pipe_tool.rb`, the thermal-bridge edge tool's shape, P3b-07's rules):
+  `pipe_tool.choose` (view command) takes `pipe_type_id`, `role` and the role's values as `pipes.assign` does (another
+  role's value refuses `params.invalid`; a missing type `target.not_found`), arms the tool and leases Colour by pipe
+  role; `pipe_tool.stop` ends it; `pipe_tool.state` and the snapshot section `ph_composer.piping.pipe_tool` read
+  `{active, pipe_type_id, role, values, gesture_limit}`. A pick reads the Edge's path by the selection's rule (an Edge
+  outside a Piping group or behind a write refusal refuses the gesture with its reason); type, role, values and
+  revision freeze at button-down; collection stops one past the limit; release sends one `pipes.assign` through
+  `API.invoke`, one Undo step; Escape, deactivation, suspension, a lost release and an edit-path change cancel and
+  write nothing. Menu items `pipe_tool.arm_menu` (re-arms with the last choice) and `pipe_tool.stop_menu` sit under
+  "Hot water piping".
 
 ## This computer's settings file
 

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 101
+    MINOR = 102
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -633,7 +633,14 @@ module PhComposer
                     "systems, the query ph_composer.piping.export_preflight lists its checks, and the code " \
                     "piping.system_unexported notes a System whose pipes no exported Zone takes. The schedule's " \
                     "recirculation temperature and hours add runs and pipes in identifier order, as a reloaded " \
-                    "honeybee-ph system does." }
+                    "honeybee-ph system does." },
+      { "minor" => 102, "date" => "2026-11-24",
+        "change" => "ph_composer.piping adds the panel's whole schedule read ph_composer.piping.schedule.all, the " \
+                    "pipe tool (ph_composer.piping.pipe_tool.state and its snapshot section, the view commands " \
+                    "pipe_tool.choose and pipe_tool.stop, and their menu items) and the Colour-by modes " \
+                    "ph_composer.piping.by_role and ph_composer.piping.by_type. ph_composer.mechanical." \
+                    "hot_water_systems rows drop recirculation, which the piping Systems read gives. Units add " \
+                    "hours_per_day." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

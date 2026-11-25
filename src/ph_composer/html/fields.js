@@ -34,6 +34,8 @@ PhComposerUI.define("fields", [], function () {
   var KILOHOURS = descriptor("kilohours", "kh");
   /* A fan's runtime in minutes a year, unconverted under IP. */
   var ANNUAL_MINUTES = descriptor("annual_minutes", "min");
+  /* A recirculation pipe's hours a day, unconverted under IP. */
+  var HOURS_PER_DAY = descriptor("hours_per_day", "h_day");
   /* A fraction from 0 to 1, read and entered as a percentage. */
   var PERCENT = descriptor("percent", "1");
   /* A heat pump's rated capacity in kW, shown kBtu/h under IP. */
@@ -51,6 +53,6 @@ PhComposerUI.define("fields", [], function () {
     IRRADIATION_KWH_M2: IRRADIATION_KWH_M2, IRRADIANCE_W_M2: IRRADIANCE_W_M2, WIND_SPEED_M_S: WIND_SPEED_M_S,
     DISTANCE_KM: DISTANCE_KM, ELECTRIC_EFFICIENCY: ELECTRIC_EFFICIENCY, VOLUME_L: VOLUME_L, POWER_W: POWER_W,
     PERCENT: PERCENT, CAPACITY_KW: CAPACITY_KW, ELECTRIC_POWER_W: ELECTRIC_POWER_W, KILOHOURS: KILOHOURS,
-    ANNUAL_MINUTES: ANNUAL_MINUTES,
+    ANNUAL_MINUTES: ANNUAL_MINUTES, HOURS_PER_DAY: HOURS_PER_DAY,
     with: withSettings };
 });
