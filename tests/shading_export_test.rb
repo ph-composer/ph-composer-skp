@@ -43,7 +43,7 @@ class ShadingExportTest < PhComposerTestCase
      PhComposer::Mechanical::HeatPumpExport::SECTION,
      PhComposer::Mechanical::ElectricHeaterExport::SECTION, PhComposer::Mechanical::PumpExport::SECTION,
      PhComposer::Mechanical::FanExport::SECTION, PhComposer::Mechanical::SegmentExport::SECTION,
-     PhComposer::Piping::ExportProjection::SECTION, X::SECTION]
+     PhComposer::Piping::ExportProjection::SECTION, PhComposer::Ducting::ExportProjection::SECTION, X::SECTION]
   end
 
   def point(xyz)

@@ -1,7 +1,7 @@
 # P4-14d: duct runs and the schedule
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14d`; offline evidence in [p4-14d-duct-runs-and-schedule](../evidence/p4-14d-duct-runs-and-schedule.md), host case `M14d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q1, Q4, Q6, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors" and "Validation rows". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14d` runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-25 (#586, squash `1b05db9c`); offline evidence in [p4-14d-duct-runs-and-schedule](../evidence/p4-14d-duct-runs-and-schedule.md), host case `M14d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q1, Q4, Q6, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors" and "Validation rows". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14d` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

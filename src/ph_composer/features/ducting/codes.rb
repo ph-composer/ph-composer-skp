@@ -14,6 +14,7 @@ module PhComposer
       RUN_MISSING = "ducting.run_missing"
       SHARED_DEFINITION = "ducting.shared_definition"
       HIDDEN = "ducting.hidden"
+      VENTILATOR_UNEXPORTED = "ducting.ventilator_unexported"
 
       DESCRIPTIONS = {
         INSULATION_CONDUCTIVITY_MISSING => "A Duct Type has insulation and no insulation conductivity, so a duct " \
@@ -26,7 +27,9 @@ module PhComposer
                           "cannot export.",
         RUN_MISSING => "A Ventilator serving a Zone has no Outdoor air run or no Exhaust air run; METr assumes none.",
         SHARED_DEFINITION => "Ducts are reached through two placements of one Ducting group's storage, and both count.",
-        HIDDEN => "A duct to locate, or a Group holding it, is hidden or on a hidden tag."
+        HIDDEN => "A duct to locate, or a Group holding it, is hidden or on a hidden tag.",
+        VENTILATOR_UNEXPORTED => "A Ventilator whose Ducting groups hold ducts serves no exported Zone, so its ducts " \
+                                 "are not exported."
       }.freeze
 
       module_function

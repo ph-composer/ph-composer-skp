@@ -106,8 +106,8 @@ Fresh process, the installed RBZ, Ed at the mouse, the PRD's acceptance shape on
 [ERV ducting case](../ACCEPTANCE.md#erv-ducting-case-p4-14): one Round and one Rectangular Duct Type; New Ducting group
 linked to ERV-1 opens for the Line tool; an Outdoor air and an Exhaust air run per Ventilator drawn and assigned from
 the bar, one Undo step each, ERV-2's Exhaust air at quantity 2; the schedule's lengths match hand measurement and the
-Ventilators columns read them; delete ERV-2 with null and read `ducting.group_unlinked`, whose Locate selects the
-group; both Colour-by modes with their legend lengths; save and reopen; the panel at 1280 x 800, 420 px and 360 x 520;
+Ventilators columns read them; delete ERV-2 with null and read `ducting.group_unlinked`, whose Locate opens the
+group and selects that run's ducts (P4-14e, "Recorded at implementation"); both Colour-by modes with their legend lengths; save and reopen; the panel at 1280 x 800, 420 px and 360 x 520;
 the UI polish review. Record with `acceptance_case.py`.
 
 ## Out of scope

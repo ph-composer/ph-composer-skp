@@ -4,11 +4,16 @@ section check the reloaded model against its own result fields (`Section.conform
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
 from . import stack
+from .contract import JSONValue
 from .sections import Section
+
+#: Drawn lengths read back to the millimetre.
+LENGTH_TOLERANCE_M = 0.001
 
 
 class ConformanceError(ValueError):
@@ -54,3 +59,14 @@ def check(
         raise ValueError("canonical Surface accounting disagrees")
     for section in sections:
         section.conformance(model, (result or {}).get(section.id, {}))
+
+
+def result_rows(fields: Mapping[str, JSONValue], key: str) -> list[dict[str, JSONValue]]:
+    """A section's result rows under `key`, each a JSON object; anything else reads as no row."""
+    reported = fields.get(key)
+    return [row for row in (reported if isinstance(reported, list) else []) if isinstance(row, dict)]
+
+
+def same_length(value: JSONValue, length: float) -> bool:
+    """A reported length equal to a reloaded one to the millimetre."""
+    return isinstance(value, (int, float)) and math.isclose(value, length, rel_tol=0.0, abs_tol=LENGTH_TOLERANCE_M)

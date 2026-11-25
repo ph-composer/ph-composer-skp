@@ -1,0 +1,23 @@
+{
+  "elements": [
+    "ventilator_id",
+    "identifier",
+    "duct_type",
+    "segment_count",
+    "length_m",
+    "shape_type",
+    "diameter_m",
+    "width_m",
+    "height_m",
+    "insulation_thickness_m",
+    "insulation_conductivity",
+    "insulation_reflective"
+  ],
+  "ventilators": [
+    "ventilator_id",
+    "system_identifier",
+    "room_count",
+    "supply_length_m",
+    "exhaust_length_m"
+  ]
+}

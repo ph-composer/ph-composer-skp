@@ -45,6 +45,7 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.mechanical.export.ventilation",
         "ph_composer.mechanical.export.hot_water",
         "ph_composer.piping.export.piping",
+        "ph_composer.ducting.export.ducting",
         "ph_composer.mechanical.export.heat_pumps",
         "ph_composer.mechanical.export.electric_heaters",
         "ph_composer.mechanical.export.pumps",

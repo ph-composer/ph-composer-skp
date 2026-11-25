@@ -11,6 +11,7 @@ from typing import Any
 from .airtightness_sections import AirtightnessSection
 from .certification_sections import CertificationSection
 from .constructions import ConstructionSection
+from .ducting_sections import DuctingSection
 from .exporters import Exporter
 from .material_sources import MaterialSourcesSection
 from .mechanical_sections import (
@@ -55,6 +56,7 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     VentilationSection(),
     HotWaterSection(),
     PipingSection(),
+    DuctingSection(),
     HeatPumpSection(),
     ElectricHeaterSection(),
     PumpSection(),

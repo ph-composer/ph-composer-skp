@@ -1386,10 +1386,11 @@ Edge names (its kind, field and label) and the query answering which Zone holds 
 | `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
 | `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
 | `ScheduleShapes` | The schemas a schedule's run rows share (the Edge paths, findings, compact counts), the unreadable row, and the members query and `runs.locate` registrations, worded by the spec's Edge noun |
+| `ExportScan` | The export's read of the snapshot: each assigned Edge directly in a group occurrence as `Scan.edges` gives it, with `in_zone` from the Zones section's paths, `shared` from the paths the snapshot reaches, claims captured per occurrence and an unreadable record refusing the export; and the preflight's unreadable, Locate and metadata rows |
 
 The feature keeps its schemas and record shapes, its assign (the values an Edge takes are its own), its type
 operations, its declarations, its reference targets' declared descriptors, its runs, findings, schedule rows and
-export, its Colour-by modes and any tool. Its declarations call the operations with its spec
+export records, its Colour-by modes and any tool. Its declarations call the operations with its spec
 (`features/piping/line_group.rb`, `features/ducting/line_group.rb`), as thermal bridges and piping call the chain
 rule in `core/edge_runs.rb`.
 

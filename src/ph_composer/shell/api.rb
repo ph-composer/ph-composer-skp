@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 106
+    MINOR = 107
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -666,7 +666,13 @@ module PhComposer
                     "ph_composer.ducting.ventilators and its snapshot section, and the view command " \
                     "ph_composer.ducting.runs.locate, with the codes ducting.type_missing, ducting.group_unlinked, " \
                     "ducting.run_missing, ducting.shared_definition and ducting.hidden. duct_types.list and " \
-                    "duct_types.all rows add used_length_m. A duct's quantity is at most 10,000." }
+                    "duct_types.all rows add used_length_m. A duct's quantity is at most 10,000." },
+      { "minor" => 107, "date" => "2026-11-25",
+        "change" => "ph_composer.ducting exports its ducts: the export section ph_composer.ducting.export.ducting " \
+                    "appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run " \
+                    "of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, " \
+                    "and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone " \
+                    "takes." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
