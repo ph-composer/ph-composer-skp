@@ -1,7 +1,7 @@
 # Hot water piping: status
 
 DATE: 2026-10-21
-STATUS: Merged to main, host cases owed to MS3: P4-13a merged (#576); P4-13b merged (#577); P4-13c merged (#578); P4-13d merged (#579); P4-13e merged (#580). P4-14c2 (#584, in review) moves piping's group and clear operations into `line_groups/` and closes four parity gaps with ducting. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
+STATUS: Merged to main, host cases owed to MS3: P4-13a merged (#576); P4-13b merged (#577); P4-13c merged (#578); P4-13d merged (#579); P4-13e merged (#580). P4-14c2 (#584, merged in #585) moves piping's group and clear operations into `line_groups/` and closes four parity gaps with ducting. Interviewed 2026-11-23 (D4-36, Q1–Q13 all as recommended); planned in full 2026-11-24 as P4-13a to P4-13e.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
