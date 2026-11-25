@@ -1347,9 +1347,9 @@ thickness or a conductivity of 0 is refused as `params.invalid` and nothing is w
 other shape's dimension is the same as leaving it out. To change the shape, send the new `shape` with
 its dimensions; the old ones are removed in the same edit.
 
-Setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then reads
-`export_ready: false` with `ducting.insulation_conductivity_missing`, which blocks the export of a duct
-using the type. A bare duct, `insulation_thickness_mm` 0, needs no conductivity. Each row gives the
+On an insulated type, setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then
+reads `export_ready: false` with `ducting.insulation_conductivity_missing`, which blocks the export of a
+duct using the type. A bare duct, `insulation_thickness_mm` 0, needs no conductivity. Each row gives the
 colour the type draws in under `display.color`; set `color` to store one, or null to return to the
 default. Edit with `ph_composer.ducting.duct_types.update`, copying `expected_values` from the values
 you read; `ph_composer.ducting.duct_types.duplicate` copies one with its `user_data`.
