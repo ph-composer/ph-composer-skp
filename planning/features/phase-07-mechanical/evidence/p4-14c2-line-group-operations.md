@@ -83,6 +83,10 @@ new `target.not_found`-first order (recorded above, inherent in gap 2); the test
 `STRANDED_DETAIL` repeated in both modules (declined: `edge_operations.rb` loads before `group_operations.rb`, so a
 reference would fail at load); two over-long documentation lines (fixed).
 
+Codex, gpt-6-astra, cycle 1 on `b5a991e6` (PR #585): "no findings. Verdict: approve." Its residual notes: its sandbox
+could not start the Ruby tests, so it relied on the recorded gate, and native acceptance stays owed to MS3. No second
+cycle: nothing changed after it but this ledger.
+
 ## Gate
 
 - `make ci` on Ruby 3.2.2 on the first commit's tree: "Ruby suite, 10 processes: 3588 runs, 50526 assertions, 0
@@ -95,6 +99,7 @@ reference would fail at load); two over-long documentation lines (fixed).
   (114,688), above the 40 KB line.
 - PHX: `uv run --group phx pytest tests/python`: "486 passed, 1 skipped" (`test_map_borders.py`,
   `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: "26 passed, 461 deselected", none skipped (nothing here exports).
-- Browser checks and the final head's figures: below, after review.
+- Browser checks: `make ui-checks` on `b5a991e6`, after review: 40 of 40 scripts pass, exit 0, none skipped (no panel
+  change). The commit after it changes only this ledger.
 - Design System: not needed for this PR (no kit CSS, shared kit part or unit quantity changes). The re-sync owed
   from P4-13e is the conductor's to run from `main`.
