@@ -5772,7 +5772,8 @@
         "src/ph_composer/core/pick.rb",
         "src/ph_composer/core/drag_set.rb",
         "src/ph_composer/core/units.rb",
-        "src/ph_composer/html/unit_tables.js"
+        "src/ph_composer/html/unit_tables.js",
+        "src/ph_composer/html/choice_cell.js"
       ],
       "native_control_required": true
     },
@@ -5911,7 +5912,8 @@
         "src/ph_composer/html/features/mechanical/equipment_table.js",
         "src/ph_composer/html/table_contributions.js",
         "src/ph_composer/html/table.js",
-        "src/ph_composer/colour_by/*"
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/html/choice_cell.js"
       ],
       "native_control_required": true
     },

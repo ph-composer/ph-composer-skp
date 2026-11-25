@@ -181,6 +181,33 @@ test("opening Ducting reads once; a row Locates, totals apply the quantity, and 
   assert.strictEqual(named(o, PREFIX + "schedule.all").length, 2);
 });
 
+test("a served Ventilator's missing-run note shows before any duct is drawn", function () {
+  var o = setup(), value = fixtures.schedule();
+  value.runs = [];
+  answer(o, last(o, PREFIX + "schedule.all"), { status: "completed", revision: o.state.revision, value: value });
+  var schedule = o.view(DUCTING).schedule;
+  assert.strictEqual(schedule.totals.hidden, false);
+  assert.match(schedule.parts[1].mount.querySelector("[data-row-key=" + fixtures.mechanical.ERV3.id + "]")
+    .querySelector(".col-note").textContent, /no Outdoor air run/);
+  value.ventilators.forEach(function (row) { row.findings = []; });
+  o.state.revision = 2; o.paint(); press(schedule.refresh);
+  answer(o, last(o, PREFIX + "schedule.all"), { status: "completed", revision: 2, value: value });
+  assert.strictEqual(schedule.totals.hidden, true, "with no run and no note there is nothing to total");
+});
+
+test("a Shape change held after the shape changed elsewhere sends nothing on Enter", function () {
+  var o = setup(TYPES), form = o.view(TYPES).shapeForm;
+  change(row(o, fixtures.DT1).querySelector(".col-shape").querySelector("select"), "rectangular");
+  form.units[0].unit.input.value = "250"; form.units[0].unit.input.listeners.input({});
+  form.units[1].unit.input.value = "120"; form.units[1].unit.input.listeners.input({});
+  var record = o.state.sections[TYPES].value.records[0];
+  record.values.shape = "rectangular"; o.paint();
+  record.values.shape = "round"; o.paint();
+  assert.ok(form.submitButton.disabled, "the change is held once the shape moved");
+  key(form.units[1].unit.input, "Enter");
+  assert.strictEqual(named(o, TYPES + ".update").length, 0);
+});
+
 test("a group's Ventilator links in place, and New Ducting group asks for one", function () {
   var o = setup();
   read(o);

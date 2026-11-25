@@ -6,7 +6,8 @@
 
      { columns, widths, field(run, name), cell(td, run, name, schedule) (true when drawn), order(runs) (each run
        with a unique `key` and its `order`), groups, initialGroup, placeholder, search(run), toggles, empty,
-       totals: [{ title, rows(value), key(row), columns(), widths, cell(td, row, name) }] }
+       totals: [{ title, rows(value), key(row), columns(), widths, cell(td, row, name) }],
+       totalsShown(value) (optional: whether the totals show; by default once there is a run) }
 
    A column named `length_m` carries the length unit in its header. */
 PhComposerUI.define("line_groups/schedule", ["request", "workspace", "table", "view_controls", "fields", "units",
@@ -195,7 +196,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, colourB
     }, this);
   };
   Schedule.prototype.paintTotals = function (value) {
-    this.totals.hidden = !value || !value.runs.length;
+    this.totals.hidden = !value || !(this.view.totalsShown ? this.view.totalsShown(value) : value.runs.length);
     if (this.totals.hidden) return;
     this.parts.forEach(function (held) {
       var part = held.part, rows = part.rows(value);

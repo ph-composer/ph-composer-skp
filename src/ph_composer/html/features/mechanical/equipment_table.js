@@ -237,8 +237,9 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms, choiceCe
     });
     return failed ? null : entered;
   };
+  /* Enter in a field reaches here as the button does, so a held or disabled change sends nothing either way. */
   VariantForm.prototype.submit = function () {
-    if (!this.record || this.busy()) return;
+    if (!this.record || !this.enabled || this.busy() || this.stale) return;
     var entered = this.entered();
     if (entered) this.run(this.change(this.record, this.variant, entered));
   };

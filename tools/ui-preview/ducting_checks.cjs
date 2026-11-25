@@ -107,6 +107,12 @@ check({ name: "ducting", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => Array.isArray(window.previewHost.locatedDucts));
   await page.screenshot({ path: path.join(output, "ducting.png"), fullPage: true });
 
+  step("relinking a group with ducts moves its lengths to the other Ventilator on the next read");
+  await groups.locator("[data-row-key='700'] .col-link select").selectOption(ERV1);
+  await totals.locator(`[data-row-key='${ERV1}'] .col-outdoor_air_length_m`).getByText("5", { exact: true })
+    .waitFor();
+  assert.equal(await totals.locator(`[data-row-key='${ERV2}'] .col-exhaust_air_length_m`).textContent(), "0");
+
   step("Colour by duct direction from the Direction header");
   const toggle = schedule.locator("th.col-direction").getByRole("button", { name: /Colour by/ });
   assert.equal(await toggle.getAttribute("aria-pressed"), "false");

@@ -36,6 +36,12 @@ function (ui, fields, lineSchedule, shared) {
     toggles: { direction: shared.BY_DIRECTION, duct_type_name: shared.BY_TYPE },
     search: function (run) { return [run.display_name, field(run, "ventilator"), run.duct_type_name || ""].join(" "); },
     empty: "No ducts yet. Draw lines in a Ducting group and assign them a Duct Type and a direction.",
+    // A served Ventilator with no ducts yet carries its missing-run note before any run exists.
+    totalsShown: function (value) {
+      return value.runs.length > 0 || (value.ventilators || []).some(function (row) {
+        return (row.findings || []).length > 0;
+      });
+    },
     totals: [{ title: "By direction", rows: function (value) { return value.totals.by_direction; },
       key: function (row) { return row.direction; }, widths: { direction: 160, run_count: 80, line_count: 80 },
       columns: function () {

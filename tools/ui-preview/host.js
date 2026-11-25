@@ -631,12 +631,17 @@
       value: { id: id, group_id: id }, affected: [], findings: [], detail: null };
   };
 
-  /* The fixture's duct runs with each type's current name, a missing type's null. */
+  /* The fixture's duct runs with each type's current name, a missing type's null, and the Ventilator their group
+     links to now, as a relink or unlink moves them. */
   Host.prototype.ductRuns = function () {
-    var types = this.ducting.types;
+    var types = this.ducting.types, groups = this.ducting.groups, ventilators = this.mechanical.ventilators;
     return this.ducting.runs.map(function (run) {
       var type = types.filter(function (entry) { return entry.id === run.duct_type_id; })[0];
-      return Object.assign(JSON.parse(JSON.stringify(run)), { duct_type_name: type ? type.values.name : null });
+      var group = groups.filter(function (entry) { return entry.reference.group_id === run.group.group_id; })[0];
+      var id = group ? group.values.ventilator_id : run.ventilator_id;
+      var ventilator = ventilators.filter(function (record) { return record.id === id; })[0];
+      return Object.assign(JSON.parse(JSON.stringify(run)), { duct_type_name: type ? type.values.name : null,
+        ventilator_id: id, ventilator_name: ventilator ? ventilator.values.name : null });
     });
   };
   /* Each length the runs give `matches`, each line times its quantity, as Ruby's totals apply it. */
@@ -654,7 +659,7 @@
   };
   /* Every Ventilator's two duct lengths, 0 with none. */
   Host.prototype.ductVentilatorRows = function () {
-    var runs = this.ducting.runs;
+    var runs = this.ductRuns();
     return this.mechanical.ventilators.map(function (record) {
       function length(direction) {
         return counted(runs, function (run) { return run.ventilator_id === record.id && run.direction === direction; });

@@ -196,9 +196,9 @@
       "sha256": "b016ec7038b9f2ac0734cd8738fa89b7917463c6fa1522c2288d68fce505a7dd"
     },
     "html/features/ducting/schedule.js": {
-      "bytes": 3833,
+      "bytes": 4117,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d1715e5a72c8dcafde3f8368dd004a18c15e7c2d74f4aa5598ca06fa6d6afc44"
+      "sha256": "e11b6a80dd833956b7e80a33e48d78981c833d58412af87066d8ef5f3dbac536"
     },
     "html/features/ducting/section.js": {
       "bytes": 1211,
@@ -221,9 +221,9 @@
       "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
     },
     "html/features/mechanical/equipment_table.js": {
-      "bytes": 23986,
+      "bytes": 24130,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "895001c4ad24f5c53b6b30b03021b4b4b009287b865c162c55955b921f83254f"
+      "sha256": "843b25dfd45f0ea7ff289e945ee1bf4fade5727fd1188746e7de123f7054d59e"
     },
     "html/features/mechanical/fans.js": {
       "bytes": 8575,
@@ -746,9 +746,9 @@
       "sha256": "fe9da1a42b1122de30150c984a28c956a4dc22b090312859f4e6d478f84c8429"
     },
     "html/line_groups/schedule.js": {
-      "bytes": 12844,
+      "bytes": 12996,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "bf8aadb64d1531763d4a7d2c174d40c68bd12b8f705d3995fcd14c40a3cd0b68"
+      "sha256": "54dc27375496d9ae5f5ae21ee8f6412c43ac4a640d739ce0adda17ca9989e43b"
     },
     "html/line_groups/shared.js": {
       "bytes": 4731,
