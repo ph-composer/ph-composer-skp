@@ -1,7 +1,7 @@
 # P4-14: ERV ducting
 
 DATE: 2026-10-21
-STATUS: Implemented in full: P4-14a to P4-14e and the consolidation P4-14c2 merged (#581 to #587), P4-14f in review (#588); the M14a to M14f host cases are owed to the MS3 sitting. Planned in full 2026-11-24 as six sub-stages, P4-14a to P4-14f, each one pull request, from the gate stub, the [ducting PRD](../erv-ducting/PRD.md), D4-09, D4-13, D4-25, D4-30, D4-31 and D4-37 (Q1 to Q9 all as recommended). This file is their parent index: the entry gates, the size budget, what the sub-stages share and the inferences that cross them. Not one pull request: the installed-size headroom and the diff size both refuse it (see "Size"). Two inferences are for Ed before P4-14b and P4-14e ("Inferred in planning"). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host cases run in the MS3 sitting (D4-31).
+STATUS: Merged to main: P4-14a to P4-14f and the consolidation P4-14c2 merged (#581 to #588); the M14a to M14f host cases are owed to the MS3 sitting. Planned in full 2026-11-24 as six sub-stages, P4-14a to P4-14f, each one pull request, from the gate stub, the [ducting PRD](../erv-ducting/PRD.md), D4-09, D4-13, D4-25, D4-30, D4-31 and D4-37 (Q1 to Q9 all as recommended). This file is their parent index: the entry gates, the size budget, what the sub-stages share and the inferences that cross them. Not one pull request: the installed-size headroom and the diff size both refuse it (see "Size"). Two inferences are for Ed before P4-14b and P4-14e ("Inferred in planning"). Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host cases run in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

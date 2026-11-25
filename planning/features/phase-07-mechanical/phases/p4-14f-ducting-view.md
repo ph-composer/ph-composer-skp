@@ -1,7 +1,7 @@
 # P4-14f: the Ducting pills, the Ventilators columns and Colour-by
 
 DATE: 2026-11-24
-STATUS: In review (#588); offline evidence in [p4-14f-ducting-view](../evidence/p4-14f-ducting-view.md), host case `M14f` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-13, D4-30, D4-37 (Q1, Q2, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14f` runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-25 (#588, squash `4a835641`); offline evidence in [p4-14f-ducting-view](../evidence/p4-14f-ducting-view.md), host case `M14f` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-13, D4-30, D4-37 (Q1, Q2, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14f` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
