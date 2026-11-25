@@ -15,13 +15,16 @@ module PhComposer
       # Stored lower case, shown Outdoor air and Exhaust air: the cold intake from the outside to the ventilator, which
       # honeybee-ph calls supply, and the exhaust from the ventilator to the outside.
       DIRECTIONS = %w[outdoor_air exhaust_air].freeze
+      # Far above any building's count of identical units, and low enough that a length times it stays a finite
+      # number a reply can carry.
+      QUANTITY_LIMIT = 10_000
       VALUE_SCHEMAS = {
         "duct_type_id" => { "type" => %w[string null],
                             "description" => "The Duct Type; null once its type was deleted with null, which " \
                                              "blocks export." },
         "direction" => { "type" => "string", "enum" => DIRECTIONS,
                          "description" => "outdoor_air (shown Outdoor air) or exhaust_air (shown Exhaust air)." },
-        "quantity" => { "type" => "integer", "minimum" => 1,
+        "quantity" => { "type" => "integer", "minimum" => 1, "maximum" => QUANTITY_LIMIT,
                         "description" => "How many identical ducts this line stands for; 1 by default." }
       }.freeze
 

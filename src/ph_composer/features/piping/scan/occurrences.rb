@@ -41,23 +41,10 @@ module PhComposer
       end
 
       # Every readable pipe occurrence as a Runs::Fact, and the group and pipe records that cannot be read, each as
-      # `{ path, code, message }`. A pipe whose Piping group cannot be read is not read. With `zones`, Zones says which
-      # groups a Zone holds, which only the findings read; without it no group is held, so a read that reports no
-      # finding does not refuse for an unreadable Zone record. `walked` is a `walk` the caller already made.
+      # `{ path, code, message }` (LineGroups::Scan.edges, which says what `zones` and `walked` do).
       def call(request, zones: true, walked: walk(request.model))
-        groups, unreadable = walked
-        unreadable = unreadable.dup
-        paths = zones ? groups.map(&:path) : []
-        held = LineGroups::GroupOperations.contained(LINE_GROUP, request, paths)
-                                          .to_h { |row| [row.fetch("path"), !row["zone"].nil?] }
-        facts = groups.flat_map do |occurrence|
-          path = occurrence.path
-          detached = { "group_id" => occurrence.record.fetch("id"), "group_path" => path, "name" => occurrence.name,
-                       "hot_water_system_id" => occurrence.record["hot_water_system_id"],
-                       "in_zone" => held.fetch(path, false) }
-          occurrence.edges.filter_map { |edge| fact(edge, detached, occurrence, unreadable) }
-        end
-        [facts, unreadable.sort_by { |row| row.fetch("path") }]
+        edges, unreadable = LineGroups::Scan.edges(LINE_GROUP, request, :zones => zones, :walked => walked)
+        [edges.map { |edge| fact(edge) }, unreadable]
       end
 
       # Every readable Piping group occurrence, and the groups that cannot be read (LineGroups::Scan.walk).
@@ -65,32 +52,14 @@ module PhComposer
         LineGroups::Scan.walk(LINE_GROUP, model)
       end
 
-      # One pipe as a fact, or nil with a row in `unreadable` for a record that is not a valid pipe assignment, a
-      # record of another schema version included.
-      def fact(edge, group, occurrence, unreadable)
-        path = occurrence.path + [edge.persistent_id]
-        record, problem = Group.read(edge, Assignment::STORE)
-        problem ||= Assignment::RECORD_KIND.problems(record).first
-        if problem
-          unreadable << row(path, problem)
-          return nil
-        end
-
-        Runs::Fact.new(:path => path, :group => group, :record_id => record.fetch("id"),
+      def fact(edge)
+        record = edge.record
+        Runs::Fact.new(:path => edge.path, :group => edge.group, :record_id => record.fetch("id"),
                        :pipe_type_id => record.fetch("pipe_type_id"), :role => record.fetch("role"),
                        :values => record.slice(*Assignment::ROLE_VALUES.fetch(record.fetch("role")).keys),
-                       :points_m => [edge.start, edge.end].map { |vertex| world_m(vertex, occurrence.transform) },
-                       :vertex_ids => [edge.start, edge.end].map(&:persistent_id), :shared => occurrence.shared)
+                       :points_m => edge.points_m, :vertex_ids => edge.vertex_ids, :shared => edge.shared)
       end
-
-      def world_m(vertex, transform)
-        FaceCapture.point_m(vertex.position.transform(transform))
-      end
-
-      def row(path, problem)
-        LineGroups::Scan.unreadable_row(path, problem)
-      end
-      private_class_method :fact, :world_m, :row
+      private_class_method :fact
     end
   end
 end

@@ -54,6 +54,18 @@ class LineGroupsTest < PhComposerTestCase
                  L::EdgeTarget.entries(SPEC, @model).map(&:key)
   end
 
+  def test_the_scan_detaches_each_placements_edges_and_reports_an_unreadable_record_as_a_row
+    @lines.first.set_attribute(EDGE_STORE.dictionary, EDGE_STORE.key, JSON.generate("size" => "big"))
+    edges, unreadable = L::Scan.edges(SPEC, request("test.line_groups.scan"), :zones => false)
+    assert_equal [[[700, 702], true], [[710, 702], true]], edges.map { |edge| [edge.path, edge.shared] }
+    assert_equal({ "group_id" => "prg_AAAAAAAAAAAA", "group_path" => [710], "name" => "", "owner_id" => "own_1",
+                   "in_zone" => false }, edges.last.group)
+    assert_equal [[0.0, 0.0, 0.0], [2.54, 17.8308, 0.0]],
+                 edges.first.points_m.map { |point| point.map { |value| value.round(4) } }
+    assert_equal [[[700, 701], "record.unreadable"], [[710, 701], "record.unreadable"]],
+                 unreadable.map { |row| row.values_at("path", "code") }
+  end
+
   def test_group_and_edge_paths_resolve_and_an_edge_outside_a_group_refuses
     group = { "group_id" => "prg_AAAAAAAAAAAA", "group_path" => [700] }
     assert_same @group, L::GroupTarget.locate(SPEC, @model, group, :mutable => false).entity

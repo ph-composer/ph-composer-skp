@@ -32,7 +32,11 @@ module PhComposer
                                                            "Whether a duct using this type can export."),
                         "export_blockers" => Shapes.described(Shapes.list(Shapes::TEXT),
                                                               "The codes keeping it out of an export once a duct " \
-                                                              "uses it; empty when export_ready."))
+                                                              "uses it; empty when export_ready."),
+                        "used_length_m" => Shapes.described({ "type" => "number", "minimum" => 0, "x-unit" => "m" },
+                                                            "The length of every duct naming it, each line times " \
+                                                            "its quantity, read by walking the Model; 0 when none " \
+                                                            "does."))
       LIST_PARAMS = DefinitionLists.params(ROW).tap do |params|
         params["properties"]["ids"]["items"] = Shapes.id(KIND.id_prefix, "A Duct Type id.")
       end.freeze
@@ -63,16 +67,24 @@ module PhComposer
 
       def install_reads(feature)
         list = DuctType::Reads::LIST
-        feature.query(list, :description => "One bounded page of Duct Types in id order, with export readiness.",
+        feature.query(list, :description => "One bounded page of Duct Types in id order, with export readiness and " \
+                                            "used length.",
                             :refuses => PAGE, :params => LIST_PARAMS,
                             :result => DefinitionLists.result(ROW, :paged => true),
-                            :examples => LIST_EXAMPLES) { |request| DuctType::Reads.list(request) }
-        feature.query("#{PREFIX}.all", :description => "Every Duct Type with its values and export readiness, " \
-                                                       "for the panel snapshot.",
+                            :examples => LIST_EXAMPLES) do |request|
+          # Used length walks the Model, so a read that leaves the field out does not pay for it.
+          fields = request.params["fields"]
+          measured = fields.nil? || fields.include?("used_length_m")
+          DuctType::Reads.list(request, measured ? Scan.used_lengths(request) : {})
+        end
+        feature.query("#{PREFIX}.all", :description => "Every Duct Type with its values, export readiness and used " \
+                                                       "length, for the panel snapshot.",
                                        :response => { "bounded" => false, "prefer" => list },
                                        :refuses => [], :params => Shapes::NONE,
                                        :result => DefinitionLists.result(ROW, :paged => false),
-                                       :examples => [{}]) { |request| DuctType::Reads.all(request) }
+                                       :examples => [{}]) do |request|
+          DuctType::Reads.all(request, Scan.used_lengths(request))
+        end
         feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
       end
 

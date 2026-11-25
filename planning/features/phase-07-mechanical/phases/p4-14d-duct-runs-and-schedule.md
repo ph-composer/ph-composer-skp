@@ -1,7 +1,7 @@
 # P4-14d: duct runs and the schedule
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q1, Q4, Q6, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors" and "Validation rows". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14d` runs in the MS3 sitting (D4-31).
+STATUS: In review 2026-11-25 on `feat/phase-07-mechanical-p4-14d`; offline evidence in [p4-14d-duct-runs-and-schedule](../evidence/p4-14d-duct-runs-and-schedule.md), host case `M14d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q1, Q4, Q6, Q9) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors" and "Validation rows". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14d` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -113,6 +113,31 @@ identifiers; the measurement in step 5. Offline `make ci` passes on this sub-sta
 ## Out of scope
 
 Export (P4-14e). Screens (P4-14f). Joining runs by connection.
+
+## Recorded at implementation (2026-11-25)
+
+- **The layer gained two pieces, and piping moved onto them.** Piping's scan built each pipe's detached record, group
+  hash, world points and unreadable row in code that names no role; ducting needs the same, so it is
+  `LineGroups::Scan.edges`, and each feature maps its Edges to its own facts. The schedule's shared schemas (a
+  finding, a run row's Edge paths and compact counts, the unreadable row) and the members and `runs.locate`
+  registrations are `LineGroups::ScheduleShapes`, worded by the spec's Edge noun. Piping's tests, goldens and
+  `docs/API_REFERENCE.md` lines are unchanged. Each feature keeps its findings, rows and the rest of its
+  declarations, as `context/EXTENSIBILITY.md` assigns them; ducting's type, group and shared findings are short
+  twins of piping's, a consolidation candidate for Ed.
+- **`ducting.run_missing` sits on the `ventilators` rows.** It names a Ventilator, not ducts, so it rides on that
+  Ventilator's schedule row, its `locate` Mechanical's (`{name: "ph_composer.mechanical.locate", params:
+  {ventilator_ids}}`, the `row_locate` P4-13d's export uses for a System finding). Its message names no user text,
+  so the details pages stay bounded. The `ducting_ventilators` section and `duct_types.all` never read Mechanical's
+  Ventilators, which pulls Serves and Spaces; only the schedule does.
+- **Used length applies the quantity**, as every total does, so P4-14f's by-type legend can equal the schedule.
+- **A duct's quantity is at most 10,000.** It had no maximum, and a length times a large enough integer is
+  Infinity, which no reply carries (P4-13c's `water_temp_c` precedent). A stored record above it reads unreadable;
+  `ducts.assign` refuses it `params.invalid`. API 1.106 records it.
+- **`ducting.hidden`** is new in `codes.rb` and ducting's spec: `LineGroups::Locate` reads it.
+- **Run order and names.** Runs sort by Ventilator id, as piping's sort by Hot Water System id, then group path,
+  direction and smallest point; a run's ducts in canonical order (sorted endpoints, then path), which `edge_paths`
+  and the segment identifiers follow.
+- **No `schedule.all`.** Piping's panel read arrived with its view (P4-13e); ducting's is P4-14f's.
 
 ## Done when
 

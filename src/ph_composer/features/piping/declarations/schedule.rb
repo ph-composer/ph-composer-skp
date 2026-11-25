@@ -16,25 +16,11 @@ module PhComposer
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
       MEMBERS_REFUSES = (PAGE + %w[target.ambiguous target.not_found]).freeze
-      LOCATE_REFUSES = %w[session.inactive target.ambiguous target.not_found target.locked target.wrong_kind
-                          target.shared_definition piping.hidden].freeze
 
       NUMBER = { "type" => "number" }.freeze
       COUNT = { "type" => "integer", "minimum" => 0 }.freeze
       NULLABLE_TEXT = { "type" => %w[string null] }.freeze
-      # One locate takes a whole run, however long, since a second call would replace the first selection. The bound
-      # only stops a runaway request.
-      LOCATE_EDGE_LIMIT = 10_000
-      EDGE_PATHS = Shapes.list(PATH).merge("description" => "Root-to-Edge persistent-id paths.")
-      FINDING = Shapes.object({
-        "code" => Shapes::TEXT,
-        "message" => Shapes.described(Shapes::TEXT, "Cut to #{SchedulePages::MAX_MESSAGE} characters."),
-        "blocks_export" => { "type" => "boolean" },
-        "locate" => Shapes.object({ "edge_paths" => EDGE_PATHS })
-                          .merge("description" => "The pipes named, as runs.locate takes them; without compact."),
-        "edge_count" => COUNT.merge("description" => "With compact: how many pipes it names; " \
-                                                     "#{SchedulePages::MEMBERS} with finding pages them.")
-      }, :optional => %w[locate edge_count])
+      Common = LineGroups::ScheduleShapes
       RUN = Shapes.object({
         "identifier" => Shapes.described(Shapes::TEXT, "pipe_ and a digest of the group occurrence, role, Pipe Type, " \
                                                        "role values and points; derived, and it changes with the " \
@@ -55,17 +41,9 @@ module PhComposer
         "values" => Shapes.described(Shapes::OBJECT, "The role's values: a trunk's multiplier and " \
                                                      "demand_recirculation, a recirculation run's water_temp_c and " \
                                                      "daily_period, none for a branch or twig."),
-        "closed" => { "type" => "boolean" },
-        "edge_paths" => EDGE_PATHS.merge("description" => "The run's pipes in order; runs.locate takes them. Left " \
-                                                          "out with compact."),
-        "edge_count" => COUNT.merge("description" => "With compact: how many pipes."),
-        "index" => COUNT.merge("description" => "With compact: the run's place in the schedule, which names it to " \
-                                                "#{SchedulePages::MEMBERS} when two runs share an identifier."),
-        "truncated" => ContextChildren::TRUNCATED,
-        "shared" => Shapes.described({ "type" => "boolean" }, "Whether any pipe is in storage another placement " \
-                                                              "draws."),
-        "findings" => Shapes.list(FINDING)
-      }, :optional => %w[edge_paths edge_count index truncated])
+        "closed" => { "type" => "boolean" }
+      }.merge(Common.run_edges(LINE_GROUP, SchedulePages::MEMBERS)),
+                          :optional => %w[edge_paths edge_count index truncated])
       ROLE_TOTAL = Shapes.object({ "role" => Shapes::TEXT, "run_count" => COUNT, "line_count" => COUNT,
                                    "length_m" => NUMBER })
       TOTALS = Shapes.object({
@@ -91,7 +69,7 @@ module PhComposer
       TYPE = Shapes.object({ "pipe_type_id" => Shapes::TEXT, "name" => Shapes::TEXT, "used_length_m" => NUMBER,
                              "line_count" => COUNT, "truncated" => ContextChildren::TRUNCATED },
                            :optional => ["truncated"])
-      UNREADABLE = Shapes.object({ "path" => PATH, "code" => Shapes::TEXT, "message" => Shapes::TEXT })
+      UNREADABLE = Common::UNREADABLE
       RESULT = Shapes.object({
         "runs" => Shapes.list(RUN).merge("description" => "One page of runs in schedule order: by Hot Water " \
                                                           "System, group path, role and smallest point."),
@@ -127,12 +105,6 @@ module PhComposer
         "unreadable" => Shapes.list(UNREADABLE).merge("description" => "With part unreadable: records by path."),
         "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
       }, :optional => %w[systems types unreadable])
-      LOCATE_PARAMS = Shapes.object({ "edge_paths" => EDGE_PATHS.merge(
-        "minItems" => 1, "maxItems" => LOCATE_EDGE_LIMIT,
-        "description" => "The pipes of one run, or of one finding, as the schedule reads them."
-      ) })
-      LOCATE_RESULT = Shapes.object({ "path" => PATH.merge("description" => "The edit path afterwards."),
-                                      "selected" => COUNT })
       PAGE_PARAMS = Shapes.object({
         "compact" => { "type" => "boolean",
                        "description" => "Leave out each run's edge_paths and each finding's pipes, counted instead, " \
@@ -141,19 +113,6 @@ module PhComposer
                                         "pipes. Every page then fits one agent reply. False when absent." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
       }, :optional => %w[compact limit cursor])
-      MEMBERS_PARAMS = Shapes.object({
-        "identifier" => Shapes.described(Shapes::TEXT, "The run's identifier from the schedule."),
-        "index" => COUNT.merge("description" => "The run's index from a compact schedule row; needed only when two " \
-                                                "runs share the identifier."),
-        "finding" => COUNT.merge("description" => "Only the pipes of the run's finding at this index."),
-        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
-      }, :optional => %w[index finding limit cursor])
-      MEMBERS_RESULT = Shapes.object({
-        "identifier" => Shapes::TEXT,
-        "members" => Shapes.list(Shapes.object({ "index" => COUNT.merge("description" => "Its place in the run."),
-                                                 "path" => PATH })),
-        "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
-      })
 
       module_function
 
@@ -166,14 +125,9 @@ module PhComposer
                       :examples => [{ "part" => "systems" }, { "part" => "unreadable", "limit" => 20 }]) do |request|
           SchedulePages::PAGES.details(request)
         end
-        feature.query(SchedulePages::MEMBERS,
-                      :description => "One bounded page of one run's pipes in run order, each with its path, or only " \
-                                      "those one of its findings names.",
-                      :refuses => MEMBERS_REFUSES, :params => MEMBERS_PARAMS, :result => MEMBERS_RESULT,
-                      :examples => [{ "identifier" => "pipe_0a1b2c3d4e5f6a7b" },
-                                    { "identifier" => "pipe_0a1b2c3d4e5f6a7b", "finding" => 0 }]) do |request|
-          SchedulePages::PAGES.members(request)
-        end
+        Common.install_members(feature, LINE_GROUP, SchedulePages::PAGES, :members => SchedulePages::MEMBERS,
+                                                                          :refuses => MEMBERS_REFUSES,
+                                                                          :example => "pipe_0a1b2c3d4e5f6a7b")
       end
 
       def install(feature)
@@ -201,15 +155,7 @@ module PhComposer
                       :result => Shapes.object({ "systems" => RESULT.dig("properties", "systems") }),
                       :examples => [{}]) { |request| Scan.systems(request) }
         feature.snapshot_section(SYSTEMS_SECTION, :query => SYSTEMS)
-        feature.view_command(LOCATE,
-                             :description => "Select the pipes of one run and bring them into view, opening the " \
-                                             "Piping group that holds them.",
-                             :refuses => LOCATE_REFUSES, :params => LOCATE_PARAMS, :result => LOCATE_RESULT,
-                             :preconditions => ["Every pipe sits in one Piping group and none is hidden."],
-                             :side_effects => "Selects and frames the pipes. #{ContextCommands::SIDE_EFFECTS}",
-                             :examples => [{ "edge_paths" => [[1301, 1305], [1301, 1306]] }]) do |request|
-          LineGroups::Locate.call(LINE_GROUP, request, :edge_paths => request.params.fetch("edge_paths"))
-        end
+        Common.install_locate(feature, LINE_GROUP, LOCATE)
       end
     end
   end

@@ -9,7 +9,11 @@
 #   group/          the Ducting group record on a Group and its reference target
 #   assignment/     the duct record on an Edge, its reference target, assign and the selection
 #   line_group.rb   the spec the foundation's line_groups/ layer reads ducting by; create, link, clear, the type
-#                   rewrite and the occurrence rows are that layer's
+#                   rewrite, the occurrence rows, the walk, schedule paging and Locate are that layer's
+#   runs.rb         pure Ruby: runs by occurrence, direction, Duct Type and quantity, with no chain rule
+#   findings.rb     pure Ruby: a run's findings and the Ventilators missing a run
+#   schedule.rb     pure Ruby: the schedule's rows and totals, and its pages
+#   scan.rb         the live read: the walk's ducts as facts, the schedule, the Ventilators' lengths and used length
 #   codes.rb        the `ducting` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -29,9 +33,14 @@ require_relative "group/reference_target"
 require_relative "assignment/reference_target"
 require_relative "assignment/operations"
 require_relative "assignment/selection"
+require_relative "runs"
+require_relative "findings"
+require_relative "schedule"
+require_relative "scan"
 require_relative "declarations/duct_types"
 require_relative "declarations/groups"
 require_relative "declarations/ducts"
+require_relative "declarations/schedule"
 
 module PhComposer
   module Ducting
@@ -43,6 +52,7 @@ module PhComposer
       DuctTypeRegistration.install(feature)
       GroupRegistration.install(feature)
       DuctRegistration.install(feature)
+      ScheduleRegistration.install(feature)
       Codes.install(feature)
     end
   end

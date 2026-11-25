@@ -1381,10 +1381,11 @@ Edge names (its kind, field and label) and the query answering which Zone holds 
 | `CreateStep`, `GroupWriteStep`, `EdgeWriteStep` | Create an empty group at the root with its record and open it; rewrite group records; write and clear Edge records, each one operation |
 | `GroupOperations` | `create` (refusing a Model SketchUp is not showing), `link` and unlink, the retarget a linked record's delete runs, the Zone containment read, and the occurrence rows with their placement findings and the `write_refusal` link meets |
 | `EdgeOperations` | `clear`, checking every removed id against its referrers; `delete_type` with the rewrite of every Edge naming the type, a stale type refusing first; and the `resolve`, `update` and `propose` a feature's own assign builds on |
-| `Scan.walk` | Each readable occurrence's path, record, name, direct assigned Edges, transform and `shared`, and the unreadable groups as rows |
+| `Scan.walk`, `Scan.edges` | Each readable occurrence's path, record, name, direct assigned Edges, transform and `shared`, and the unreadable groups as rows; `edges` detaches each readable assignment with its group, world points in metres and vertex ids, an unreadable one a row, and asks the containment query which groups a Zone holds |
 | `Selection` | The native selection under the active path as Edge references, with ignored entities counted; the caller passes its gesture limit and Zones' containment |
 | `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
 | `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
+| `ScheduleShapes` | The schemas a schedule's run rows share (the Edge paths, findings, compact counts), the unreadable row, and the members query and `runs.locate` registrations, worded by the spec's Edge noun |
 
 The feature keeps its schemas and record shapes, its assign (the values an Edge takes are its own), its type
 operations, its declarations, its reference targets' declared descriptors, its runs, findings, schedule rows and

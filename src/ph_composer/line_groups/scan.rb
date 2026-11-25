@@ -11,8 +11,32 @@ module PhComposer
       # directly in it carrying an assignment record, the transform mapping its contents to world, and whether another
       # placement draws its storage.
       Occurrence = Struct.new(:path, :record, :name, :edges, :transform, :shared, keyword_init: true)
+      # One assigned Edge occurrence, detached, its record read and checked: `path` is root to Edge; `group` is its line
+      # group occurrence as `{ "group_id", "group_path", "name", <link_key>, "in_zone" }`; `points_m` are its two world
+      # endpoints in metres and `vertex_ids` its two vertices' persistent ids, in the same order; `shared` as the
+      # occurrence's.
+      Edge = Struct.new(:path, :group, :record, :points_m, :vertex_ids, :shared, keyword_init: true)
 
       module_function
+
+      # Every readable assignment of every readable occurrence as an Edge, and the group and Edge records that cannot be
+      # read, each as `{ path, code, message }`, sorted by path. A record failing its schema, another schema version
+      # included, is unreadable; an Edge whose group cannot be read is not read. With `zones`, the spec's containment
+      # query says which groups a Zone holds, which only findings read; without it no group is held, so a read that
+      # reports no finding does not refuse for an unreadable Zone record. `walked` is a `walk` the caller already made.
+      def edges(spec, request, zones: true, walked: walk(spec, request.model))
+        groups, unreadable = walked
+        unreadable = unreadable.dup
+        held = GroupOperations.contained(spec, request, zones ? groups.map(&:path) : [])
+                              .to_h { |row| [row.fetch("path"), !row["zone"].nil?] }
+        found = groups.flat_map do |occurrence|
+          path = occurrence.path
+          group = { "group_id" => occurrence.record.fetch("id"), "group_path" => path, "name" => occurrence.name,
+                    spec.link_key => occurrence.record[spec.link_key], "in_zone" => held.fetch(path, false) }
+          occurrence.edges.filter_map { |edge| detach(spec, edge, group, occurrence, unreadable) }
+        end
+        [found, unreadable.sort_by { |row| row.fetch("path") }]
+      end
 
       # Every readable line group occurrence, and the groups that cannot be read, each as `{ path, code, message }`.
       # Transforms compose from the root, so a context open or not gives world points
@@ -52,6 +76,22 @@ module PhComposer
                                  :transform => transform, :shared => shared)
       end
 
+      # One Edge's assignment as an Edge, or nil with a row in `unreadable` for a record that is not a valid one.
+      def detach(spec, edge, group, occurrence, unreadable)
+        path = occurrence.path + [edge.persistent_id]
+        record, problem = LineGroups.read(edge, spec.edge_store)
+        problem ||= spec.edge_record_kind.problems(record).first
+        if problem
+          unreadable << unreadable_row(path, problem)
+          return nil
+        end
+
+        vertices = [edge.start, edge.end]
+        points = vertices.map { |vertex| FaceCapture.point_m(vertex.position.transform(occurrence.transform)) }
+        Edge.new(:path => path, :group => group, :record => record, :points_m => points,
+                 :vertex_ids => vertices.map(&:persistent_id), :shared => occurrence.shared)
+      end
+
       # Component storage, or a Group whose definition another Group shares: geometry every placement of it shows,
       # counted per placement.
       def shared?(entity)
@@ -60,7 +100,7 @@ module PhComposer
         definition = entity.respond_to?(:definition) ? entity.definition : nil
         definition.respond_to?(:instances) && definition.instances.length > 1
       end
-      private_class_method :read_group, :shared?
+      private_class_method :read_group, :detach, :shared?
     end
   end
 end
