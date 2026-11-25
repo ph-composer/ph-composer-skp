@@ -19299,7 +19299,9 @@ Example params:
 
 ### `ph_composer.ducting.ventilators`
 
-Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times its quantity, 0 with none. It walks the Model. Owner: `ph_composer.ducting`.
+Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times its quantity, 0 with none, for the panel. It walks the Model. Owner: `ph_composer.ducting`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.schedule.details` instead.
 
 Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
 

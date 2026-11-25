@@ -119,7 +119,8 @@ module PhComposer
         install_pages(feature)
         feature.query(VENTILATORS,
                       :description => "Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times " \
-                                      "its quantity, 0 with none. It walks the Model.",
+                                      "its quantity, 0 with none, for the panel. It walks the Model.",
+                      :response => { "bounded" => false, "prefer" => SchedulePages::DETAILS },
                       :refuses => READ, :params => Shapes::NONE,
                       :result => Shapes.object({ "ventilators" => Shapes.list(VENTILATOR) }),
                       :examples => [{}]) { |request| Scan.ventilators(request) }
