@@ -25,18 +25,12 @@ module PhComposer
 
       module_function
 
-      def identity(record)
-        id = record && record["id"]
-        Records::Identity.pattern(RECORD_KIND.id_prefix).match?(id.to_s) ? id : nil
-      end
-
       def values(record)
         record ? RECORD_KIND.values(record) : {}
       end
 
       def new_record(id, ventilator_id)
-        { "id" => id, "schema_version" => 1, "ventilator_id" => ventilator_id, "user_data" => {},
-          "extension_data" => {} }
+        LINE_GROUP.new_group(id, ventilator_id)
       end
     end
   end

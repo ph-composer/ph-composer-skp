@@ -49,28 +49,8 @@ module PhComposer
 
       module_function
 
-      def validate!(record)
-        found = RECORD_KIND.problems(record)
-        return record if found.empty?
-
-        raise CodedError.new("validation.failed", "A duct assignment record is invalid: #{found.first}.",
-                             "findings" => found)
-      end
-
       def values(record)
         record ? RECORD_KIND.values(record) : {}
-      end
-
-      def check_limit!(count)
-        limit = gesture_edge_limit
-        return if count <= limit
-
-        raise CodedError.new("gesture.too_large", "One command changes at most #{limit} Edges; this one has #{count}.")
-      end
-
-      # How many Edges directly inside `group` carry a duct record.
-      def ducts_in(group)
-        group.entities.count { |entity| LINE_GROUP.edge?(entity) }
       end
     end
   end

@@ -31,7 +31,7 @@ module PhComposer
         # The gesture limit and Zones' containment the rows read.
         def reads(request)
           { :limit => Assignment.gesture_edge_limit,
-            :contained => ->(paths) { Group::Operations.contained(request, paths) } }
+            :contained => ->(paths) { LineGroups::GroupOperations.contained(LINE_GROUP, request, paths) } }
         end
         private_class_method :reads
 

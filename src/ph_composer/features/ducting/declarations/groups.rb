@@ -6,6 +6,8 @@ module PhComposer
     # a Ventilator delete runs. Each write is one native Undo step.
     module GroupRegistration
       PREFIX = "#{FEATURE_ID}.groups".freeze
+      # The shared layer runs every group operation with this feature's spec (LINE_GROUP).
+      Operations = LineGroups::GroupOperations
       Shapes = Mechanical::Shapes
       OBJECT = { "type" => "object" }.freeze
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
@@ -22,7 +24,7 @@ module PhComposer
                                               OBJECT, "The group's values as last read; a changed one refuses as " \
                                                       "target.changed. {} skips the check."
                                             ) }, :optional => ["expected_values"]))
-                      .merge("minItems" => 1, "maxItems" => Group::Operations::TARGET_LIMIT,
+                      .merge("minItems" => 1, "maxItems" => Operations::TARGET_LIMIT,
                              "description" => "Explicit Ducting group occurrences, as groups.all returns them.")
       EXAMPLE = { "group_id" => "dcg_Ab12Cd34Ef56", "group_path" => [1301] }.freeze
       REFUSAL = Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT }).merge("type" => %w[object null])
@@ -55,7 +57,7 @@ module PhComposer
         install_reads(feature)
         feature.reference_retargeter("#{PREFIX}.retarget_ventilator",
                                      :target_kind => Mechanical::VENTILATOR_KIND) do |request, proposal, from:, to:|
-          Group::Operations.retarget(request, proposal, :from => from, :to => to)
+          Operations.retarget(LINE_GROUP, request, proposal, :from => from, :to => to)
         end
       end
 
@@ -68,7 +70,7 @@ module PhComposer
                       :result => Shapes.object({ "groups" => Shapes.list(ROW), "next_cursor" => Pages::NEXT_CURSOR,
                                                  "total" => Pages::TOTAL }),
                       :examples => [{}, { "limit" => 20 }]) do |request|
-          rows = Group::Operations.rows(request)
+          rows = Operations.rows(LINE_GROUP, request)
           page, cursor = Pages.bounded(request, "#{PREFIX}.list", rows, :key => ->(row) { row.fetch("path") })
           { "groups" => page, "next_cursor" => cursor, "total" => rows.length }
         end
@@ -76,7 +78,9 @@ module PhComposer
                                        :response => { "bounded" => false, "prefer" => "#{PREFIX}.list" },
                                        :refuses => READ, :params => Shapes::NONE,
                                        :result => Shapes.object({ "groups" => Shapes.list(ROW) }),
-                                       :examples => [{}]) { |request| { "groups" => Group::Operations.rows(request) } }
+                                       :examples => [{}]) do |request|
+          { "groups" => Operations.rows(LINE_GROUP, request) }
+        end
       end
 
       def install_writes(feature)
@@ -90,7 +94,7 @@ module PhComposer
                        :side_effects => "Adds a Group at the root with a Ducting group record and moves the edit " \
                                         "path into it, closing any Group open before.",
                        :examples => [{ "ventilator_id" => "vnt_Ab12Cd34Ef56" }]) do |request, proposal|
-          Group::Operations.create(request, proposal, :ventilator_id => request.params.fetch("ventilator_id"))
+          Operations.create(LINE_GROUP, request, proposal, request.params.fetch("ventilator_id"))
         end
         result = Shapes.object({ "group_ids" => Shapes.described(Shapes.list(Shapes::TEXT),
                                                                  "Groups rewritten; empty when none changed.") })
@@ -102,8 +106,8 @@ module PhComposer
                        :side_effects => "Rewrites each group's ventilator_id.",
                        :examples => [{ "targets" => [{ "reference" => EXAMPLE }],
                                        "ventilator_id" => "vnt_Ab12Cd34Ef56" }]) do |request, proposal|
-          Group::Operations.link(request, proposal, :targets => request.params.fetch("targets"),
-                                                    :ventilator_id => request.params.fetch("ventilator_id"))
+          Operations.link(LINE_GROUP, request, proposal, request.params.fetch("targets"),
+                          request.params.fetch("ventilator_id"))
         end
         feature.action("#{PREFIX}.unlink",
                        :description => "Unlink explicit Ducting groups from their Ventilator, which blocks their " \
@@ -112,7 +116,7 @@ module PhComposer
                        :result => result, :undo_name => "Unlink Ducting Group", :preconditions => PRECONDITIONS,
                        :side_effects => "Sets each group's ventilator_id to null.",
                        :examples => [{ "targets" => [{ "reference" => EXAMPLE }] }]) do |request, proposal|
-          Group::Operations.link(request, proposal, :targets => request.params.fetch("targets"), :ventilator_id => nil)
+          Operations.link(LINE_GROUP, request, proposal, request.params.fetch("targets"), nil)
         end
       end
     end

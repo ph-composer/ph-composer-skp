@@ -1282,10 +1282,11 @@ pipe segment carries its pipe's.
   `ph_composer.zones.containment` says a Zone holds the group, and `piping.group_nested` inside another Piping group.
   A Pipe Type or Hot Water System delete still rewrites a group a Zone holds, so no reference is left dangling. `groups.create` adds an empty
   Group at the root with a new record naming an existing System and opens it through `EditContext.enter`, in one Undo
-  step; whether the host keeps an empty Group through the commit is owed to the host case M13b. `groups.all` and the
-  bounded `groups.list` give every occurrence in path order with `values`, `pipe_count` (Edges directly inside with a
-  pipe record), `copied`, `findings` (the two placement codes) and `write_refusal`. No Model-level registry lists
-  groups or pipes (Q1).
+  step, refusing `session.inactive` for a Model SketchUp is not showing; whether the host keeps an empty Group
+  through the commit is owed to the host case M13b. `groups.all` and the bounded `groups.list` give every occurrence
+  in path order with `values`, `pipe_count` (Edges directly inside with a pipe record), `copied`, `findings` (the two
+  placement codes) and `write_refusal`, the refusal `groups.link` meets in its order: nested, the path's own (a
+  component, a locked or shared step), then in a Zone. No Model-level registry lists groups or pipes (Q1).
 - **Pipe** (reference target `ph_composer.piping.pipe`, `features/piping/assignment/`): the assignment on an Edge,
   occurrence reference `{group_path, entity_path, entity_id}` with `entity_path` root-to-Edge. `role` is `trunk`,
   `branch`, `twig` or `recirculation`; a trunk carries `multiplier` (integer at least 1, default 1) and
@@ -1294,13 +1295,16 @@ pipe segment carries its pipe's.
   a value another role takes refuses `params.invalid`, and reassigning a role drops the old role's values.
   `pipes.assign` and `pipes.clear` take at most 250 explicit Edges and refuse as a whole for a stale target, an Edge
   outside a Piping group (`piping.outside_group`), a misplaced group, a locked or shared step or one Edge too many
-  (`gesture.too_large`), one Undo step each. `pipes.selection` (bounded), `pipes.selection_all` and its snapshot
-  section `ph_composer.piping.pipes.selected` read the native selection under the active path, each Edge with its
-  group and System, values, `copied` and `write_refusal`; anything not an Edge is listed as ignored.
-  `pipe_types.delete` with `replacement_id` rewrites every pipe naming the type, with null nulls its `pipe_type_id`,
-  in the delete's proposal; a pipe the rewrite cannot reach (outside a Piping group, locked or shared) refuses the
-  whole delete as `reference.in_use`. A Hot Water System delete with an id or null moves or clears the Piping groups
-  naming it through piping's retargeter `ph_composer.piping.groups.retarget_hot_water_system`.
+  (`gesture.too_large`), one Undo step each. `pipes.clear` refuses `reference.in_use` while a record names a removed
+  `ppe_` id no Edge the command leaves keeps, a record of another schema version included. `pipes.selection`
+  (bounded), `pipes.selection_all` and its snapshot section `ph_composer.piping.pipes.selected` read the native
+  selection under the active path, each Edge with its group and System, values, `copied` and `write_refusal`;
+  anything not an Edge is listed as ignored. `pipe_types.delete` with `replacement_id` rewrites every pipe naming the
+  type, with null nulls its `pipe_type_id`, in the delete's proposal; a stale `expected_values` refuses
+  `target.changed` before any pipe is planned, and a pipe the rewrite cannot reach (outside a Piping group, locked or
+  shared) refuses the whole delete as `reference.in_use`. A Hot Water System delete with an id or null moves or
+  clears the Piping groups naming it through piping's retargeter
+  `ph_composer.piping.groups.retarget_hot_water_system`.
 - **Runs and the tree** (`features/piping/runs/`, pure Ruby over detached facts; the live walk in
   `features/piping/scan/`). Runs are derived, never stored. The core chain rule (`core/edge_runs.rb`) joins pipes of
   one group occurrence, role, Pipe Type and role values where they share a vertex (a whole float compared as its integer); a run
@@ -1395,8 +1399,8 @@ conductivity, which blocks the export only of a duct that uses it; a bare duct n
 `user_data` is written with `ph_composer.records.update_metadata` and kept in the Model.
 
 Ducting groups and ducts stand on the foundation's line-group layer (`context/EXTENSIBILITY.md`, "Line groups") with
-ducting's spec (`features/ducting/line_group.rb`), so their targets, writes, walk and selection rows follow Piping
-groups' and pipes' rules (see "Hot water piping") with these differences.
+ducting's spec (`features/ducting/line_group.rb`), so their targets, writes, group operations, clear, type rewrite,
+walk and selection rows follow Piping groups' and pipes' rules (see "Hot water piping") with these differences.
 
 - **Ducting group** (reference target `ph_composer.ducting.group`, `features/ducting/group/`): the record in the
   storage table on a SketchUp Group, occurrence reference `{group_id, group_path}`. Membership is the direct parent;

@@ -11,8 +11,12 @@ module PhComposer
     # One feature's line group: `label` and `edge_noun` (one word, also its step name) for messages, the two target
     # kinds, stores and record kinds, `link_key` (the group's linked-record field), `codes` (:outside_group,
     # :group_nested, :group_in_zone, :hidden) and `child_lookup`, a one-read index factory (`matching(entities, id)`).
+    # The operations (GroupOperations, EdgeOperations) also read the linked record's kind and `link_label`, the type
+    # an Edge names (`type_kind`, its field `type_key` and `type_label`) and `containment`, the query answering which
+    # Zone holds a Group path.
     Spec = Struct.new(:label, :edge_noun, :group_kind, :edge_kind, :group_store, :edge_store, :group_record_kind,
-                      :edge_record_kind, :link_key, :codes, :child_lookup, keyword_init: true) do
+                      :edge_record_kind, :link_key, :codes, :child_lookup, :link_kind, :link_label, :type_kind,
+                      :type_key, :type_label, :containment, keyword_init: true) do
       # The group's `affected` kind and step-name stem: the label in snake case.
       def group_noun
         label.downcase.tr(" ", "_")
@@ -35,6 +39,27 @@ module PhComposer
         return record if found.empty?
 
         raise CodedError.new("validation.failed", "A #{label} record is invalid: #{found.first}.", "findings" => found)
+      end
+
+      def validate_edge!(record)
+        found = edge_record_kind.problems(record)
+        return record if found.empty?
+
+        raise CodedError.new("validation.failed", "A #{edge_noun} assignment record is invalid: #{found.first}.",
+                             "findings" => found)
+      end
+
+      def new_group(id, link_id)
+        { "id" => id, "schema_version" => 1, link_key => link_id, "user_data" => {}, "extension_data" => {} }
+      end
+
+      def group_identity(record)
+        id = record && record["id"]
+        Records::Identity.pattern(group_record_kind.id_prefix).match?(id.to_s) ? id : nil
+      end
+
+      def group_values(record)
+        record ? group_record_kind.values(record) : {}
       end
 
       def edge_identity(record)
