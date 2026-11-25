@@ -59,7 +59,7 @@ the rows below are corrected to it.
 
 Sixteen stages, one of them superseded. P4-01 to P4-07 and P4-15 have full documents under [phases/](phases) with scope,
 steps, source, tests to write first, the host gate and the done condition; P4-08, P4-08b, P4-09, P4-10 and P4-11 were
-written in full before their runs (2026-11-23, 2026-11-24), and P4-13 as five sub-stages, P4-13a to P4-13e, each one pull request, under the parent index [P4-13](phases/p4-13-hot-water-piping.md) (2026-11-24). P4-14 is a gate stub: entry gates, what the stage owns and reuses, and the interview that precedes its planning.
+written in full before their runs (2026-11-23, 2026-11-24), and P4-13 as five sub-stages, P4-13a to P4-13e, each one pull request, under the parent index [P4-13](phases/p4-13-hot-water-piping.md) (2026-11-24). P4-14 is six sub-stages, P4-14a to P4-14f, under the parent index [P4-14](phases/p4-14-erv-ducting.md) (2026-11-24).
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
@@ -77,7 +77,7 @@ written in full before their runs (2026-11-23, 2026-11-24), and P4-13 as five su
 | [P4-11](phases/p4-11-fans.md) | Family 6: the Fan kind, the `fan_ids` list slot, the exhaust ventilator export with a linked type 10 `PhSupportiveDevice` when Power is filled and its PHX round trip, the no-Spaces finding, the Fans subtab | P4-10; its interview (D4-35) | mechanical, export, UI | Batched in MS3 |
 | [P4-12](phases/p4-12-appliances.md) | Family 7 as Process loads with the Phius default set (Q12) | Superseded: [Phase 4a](../../archive/phase-06-program/README.md) owns appliances (Q4a-03) | mechanical | Superseded |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Roadmap 4.4 as five sub-stages: P4-13a Pipe Types, P4-13b Piping groups and assignment, P4-13c the chain rule in `core/` with the tree and schedule, P4-13d the export into the Hot Water System (D4-09) with its PHX round trip, P4-13e the Piping pills, Colour-by and the pipe tool | P4-06; the piping interview (D4-36, met) | piping, core (P4-13c), export | Batched in MS3 (`M13a` to `M13e`) |
-| [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2, planned in detail after its interview | P4-04; P4-13's draw and assign; the ducting interview | ducting | Stub |
+| [P4-14](phases/p4-14-erv-ducting.md) | Roadmap 4.2 as six sub-stages: P4-14a Duct Types, P4-14b the shared line-group layer extracted from piping, P4-14c Ducting groups and the duct assignment, P4-14d runs and the schedule, P4-14e the export into the ventilation system (D4-09) with its PHX round trip, P4-14f the Ducting pills, the Ventilators columns and Colour-by | P4-04; P4-13; the ducting interview (D4-37, met) | ducting, line_groups (P4-14b), export | Batched in MS3 (`M14a`, `M14c` to `M14f`) |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Register closed; context, docs, the metr-export handoff; Phase 4 close is the MVP (D1) | all stages above | integration | Fresh-process integrated run |
 
 ```
@@ -118,7 +118,7 @@ whichever lands second rebases.
 Within this track, P4-06 can proceed beside P4-04 and P4-05 after P4-03, since it shares only
 `composition.py` with P4-04 (serialise those two). Families 3 to 6 are independent of one another
 after P4-07 and may run in any order their interviews allow. P4-13's sub-stages run in order,
-P4-13a to P4-13e; P4-14 follows them.
+P4-13a to P4-13e; P4-14's sub-stages follow them in order, P4-14a to P4-14f.
 
 Each stage is one pull request against `main`, with `Refs` the Phase 4 issue once it exists. A
 stage that grows past one coherent review splits along the slices its document names; it does not
