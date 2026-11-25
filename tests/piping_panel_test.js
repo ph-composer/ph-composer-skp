@@ -160,7 +160,7 @@ test("opening Piping reads the schedule and groups once; the tree orders twigs u
 test("a group's System links in place, None unlinks, and New Piping group creates and opens one", function () {
   var o = setup();
   read(o);
-  var select = o.view(PIPING).groups.mount.querySelector("[data-row-key='500']").querySelector(".col-system")
+  var select = o.view(PIPING).groups.mount.querySelector("[data-row-key='500']").querySelector(".col-link")
     .querySelector("select");
   change(select, fixtures.mechanical.HWS2.id);
   var link = named(o, PREFIX + "groups.link")[0];
@@ -178,8 +178,8 @@ test("a group's System links in place, None unlinks, and New Piping group create
   var bar = o.view(PIPING).bar;
   press(bar.newGroup);
   var form = o.view(PIPING).groupForm;
-  assert.strictEqual(form.system.children.length, 3, "a prompt and the two Systems");
-  change(form.system, fixtures.mechanical.HWS1.id);
+  assert.strictEqual(form.link.children.length, 3, "a prompt and the two Systems");
+  change(form.link, fixtures.mechanical.HWS1.id);
   form.submit();
   assert.deepStrictEqual(clone(named(o, PREFIX + "groups.create")[0].payload.params),
     { hot_water_system_id: fixtures.mechanical.HWS1.id });
@@ -315,11 +315,11 @@ test("a tool armed without a value shows its default, typing repaints Assign, an
     assert.strictEqual(bar.assign.disabled, false, "Assign follows the text as typed");
     press(bar.newGroup);
     var form = o.view(PIPING).groupForm;
-    change(form.system, fixtures.mechanical.HWS2.id);
+    change(form.link, fixtures.mechanical.HWS2.id);
     var systems = o.state.sections[MECHANICAL + "hot_water_systems"].value.records;
     systems.splice(1, 1);
     o.paint();
-    assert.strictEqual(form.system.value, "", "a deleted System is no longer chosen");
+    assert.strictEqual(form.link.value, "", "a deleted System is no longer chosen");
     assert.ok(form.submitButton.disabled);
   });
 

@@ -62,7 +62,9 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
 
   step("Piping: the bar shows the role's values only, and Assign sends the selection");
   await pills.getByRole("button", { name: "Piping" }).click();
-  const bar = pane.getByRole("region", { name: "Assign to selected lines" });
+  // The line-group parts are shared with ducting, so they are found inside the Piping pill's own surface.
+  const piping = pane.locator("#" + await pills.getByRole("button", { name: "Piping" }).getAttribute("aria-controls"));
+  const bar = piping.getByRole("region", { name: "Assign to selected lines" });
   await bar.getByText("3 lines selected, 2 assignable").waitFor();
   await bar.getByLabel("Pipe Type for selected lines").selectOption(PT1);
   assert.equal(await bar.getByLabel("Multiplier").isVisible(), true);
@@ -88,10 +90,10 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
   await bar.getByRole("button", { name: "Assign by clicking lines", pressed: false }).waitFor();
 
   step("the Piping groups: a System chosen in place, and New Piping group");
-  const groups = pane.locator(".piping-groups");
+  const groups = piping.locator(".line-group-groups");
   await groups.locator("[data-row-key='520']").waitFor();
   assert.match(await groups.locator("[data-row-key='520'] .col-note").textContent(), /Link it to a Hot Water/);
-  await groups.locator("[data-row-key='520'] .col-system select").selectOption(DHW1);
+  await groups.locator("[data-row-key='520'] .col-link select").selectOption(DHW1);
   await page.waitForFunction(() => window.previewHost.piping.groups[2].values.hot_water_system_id !== null);
   await bar.getByRole("button", { name: "+ New Piping group" }).click();
   const dialog = page.getByRole("dialog", { name: "New Piping group" });
@@ -101,16 +103,16 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
   assert.equal((await sent(PREFIX + "groups.create")).length, 1);
 
   step("the schedule: branches under their trunk, a finding, totals, and a row that Locates");
-  const schedule = pane.locator(".piping-schedule");
+  const schedule = piping.locator(".line-group-schedule");
   await schedule.locator("[data-row-key='pipe_preview0002#1']").waitFor();
   const order = await schedule.locator("tbody tr[data-row-key]").evaluateAll(rows =>
     rows.map(row => row.getAttribute("data-row-key")));
   assert.deepEqual(order.slice(0, 4), ["pipe_preview0001#0", "pipe_preview0002#1", "pipe_preview0003#2",
     "pipe_preview0004#3"], "the trunk, its first branch and that branch's twigs");
   await schedule.getByRole("button", { name: "1 finding for Branch 3" }).click();
-  await page.locator(".piping-findings").getByText(/reaches no trunk/).waitFor();
+  await page.locator(".line-group-findings").getByText(/reaches no trunk/).waitFor();
   await page.keyboard.press("Escape");
-  await pane.locator(".piping-totals").getByText("By Hot Water System").waitFor();
+  await piping.locator(".line-group-totals").getByText("By Hot Water System").waitFor();
   await schedule.locator("[data-row-key='pipe_preview0001#0'] .col-length_m").click();
   await page.waitForFunction(() => Array.isArray(window.previewHost.locatedPipes));
   await page.screenshot({ path: path.join(output, "piping.png"), fullPage: true });
@@ -137,7 +139,7 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
       // A scroll closes an open bubble, so the click waits for the scroll to settle.
       await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
       await trigger.click();
-      const bubble = page.locator(".piping-findings .piping-finding");
+      const bubble = page.locator(".line-group-findings .line-group-finding");
       await bubble.getByRole("button", { name: "Locate" }).waitFor();
       const box = await bubble.boundingBox(), head = await schedule.locator("thead").boundingBox();
       assert.ok(box.x >= 0 && box.x + box.width <= width, `the findings bubble fits ${width} px`);

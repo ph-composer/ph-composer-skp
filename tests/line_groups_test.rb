@@ -171,11 +171,13 @@ class LineGroupsTest < PhComposerTestCase
     assert_empty @model.selection.to_a
   end
 
-  # The foundation's own ph_composer.context.open is allowed; nothing else of a feature is.
+  # The foundation's own ph_composer.context.open is allowed; nothing else of a feature is. The panel's line-group
+  # screens (html/line_groups/) are held to the same rule.
   def test_nothing_under_line_groups_names_a_feature
-    names = /ph_composer\.(piping|ducting|zones|mechanical)\b|\b(Piping|Ducting|Mechanical)\b|\bZones::/
-    files = Dir[File.join(ROOT, "**", "*.rb")]
-    assert_operator files.length, :>=, 7
+    names = %r{ph_composer\.(piping|ducting|zones|mechanical)\b|\b(Piping|Ducting|Mechanical)\b|\bZones::|features/}
+    panel = File.join(SOURCE_ROOT, "ph_composer", "html", "line_groups")
+    files = Dir[File.join(ROOT, "**", "*.rb")] + Dir[File.join(panel, "*.{js,css}")]
+    assert_operator files.length, :>=, 13
     ["ph_composer.piping.group", "Piping::Group", "Zones::ChildLookup", "Mechanical"].each do |text|
       assert_match names, text
     end

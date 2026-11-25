@@ -3,10 +3,10 @@
    Conductivity, Reflective, Quality, Colour and Used length (read only: the drawn length of the pipes naming it, as
    the snapshot measured it), then Notes behind the Columns menu. New asks for the Tag; Delete moves the pipes using a
    type to another, or clears them. */
-PhComposerUI.define("features/piping/pipe_types", ["panel", "workspace", "fields", "units", "unit_preferences",
-  "inventory_forms", "sections/colour_by", "features/mechanical/systems", "features/mechanical/equipment_table",
-  "features/mechanical/hot_water", "features/piping/shared"],
-function (panel, ui, fields, units, preferences, forms, colourBy, systems, equipment, hotWater, shared) {
+PhComposerUI.define("features/piping/pipe_types", ["panel", "fields", "inventory_forms", "sections/colour_by",
+  "features/mechanical/systems", "features/mechanical/equipment_table", "features/mechanical/hot_water",
+  "line_groups/shared", "features/piping/shared"],
+function (panel, fields, forms, colourBy, systems, equipment, hotWater, lineGroups, shared) {
   "use strict";
   var SECTION = shared.TYPES, LABEL = "Pipe Type";
   // honeybee-ph's material numbers and the eight nominal sizes in mm, as features/piping/type/schema.rb keeps them.
@@ -18,17 +18,9 @@ function (panel, ui, fields, units, preferences, forms, colourBy, systems, equip
   var QUALITIES = [{ value: "1", label: "None" }, { value: "2", label: "Moderate" }, { value: "3", label: "Good" }];
   var CHOICES = { material: MATERIALS, diameter_mm: DIAMETERS, insulation_quality: QUALITIES,
     insulation_reflective: equipment.YES_NO };
-  var USED = fields.with(fields.LENGTH_M, { label: "Used length" });
   var columns = [["material", "Material"], ["diameter_mm", "Diameter"], ["insulation_thickness_mm", "Insulation"],
     ["insulation_conductivity_w_mk", "Conductivity"], ["insulation_reflective", "Reflective"],
     ["insulation_quality", "Quality"], ["color", "Colour"], ["used_length_m", "Used length"]];
-
-  /* The Colour cell's form, held as an equipment table part so an open one holds the tab. */
-  function ColourPart(form) { this.form = form; }
-  ColourPart.prototype.busy = function () { return this.form.requests.busy(); };
-  ColourPart.prototype.guard = function () { return this.form.root.hidden ? null : "Finish or cancel the open form."; };
-  ColourPart.prototype.refresh = function (state, records) { this.form.refresh(state, true, records); };
-  ColourPart.prototype.dispose = function () { this.form.dispose(); };
 
   function PipeTypes(root, context) {
     var self = this;
@@ -40,10 +32,10 @@ function (panel, ui, fields, units, preferences, forms, colourBy, systems, equip
       editable: ["material", "diameter_mm", "insulation_thickness_mm", "insulation_conductivity_w_mk",
         "insulation_reflective", "insulation_quality"],
       replacement: { replacement: true, allowClear: true, usedOn: "pipe",
-        usage: function (state, id) { return self.usage(id); } },
-      parts: [new ColourPart(this.colour)],
+        usage: function (state, id) { return lineGroups.usage(shared.SPEC, self.table.records, id); } },
+      parts: [new lineGroups.ColourPart(this.colour)],
       inventory: {
-        quantities: { insulation_thickness_mm: fields.LENGTH_MM, used_length_m: USED,
+        quantities: { insulation_thickness_mm: fields.LENGTH_MM, used_length_m: lineGroups.USED,
           insulation_conductivity_w_mk: fields.with(fields.CONDUCTIVITY, { allowBlank: true }) },
         selectFields: CHOICES,
         normalize: function (field, text) {
@@ -70,26 +62,16 @@ function (panel, ui, fields, units, preferences, forms, colourBy, systems, equip
       cell: function (td, row, field) {
         if (field === "color") { forms.colorCell(td, row.record, self.colour, function () { return table.allowed(); });
           return true; }
-        if (field === "used_length_m") { self.usedCell(td, row.record); return true; }
+        if (field === "used_length_m") {
+          lineGroups.usedCell(td, row.record, "Read only: the drawn length of every pipe using it.");
+          return true;
+        }
         return false;
       } });
     root.appendChild(this.colour.root);
     this.inventory = table.inventory;
     this.create = table.create;
   }
-  /* The pipes a type's Delete moves or clears, from the drawn length the snapshot measured. */
-  PipeTypes.prototype.usage = function (id) {
-    var record = this.table.records.filter(function (entry) { return entry.id === id; })[0];
-    var used = record ? record.used_length_m || 0 : 0;
-    return { count: used > 0 ? 1 : 0, description: "Pipes " + units.format(used, fields.LENGTH_M,
-      units.profile(fields.LENGTH_M, preferences.current())) + " long use it." };
-  };
-  PipeTypes.prototype.usedCell = function (td, record) {
-    td.textContent = units.format(record.used_length_m || 0, USED, units.profile(USED, preferences.current()),
-      { showUnit: false });
-    td.classList.add("mech-read-only");
-    ui.tooltip(td, "Read only: the drawn length of every pipe using it.");
-  };
   PipeTypes.prototype.render = function (state, shown) { this.table.render(state, shown); };
   PipeTypes.prototype.guard = function () { return this.table.guard(); };
   PipeTypes.prototype.accepts = function (intent) { return this.table.accepts(intent); };

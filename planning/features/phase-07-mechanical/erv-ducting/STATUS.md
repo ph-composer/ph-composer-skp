@@ -1,7 +1,7 @@
 # ERV ducting: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). In progress: P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, merged (#582); P4-14c, Ducting groups and the duct assignment, merged (#583); P4-14c2, the line-group operations consolidated (#584), merged (#585); P4-14d, duct runs and the schedule, in review (#586).
+STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). In progress: P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, merged (#582); P4-14c, Ducting groups and the duct assignment, merged (#583); P4-14c2, the line-group operations consolidated (#584), merged (#585); P4-14d, duct runs and the schedule, merged (#586); P4-14e, the ducting export, merged (#587); P4-14f, the Ducting pills, the Ventilators columns and Colour-by, in review (#588), which completes the implementation.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -23,7 +23,7 @@ edge stages merged on 2026-10-26.
 
 ## Next step
 
-P4-14d merged (#586: duct runs, findings and the schedule); P4-14e, the ducting export, in review (#587); then P4-14f, the view.
+P4-14e merged (#587: the ducting export); P4-14f, the view, in review (#588). Then the M14a to M14f host cases in the MS3 sitting.
 
 ## Blockers
 
@@ -36,7 +36,7 @@ P4-14d merged (#586: duct runs, findings and the schedule); P4-14e, the ducting 
 
 ## Verification
 
-P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md); P4-14c offline: [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md); P4-14d offline: [p4-14d-duct-runs-and-schedule](../evidence/p4-14d-duct-runs-and-schedule.md). No host evidence yet; the host cases run in MS3.
+P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md); P4-14c offline: [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md); P4-14d offline: [p4-14d-duct-runs-and-schedule](../evidence/p4-14d-duct-runs-and-schedule.md); P4-14e offline: [p4-14e-ducting-export](../evidence/p4-14e-ducting-export.md); P4-14f offline: [p4-14f-ducting-view](../evidence/p4-14f-ducting-view.md). No host evidence yet; the host cases run in MS3.
 
 ## Ledger
 
@@ -52,3 +52,4 @@ P4-14a offline: [p4-14a-duct-types](../evidence/p4-14a-duct-types.md); P4-14c of
 | 2026-11-25 | P4-14a merged (#581). P4-14b implemented on `feat/phase-07-mechanical-p4-14b` and in review: the foundation `line_groups/` package with piping moved onto it, no behavior change. |
 | 2026-11-25 | P4-14b merged (#582). P4-14c implemented on `feat/phase-07-mechanical-p4-14c` and in review: Ducting groups linked to a Ventilator and the duct assignment (Duct Type, direction, quantity) on the shared layer, panel closed; host case `M14c` owed to MS3. |
 | 2026-11-25 | P4-14c2 merged (#585). P4-14d implemented on `feat/phase-07-mechanical-p4-14d` and in review (#586): duct runs, findings, the schedule and its pages, `runs.locate`, each Ventilator's two lengths and used length, panel closed; host case `M14d` owed to MS3. |
+| 2026-11-25 | P4-14d merged (#586) and P4-14e merged (#587). P4-14f implemented on `feat/phase-07-mechanical-p4-14f` and in review (#588): the Duct Types and Ducting pills, the Ventilators table's two duct columns and the two Colour-by modes, on the panel's shared `html/line_groups/` layer with piping moved onto it; every sub-stage implemented, host cases `M14a` to `M14f` owed to MS3. |

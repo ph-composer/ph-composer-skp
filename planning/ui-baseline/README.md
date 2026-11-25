@@ -95,6 +95,15 @@ trunk, totals by role and by System, findings behind an alert glyph and Locate o
 are two pills, not one (D4-13 named one); the UI polish review may fold them. The Systems table's recirculation
 columns are piping's, contributed through `table_contributions`, so they sit after Notes at the right.
 
+Built by P4-14f on 2026-11-25 (offline; the host review is owed to the MS3 sitting): Ventilation gains Duct Types and
+Ducting after Ventilators, the same two pills as piping's. Both features' Piping and Ducting pills are now one shared
+part, `html/line_groups/` (the bar's frame, the groups, the schedule and the read), each feature giving its own
+values and words. Duct Types is the equipment table; a Shape change asks for the new shape's sizes in the shared form
+dialog a Heater's Type change uses, and the other shape's sizes read as a dash. The Ducting pill opens with one line
+saying only the two cold runs are drawn, then the bar with the direction as two setting choices and a quantity (no
+viewport tool), the groups with their Ventilator, and the schedule grouped by Ventilator with totals by direction and
+by Ventilator. The Ventilators table's `Outdoor air duct` and `Exhaust air duct` columns are ducting's, after Notes.
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the

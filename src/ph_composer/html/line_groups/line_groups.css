@@ -1,0 +1,48 @@
+/* A line group's pill (html/line_groups/): the assign bar over the groups and the schedule with its totals and
+   findings. The tables, controls and bubbles are the kit's; these rules only place the pill's own parts. */
+.line-group-intro { margin: 12px 0 0; font-size: 13px; color: var(--muted-strong); }
+/* One row that always shows, so a selection never moves what is under it; it wraps at narrow widths. */
+.line-group-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0; }
+.line-group-bar-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.line-group-bar select { width: 160px; max-width: 100%; }
+.line-group-bar-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.line-group-bar-field[hidden], .line-group-bar-reason[hidden] { display: none; }
+.phc-workspace .line-group-number { width: 4em; }
+.phc-workspace .line-group-bar-field .phc-unit-field input { width: 5em; }
+.line-group-number[aria-invalid="true"] { border-color: var(--red); }
+.line-group-bar-reason { margin-left: -8px; }
+.line-group-new { margin-left: auto; }
+.line-group-groups h2, .line-group-schedule-title, .line-group-totals h2, .line-group-others h2 {
+  margin: 16px 0 4px; font-size: var(--text-md); font-weight: 600;
+}
+.line-group-totals h3 { margin: 8px 0 2px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
+/* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
+.line-group-table { min-width: 0; overflow: auto; }
+.line-group-totals .line-group-table { max-width: 900px; }
+.line-group-schedule tbody tr { cursor: pointer; }
+.line-group-schedule-section > .phc-inventory-controls { margin: 4px 0 8px; }
+.line-group-table .phc-table :is(.col-display_name, .col-group, .col-group_name, .col-link, .col-note) {
+  text-align: left;
+}
+.phc-workspace .phc-table td.line-group-warning { color: var(--warning-ink); }
+.phc-workspace .phc-table td.line-group-read-only { color: var(--ink); }
+.line-group-status { font-size: 12px; color: var(--muted); }
+.line-group-status.line-group-error { color: var(--red); }
+.phc-workspace .phc-table .line-group-blocks-export { color: var(--amber); }
+.line-group-findings-layer .line-group-findings { display: block; }
+.line-group-finding { display: flex; align-items: baseline; gap: 10px; }
+.line-group-finding p { flex: 1; margin: 0 0 6px; }
+.line-group-finding-blocks { color: var(--warning-ink); font-weight: 600; }
+.line-group-totals[hidden], .line-group-others[hidden] { display: none; }
+.line-group-other-findings { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line);
+  border-radius: var(--radius-md); }
+.line-group-other-findings li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px;
+  border-bottom: 1px solid var(--line); }
+.line-group-other-findings li:last-child { border-bottom: 0; }
+.line-group-other-findings li span { flex: 1; }
+/* A narrow panel lays the bar out in deliberate rows. */
+@media (max-width: 500px) {
+  .line-group-bar select { flex: 1 1 140px; width: auto; }
+  .line-group-bar { gap: 8px; }
+  .line-group-new { margin-left: 0; }
+}

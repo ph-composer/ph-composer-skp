@@ -68,7 +68,7 @@ result fields; the conductor's Locate decision; the quantity bullet as inferred.
   (`ducting.run_missing`, `ducting.shared_definition`) equal to the preflight's rows by code, object and message; a bare
   type's 0.04; user_data on every copy's segment, a group's and a type's omitted, a reserved key blocking; a Model
   with no ducts; the privacy allowlist.
-- Python `tests/python/test_ducting_sections.py` (13): fresh ducts on each pair's system before attach, equal
+- Python `tests/python/test_ducting_sections.py` (11 functions, 15 cases): fresh ducts on each pair's system before attach, equal
   dictionaries; the base case reloaded on both Rooms with Ruby's lengths; the shared case's equal identifiers;
   conformance refusing a differing, missing, unreported or misdirected element, wrong lengths or Room count, and a
   differing reloaded segment; a forced failure on the second Room's build blocks and leaves both systems without

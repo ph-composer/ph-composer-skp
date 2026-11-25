@@ -26,8 +26,8 @@
    Cells that are one choice applied at once (a Heater's System) send through `choose(record, values, expected)`:
    one guarded update, its refusal a warning notice, the cell showing the Model's value again. */
 PhComposerUI.define("features/mechanical/equipment_table", ["panel", "snapshot", "workspace", "request",
-  "record_form", "inventory", "inventory_forms"],
-function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
+  "record_form", "inventory", "inventory_forms", "choice_cell", "unit_field"],
+function (panel, snapshot, ui, request, RecordForm, inventories, forms, choiceCell, unitFields) {
   "use strict";
   var IDENTITY = [["manufacturer", "Manufacturer"], ["model", "Model"], ["notes", "Notes"]];
   var YES_NO = [{ value: "true", label: "Yes" }, { value: "false", label: "No" }];
@@ -146,32 +146,129 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
   };
   TagForm.prototype.dispose = function () { this.enabled = false; this.withdraw(); };
 
-  /* A choice applied at once, drawn as the tables' enum pill: `choices` are { value, label }, `value` the Model's.
-     The select is kept across repaints, so focus a dialog returns to it (a Heater's Type change) finds it. */
-  function choiceCell(td, options) {
-    var select = td.mechChoice;
-    if (!select) {
-      select = td.mechChoice = ui.element("select", "phc-enum-cell");
-      select.addEventListener("change", function () {
-        var current = select.mechOptions, chosen = select.value;
-        select.value = current.value;
-        if (chosen !== current.value) current.choose(chosen, select);
-      });
-    }
-    select.mechOptions = options;
-    var listed = JSON.stringify(options.choices);
-    if (select.mechListed !== listed) {
-      select.mechListed = listed;
-      select.replaceChildren();
-      options.choices.forEach(function (choice) { select.appendChild(ui.option(choice.value, choice.label)); });
-    }
-    select.value = options.value;
-    select.disabled = Boolean(options.disabled);
-    select.setAttribute("aria-label", options.label);
-    if (select.parentNode !== td) td.replaceChildren(select);
-    td.classList.add("phc-editable-cell");
-    return select;
+  function present(value) { return value !== null && value !== undefined; }
+
+  /* Change Type, for a kind whose variant takes its own values (a Hot Water Heater's Type, say): the
+     new variant's values, each required, and what the old variant's values were, sent as one guarded update with a
+     null for each old value, one Undo step. options: { section, label (request label), key (the variant field), word
+     ("Type"), choices ([{ value, label }]), values ({ field: { label, field } }), fields ({ variant: [field] }),
+     positive ([field] that must be above 0), none (said when the new variant takes no value), changed } */
+  function VariantForm(session, send, options) {
+    var word = options.word;
+    RecordForm.call(this, session, send, { title: "Change " + word, action: options.section + ".update",
+      label: options.label, submitLabel: "Change " + word, pendingText: "Changing...",
+      failureText: "The " + word + " was not changed.", changed: options.changed });
+    this.options = options;
+    this.explanation = ui.element("p");
+    this.form.appendChild(this.explanation);
+    this.fieldsRoot = ui.element("div", "mech-type-fields");
+    this.form.appendChild(this.fieldsRoot);
+    this.units = [];
+    this.finish();
   }
+  RecordForm.extend(VariantForm);
+  VariantForm.prototype.label = function (value) {
+    var entry = this.options.choices.filter(function (choice) { return choice.value === value; })[0];
+    return entry ? entry.label : value;
+  };
+  /* The one update a change sends: the new variant and its values, a null for each value of the old one, each
+     guarded by what the row showed. */
+  VariantForm.prototype.change = function (record, variant, entered) {
+    var key = this.options.key, values = {}, expected = {}, wanted = this.options.fields[variant];
+    values[key] = variant; expected[key] = record.values[key];
+    Object.keys(this.options.values).forEach(function (field) {
+      if (wanted.indexOf(field) >= 0) values[field] = entered[field];
+      else if (present(record.values[field])) {
+        values[field] = null;
+        expected[field] = record.values[field];
+      }
+    });
+    return { id: record.id, values: values, expected_values: expected };
+  };
+  VariantForm.prototype.open = function (record, variant) {
+    if (!this.enabled) return;
+    var self = this, options = this.options, wanted = options.fields[variant];
+    this.record = record; this.variant = variant; this.stale = false; this.from = record.values[options.key];
+    this.release();
+    this.title.textContent = "Change " + record.values.name + " to " + this.label(variant);
+    var going = Object.keys(options.values).filter(function (field) {
+      return wanted.indexOf(field) < 0 && present(record.values[field]);
+    }).map(function (field) { return options.values[field].label; });
+    this.explanation.textContent = going.length ? "Removes its " + going.join(", ") + "." :
+      wanted.length ? "" : options.none;
+    this.explanation.hidden = !this.explanation.textContent;
+    this.units = wanted.map(function (field) {
+      var entry = options.values[field], label = ui.element("label", "mech-type-field");
+      var unit = new unitFields.UnitField({ field: entry.field, value: null,
+        onCommit: function () { self.updateButton(); } });
+      unit.input.setAttribute("aria-label", entry.label);
+      // A held change keeps saying why until the dialog closes.
+      unit.input.addEventListener("input", function () { if (!self.stale) self.error.textContent = ""; });
+      // Enter in any field submits, after the field has read what was typed.
+      unit.input.addEventListener("keydown", function (event) { if (event.key === "Enter") self.submit(); });
+      label.appendChild(ui.element("span", "", entry.label));
+      label.appendChild(unit.root);
+      RecordForm.required(label, unit.input);
+      self.fieldsRoot.appendChild(label);
+      return { key: field, unit: unit };
+    });
+    this.error.textContent = "";
+    this.updateButton();
+    this.show();
+    if (this.units.length) this.units[0].unit.input.focus(); else this.submitButton.focus();
+  };
+  VariantForm.prototype.updateButton = function () {
+    this.submitButton.disabled = !this.enabled || this.busy() || Boolean(this.stale);
+  };
+  /* Each value read as typed, or the first field's reason it cannot be. */
+  VariantForm.prototype.entered = function () {
+    var entered = {}, failed = false, options = this.options;
+    this.units.forEach(function (held) {
+      var outcome = held.unit.commit(), value = outcome.ok ? held.unit.baseline : null;
+      var reason = !outcome.ok ? outcome.message : value === null ? "Enter the " +
+        options.values[held.key].label + "." : options.positive.indexOf(held.key) >= 0 && value <= 0 ?
+        "Enter a number above 0." : "";
+      if (reason) {
+        held.unit.error.textContent = reason; held.unit.error.hidden = false;
+        held.unit.input.setAttribute("aria-invalid", "true");
+        if (!failed) held.unit.input.focus();
+        failed = true;
+      }
+      entered[held.key] = value;
+    });
+    return failed ? null : entered;
+  };
+  /* Enter in a field reaches here as the button does, so a held or disabled change sends nothing either way. */
+  VariantForm.prototype.submit = function () {
+    if (!this.record || !this.enabled || this.busy() || this.stale) return;
+    var entered = this.entered();
+    if (entered) this.run(this.change(this.record, this.variant, entered));
+  };
+  VariantForm.prototype.refresh = function (state) {
+    var outcome = forms.refreshForm(this, state, this.options.section), key = this.options.key;
+    if (outcome && outcome.status === "completed") { this.hide(); this.release(); return; }
+    var record = this.record, records = (snapshot.value(state, this.options.section) || {}).records || [];
+    var now = record && records.filter(function (entry) { return entry.id === record.id; })[0];
+    if (!this.root.hidden && record && !this.busy()) {
+      // The record went: nothing is left to change.
+      if (!now) { this.hide(); this.release(); return; }
+      // Its variant changed elsewhere: the change no longer means what it said. The typed values and any refusal stay
+      // in view; the change is held, and Cancel lets the user choose again from the variant now shown.
+      if (now.values[key] !== this.from && !this.stale) {
+        this.stale = true;
+        this.error.textContent = (this.error.textContent ? this.error.textContent + " " : "") +
+          record.values.name + " is now " + this.label(now.values[key]) + "; cancel and choose its " +
+          this.options.word + " again.";
+      }
+    }
+    this.updateButton();
+  };
+  VariantForm.prototype.release = function () {
+    this.units.forEach(function (held) { held.unit.dispose(); });
+    this.units = [];
+    this.fieldsRoot.replaceChildren();
+  };
+  VariantForm.prototype.dispose = function () { this.enabled = false; this.withdraw(); this.release(); };
 
   function EquipmentTable(root, context, spec) {
     var self = this, session = context.session, send = context.send, label = spec.label;
@@ -312,6 +409,6 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.inventory.dispose();
   };
 
-  return { EquipmentTable: EquipmentTable, TagForm: TagForm, choiceCell: choiceCell, yesNo: yesNo, choice: choice,
-    wholeNumber: wholeNumber, stored: stored, YES_NO: YES_NO, IDENTITY: IDENTITY };
+  return { EquipmentTable: EquipmentTable, TagForm: TagForm, VariantForm: VariantForm, choiceCell: choiceCell,
+    yesNo: yesNo, choice: choice, wholeNumber: wholeNumber, stored: stored, YES_NO: YES_NO, IDENTITY: IDENTITY };
 });

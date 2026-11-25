@@ -25,6 +25,11 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "93522816c422791a597480f7eb8550a4cbbfe19ff65af593ff0933e5c6ffbe40"
     },
+    "html/choice_cell.js": {
+      "bytes": 1390,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "c955978508c0c65ae5955d20787769b398059d5a084e4517997d59224ec19ba8"
+    },
     "html/column_menu.js": {
       "bytes": 5796,
       "mime": "text/javascript; charset=utf-8",
@@ -175,15 +180,50 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
+    "html/features/ducting/assign_bar.js": {
+      "bytes": 4370,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "662322b1dfa819cba382eb2b21e27cb3f38f3bb022cdad85066e4e984eb8f7bc"
+    },
+    "html/features/ducting/duct_types.js": {
+      "bytes": 7381,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "aabae52a6ec241529fc081420a5743424a263b9487aa8c82d0cbffb87d3465f3"
+    },
+    "html/features/ducting/ducting.css": {
+      "bytes": 474,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "b016ec7038b9f2ac0734cd8738fa89b7917463c6fa1522c2288d68fce505a7dd"
+    },
+    "html/features/ducting/schedule.js": {
+      "bytes": 4117,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e11b6a80dd833956b7e80a33e48d78981c833d58412af87066d8ef5f3dbac536"
+    },
+    "html/features/ducting/section.js": {
+      "bytes": 1211,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "710eb115a164094896ab560f011adb69b66b7e382d31a7ed47c1ec5d73a90c8b"
+    },
+    "html/features/ducting/shared.js": {
+      "bytes": 1560,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "0f9b7a2f4d34db403f2143833332c88c26eb4871596db8a95bac3e100e2c804c"
+    },
+    "html/features/ducting/ventilator_columns.js": {
+      "bytes": 2110,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "b91e290260910d29fe57f95c4f031731db81cc513f741d4cd2379f0a1632a577"
+    },
     "html/features/mechanical/electric_heaters.js": {
       "bytes": 5403,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
     },
     "html/features/mechanical/equipment_table.js": {
-      "bytes": 18375,
+      "bytes": 24212,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "177afc4bbdd920d8fa30363b36a8b359e2a7aa132bcea6f04fcd9fb87a04b65e"
+      "sha256": "8354923cea664c17e3146fa7d1581016da9578964b8040be1210f4e0f91d3b0e"
     },
     "html/features/mechanical/fans.js": {
       "bytes": 8575,
@@ -211,9 +251,9 @@
       "sha256": "5d25552db922144617092db46bbcd12b217119f597114e2e58dfb52ef2ddb0b9"
     },
     "html/features/mechanical/hot_water_heaters.js": {
-      "bytes": 14355,
+      "bytes": 8648,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "040bf91fb8650d3d45ddb53572e28f44b33addd43d989ab0d84aa252e875a7ef"
+      "sha256": "205e72fc91f5cf894177b09d76640ec65f47b7af1a06e374ce80301678f37a60"
     },
     "html/features/mechanical/hot_water_tanks.js": {
       "bytes": 7005,
@@ -256,19 +296,14 @@
       "sha256": "e96bd2c8e94a83789b7dc7e6c6d94881916c6c7ef158d2b806b584c2c6bfa01f"
     },
     "html/features/mechanical/ventilators.js": {
-      "bytes": 9910,
+      "bytes": 10050,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "37ba2034b7031e4bae11905eb3ca063da8c88ed7ae3dc732c6c360c150c2fe33"
+      "sha256": "b1f410e5e479269353893963d6024c8fdbd3e9779174f2658fd8f4d92efd19d7"
     },
     "html/features/piping/assign_bar.js": {
-      "bytes": 15666,
+      "bytes": 9911,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "65bcfdd72c577a5d58de866c3a2d37de07ea5ff4bd65d6ba0b3ef4cb0c4f9900"
-    },
-    "html/features/piping/groups.js": {
-      "bytes": 7473,
-      "mime": "text/javascript; charset=utf-8",
-      "sha256": "906253a445f7a0d161dfd5f6fbfb952e80ddf92c3d267a98693c052197250c78"
+      "sha256": "b9d0bfa1d4a7f247a424ad813980f15e3fd93b955ea222129cd8a07cb8cdbeb4"
     },
     "html/features/piping/pipe_tool.js": {
       "bytes": 3279,
@@ -276,29 +311,29 @@
       "sha256": "4067a5def0ba073a1b8f59da68849a141ada8f63290b0c76ca5a876c27415a9b"
     },
     "html/features/piping/pipe_types.js": {
-      "bytes": 6781,
+      "bytes": 5516,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "aced99a35c780f458abbe549a3a3a6250348211b42b228bca720a9214a922392"
+      "sha256": "368fbc64a9225e568cf7df1f5a6e1be84658a375374c2b63bc1e002a003953c3"
     },
     "html/features/piping/piping.css": {
-      "bytes": 3653,
+      "bytes": 1026,
       "mime": "text/css; charset=utf-8",
-      "sha256": "15272a999d3c3c75b477b9a489866add1ac416ef8459d852d91d206bbf9932dd"
+      "sha256": "1d84412462cede0ec4a7c992a9713d6ac364d48d7de22fb2cf554f698568581b"
     },
     "html/features/piping/schedule.js": {
-      "bytes": 17178,
+      "bytes": 6249,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a80e4fbc0919996e26349eab7966a2a4d649c893667b00febfd380a089e2f1e6"
+      "sha256": "fc584f07935b320abee69895b1c75a395bc25b7dd43e36b164c7782c6dd0fa10"
     },
     "html/features/piping/section.js": {
-      "bytes": 3171,
+      "bytes": 994,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "94717ba8a43ff9bc5e9113b6378557fcbde58791748ad231ab3a9857a577707c"
+      "sha256": "0dcc3406db1cea3af3b9a40858fdb0715cc590edef85c6ae63c11b89dfef5c1b"
     },
     "html/features/piping/shared.js": {
-      "bytes": 3373,
+      "bytes": 1581,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "f51426f1602e62512e28354c3152d32da8b0f2057f2c1851a852cbf987623f2f"
+      "sha256": "56bc420cb373b9d88046bf9415eb99978b6f860bcac2894846e4e6b99a716f64"
     },
     "html/features/piping/systems_columns.js": {
       "bytes": 2504,
@@ -611,9 +646,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 12128,
+      "bytes": 12851,
       "mime": "text/html; charset=utf-8",
-      "sha256": "5e899816fbfa392c0ae372fa5e8a6088270a082eeba498cfc12f24ab13fcc32b"
+      "sha256": "061316699bc2660b8160c49384b4fbfb3a3d15fc7b70e3637096e01954be04a0"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -689,6 +724,36 @@
       "bytes": 9648,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "32a94d159fec4ad46489552205e09ac3763ec0e234bb5f50cd8b5df8fa185d7d"
+    },
+    "html/line_groups/assign_bar.js": {
+      "bytes": 8766,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e430d52c17bc5140a6b5455c12e1a9a87272418f0d386fef7ab4b0a549d4e909"
+    },
+    "html/line_groups/groups.js": {
+      "bytes": 7414,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e43f5ebebf63b939bd26f10f62026114e40f5e99638ae6c31a70d318210b3820"
+    },
+    "html/line_groups/line_groups.css": {
+      "bytes": 3207,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "02fe15cc6d7bdea38febc368229460a0e22be8cd005125b8e11fead96066595a"
+    },
+    "html/line_groups/pill.js": {
+      "bytes": 3055,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "fe9da1a42b1122de30150c984a28c956a4dc22b090312859f4e6d478f84c8429"
+    },
+    "html/line_groups/schedule.js": {
+      "bytes": 12996,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "54dc27375496d9ae5f5ae21ee8f6412c43ac4a640d739ce0adda17ca9989e43b"
+    },
+    "html/line_groups/shared.js": {
+      "bytes": 4731,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "6946543a891043a33925c172bc09406e2cbed912d1f10a1ed937d2d8ba011722"
     },
     "html/map_borders.js": {
       "bytes": 113186,

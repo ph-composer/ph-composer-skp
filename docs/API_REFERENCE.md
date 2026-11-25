@@ -19201,6 +19201,440 @@ Example params:
 }
 ```
 
+### `ph_composer.ducting.schedule.all`
+
+Every ERV duct run in one read, for the panel, with the totals, Ventilator and Duct Type rows and unreadable records. It walks the Model. Owner: `ph_composer.ducting`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.schedule` instead.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "totals",
+    "ventilators",
+    "types",
+    "unreadable",
+    "unreadable_total",
+    "runs"
+  ],
+  "properties": {
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "by_direction",
+        "run_count",
+        "line_count",
+        "length_m"
+      ],
+      "properties": {
+        "by_direction": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "direction",
+              "run_count",
+              "line_count",
+              "length_m"
+            ],
+            "properties": {
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "outdoor_air",
+                  "exhaust_air"
+                ]
+              },
+              "run_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "line_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "length_m": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "m",
+                "description": "Each line times its quantity."
+              }
+            }
+          },
+          "description": "Both directions, zero with no run."
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "length_m": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "m",
+          "description": "Each line times its quantity."
+        }
+      },
+      "description": "Over every run."
+    },
+    "ventilators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ventilator_id",
+          "name",
+          "outdoor_air_length_m",
+          "exhaust_air_length_m",
+          "findings"
+        ],
+        "properties": {
+          "ventilator_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outdoor_air_length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "Its Outdoor air ducts, each line times its quantity; 0 with none."
+          },
+          "exhaust_air_length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "Its Exhaust air ducts, each line times its quantity; 0 with none."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message",
+                "blocks_export",
+                "locate"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                },
+                "locate": {
+                  "type": "object",
+                  "description": "The view command and params opening the Ventilator: ph_composer.mechanical.locate."
+                }
+              }
+            },
+            "description": "ducting.run_missing when it serves a Zone and has no run of a direction."
+          }
+        }
+      },
+      "description": "Every Ventilator, one with no ducts included."
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "duct_type_id",
+          "name",
+          "used_length_m",
+          "line_count"
+        ],
+        "properties": {
+          "duct_type_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "used_length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "Each line times its quantity."
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "Every Duct Type with its used length."
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Every unreadable group and duct record."
+    },
+    "unreadable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "display_name",
+          "direction",
+          "ventilator_id",
+          "ventilator_name",
+          "group",
+          "duct_type_id",
+          "duct_type_name",
+          "length_m",
+          "quantity",
+          "line_count",
+          "shared",
+          "findings"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "duct_ and a digest of the group occurrence, direction, Duct Type, quantity and points; derived, and it changes with the geometry."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "The direction and a counter, numbered per Ventilator."
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "outdoor_air",
+              "exhaust_air"
+            ]
+          },
+          "ventilator_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The group's Ventilator, or null."
+          },
+          "ventilator_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the group names no existing Ventilator."
+          },
+          "group": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group_id",
+              "group_path",
+              "name"
+            ],
+            "properties": {
+              "group_id": {
+                "type": "string"
+              },
+              "group_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "duct_type_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duct_type_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the Duct Type no longer exists or is unset."
+          },
+          "length_m": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m",
+            "description": "Drawn length; the quantity is not applied."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "How many identical ducts each line stands for."
+          },
+          "line_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "edge_paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "description": "The run's ducts in order; runs.locate takes them. Left out with compact."
+          },
+          "edge_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: how many ducts."
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: the run's place in the schedule, which names it to ph_composer.ducting.runs.members when two runs share an identifier."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Whether any duct is in storage another placement draws."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message",
+                "blocks_export"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Cut to 512 characters."
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                },
+                "locate": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "edge_paths"
+                  ],
+                  "properties": {
+                    "edge_paths": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "description": "Root-to-Edge persistent-id paths."
+                    }
+                  },
+                  "description": "The ducts named, as runs.locate takes them; without compact."
+                },
+                "edge_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "With compact: how many ducts it names; ph_composer.ducting.runs.members with finding pages them."
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Every run in schedule order."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.ducting.schedule.details`
 
 One bounded page of the schedule's Ventilator rows, Duct Type rows or unreadable records, each name cut, for a compact read. Owner: `ph_composer.ducting`.
@@ -130756,3 +131190,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.105 | 2026-11-25 | ph_composer.piping.groups.create refuses session.inactive for a Model SketchUp is not showing and declares record.unreadable. piping.groups.all and groups.list rows give the write_refusal a link meets, a nested group or one a Zone holds included; pipes.clear checks every removed pipe id against its referrers; a pipe_types.delete with stale expected_values refuses target.changed first. |
 | 1.106 | 2026-11-25 | ph_composer.ducting adds the schedule: ph_composer.ducting.schedule (runs by Ducting group, direction, Duct Type and quantity, each Ventilator's two lengths and each Duct Type's used length, with compact), ph_composer.ducting.schedule.details, ph_composer.ducting.runs.members, ph_composer.ducting.ventilators and its snapshot section, and the view command ph_composer.ducting.runs.locate, with the codes ducting.type_missing, ducting.group_unlinked, ducting.run_missing, ducting.shared_definition and ducting.hidden. duct_types.list and duct_types.all rows add used_length_m. A duct's quantity is at most 10,000. |
 | 1.107 | 2026-11-25 | ph_composer.ducting exports its ducts: the export section ph_composer.ducting.export.ducting appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone takes. |
+| 1.108 | 2026-11-25 | ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its direction or Duct Type with legend lengths, quantity applied. |

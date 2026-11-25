@@ -1385,14 +1385,24 @@ Edge names (its kind, field and label) and the query answering which Zone holds 
 | `Selection` | The native selection under the active path as Edge references, with ignored entities counted; the caller passes its gesture limit and Zones' containment |
 | `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
 | `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
-| `ScheduleShapes` | The schemas a schedule's run rows share (the Edge paths, findings, compact counts), the unreadable row, and the members query and `runs.locate` registrations, worded by the spec's Edge noun |
+| `ScheduleShapes` | The schemas a schedule's run rows share (the Edge paths, findings, compact counts), the unreadable row, and the members query, the panel's whole `schedule.all` read (`install_all`) and `runs.locate` registrations, worded by the spec's Edge noun |
+| `ColourModes` | One Colour-by entry per readable assigned Edge occurrence with its type, the Edge as entity and its world segment as derived geometry at the shared 5 px stroke, its legend figure the length times the count the feature gives; shared storage withheld while a repeated parent's context is open |
 | `ExportScan` | The export's read of the snapshot: each assigned Edge directly in a group occurrence as `Scan.edges` gives it, with `in_zone` from the Zones section's paths, `shared` from the paths the snapshot reaches, claims captured per occurrence and an unreadable record refusing the export; and the preflight's unreadable, Locate and metadata rows |
 
 The feature keeps its schemas and record shapes, its assign (the values an Edge takes are its own), its type
 operations, its declarations, its reference targets' declared descriptors, its runs, findings, schedule rows and
-export records, its Colour-by modes and any tool. Its declarations call the operations with its spec
-(`features/piping/line_group.rb`, `features/ducting/line_group.rb`), as thermal bridges and piping call the chain
+export records, its Colour-by modes' values and colours, and any tool. Its declarations call the operations with its
+spec (`features/piping/line_group.rb`, `features/ducting/line_group.rb`), as thermal bridges and piping call the chain
 rule in `core/edge_runs.rb`.
+
+The panel has the same layer, `html/line_groups/`, which names no feature either. A feature's screens describe it
+once as a plain spec (its prefix, its group and Edge words, its type label, its selection section and the linked
+record's key, label and section; `line_groups/shared.js`), and `line_groups/pill.js` builds the pill from it: the
+one read of `schedule.all` and `groups.all`, the groups with their linked record chosen in place and New <group>, and
+the schedule with Locate, findings, totals and "Not in the schedule" (`line_groups/schedule.js`), given the feature's
+columns, words and totals. The feature's assign bar inherits `line_groups/assign_bar.js`'s frame (the selection
+count, the type, Assign with its reason, Clear and New <group>) and adds its own values (`features/piping/` and
+`features/ducting/`).
 
 ## Scripting as an entry point
 

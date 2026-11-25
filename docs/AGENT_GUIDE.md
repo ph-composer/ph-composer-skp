@@ -1398,7 +1398,10 @@ a Zone and has no run of a direction carries the warning `ducting.run_missing`.
 `ph_composer.ducting.schedule.details` (`part` `ventilators`, `types` or `unreadable`),
 `ph_composer.ducting.runs.members` and `ph_composer.ducting.runs.locate` work as piping's; a hidden duct
 or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store
-one.
+one. `ph_composer.ducting.schedule.all` is the whole schedule in one read, for the panel; prefer the
+pages. Two Colour-by modes, Duct direction and Duct Type (mode names ph_composer.ducting.by_direction and
+ph_composer.ducting.by_type), colour each duct by its direction or its Duct Type; each legend row sums
+its ducts' length times their quantity, so it reads what the totals and `used_length_m` read.
 
 The export appends each Ventilator's runs to the ventilation system of every Room it serves: each Outdoor
 air run as a supply duct element and each Exhaust air run as an exhaust one, one segment per line with

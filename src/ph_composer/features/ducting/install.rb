@@ -16,6 +16,7 @@
 #   scan.rb         the live read: the walk's ducts as facts, the schedule, the Ventilators' lengths and used length
 #   extraction.rb   pure Ruby: the export's findings and its records, one per Ventilator with ducts
 #   export.rb       the export contributor over the snapshot and its preflight over the live Model
+#   colour_modes.rb the two Colour-by modes, by direction and by Duct Type, on the layer's Edge entries
 #   codes.rb        the `ducting` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -41,6 +42,7 @@ require_relative "schedule"
 require_relative "scan"
 require_relative "extraction"
 require_relative "export"
+require_relative "colour_modes"
 require_relative "declarations/duct_types"
 require_relative "declarations/groups"
 require_relative "declarations/ducts"
@@ -58,6 +60,7 @@ module PhComposer
       DuctRegistration.install(feature)
       ScheduleRegistration.install(feature)
       ExportProjection.install(feature)
+      ColourModes.install(feature)
       Codes.install(feature)
     end
   end

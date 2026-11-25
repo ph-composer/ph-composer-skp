@@ -446,16 +446,40 @@ into the Hot Water System it belongs to. Scripts and assistants reach the same s
 ## Draw ERV ducting
 
 ERV ducting is the two cold runs between each ventilator and the outside, Outdoor air and Exhaust air,
-traced as lines over the model and exported into the ventilator's system. It is being built in steps. What
-exists now is the Duct Type, available to scripts and assistants through the
-[agent guide](AGENT_GUIDE.md#erv-ducting); the panel's Duct Types table, the Ducting groups that hold drawn
-lines, assignment and the schedule follow.
+traced as lines over the model and exported into the ventilator's system. Only those two runs are drawn,
+never the room-side supply and extract ducts. Scripts and assistants reach the same steps through the
+[agent guide](AGENT_GUIDE.md#erv-ducting).
 
-A **Duct Type** is one duct specification kept in the model: its **Shape**, Round or Rectangular, with a
-**Diameter** for a round duct or a **Width** and **Height** for a rectangular one, and its insulation:
-thickness, conductivity and a reflective facing. A new type is a 160 mm round duct with 25.4 mm of
-reflective insulation at 0.04 W/(m K). Changing a type's shape asks for the new shape's size. A type with
-insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
+1. Use **Mechanical > Ventilation > Duct Types**. A **Duct Type** is one duct specification kept in the
+   model: its **Shape**, Round or Rectangular, with a **Diameter** for a round duct or a **Width** and
+   **Height** for a rectangular one (the other shape's sizes read as a dash), and its **Insulation**:
+   thickness, **Conductivity** and a **Reflective** facing. **+ New Duct Type** asks for a Tag; the new
+   type is a 160 mm round duct with 25.4 mm of reflective insulation at 0.04 W/(m K). Edit each value in
+   its cell. Changing the **Shape** asks for the new shape's sizes before anything changes. **Used length**
+   is the length of the ducts using the type, each line counted as many times as its quantity. A type
+   with insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
+   Deleting a type in use asks for another to take its place, or clears it from those ducts.
+2. Use the **Ducting** pill. **+ New Ducting group** asks for the Ventilator its ducts belong to, then adds
+   a group at the top of the model and opens it in SketchUp. Draw the ducts inside it with SketchUp's own
+   Line tool, snapping to the model. Keep Ducting groups outside Zones. One group per ventilator holds
+   both of its runs. For identical units, copy the group, or give its lines a quantity.
+3. Select lines in the open group, then choose a Duct Type, **Outdoor air** or **Exhaust air**, and a
+   **Quantity** (how many identical ducts each line stands for, 1 unless you change it) in the bar above
+   the groups. **Assign** writes them to the selected lines as one Undo step, and **Clear** removes them.
+4. The **Ducting groups** table lists each group with its Ventilator, chosen in place, and its duct count.
+   A group linked to no Ventilator, or one a Zone holds, says so.
+5. The **Schedule** shows one row per run, grouped by Ventilator: the lines of one group, direction, Duct
+   Type and quantity, whether they touch or not, with the drawn length and the quantity apart. A row's
+   alert mark lists what keeps it from the export, such as a duct with no type, each with a **Locate**.
+   Click a row to select its lines in SketchUp. **Totals** sum the length by direction and by Ventilator,
+   each line times its quantity, and note a Ventilator that serves a Zone and has no run of a direction.
+   The schedule reads the model when the pill opens and on **Refresh**; after you draw or assign it says
+   **Changed since read**.
+6. The **Ventilators** table gains two columns, **Outdoor air duct** and **Exhaust air duct**, each
+   Ventilator's length of that run with the quantity applied, or a dash with none drawn.
+7. The palette in the schedule's **Direction** header colours the ducts in the viewport by direction, and
+   the one in the Duct Types **Tag** header by Duct Type. The legend sums each colour's length, each line
+   times its quantity, so it reads what the totals read.
 
 ## Reuse library definitions
 

@@ -5763,6 +5763,7 @@
         "src/ph_composer/features/piping/scan/*",
         "src/ph_composer/features/piping/runs/*",
         "src/ph_composer/html/features/piping/*",
+        "src/ph_composer/html/line_groups/*",
         "src/ph_composer/html/features/mechanical/section.js",
         "src/ph_composer/html/features/mechanical/hot_water.js",
         "src/ph_composer/html/features/mechanical/equipment_table.js",
@@ -5771,7 +5772,8 @@
         "src/ph_composer/core/pick.rb",
         "src/ph_composer/core/drag_set.rb",
         "src/ph_composer/core/units.rb",
-        "src/ph_composer/html/unit_tables.js"
+        "src/ph_composer/html/unit_tables.js",
+        "src/ph_composer/html/choice_cell.js"
       ],
       "native_control_required": true
     },
@@ -5883,6 +5885,35 @@
         "src/ph_composer/python/ph_composer_translation/conformance.py",
         "src/ph_composer/python/ph_composer_translation/composition.py",
         "src/ph_composer/python/ph_composer_translation/assembly.py"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "M14f",
+      "label": "The Duct Types and Ducting pills, the Ventilators duct columns and Colour-by on the installed RBZ from a fresh process with Ed at the mouse, on the reference model with ACCEPTANCE's ERV ducting case: one Round and one Rectangular Duct Type on the Duct Types pill, a Shape change asking for the new sizes, one Undo step; New Ducting group linked to ERV-1 opens for the Line tool; an Outdoor air and an Exhaust air run per Ventilator drawn and assigned from the Ducting pill's bar, one Undo step each, ERV-2's Exhaust air at quantity 2; the schedule's lengths match hand measurement and the Ventilators table's Outdoor air duct and Exhaust air duct columns read ERV-1 2.500 and 1.800 m and ERV-2 2.500 and 3.000 m; delete ERV-2 with null and read ducting.group_unlinked, whose Locate opens the group and selects that run's ducts; Colour by duct direction and by Duct Type with legend lengths equal to the schedule's totals and used lengths; save and reopen; the panel at 1280 x 800, 420 px and 360 x 520; the UI polish review",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/features/ducting/install.rb",
+        "src/ph_composer/features/ducting/line_group.rb",
+        "src/ph_composer/features/ducting/colour_modes.rb",
+        "src/ph_composer/features/ducting/declarations/*",
+        "src/ph_composer/features/ducting/assignment/*",
+        "src/ph_composer/features/ducting/type/*",
+        "src/ph_composer/features/ducting/scan.rb",
+        "src/ph_composer/features/ducting/runs.rb",
+        "src/ph_composer/features/ducting/schedule.rb",
+        "src/ph_composer/line_groups/*",
+        "src/ph_composer/html/line_groups/*",
+        "src/ph_composer/html/features/ducting/*",
+        "src/ph_composer/html/features/mechanical/section.js",
+        "src/ph_composer/html/features/mechanical/ventilators.js",
+        "src/ph_composer/html/features/mechanical/equipment_table.js",
+        "src/ph_composer/html/table_contributions.js",
+        "src/ph_composer/html/table.js",
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/html/choice_cell.js"
       ],
       "native_control_required": true
     },

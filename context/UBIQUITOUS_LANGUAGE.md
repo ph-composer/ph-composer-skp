@@ -208,7 +208,7 @@ terms are at the end, marked planned.
 | Term | Meaning |
 | --- | --- |
 | Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps and fans a Phius model needs. Appliances and Phius devices are Equipment Sets instead. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
-| Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation, Heat Pumps, Hot Water, Pumps, Fans and Electric Heating) and, beneath it, a pill row picking one table of that system (Ventilators, later Ducting; Systems, Heaters, Tanks, Pipe Types and Piping; Pumps; Fans; Heaters) |
+| Mechanical tab | The primary tab after Thermal Bridges: a subtab per system (Ventilation, Heat Pumps, Hot Water, Pumps, Fans and Electric Heating) and, beneath it, a pill row picking one table of that system (Ventilators, Duct Types and Ducting; Systems, Heaters, Tanks, Pipe Types and Piping; Pumps; Fans; Heaters) |
 | Serves | Which Zones an equipment item serves. Shown as Zone chips on the item's row; the Zone picker chooses them, grouped by Building Segment |
 | Tag | An equipment item's name, as its tables show it |
 | Hot Water System | The hot water record that serves Zones, one per Zone, with its tap points. Exported as one honeybee-ph hot water system per served Room, all under the System's id |

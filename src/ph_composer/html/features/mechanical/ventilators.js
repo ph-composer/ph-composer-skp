@@ -3,13 +3,15 @@
    Manufacturer, Model and Notes, which the Columns menu can hide. The subsoil heat exchanger and the preheated
    intake temperature stay behind each row's disclosure, blank by default. Delete offers a replacement, or clearing,
    for the Zones it serves. Every control sends a registered operation; the balance is the host's
-   (context/CONTRACTS.md, "Mechanical equipment"). */
+   (context/CONTRACTS.md, "Mechanical equipment"). Another feature may contribute columns through the table's
+   section (html/table_contributions.js). */
 PhComposerUI.define("features/mechanical/ventilators", ["panel", "workspace", "fields", "units", "unit_preferences",
   "sections/colour_by", "features/mechanical/systems", "features/mechanical/serves",
   "features/mechanical/optional_values", "features/mechanical/equipment_table"],
 function (panel, ui, fields, units, preferences, colourBy, systems, serves, optional, equipment) {
   "use strict";
   var FEATURE = "ph_composer.mechanical", SECTION = FEATURE + ".ventilators", LABEL = "Ventilator";
+  var SYSTEM = FEATURE + ".ventilation";
   var BY_VENTILATOR = FEATURE + ".by_ventilator";
   var FRACTION = fields.FRACTION, EFFICIENCY = fields.ELECTRIC_EFFICIENCY, TEMPERATURE = fields.TEMPERATURE_C;
   var AIRFLOW = fields.AIRFLOW_M3H;
@@ -149,8 +151,8 @@ function (panel, ui, fields, units, preferences, colourBy, systems, serves, opti
   Ventilators.prototype.navigate = function (intent) { this.table.navigate(intent); };
   Ventilators.prototype.dispose = function () { this.table.dispose(); };
 
-  systems.system({ id: FEATURE + ".ventilation", label: "Ventilation", order: 10 });
-  systems.table({ system: FEATURE + ".ventilation", id: SECTION, label: "Ventilators", order: 10,
+  systems.system({ id: SYSTEM, label: "Ventilation", order: 10 });
+  systems.table({ system: SYSTEM, id: SECTION, label: "Ventilators", order: 10,
     build: function (surface, context) { return new Ventilators(surface, context); } });
-  return { Ventilators: Ventilators };
+  return { Ventilators: Ventilators, SYSTEM: SYSTEM, SECTION: SECTION };
 });
