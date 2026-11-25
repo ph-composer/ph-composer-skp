@@ -105,3 +105,14 @@ code (P4-14d's, above).
   the guide. Declined: one engine reference check per cleared id (the engine has no batch removal check; piping's and
   thermal bridges' clears share it, a core follow-up, as P4-13b recorded). Piping's clear, Pipe Type delete and group
   rows have the same three gaps; they are a follow-up for Ed, not changed here.
+- Cycle 2, gpt-6.2-sol on `e2cd5483`: 1 P1, 5 P2. Fixed in the next commit, which merges unreviewed after the
+  two-cycle cap: `groups.create` refuses `session.inactive` (`EditContext.shown!`) for a Model SketchUp is not
+  showing, before anything is proposed, and declares it; a group row's `write_refusal` follows link's order (nested,
+  the path's own, then in a Zone), so a group in a locked Zone reads `target.locked` as link returns it; the early
+  stale Duct Type refusal carries the engine's `fields` detail; M14c's dependency paths name
+  `features/mechanical/serves/*`. Declined: projecting readable records of another schema version into the clear's
+  plan (the engine refuses an invalid planned record, so two such records naming each other still refuse together,
+  which writes nothing); the selection's single `write_refusal` and its refusal order, which are the shared layer's
+  (`LineGroups::Selection`) and piping's alike, a layer follow-up. Piping's `groups.create` has no shown-Model check
+  either (P4-13b's recorded inference), a follow-up for Ed.
+

@@ -49,6 +49,10 @@ class DuctingGroupTest < PhComposerTestCase
     engine.kind(kind).store.write(@model, engine.find(kind, @erv2).merge("schema_version" => 9))
     assert_equal %w[refused record.unreadable], invoke("#{PREFIX}.create", "ventilator_id" => @erv2)
       .values_at("status", "code")
+    Sketchup.active_model = Sketchup::Model.new
+    assert_equal %w[refused session.inactive], invoke("#{PREFIX}.create", "ventilator_id" => @erv1)
+      .values_at("status", "code")
+    assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
   end
 
   def test_link_and_unlink_are_guarded_and_each_one_undo_step
@@ -84,6 +88,11 @@ class DuctingGroupTest < PhComposerTestCase
       assert_equal [[code], code], [row.fetch("findings"), row.dig("write_refusal", "code")]
     end
     assert_equal @erv1, STORE.read(in_zone).fetch("ventilator_id")
+    zone.locked = true
+    row = all.find { |entry| entry.fetch("path") == [100, 510] }
+    locked = invoke("#{PREFIX}.link", "targets" => [row.slice("reference")], "ventilator_id" => @erv2)
+    assert_equal [["ducting.group_in_zone"], "target.locked", "target.locked"],
+                 [row.fetch("findings"), row.dig("write_refusal", "code"), locked["code"]]
   end
 
   def test_a_pasted_copy_reads_copied_keeps_its_ventilator_and_refuses_a_write_through_its_shared_storage

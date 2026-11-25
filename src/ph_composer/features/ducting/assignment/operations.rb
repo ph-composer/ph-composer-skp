@@ -66,7 +66,8 @@ module PhComposer
           type = request.engine.find(DUCT_TYPE_KIND, id)
           changed = expected_values.keys.reject { |key| type[key] == expected_values[key] }
           unless changed.empty?
-            raise CodedError.new("target.changed", "The Duct Type changed since it was read (#{changed.join(', ')}).")
+            raise CodedError.new("target.changed", "Duct Type #{id} has changed since it was read " \
+                                                   "(#{changed.join(', ')}).", "fields" => changed)
           end
 
           DuctType::Operations.check_replacement!(request, id, replacement_id) unless keep

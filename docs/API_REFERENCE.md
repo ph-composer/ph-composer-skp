@@ -77154,9 +77154,9 @@ Add one empty Ducting group at the Model root linked to a Ventilator and open it
 
 Undo step: New Ducting Group. Adds a Group at the root with a Ducting group record and moves the edit path into it, closing any Group open before.
 
-Before calling: The Ventilator exists.
+Before calling: The Ventilator exists. SketchUp shows this Model.
 
-Refuses: `record.unreadable`, `target.not_found`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `session.inactive`, `target.not_found`, `validation.failed`, and the `action` common set.
 
 Params:
 

@@ -10,7 +10,7 @@ module PhComposer
       OBJECT = { "type" => "object" }.freeze
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
-      CREATE = %w[record.unreadable target.not_found validation.failed].freeze
+      CREATE = %w[record.unreadable session.inactive target.not_found validation.failed].freeze
       LINK = (LOCATE + %W[gesture.too_large #{Codes::GROUP_IN_ZONE} #{Codes::GROUP_NESTED}]).freeze
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
@@ -85,7 +85,8 @@ module PhComposer
                                        "open it, so lines drawn next land inside it.",
                        :refuses => CREATE, :params => Shapes.object({ "ventilator_id" => VENTILATOR_ID }),
                        :result => Shapes.object({ "group_id" => Shapes::TEXT }),
-                       :undo_name => "New Ducting Group", :preconditions => ["The Ventilator exists."],
+                       :undo_name => "New Ducting Group",
+                       :preconditions => ["The Ventilator exists.", "SketchUp shows this Model."],
                        :side_effects => "Adds a Group at the root with a Ducting group record and moves the edit " \
                                         "path into it, closing any Group open before.",
                        :examples => [{ "ventilator_id" => "vnt_Ab12Cd34Ef56" }]) do |request, proposal|

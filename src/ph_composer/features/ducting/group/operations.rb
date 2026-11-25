@@ -15,8 +15,10 @@ module PhComposer
 
         module_function
 
-        # One empty Group at the Model root carrying a new record naming the Ventilator, opened for drawing.
+        # One empty Group at the Model root carrying a new record naming the Ventilator, opened for drawing. Opening it
+        # moves the edit path, which SketchUp does only in the Model it shows (EditContext.shown!).
         def create(request, proposal, ventilator_id:)
+          EditContext.shown!(request.model)
           request.engine.find(VENTILATOR_KIND, ventilator_id)
           id = Records::Identity.allocator(request, request.params).call(RECORD_KIND.id_prefix)
           record = LINE_GROUP.validate_group!(Group.new_record(id, ventilator_id))
@@ -136,8 +138,8 @@ module PhComposer
           end.sort_by { |row| row.fetch("path") }
         end
 
-        # A misplaced group's write refusal is its placement's, in the order a write meets them: nested, in a Zone,
-        # then the path's own.
+        # The refusal a write to the group meets, in the order link and unlink meet them: nested, the path's own
+        # (a component, a locked or shared step), then in a Zone.
         def row(group, path, along, record, problem, copied:, zone:)
           id = Group.identity(record)
           nested = LineGroups::GroupTarget.nested_refusal(LINE_GROUP, along[0...-1])
@@ -151,7 +153,7 @@ module PhComposer
             "values" => Group.values(record), "duct_count" => Assignment.ducts_in(group), "copied" => copied,
             "findings" => findings,
             "record_problem" => problem || (record && RECORD_KIND.problems(record).first),
-            "write_refusal" => nested || in_zone || LineGroups::GroupTarget.write_refusal(LINE_GROUP, along) }
+            "write_refusal" => nested || LineGroups::GroupTarget.write_refusal(LINE_GROUP, along) || in_zone }
         end
       end
     end

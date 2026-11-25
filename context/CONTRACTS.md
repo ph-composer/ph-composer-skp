@@ -1403,8 +1403,9 @@ groups' and pipes' rules (see "Hot water piping") with these differences.
   a Ducting group sits at the Model root or in plain Groups (Q5): `groups.link`, `groups.unlink`, `ducts.assign` and
   `ducts.clear` refuse `ducting.group_in_zone` where `ph_composer.zones.containment` says a Zone holds it, and
   `ducting.group_nested` inside another Ducting group; a Duct Type delete still rewrites a duct, and a Ventilator
-  delete a group, that a Zone holds. `groups.create` adds an empty Group at the root with a new record naming an existing Ventilator and opens it
-  through `EditContext.enter`, in one Undo step; whether the host keeps an empty Group through the commit is owed to
+  delete a group, that a Zone holds. `groups.create` adds an empty Group at the root with a new record naming an
+  existing Ventilator and opens it through `EditContext.enter`, in one Undo step, refusing `session.inactive` for a
+  Model SketchUp is not showing; whether the host keeps an empty Group through the commit is owed to
   the host cases M13b and M14c. A pasted copy keeps its Ventilator. `groups.all` and the bounded `groups.list` give
   every occurrence in path order with `values` (`ventilator_id`), `duct_count`, `copied`, `findings` and
   `write_refusal`.

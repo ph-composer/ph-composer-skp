@@ -199,7 +199,8 @@ class DuctingAssignmentTest < PhComposerTestCase
     STORE.write(tagged, STORE.read(@edges.first).merge("id" => "dce_LOCKEDLOCKED"))
     stale = invoke("#{PREFIX}.duct_types.delete", "id" => @dt1, "replacement_id" => @dt2,
                                                   "expected_values" => { "name" => "DT-0" })
-    assert_equal %w[refused target.changed], stale.values_at("status", "code")
+    assert_equal [%w[name], "refused", "target.changed"], [stale.dig("detail", "fields")] +
+                                                          stale.values_at("status", "code")
     fresh = invoke("#{PREFIX}.duct_types.delete", "id" => @dt1, "replacement_id" => @dt2)
     assert_equal %w[refused reference.in_use], fresh.values_at("status", "code")
   end

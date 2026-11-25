@@ -5811,6 +5811,7 @@
         "src/ph_composer/features/ducting/declarations/*",
         "src/ph_composer/features/mechanical/catalog_operations.rb",
         "src/ph_composer/features/mechanical/declarations/ventilators.rb",
+        "src/ph_composer/features/mechanical/serves/*",
         "src/ph_composer/line_groups/*",
         "src/ph_composer/session/edit_context.rb",
         "src/ph_composer/shell/handler_request.rb",
