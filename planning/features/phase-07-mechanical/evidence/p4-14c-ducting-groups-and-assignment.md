@@ -81,7 +81,21 @@ changes are the 16 `context/`, `docs/`, `planning/` and `cases.json` paths. Noth
   group unsynced); hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 851 files, 9055296 bytes, 27837718
   bytes installed".
 - Installed size: 27,837,718 bytes, 51,590 over the base's 27,786,128 against the 45 KB estimate (12 percent over,
-  under the 25 percent stop line). Final-head figures follow below.
+  under the 25 percent stop line).
+- Final head `9e4e0889`, after both review cycles: `make ci` on Ruby 3.2.2 and on 2.7.2: "Ruby suite, 10 processes:
+  3584 runs, 50498 assertions, 0 failures, 0 errors, 2 skips"; JS "pass 1226", "fail 0"; Python "486 passed, 1
+  skipped" (the `phx` group synced); hostkit "48 runs, 268 assertions, 0 failures"; "RBZ verified: 851 files,
+  9055735 bytes, 27839302 bytes installed" (3.2.2; 27839296 on 2.7.2).
+- Installed size on the final head: 27,839,302 bytes, 53,174 over the base against the 45 KB estimate (46,080), 15
+  percent over and under the 25 percent stop line (57,600). 160,698 bytes are left under the 28,000,000 ceiling;
+  less P4-14d to P4-14f's estimates (30, 30 and 52 KB, 114,688 bytes) that leaves 46,010 bytes, about 45 KB, for
+  P4-15 and any overrun: above the 40 KB line, by about 6 KB.
+- Browser checks: `make ui-checks` on `9e4e0889`: 40 of 40 scripts pass, exit 0, none skipped (no panel change).
+- PHX: `uv run --group phx pytest tests/python` on `9e4e0889`: "486 passed, 1 skipped" (`test_map_borders.py`,
+  `PH_COMPOSER_MAP_DATA` unset); `-k phx_round_trip`: "26 passed, 461 deselected", none skipped (this stage exports
+  nothing).
+- Design System: not needed. P4-14a re-synced it from `main@98ba249c` as version 41; this stage changes no kit CSS,
+  shared kit part or unit quantity.
 
 ## Review
 
