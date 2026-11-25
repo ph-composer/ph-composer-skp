@@ -196,10 +196,10 @@ module PhComposer
       def free_name(request, stem, proposal: nil)
         staged = proposal ? proposal.writes.select { |write| write.kind == DWELLING_KIND && write.after } : []
         rows = Store.names(request, DWELLING_KIND) + staged.map(&:after)
-        taken = rows.map { |row| row.fetch("name").strip.downcase }
+        taken = rows.map { |row| Records::Names.key(row.fetch("name")) }
         (1..).each do |index|
           candidate = index == 1 ? stem.strip : "#{stem.strip} #{index}"
-          return candidate unless taken.include?(candidate.downcase)
+          return candidate unless taken.include?(Records::Names.key(candidate))
         end
       end
 

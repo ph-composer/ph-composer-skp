@@ -9,18 +9,24 @@ module PhComposer
       module_function
 
       def unique!(name, rows, except: nil)
-        if name.strip.empty? || rows.any? { |row| row["id"] != except && row["name"].strip.casecmp(name.strip).zero? }
+        wanted = key(name)
+        if wanted.empty? || rows.any? { |row| row["id"] != except && key(row["name"]) == wanted }
           raise CodedError.new("validation.failed", "Give the record a unique, nonempty name.")
         end
       end
 
       def copy_name(name, rows)
         stem = name.strip
-        existing = rows.map { |row| row.fetch("name").strip.downcase }
+        existing = rows.map { |row| key(row.fetch("name")) }
         (1..).each do |index|
           candidate = index == 1 ? "#{stem} (copy)" : "#{stem} (copy #{index})"
-          return candidate unless existing.include?(candidate.downcase)
+          return candidate unless existing.include?(key(candidate))
         end
+      end
+
+      # Both rules compare with the same Unicode case fold, so an accented name is one name in any case.
+      def key(name)
+        name.strip.downcase(:fold)
       end
     end
   end

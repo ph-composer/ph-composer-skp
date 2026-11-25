@@ -145,6 +145,7 @@ PLANTED = ["P4" + "-01", "P4" + "-08b", "M" + "01", "M" + "16", "M" + "13a", "D"
         '<path aria-label="See ' + "M" + '05" d="' + "M" + '12 4v16"/>',
         '<path data-d="' + "M" + '01 2026-11-23"/>',
         '<path d="' + "M" + '05"/>',
+        '<path d="' + "M" + "12.5 " + "Q" + '12"/>',
     ],
 )
 def test_the_citation_lint_catches_stage_and_register_ids(tmp_path: Path, text: str) -> None:
@@ -163,6 +164,7 @@ def test_the_citation_lint_catches_stage_and_register_ids(tmp_path: Path, text: 
         '<path d=" M12 4v16"/>',
         '<path d="M12 4e0v16"/>',
         '<path d="M+12 4v16"/>',
+        '<path d="M12.5.6v16"/>',
         "%3Cpath d='M12 9v4'/%3E",
         "# REVIEW F05 keeps this.",
         "Phase 4 module",
