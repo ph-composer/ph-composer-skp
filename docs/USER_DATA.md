@@ -113,7 +113,7 @@ membership stamps on Faces, Zone option settings, the Windows, Spaces and Zones 
 Window definitions and panes PH-Composer generates, thermal-bridge runs (calculated from Edges),
 the site and design temperatures (Model settings), the Programs settings stored on Zones and
 Building Segments (assignments, Single dwelling, Phius certification and airtightness), what serves
-each Zone (its Ventilator, Hot Water System, heat pump indoor units, Electric Heaters, Pumps and Fans, stored on the Zone, whose map is the Zone's own), the export snapshot, and
+each Zone (its Ventilator, Hot Water System, heat pump indoor units, Electric Heaters, Pumps and Fans, stored on the Zone, whose map is the Zone's own), a Building Segment's mechanical settings (stored on the Segment, whose map is the Segment's own), the blended heat pump of each Building Segment (worked out from the heat pump records), pipe runs and duct runs (worked out from the Pipes and Ducts), the export snapshot, and
 library provider, connection and agent-access state.
 
 The climate data folders are kept on this computer, not in a Model: in PH-Composer's settings file,

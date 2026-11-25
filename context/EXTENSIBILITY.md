@@ -99,6 +99,17 @@ call nothing in Zones; Window units and their placement are layer 3 and read Zon
 requires `windows`. The Assemblies inventory shows Face usage through a table contribution from
 Zones' panel module, so the inventory names no Face.
 
+Phase 7 added three more on the same contracts. `mechanical` holds the equipment records and requires Zones,
+Spaces, Programs and Climate. What serves a Zone is its structured extension `ph_composer.mechanical.zone_serves` on
+the Zone record, the second feature payload there after Programs' assignment, written through Zones' participant
+`ph_composer.zones.stage_extension` so that Zones names no family ([CONTRACTS.md](CONTRACTS.md), "Mechanical
+equipment"). `piping` and `ducting` each require `mechanical` and `zones`; `mechanical` names neither, and neither
+names the other. What they share is the `line_groups/` foundation package and the panel's `html/line_groups/`
+("Line groups", below). Their export sections are the first that add to objects another section must build:
+each `requires` Mechanical's hot water or ventilation section and adds its elements to the systems that section
+built, before the assembly attaches them to their Rooms ([CONTRACTS.md](CONTRACTS.md), "Translation sections and
+artifacts").
+
 A definition feature whose definitions have placed users keeps one authoring coordinator above its
 operations. In `windows` that is `Windows::Authoring` (`features/windows/authoring.rb`): every
 public command, library callback and library assignment that changes a product, a Type or the

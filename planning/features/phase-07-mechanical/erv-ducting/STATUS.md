@@ -1,7 +1,7 @@
 # ERV ducting: status
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). In progress: P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, merged (#582); P4-14c, Ducting groups and the duct assignment, merged (#583); P4-14c2, the line-group operations consolidated (#584), merged (#585); P4-14d, duct runs and the schedule, merged (#586); P4-14e, the ducting export, merged (#587); P4-14f, the Ducting pills, the Ventilators columns and Colour-by, merged (#588), which completes the implementation.
+STATUS: Merged to main, host cases owed to MS3. Interviewed 2026-11-23 (D4-37, Q1–Q9 all as recommended); planned in full 2026-11-24 as P4-14a to P4-14f ([P4-14](../phases/p4-14-erv-ducting.md)). P4-14a, the ducting feature and Duct Types, merged (#581); P4-14b, the shared line-group layer, merged (#582); P4-14c, Ducting groups and the duct assignment, merged (#583); P4-14c2, the line-group operations consolidated (#584), merged (#585); P4-14d, duct runs and the schedule, merged (#586); P4-14e, the ducting export, merged (#587); P4-14f, the Ducting pills, the Ventilators columns and Colour-by, merged (#588), which completes the implementation.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -23,7 +23,9 @@ edge stages merged on 2026-10-26.
 
 ## Next step
 
-P4-14e merged (#587: the ducting export); P4-14f, the view, in review (#588). Then the M14a to M14f host cases in the MS3 sitting.
+P4-14a to P4-14f merged (#581 to #588). What remains is the `M14a` and `M14c` to `M14f` host cases in the MS3 sitting
+([P4-15 evidence](../evidence/p4-15-acceptance.md)); the duct quantity's export shape is for Ed, and the METr rows are
+metr-export's.
 
 ## Blockers
 

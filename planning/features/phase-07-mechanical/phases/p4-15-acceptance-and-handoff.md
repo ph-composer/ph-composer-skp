@@ -1,7 +1,7 @@
 # P4-15: acceptance and handoff
 
 DATE: 2026-10-21
-STATUS: Scoped. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families; then D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
+STATUS: In review, offline part (2026-11-25): steps 1 and 3 to 7 done offline in [the evidence](../evidence/p4-15-acceptance.md); step 2, the integrated host run, is owed to the MS3 sitting as case `M15`. Corrected 2026-11-22 after Phase 6 Programs: P4-08b and M16, the footprint keys, six families; then D4-22 and D4-25, answered the same day. See [DECISIONS, Part 4](../DECISIONS.md#part-4-review-after-programs-2026-11-22).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

@@ -31,7 +31,8 @@ This packet's stage is [P4-13](../phases/p4-13-hot-water-piping.md) in the
 [P4-13d](../phases/p4-13d-piping-export.md), the piping export, is merged (#579), and
 [P4-13e](../phases/p4-13e-piping-view.md), the Piping pills, Colour-by and the pipe tool, is merged (#580)
 ([the parent index](../phases/p4-13-hot-water-piping.md)). Stages and their state live in the
-[phase ledger](../STATUS.md).
+[phase ledger](../STATUS.md). What remains is the `M13a` to `M13e` host cases in the MS3 sitting
+([P4-15 evidence](../evidence/p4-15-acceptance.md)), with three P4-13 inferences still for Ed.
 
 ## Blockers
 

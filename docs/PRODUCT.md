@@ -335,6 +335,31 @@ Hot water flow stays in L/h per m².
    in the model by its Ventilator; a Zone with none stays uncoloured. **Duplicate** copies a Ventilator,
    and **Delete** asks which Ventilator takes its place on its Zones, or clears them.
 
+## Add heat pumps
+
+1. Use **Mechanical > Heat Pumps**. Its pills are **Equipment · Outdoor**, **Equipment · Indoor**,
+   **Units · Outdoor**, **Units · Indoor** and **Blended result**. Equipment is the heat pump models;
+   Units are the ones installed.
+2. **Equipment · Outdoor** holds each outdoor model with the Phius Heat Pump Performance Estimator's
+   inputs: its heating capacity at 17 °F and 47 °F and its heating rating, as COPs at 17 °F and 47 °F,
+   an HSPF or an HSPF2; and, for a model that cools, its cooling capacity at 95 °F and its rating, as
+   EER and SEER, EER2 and SEER2, or IEER. Capacities read in kW, or kBtu/h in IP. **Paired indoor**
+   names the indoor model its ratings were measured with. A model still missing a value the blend needs
+   says so.
+3. **Equipment · Indoor** holds each indoor model by its Tag, Manufacturer, Model and Notes.
+4. **Units · Outdoor** installs an outdoor model, with its quantity. **Units · Indoor** installs an indoor
+   model on an outdoor unit. Click an indoor unit's **Serves** cell to choose its Zones, as for a
+   Ventilator. A Zone may have several indoor units.
+5. **Blended result** shows, for each Building Segment an indoor unit serves, the one air-source heat
+   pump the export writes, worked out by the Phius estimator's method from the outdoor models serving
+   that Segment and laid out in the estimator's sections. It needs the model's climate: the twelve
+   monthly mean temperatures and both design temperatures. **Copy for the estimator** copies its rows.
+6. The Export pane notes an indoor unit serving no Zone, an outdoor unit with no indoor unit serving
+   one, an outdoor unit whose Zones sit in two Building Segments, and a Segment whose cooling passes
+   200 kW (682 kBtu/h), which is still exported as one heat pump. None of these stops the export; a Zone or
+   unit naming a unit or model that is no longer in the model does.
+7. Deleting a model or unit that another record or a Zone names asks which takes its place.
+
 ## Add hot water systems, heaters and tanks
 
 1. Use **Mechanical > Hot Water**. Its pills are **Systems**, **Heaters**, **Tanks**, **Pipe Types** and
@@ -498,6 +523,13 @@ Faces, Spaces, Edges and windows, and the report names it. A Surface Face paired
 left-out Zone blocks the export. When you move a Zone out of every Segment, PH-Composer offers to
 make such Faces an Attached zone boundary, in one Undo step. Choose a
 destination and write the HBJSON and its companion report. Use the findings in the Export tab to diagnose a stopped run. Save changes to the SKP through SketchUp.
+
+The HBJSON carries each served Zone's equipment on its Room: its Ventilator, Hot Water System with its
+tanks, heaters and piping, the blended heat pump of its Building Segment, and its electric heaters,
+pumps and fans. An item serving several Zones is written on each Room under one identifier, so it
+stays one item. Ducting is written into its Ventilator's system. Each Building Segment carries its
+mechanical settings. The Export pane lists the equipment findings before you export, and a finding
+that blocks names the record to fix.
 
 The report records exported quantities and findings. Share linked datasheets and photos
 separately when the recipient needs them.
