@@ -194,12 +194,12 @@ Rows marked "not re-verified" were collected from the evidence files and not che
 
 | # | Item | Source |
 | --- | --- | --- |
-| 16 | A post-cap review is owed before the archive PR for P4-01's and P4-02's last commits (merged past their cap, not among the eighteen #589 read) and for #590's `17b07275` | STATUS, P4-01 and P4-02 rows; post-cap-review, "The review" |
+| 16 | `17b07275`, #590's last commit, merged past its cap. A read-only `codex -m gpt-6.2-sol review --commit` on 2026-11-25 found one live P3: the citation lint flags valid compact SVG path data such as `M12.5.6v16` (no shipped file has it today). P4-01's `dd8a3ad7` and P4-02's `603bf5e5` were among the eighteen #589 read (its table cites both); a second read of each found nothing live beyond row 21 | post-cap-review, "Live findings"; this stage's review |
 | 17 | The agent `discover` index is past its 20 KiB budget (`Discovery::INDEX_BYTES`), so it answers counts, not names; raise the budget or trim the index | p4-05-systems-tab, "Departures and choices"; the stage brief |
 | 18 | Upstream, PH-Tools/PHX: the exhaust ventilator's quantity is dropped (row 15) | p4-11-fans |
 | 19 | Upstream, honeybee-ph: recirculation runs of 3.3 m and 1.7 m at 24 h read 23 h (`int()` truncation); Ruby matches the export on purpose | p4-13c-tree-and-schedule; p4-13d-piping-export |
 | 20 | Upstream, honeybee_ph#135 (open): the calculation-method field; `piping_calc_method` is a guessed attribute until it lands | p4-06-hot-water-records; STATUS, "Deferred" |
-| 21 | `names.rb`'s case check compares ASCII only, for every kind; left to #321 | p4-13a-pipe-types; post-cap-review |
+| 21 | `Records::Names.unique!` compares case in ASCII only (`casecmp`) while `copy_name` uses `downcase`, so with `ÉRV` and `érv (copy)` a Duplicate skips to `ÉRV (copy 2)` though `ÉRV (copy)` is accepted; left to #321, which has since merged without changing it (checked on `main` 2026-11-25) | p4-13a-pipe-types; post-cap-review |
 | 22 | Core `Descriptor#patch_schema` admits null for required fields on update, for every kind | p4-13a-pipe-types, Codex cycle 1 (not re-verified) |
 | 23 | Share one `zones.all` read across snapshot sections (Mechanical reads Zones four times per `ventilators.all`) | p4-03-serves; p4-05-systems-tab (not re-verified) |
 | 24 | `OccurrencePath.resolve` scans each level per row; index it if a large Model is slow on the host | p4-01-contracts; p4-05-systems-tab (not re-verified) |
