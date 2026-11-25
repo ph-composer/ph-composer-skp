@@ -46,9 +46,10 @@ module PhComposer
       # Every readable pipe occurrence as a Runs::Fact, and the group and pipe records that cannot be read, each as
       # `{ path, code, message }`. A pipe whose Piping group cannot be read is not read. With `zones`, Zones says which
       # groups a Zone holds, which only the findings read; without it no group is held, so a read that reports no
-      # finding does not refuse for an unreadable Zone record.
-      def call(request, zones: true)
-        groups, unreadable = walk(request.model)
+      # finding does not refuse for an unreadable Zone record. `walked` is a `walk` the caller already made.
+      def call(request, zones: true, walked: walk(request.model))
+        groups, unreadable = walked
+        unreadable = unreadable.dup
         paths = zones ? groups.map(&:path) : []
         held = Group::Operations.contained(request, paths).to_h { |row| [row.fetch("path"), !row["zone"].nil?] }
         facts = groups.flat_map do |occurrence|

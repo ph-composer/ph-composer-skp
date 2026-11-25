@@ -144,7 +144,7 @@ lint-python:
 
 # The owning tests, one per golden: exactly one test may write each file (docs/DEVELOPMENT.md
 # "Fixtures and coverage"). A new golden adds its owner here and its path below.
-FIXTURE_OWNERS := phase_one_export segment_export_rules segment_certification segment_airtightness segment_mechanical program_export program_records thermal_bridge_export shading_export mechanical_export mechanical_hot_water_export mechanical_heat_pump_export mechanical_electric_heater_export mechanical_pump_export mechanical_fan_export api_reference agent_guide climate_folder_scan climate_export
+FIXTURE_OWNERS := phase_one_export segment_export_rules segment_certification segment_airtightness segment_mechanical program_export program_records thermal_bridge_export shading_export mechanical_export mechanical_hot_water_export mechanical_heat_pump_export mechanical_electric_heater_export mechanical_pump_export mechanical_fan_export piping_export api_reference agent_guide climate_folder_scan climate_export
 # Python owners run after the Ruby ones, whose extractions they translate.
 PYTHON_FIXTURE_OWNERS := tests/python/test_site_sections.py::test_board_18_reloads_with_its_site_on_the_building_segment_and_owns_the_result_golden
 FIXTURE_PATHS := tests/fixtures tests/python/fixtures docs/API_REFERENCE.md src/ph_composer/agent_access/guide.md

@@ -5713,6 +5713,35 @@
       "native_control_required": true
     },
     {
+      "id": "M13d",
+      "label": "The piping export on the installed RBZ from a fresh process, the panel closed, on the reference model (Zone A and Zone B in one Building Segment, each with its detailed Space, both served by HWS-1 with 8 tap points) carrying ACCEPTANCE's hot water piping case in PG-1 at the Model root, linked to HWS-1: ph_composer.piping.export_preflight lists nothing; export, reload the exact HBJSON in the pinned honeybee stack and read both Rooms' ph_hvac.hot_water_system: one trunk of 9.000 m with multiplier 12 and no demand recirculation, three branches (4.000, 4.000, 3.000 m) of two fixtures each, two recirculation elements (9.000 and 2.000 m), every segment with its Pipe Type's material, diameter and insulation, recirc_temp 54.09 C and recirc_hours 19 equal to ph_composer.piping.systems, number_tap_points 8, and the two Rooms' systems equal; move Floor 2's first line to start at (1.05,1,6) and see the export refuse piping.branch_unconnected with the preflight row's Locate selecting Floor 2's pipes, then Undo; save, fresh-process reopen and re-export give the same HBJSON",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/core/edge_runs.rb",
+        "src/ph_composer/features/piping/install.rb",
+        "src/ph_composer/features/piping/codes.rb",
+        "src/ph_composer/features/piping/export.rb",
+        "src/ph_composer/features/piping/runs/*",
+        "src/ph_composer/features/piping/scan/*",
+        "src/ph_composer/features/piping/group/schema.rb",
+        "src/ph_composer/features/piping/assignment/schema.rb",
+        "src/ph_composer/features/mechanical/hot_water_export.rb",
+        "src/ph_composer/features/mechanical/hot_water_plan.rb",
+        "src/ph_composer/features/mechanical/export_zones.rb",
+        "src/ph_composer/features/mechanical/export.rb",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/piping_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/piping_records.py",
+        "src/ph_composer/python/ph_composer_translation/mechanical_sections.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

@@ -1313,8 +1313,9 @@ pipe segment carries its pipe's.
   temperature and hours the length-weighted means of its pipes'; the System's are the length-weighted means of its
   runs', the hours truncated toward zero as `int()` does, 60.0 and 24 with no recirculation pipe (`from_piping` false).
   Segment lengths are ladybug-geometry's magnitude and every sum adds left to right, as CPython 3.11's `sum` does; runs
-  add in schedule order and pipes in run order, the order the export must write them in. Two runs of 3.3 m and 1.7 m at
-  24 h give 23, as honeybee-ph does; one run of both gives 24.
+  add in identifier order and pipes in segment identifier order, the order a system reloaded from the canonical HBJSON,
+  whose keys are sorted, holds them in. Two runs of 3.3 m and 1.7 m at 24 h give 23, as honeybee-ph does; one run of
+  both gives 24; three runs of 0.1, 0.2 and 0.7 m give 23 or 24 by their identifiers, as honeybee-ph does.
 - **The schedule** `ph_composer.piping.schedule` (bounded, `limit`, `cursor` and `compact`; refuses `record.unreadable` and
   `validation.failed` for an unreadable Pipe Type or Hot Water System) walks the Model once, with no snapshot section,
   and answers one page of runs, each with `hot_water_system_id` and name, `group`, `role`, `parent` and `parent_name`,
@@ -2370,6 +2371,40 @@ section, bar its empty row in `sections`. Conformance finds the reported count o
 detached, and per component the reported count and area. The report's Shading section lists each component
 and the totals, and is absent with none. PHX 1.59.4 writes one shading component per name in every Variant,
 with `InnerAttachment` and `idIC` -1 (`tests/python/test_shade_phx_round_trip.py`).
+
+Hot water piping is the first section that adds to another section's required objects:
+`ph_composer.piping.export.piping` (Ruby `features/piping/export.rb` and the pure `runs/extraction.rb`, Python
+`piping_sections.py`, record `contract/piping_records.py`). None of the four hosts is a hot water system, so it
+attaches nowhere (`attaches = None`): it `requires` the hot water section and, in `translate`, adds the System's
+trunks and recirculation elements to every `PhHotWaterSystem` that section built for the System, which the
+assembly then attaches to their Rooms. The coordinator runs every `translate` before it assembles and collects
+`result_fields` after, so the hot water rows' digests are taken with the pipes in place. Its Ruby contributor
+`requires` the Zones section (which Piping groups a Zone holds), the Ventilator section (which Systems an exported
+Zone names) and the hot water section (so that section reads the Systems first). It writes one record per Hot Water
+System whose Piping groups hold pipes, `{id, system_id, recirculation_temperature_c, recirculation_hours, trunks,
+recirculation}`: each trunk run `{identifier, display_name, multiplier, demand_recirculation, segments, branches}`,
+each branch `{identifier, display_name, segments, twigs}`, each twig or recirculation element `{identifier,
+display_name, segments}` and each segment `{identifier, display_name, points_m, material, diameter_mm,
+insulation_thickness_mm, insulation_conductivity, insulation_reflective, insulation_quality, water_temp_c,
+daily_period, user_data}`, the runs, parents, identifiers and names those of `ph_composer.piping.schedule`. A
+distribution segment runs at honeybee-ph's 60 °C and 24 h, a recirculation segment at its pipe's values; a bare
+Pipe Type with no conductivity gives honeybee-ph's 0.04 W/(m K). The trunk's or branch's inner element takes the
+run's identifier and name, and a segment's name is its identifier, so no honeybee-ph default identifier, which is
+random, reaches the HBJSON. A finding that blocks the schedule's run refuses the section; the other findings, and
+`piping.system_unexported` for a System no exported Zone names, are notes. The snapshot has no Group definitions,
+so a pipe is `shared` when a ComponentInstance holds it or its Edge is reached at two paths. A pipe's `user_data`
+rides on its segment; a Piping group's and a Pipe Type's are left out with `export.metadata_omitted`. Python
+builds every object for every hot water system before it adds any, so a record that fails leaves each system as it
+was, and the section is required for export. The canonical HBJSON sorts its keys, and honeybee-ph keys trunks,
+branches, fixtures, recirculation elements and segments by identifier, so a reloaded system holds them in
+identifier order and sums `recirc_temp` and `recirc_hours` in that order; Python adds them in identifier order and
+the Ruby recirculation read sums in it too, so the translated system, the reloaded one and Ruby agree to the bit.
+Its result fields are `trunks` (identifier, multiplier, demand recirculation, drawn length, branch count and each
+branch's twig count), `recirculation` (identifier and length) and `systems` (the Rooms reached and Ruby's
+recirculation temperature and hours); conformance reads each back from every reloaded Room's system of that
+identifier, lengths to 1 mm and hours exactly, and refuses a trunk or recirculation element the run did not report.
+PHX 1.59.4 reads them through a Room's Spaces, keyed by identifier, so a System on two Rooms gives each trunk,
+branch, twig and recirculation element once (`tests/python/test_piping_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
 and accumulated transform, with no live SketchUp objects. Its entries are Faces, Edges (world SI

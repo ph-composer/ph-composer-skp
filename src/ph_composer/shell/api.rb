@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 100
+    MINOR = 101
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -626,7 +626,14 @@ module PhComposer
                     "piping.type_missing, piping.group_unlinked, piping.branch_unconnected, piping.twig_unconnected, " \
                     "piping.trunk_without_branches, piping.parent_ambiguous, piping.shared_definition and " \
                     "piping.hidden. pipe_types.list and pipe_types.all rows add used_length_m. A pipe's water_temp_c " \
-                    "is 0 to 100. The thermal-bridge chain rule moves to core unchanged." }
+                    "is 0 to 100. The thermal-bridge chain rule moves to core unchanged." },
+      { "minor" => 101, "date" => "2026-11-24",
+        "change" => "ph_composer.piping exports its pipes: the export section ph_composer.piping.export.piping adds " \
+                    "each Hot Water System's trunks, branches, twigs and recirculation elements to its hot water " \
+                    "systems, the query ph_composer.piping.export_preflight lists its checks, and the code " \
+                    "piping.system_unexported notes a System whose pipes no exported Zone takes. The schedule's " \
+                    "recirculation temperature and hours add runs and pipes in identifier order, as a reloaded " \
+                    "honeybee-ph system does." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

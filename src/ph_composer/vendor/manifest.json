@@ -861,9 +861,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1998,
+      "bytes": 2062,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "b7be6ff9c3e0047824c1f28c3eb4a0e42492d2e196ec29ce7a9154fd1f0566ae"
+      "sha256": "2f6e093637f377269577793be6aa7b2c8520b9c99c46a0ac14d2ce59df8a40ce"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -889,6 +889,11 @@
       "bytes": 20534,
       "mime": "text/plain; charset=utf-8",
       "sha256": "3dc0a67c9bcd0f0357c3fca8e8114eb32a7f06b2b78a60f698586f5728c612eb"
+    },
+    "python/ph_composer_translation/contract/piping_records.py": {
+      "bytes": 8345,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "d2dd6b86a625c576dd588bb202f1eb5011632b5df49ff1cb6a92bdfe38763a88"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -949,6 +954,11 @@
       "bytes": 26105,
       "mime": "text/plain; charset=utf-8",
       "sha256": "9910a7df68b6a17c3af52a24e56b6519465ed5734231b4305d4a7b601c1c3538"
+    },
+    "python/ph_composer_translation/piping_sections.py": {
+      "bytes": 13775,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "d1bbe2cc5cb2bf55be2c3ffd25dbde0b9f10f08f5b7dd3570f59cf5ecf9760a7"
     },
     "python/ph_composer_translation/program_sections.py": {
       "bytes": 31552,
@@ -1203,6 +1213,7 @@
     "python/ph_composer_translation/contract/__init__.py",
     "python/ph_composer_translation/contract/assembly_records.py",
     "python/ph_composer_translation/contract/mechanical_records.py",
+    "python/ph_composer_translation/contract/piping_records.py",
     "python/ph_composer_translation/contract/shade_records.py",
     "python/ph_composer_translation/contract/space_records.py",
     "python/ph_composer_translation/contract/thermal_bridge_records.py",
@@ -1215,6 +1226,7 @@
     "python/ph_composer_translation/mechanical_segment_sections.py",
     "python/ph_composer_translation/model_metadata.py",
     "python/ph_composer_translation/model_sections.py",
+    "python/ph_composer_translation/piping_sections.py",
     "python/ph_composer_translation/program_sections.py",
     "python/ph_composer_translation/result.py",
     "python/ph_composer_translation/sections.py",
