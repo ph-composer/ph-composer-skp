@@ -51,7 +51,7 @@ module PhComposer
     # alphabetically within each. A file whose body names a later file's constant at load names that
     # file with `require_relative`.
     unless const_defined?(:FOUNDATION_DIRECTORIES)
-      FOUNDATION_DIRECTORIES = %w[core session shell runtime export colour_by library agent_access].freeze
+      FOUNDATION_DIRECTORIES = %w[core session shell runtime export colour_by line_groups library agent_access].freeze
     end
     FOUNDATION_DIRECTORIES.each do |directory|
       Dir[File.join(__dir__, directory, "**", "*.rb")].sort.each { |path| require path }

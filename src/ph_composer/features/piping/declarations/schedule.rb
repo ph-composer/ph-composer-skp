@@ -164,7 +164,7 @@ module PhComposer
                                       "records, each name cut, for a compact read.",
                       :refuses => PAGE, :params => DETAILS_PARAMS, :result => DETAILS_RESULT,
                       :examples => [{ "part" => "systems" }, { "part" => "unreadable", "limit" => 20 }]) do |request|
-          SchedulePages.details(request)
+          SchedulePages::PAGES.details(request)
         end
         feature.query(SchedulePages::MEMBERS,
                       :description => "One bounded page of one run's pipes in run order, each with its path, or only " \
@@ -172,7 +172,7 @@ module PhComposer
                       :refuses => MEMBERS_REFUSES, :params => MEMBERS_PARAMS, :result => MEMBERS_RESULT,
                       :examples => [{ "identifier" => "pipe_0a1b2c3d4e5f6a7b" },
                                     { "identifier" => "pipe_0a1b2c3d4e5f6a7b", "finding" => 0 }]) do |request|
-          SchedulePages.members(request)
+          SchedulePages::PAGES.members(request)
         end
       end
 
@@ -185,7 +185,7 @@ module PhComposer
                       :refuses => PAGE,
                       :params => PAGE_PARAMS, :result => RESULT,
                       :examples => [{}, { "limit" => 20 }, { "compact" => true }]) do |request|
-          SchedulePages.page(request)
+          SchedulePages::PAGES.page(request)
         end
         install_pages(feature)
         feature.query(ALL, :description => "Every hot water piping run in one read, for the panel, with the totals, " \
@@ -208,7 +208,7 @@ module PhComposer
                              :preconditions => ["Every pipe sits in one Piping group and none is hidden."],
                              :side_effects => "Selects and frames the pipes. #{ContextCommands::SIDE_EFFECTS}",
                              :examples => [{ "edge_paths" => [[1301, 1305], [1301, 1306]] }]) do |request|
-          RunLocate.call(request, :edge_paths => request.params.fetch("edge_paths"))
+          LineGroups::Locate.call(LINE_GROUP, request, :edge_paths => request.params.fetch("edge_paths"))
         end
       end
     end

@@ -159,7 +159,7 @@ module PhComposer
           scopes = updates.map { |row| row.dig("reference", "group_path")[0...-1] }.uniq.map do |path|
             PhComposer::Operations::EntityScope.new(path)
           end
-          proposal.add_step(WriteStep.new(:updates => updates), :scopes => scopes)
+          proposal.add_step(LineGroups::EdgeWriteStep.new(:spec => LINE_GROUP, :updates => updates), :scopes => scopes)
         end
 
         def plan(updates)

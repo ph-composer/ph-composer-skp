@@ -1357,6 +1357,36 @@ When this is learned during a native cut, the failed result retains the rollback
 and effect and includes the declared domain reason in its message and `detail.cause`.
 Unexpected exceptions retain the generic message; their internal details are not exposed.
 
+### Line groups
+
+A line group is a SketchUp Group outside every Zone that holds loose drawn lines and carries one record linking it
+to one record of its feature; an Edge directly in it may carry the feature's assignment record. Piping groups are
+one, and Ducting groups the next. Both features need the same mechanics and neither owns the other, so they sit in a
+foundation package, `src/ph_composer/line_groups/` (`LineGroups`), loaded with the other foundation directories. It
+calls the shell and session (`Pages`, `EditContext`, `ph_composer.context.open`), which is why it is not in `core/`, and it names
+no feature (`tests/line_groups_test.rb`).
+
+A feature describes its line group once as a `LineGroups::Spec`: the label its messages use ("Piping group") and the
+noun for an assigned Edge ("pipe"), the two reference target ids, their `Records::EntityStore`s and
+`Records::RecordKind`s, the group record's linked-record key, its codes for an Edge outside a group, a nested group,
+a group a Zone holds and a hidden Edge, and a factory for the one-read child index the steps resolve with at apply
+(piping passes `Zones::ChildLookup`). Each call takes the spec:
+
+| Part | What it does |
+| --- | --- |
+| `GroupTarget` | Every group occurrence by root-to-Group path, through Groups and components, once per placement; `along!`, the strict `locate` and the nested and write refusals |
+| `EdgeTarget` | Edge records directly in a group by root-to-Edge path; refuses an Edge outside one with the feature's code |
+| `CreateStep`, `GroupWriteStep`, `EdgeWriteStep` | Create an empty group at the root with its record and open it; rewrite group records; write and clear Edge records, each one operation |
+| `Scan.walk` | Each readable occurrence's path, record, name, direct assigned Edges, transform and `shared`, and the unreadable groups as rows |
+| `Selection` | The native selection under the active path as Edge references, with ignored entities counted; the caller passes its gesture limit and Zones' containment |
+| `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
+| `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
+
+The feature keeps its schemas and record shapes, its operations and declarations, its reference targets' declared
+descriptors, its runs, findings, schedule rows and export, its Colour-by modes and any tool. Piping's files call the
+layer from where they always were (`features/piping/line_group.rb` holds its spec), as thermal bridges and piping
+call the chain rule in `core/edge_runs.rb`.
+
 ## Scripting as an entry point
 
 [AGENT_INTERFACE.md](AGENT_INTERFACE.md) extends this interface to users' external agents,

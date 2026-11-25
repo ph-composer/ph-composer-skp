@@ -20,7 +20,8 @@ module PhComposer
           request.engine.find(SYSTEM_KIND, hot_water_system_id)
           id = Records::Identity.allocator(request, request.params).call("ppg")
           record = Group.validate!(Group.new_record(id, hot_water_system_id))
-          proposal.add_step(CreateStep.new(:record => record), :scopes => [PhComposer::Operations::EntityScope.new([])])
+          proposal.add_step(LineGroups::CreateStep.new(:spec => LINE_GROUP, :record => record),
+                            :scopes => [PhComposer::Operations::EntityScope.new([])])
           { "group_id" => id }
         end
 
@@ -116,7 +117,7 @@ module PhComposer
           scopes = updates.map { |update| update.dig("reference", "group_path")[0...-1] }.uniq.map do |path|
             PhComposer::Operations::EntityScope.new(path)
           end
-          proposal.add_step(WriteStep.new(:updates => updates), :scopes => scopes)
+          proposal.add_step(LineGroups::GroupWriteStep.new(:spec => LINE_GROUP, :updates => updates), :scopes => scopes)
         end
 
         # Every Piping group occurrence in root-path order, with its System, its pipe count, whether its id is
