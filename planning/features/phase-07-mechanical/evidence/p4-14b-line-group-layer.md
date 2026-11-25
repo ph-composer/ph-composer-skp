@@ -44,7 +44,7 @@ their dependency patterns now name. M14b stays Open.
 two `shared` occurrences, two group entries and every Edge entry; a group path and an Edge path resolve, the Edge
 refuses `target.shared_definition` when mutable, and an Edge in a plain Group refuses the probe's outside code; an
 empty group created and opened in one operation, its `affected` and descriptor names, removed by one Undo; an Edge
-record written, cleared and a stale write refused `target.changed`; a probe schedule paged compact two runs at a time
+record written, cleared and a stale write refused `target.changed`; a probe schedule paged compact one run a page
 with its count key, a run's members and a detail list, an unknown run refused with the probe's run label; Locate
 selects two Edges and opens their group, and a path to a plain Group's Edge refuses; the selection rows with the
 group, values, ignored count, a Zone-held refusal with the probe's code, an assignable row and the gesture limit; a
@@ -84,13 +84,14 @@ substituted (a scratch `comm` of the literal sets; the only differences are lite
 
 ## Stale cases
 
-`uv run tools/hostkit/acceptance_ledger.py status` with `--changed` for each of the 22 changed, added or deleted paths
-(source, tests, `context/` and `cases.json`): 30 of 160 cases name one, 23 of them through `extension.rb` alone. By
+`uv run tools/hostkit/acceptance_ledger.py status` with `--changed` for each of the 35 paths of
+`git diff --name-only origin/main...HEAD` on `de73a7b4` (source, tests, `context/`, `planning/` and `cases.json`, with
+the updated M13 patterns): 30 of 160 cases name one, 23 of them through `extension.rb` alone. By
 state: `needs_recheck` 12 (A02, A04, A05, A09, A11, R01, R02, R03, R04, E17, LH1, AW10), every one already
 `needs_recheck` on the base `95b1be8f` with no change named, so this stage stales no current Pass;
 `historical_affected` 10 (A01, A03, A06, A07, A08, A10, A12, A13, A14, A16); `deferred` 1 (A15); `not_run` 7 (E02,
-M13a, M13b, M13c, M13d, M13e, M14a). `M13b` to `M13e` are owed to MS3, as expected; none was a Pass. No change is
-unmapped. Nothing was rerun.
+M13a, M13b, M13c, M13d, M13e, M14a). `M13b` to `M13e` are owed to MS3, as expected; none was a Pass. The unmapped
+changes are the 12 `context/`, `planning/` and `cases.json` paths, which no case depends on. Nothing was rerun.
 
 ## Review
 
