@@ -50,6 +50,10 @@ class PipingExportTest < PhComposerTestCase
                       { "water_temp_c" => 50.0, "daily_period" => 24 }]
   }.freeze
 
+  CLAIMED = "test.piping_claims.tag"
+  CLAIM_EXTENSION = PhComposer::Records::Extension.new(:namespace => CLAIMED, :schema_version => 1,
+                                                       :export_relevance => "required", :validate => ->(_) { [] })
+
   def setup
     super
     @model = Sketchup.active_model
@@ -240,29 +244,50 @@ class PipingExportTest < PhComposerTestCase
   end
 
   # Recirculation systems of uneven runs: what this Ruby reads for each, for the Python test to hold equal to
-  # honeybee-ph's recirc_temp and recirc_hours on the pinned wheel, before and after a reload.
+  # honeybee-ph's recirc_temp and recirc_hours on the pinned wheel, before and after a reload. The last repeats the
+  # twenty-first with every pipe at 100 C, whose mean comes out a float's width above 100.
   def test_recirculation_vectors_are_what_the_ruby_read_gives
     random = Random.new(20_261_124)
     types = { PT1 => P::PipeType::DEFAULTS.merge("id" => PT1, "name" => "PT-1") }
-    cases = Array.new(24) do |index|
-      system = "hws_VECTOR#{format('%06d', index)}"
-      facts = Array.new(random.rand(2..4)) do |run|
-        group = { "group_id" => PG1, "group_path" => [900, run], "name" => "", "hot_water_system_id" => system,
-                  "in_zone" => false }
-        values = { "water_temp_c" => [50.0, 55.0, 60.0].sample(:random => random),
-                   "daily_period" => [18, 23.5, 24].sample(:random => random) }
-        points = Array.new(random.rand(2..4)) { Array.new(3) { random.rand(1..997) / 113.0 } }
-        points.each_cons(2).each_with_index.map do |(from, to), place|
-          P::Runs::Fact.new(:path => [900, run, place], :group => group, :record_id => "ppe_V#{index}_#{run}",
-                            :pipe_type_id => PT1, :role => "recirculation", :values => values,
-                            :points_m => [from, to], :vertex_ids => [place, place + 1], :shared => false)
-        end
-      end.flatten
-      P::Runs::Extraction.records(P::Runs::Tree.call(facts), :types => types,
+    facts = Array.new(24) { |index| vector_facts(random, "hws_VECTOR#{format('%06d', index)}") }
+    hot = facts[20].map { |fact| fact.dup.tap { |copy| copy.values = copy.values.merge("water_temp_c" => 100.0) } }
+    cases = (facts + [hot]).map do |pipes|
+      system = pipes.first.group.fetch("hot_water_system_id")
+      P::Runs::Extraction.records(P::Runs::Tree.call(pipes), :types => types,
                                                              :systems => { system => { "name" => "V" } }).first
     end
-    assert_equal 24, cases.length
+    assert_operator cases.last.fetch("recirculation_temperature_c"), :>, 100.0
     write_or_compare(VECTORS, { "cases" => cases })
+  end
+
+  def vector_facts(random, system)
+    Array.new(random.rand(2..4)) do |run|
+      group = { "group_id" => PG1, "group_path" => [900, run], "name" => "", "hot_water_system_id" => system,
+                "in_zone" => false }
+      values = { "water_temp_c" => [50.0, 55.0, 60.0].sample(:random => random),
+                 "daily_period" => [18, 23.5, 24].sample(:random => random) }
+      points = Array.new(random.rand(2..4)) { Array.new(3) { random.rand(1..997) / 113.0 } }
+      points.each_cons(2).each_with_index.map do |(from, to), place|
+        P::Runs::Fact.new(:path => [900, run, place], :group => group, :record_id => "ppe_#{system}_#{run}",
+                          :pipe_type_id => PT1, :role => "recirculation", :values => values,
+                          :points_m => [from, to], :vertex_ids => [place, place + 1], :shared => false)
+      end
+    end.flatten
+  end
+
+  # Another feature claiming extension data on pipes and Piping groups receives each occurrence's payload: this
+  # section is the source of those claims.
+  def test_a_claim_on_pipes_and_piping_groups_receives_each_occurrences_payload
+    PhComposer::Registry.install([claim_feature])
+    reference
+    rewrite("twig 1a", "extension_data" => { CLAIMED => CLAIM_EXTENSION.envelope("tag" => "T-1") })
+    P::Group::STORE.write(@group, P::Group::STORE.read(@group).merge(
+      "extension_data" => { CLAIMED => CLAIM_EXTENSION.envelope("tag" => "G-1") }
+    ))
+    extraction = PhComposer::Export::Collection.build(@model, :run_id => "claims")
+    rows = extraction.document.dig("sections", "test.piping_claims.export", "records")
+    assert_equal [[[500], "G-1"], [[500, pipes_of("twig 1a").first.persistent_id], "T-1"]],
+                 rows.map { |row| [row.fetch("path"), row.dig("payload", "tag")] }.sort_by(&:first)
   end
 
   def test_the_privacy_allowlist_admits_only_the_declared_rows
@@ -278,6 +303,24 @@ class PipingExportTest < PhComposerTestCase
   end
 
   # ---------------------------------------------------------------- what the cases change
+
+  # A feature claiming CLAIMED on pipes and Piping groups, whose section lists each claimed row it receives.
+  def claim_feature
+    Module.new do
+      define_singleton_method(:install) do |registry|
+        scope = registry.feature("test.piping_claims", :contract_version => 1, :requires => ["ph_composer.piping"])
+        scope.extension(CLAIM_EXTENSION)
+        claims = [P::PIPE_KIND, P::GROUP_KIND].map do |kind|
+          { "namespace" => CLAIMED, "target_kind" => kind, "source_section" => X::SECTION, "fields" => ["tag"] }
+        end
+        scope.export_contributor("test.piping_claims.export", :section_version => 1, :requires => [X::SECTION],
+                                                              :entity_projections => claims) do |reader|
+          [P::PIPE_KIND, P::GROUP_KIND].flat_map { |kind| reader.entity_projection(CLAIMED, kind) }
+                                       .map { |row| row.merge("id" => row.fetch("path").join("_")) }
+        end
+      end
+    end
+  end
 
   def pipe_type(id, values, user_data = {})
     P::PipeType::KIND.store.write(@model, P::PipeType::DEFAULTS.merge(

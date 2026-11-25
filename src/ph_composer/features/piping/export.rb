@@ -95,7 +95,8 @@ module PhComposer
         user_data = {}
         facts = pipes.map do |entry, record|
           readable!(record, Assignment::RECORD_KIND, "pipe")
-          read = reader.entity_record(record, :fields => PIPE_FIELDS, :target_kind => PIPE_KIND, :user_data => true)
+          read = reader.entity_record(record, :fields => PIPE_FIELDS, :target_kind => PIPE_KIND, :user_data => true,
+                                              :path => entry.path)
           user_data[entry.path] = read.fetch("user_data", {})
           geometry = entry.geometry
           role = record.fetch("role")
@@ -109,12 +110,15 @@ module PhComposer
         [facts, user_data]
       end
 
-      # Each Piping group occurrence by path, detached as the live scan detaches it.
+      # Each Piping group occurrence by path, detached as the live scan detaches it. This section is the source of a
+      # claim another contributor makes on a Piping group or a pipe, so each read passes its occurrence path and the
+      # claimed payload is captured for its claimant.
       def groups(reader)
         zone_paths = reader.section(ZONES).map { |row| row.fetch("zone_path") }
         reader.snapshot.records(Group::STORE.dictionary, :kind => "group").to_h do |entry, record|
           readable!(record, Group::RECORD_KIND, "Piping group")
-          reader.entity_record(record, :fields => %w[hot_water_system_id], :target_kind => GROUP_KIND)
+          reader.entity_record(record, :fields => %w[hot_water_system_id], :target_kind => GROUP_KIND,
+                                       :path => entry.path)
           [entry.path, { "group_id" => record.fetch("id"), "group_path" => entry.path, "name" => entry.native_name,
                          "hot_water_system_id" => record["hot_water_system_id"],
                          "in_zone" => zone_paths.any? { |path| inside?(path, entry.path) } }]

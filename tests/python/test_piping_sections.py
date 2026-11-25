@@ -246,7 +246,9 @@ def test_the_ruby_recirculation_read_equals_honeybee_phs_before_and_after_a_relo
     order, some of these systems read differently, so the order is what makes them equal."""
     module = stack.load("honeybee_phhvac.hot_water_system")
     differs = 0
-    for raw in json.loads(VECTORS.read_text())["cases"]:
+    cases = json.loads(VECTORS.read_text())["cases"]
+    assert max(raw["recirculation_temperature_c"] for raw in cases) > 100.0, "pipes at 100 C can average above it"
+    for raw in cases:
         record = PipingRecord.read(raw)
         expected = (record.recirculation_temperature_c, record.recirculation_hours)
         system = module.PhHotWaterSystem()

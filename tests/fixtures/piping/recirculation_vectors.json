@@ -4460,6 +4460,127 @@
       "recirculation_temperature_c": 53.41609255495637,
       "system_id": "hws_VECTOR000023",
       "trunks": []
+    },
+    {
+      "id": "hws_VECTOR000020",
+      "recirculation": [
+        {
+          "display_name": "Recirculation 1",
+          "identifier": "pipe_9f5c5d8ec5acb31d",
+          "segments": [
+            {
+              "daily_period": 18,
+              "diameter_mm": 12.7,
+              "display_name": "pipe_seg_88edff7229d7f475",
+              "identifier": "pipe_seg_88edff7229d7f475",
+              "insulation_conductivity": 0.04,
+              "insulation_quality": 1,
+              "insulation_reflective": true,
+              "insulation_thickness_mm": 12.7,
+              "material": 2,
+              "points_m": [
+                [
+                  6.221238938053097,
+                  2.663716814159292,
+                  8.539823008849558
+                ],
+                [
+                  7.424778761061947,
+                  4.132743362831858,
+                  8.247787610619469
+                ]
+              ],
+              "user_data": {},
+              "water_temp_c": 100.0
+            }
+          ]
+        },
+        {
+          "display_name": "Recirculation 2",
+          "identifier": "pipe_5f75cfbf07fc3b68",
+          "segments": [
+            {
+              "daily_period": 23.5,
+              "diameter_mm": 12.7,
+              "display_name": "pipe_seg_aaff7c6ad78bb0f3",
+              "identifier": "pipe_seg_aaff7c6ad78bb0f3",
+              "insulation_conductivity": 0.04,
+              "insulation_quality": 1,
+              "insulation_reflective": true,
+              "insulation_thickness_mm": 12.7,
+              "material": 2,
+              "points_m": [
+                [
+                  0.13274336283185842,
+                  7.070796460176991,
+                  8.4070796460177
+                ],
+                [
+                  2.0,
+                  0.9469026548672567,
+                  4.823008849557522
+                ]
+              ],
+              "user_data": {},
+              "water_temp_c": 100.0
+            },
+            {
+              "daily_period": 23.5,
+              "diameter_mm": 12.7,
+              "display_name": "pipe_seg_235b9dda67bc2e56",
+              "identifier": "pipe_seg_235b9dda67bc2e56",
+              "insulation_conductivity": 0.04,
+              "insulation_quality": 1,
+              "insulation_reflective": true,
+              "insulation_thickness_mm": 12.7,
+              "material": 2,
+              "points_m": [
+                [
+                  2.0,
+                  0.9469026548672567,
+                  4.823008849557522
+                ],
+                [
+                  6.725663716814159,
+                  3.9557522123893807,
+                  6.132743362831858
+                ]
+              ],
+              "user_data": {},
+              "water_temp_c": 100.0
+            },
+            {
+              "daily_period": 23.5,
+              "diameter_mm": 12.7,
+              "display_name": "pipe_seg_a64b2ab95764d79d",
+              "identifier": "pipe_seg_a64b2ab95764d79d",
+              "insulation_conductivity": 0.04,
+              "insulation_quality": 1,
+              "insulation_reflective": true,
+              "insulation_thickness_mm": 12.7,
+              "material": 2,
+              "points_m": [
+                [
+                  6.725663716814159,
+                  3.9557522123893807,
+                  6.132743362831858
+                ],
+                [
+                  5.911504424778761,
+                  7.8584070796460175,
+                  4.734513274336283
+                ]
+              ],
+              "user_data": {},
+              "water_temp_c": 100.0
+            }
+          ]
+        }
+      ],
+      "recirculation_hours": 22,
+      "recirculation_temperature_c": 100.00000000000001,
+      "system_id": "hws_VECTOR000020",
+      "trunks": []
     }
   ]
 }

@@ -891,9 +891,9 @@
       "sha256": "3dc0a67c9bcd0f0357c3fca8e8114eb32a7f06b2b78a60f698586f5728c612eb"
     },
     "python/ph_composer_translation/contract/piping_records.py": {
-      "bytes": 8345,
+      "bytes": 8517,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "d2dd6b86a625c576dd588bb202f1eb5011632b5df49ff1cb6a92bdfe38763a88"
+      "sha256": "0f9c6581eb0fc109466fb4d7adcc86876f82827d19e82cbc059dddb596c23df9"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,

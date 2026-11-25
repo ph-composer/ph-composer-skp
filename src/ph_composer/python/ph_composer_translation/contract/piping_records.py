@@ -158,7 +158,9 @@ class PipingRecord:
         record = cls(
             identifier,
             as_text(raw.get("system_id"), f"{label} system_id"),
-            bounded(raw.get("recirculation_temperature_c"), f"{label} recirculation_temperature_c", 0.0, 100.0),
+            # A length-weighted mean Ruby works out: a finite number, not held to the authored 0 to 100, since pipes all
+            # at 100 C can average a float's width above it.
+            as_number(raw.get("recirculation_temperature_c"), f"{label} recirculation_temperature_c"),
             whole(raw.get("recirculation_hours"), f"{label} recirculation_hours", range(0, 25)),
             tuple(
                 PipeTrunkValues.read(trunk, f"{label} trunk") for trunk in rows(raw.get("trunks"), f"{label} trunks")
