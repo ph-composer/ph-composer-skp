@@ -5742,6 +5742,33 @@
       "native_control_required": true
     },
     {
+      "id": "M13e",
+      "label": "The Piping pills, Colour-by and the pipe tool on the installed RBZ from a fresh process with Ed at the mouse, on the reference model with ACCEPTANCE's hot water piping case: two Pipe Types on the Pipe Types pill; New Piping group linked to HWS-1 opens for the Line tool; one riser trunk with multiplier 12, three branches, six twigs and a recirculation loop drawn and assigned from the Piping pill's bar, one Undo step each; one branch assigned with Assign by clicking, one Undo step a gesture, Escape stopping it; the schedule's lengths match hand measurement; break a branch from its trunk and read its finding, whose Locate selects it; Colour by pipe role and by Pipe Type with legend lengths equal to the schedule's totals; the Systems table's Recirc. columns read the loop's temperature and hours; save and reopen; the panel at 1280 x 800, 420 px and 360 x 520; the UI polish review",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/features/piping/install.rb",
+        "src/ph_composer/features/piping/colour_modes.rb",
+        "src/ph_composer/features/piping/pipe_tool.rb",
+        "src/ph_composer/features/piping/declarations/*",
+        "src/ph_composer/features/piping/assignment/*",
+        "src/ph_composer/features/piping/scan/*",
+        "src/ph_composer/features/piping/runs/*",
+        "src/ph_composer/html/features/piping/*",
+        "src/ph_composer/html/features/mechanical/section.js",
+        "src/ph_composer/html/features/mechanical/hot_water.js",
+        "src/ph_composer/html/features/mechanical/equipment_table.js",
+        "src/ph_composer/html/table_contributions.js",
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/core/pick.rb",
+        "src/ph_composer/core/drag_set.rb",
+        "src/ph_composer/core/units.rb",
+        "src/ph_composer/html/unit_tables.js"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

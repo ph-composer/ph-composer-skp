@@ -181,9 +181,9 @@
       "sha256": "7885385716765f777d803d7acab239feb3ce8887e2bf9429b0525377c8a85a0a"
     },
     "html/features/mechanical/equipment_table.js": {
-      "bytes": 18100,
+      "bytes": 18375,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "49acb05a12fa752d46d19f46a1a30f54d28df8b35f73005727db6116a72dc056"
+      "sha256": "177afc4bbdd920d8fa30363b36a8b359e2a7aa132bcea6f04fcd9fb87a04b65e"
     },
     "html/features/mechanical/fans.js": {
       "bytes": 8575,
@@ -206,9 +206,9 @@
       "sha256": "3ac162c732fcc8709dbd478b3bee9427f70d21388208802b65b57e7ba84d7b55"
     },
     "html/features/mechanical/hot_water.js": {
-      "bytes": 13002,
+      "bytes": 11313,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a7354781bb575e4e92ca499d5248ad20fbf1d98857e45e17777abf8782fadcd3"
+      "sha256": "5d25552db922144617092db46bbcd12b217119f597114e2e58dfb52ef2ddb0b9"
     },
     "html/features/mechanical/hot_water_heaters.js": {
       "bytes": 14355,
@@ -221,9 +221,9 @@
       "sha256": "24318afc58eb927c63add9a3c1dc82d7df8fc63ca58cd571c740583d9b1c20e9"
     },
     "html/features/mechanical/mechanical.css": {
-      "bytes": 7681,
+      "bytes": 7555,
       "mime": "text/css; charset=utf-8",
-      "sha256": "d57ac5852a9a3d65caf318416915099042209f203b33f07c05b375143fac901d"
+      "sha256": "19c1ad8ce7b514f3dbe32026f1b7e757e2b097c55d96dd3e5213baa80dfb789f"
     },
     "html/features/mechanical/optional_values.js": {
       "bytes": 13362,
@@ -259,6 +259,51 @@
       "bytes": 9910,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "37ba2034b7031e4bae11905eb3ca063da8c88ed7ae3dc732c6c360c150c2fe33"
+    },
+    "html/features/piping/assign_bar.js": {
+      "bytes": 14750,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "876c9718cb8a861ecdc2332c96b22daeb9fc7f40fa30835f12227b2526b6210b"
+    },
+    "html/features/piping/groups.js": {
+      "bytes": 6967,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "a9ca8ce07b10262d301e6c5c7556145da5a44a0b75b5c2f8c2fd9723c1404a40"
+    },
+    "html/features/piping/pipe_tool.js": {
+      "bytes": 3164,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "36001a7a0331af5796e58290e8a867449321e4db62e6720f940bd9b1c1e1ff78"
+    },
+    "html/features/piping/pipe_types.js": {
+      "bytes": 6781,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "aced99a35c780f458abbe549a3a3a6250348211b42b228bca720a9214a922392"
+    },
+    "html/features/piping/piping.css": {
+      "bytes": 3653,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "15272a999d3c3c75b477b9a489866add1ac416ef8459d852d91d206bbf9932dd"
+    },
+    "html/features/piping/schedule.js": {
+      "bytes": 15453,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "1c1b5fb492e5449d9cd7695bc3641f5ea7857ef92c92f8e2d76ec8af9f47bab0"
+    },
+    "html/features/piping/section.js": {
+      "bytes": 3157,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "0c898c9f165e028b2c26bb1d46008b509fb9f2cd4d94097e3180f2f40b12325a"
+    },
+    "html/features/piping/shared.js": {
+      "bytes": 3376,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "b01c21515a8d09529cdec0c0a63e36d0e999bbd892b04447d5164a36e0eebe47"
+    },
+    "html/features/piping/systems_columns.js": {
+      "bytes": 2504,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "0914d21f774f6ffd24d6086350516d78c9c4528d2f791eacbecd86a33447d7e6"
     },
     "html/features/programs/airtightness.js": {
       "bytes": 6073,
@@ -556,9 +601,9 @@
       "sha256": "9698d795e2d2031afa9dac5732125f52c0292492eaab2721f6a77a3a7e3de74f"
     },
     "html/fields.js": {
-      "bytes": 3364,
+      "bytes": 3520,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a29f74a71e881db6d2d4f38a4cb8ca03b4f71d188ac7eaa981416723578137f6"
+      "sha256": "fd74382638848d7ef61f7e8455696f10cf263780fa016beab5df07446dd8aba4"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -566,9 +611,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 11611,
+      "bytes": 12128,
       "mime": "text/html; charset=utf-8",
-      "sha256": "e88de52efa7c6bcae3a77e9a7ab8bc7c91a79bf4fd0d94baf88cfc6ae94e601f"
+      "sha256": "5e899816fbfa392c0ae372fa5e8a6088270a082eeba498cfc12f24ab13fcc32b"
     },
     "html/inventory.js": {
       "bytes": 15568,
@@ -821,9 +866,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 16091,
+      "bytes": 16348,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e1b8fa7c3997aa522c74f281b72e924d67beff9e4f0fda7bd58d139f975f4aee"
+      "sha256": "1871eb7d4c67f7ec4c922eab2bc70ff18fcc74004cfa84ef62a75a5d05cd8e79"
     },
     "html/units.js": {
       "bytes": 14458,

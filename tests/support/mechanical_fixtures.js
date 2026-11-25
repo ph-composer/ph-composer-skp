@@ -48,12 +48,11 @@ function finding(code, severity, message) {
 function hotWater(sections) {
   sections[PREFIX + "hot_water_systems"] = { status: "completed", value: { unreadable: [], records: [
     record("hot_water_system", HWS1, { number_tap_points: 8, piping_calc_method: 2 }, { heater_count: 2,
-      tank_count: 3, recirculation: { temperature_c: 60, hours: 24, from_piping: false },
+      tank_count: 3,
       zones: [{ zone_id: ZONES.C.zone_id, reference: ZONES.C, name: "Zone C" }],
       findings: [finding("mechanical.method_not_exported", "info", "HWS-1 sets piping calculation method 2, and the " +
         "pinned honeybee-ph has no field for it, so the export leaves it out.")] }),
-    record("hot_water_system", HWS2, {}, { heater_count: 0, tank_count: 0,
-      recirculation: { temperature_c: 60, hours: 24, from_piping: false }, zones: [],
+    record("hot_water_system", HWS2, {}, { heater_count: 0, tank_count: 0, zones: [],
       findings: [finding("mechanical.item_unserved", "warning",
         "HWS-2 serves no Zone, so nothing exports it.")] })] } };
   sections[PREFIX + "hot_water_heaters"] = { status: "completed", value: { unreadable: [], records: [

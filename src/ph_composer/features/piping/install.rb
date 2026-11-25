@@ -14,6 +14,8 @@
 #   run_locate.rb   runs.locate, which selects a run's pipes through the foundation's context.open
 #   export.rb       the export contributor over the snapshot, which adds each System's pipes to its hot water
 #                   objects, and its preflight
+#   colour_modes.rb the Colour-by modes, pipes in their role's colour or their Pipe Type's
+#   pipe_tool.rb    the pipe tool, the pointer route to pipes.assign; declarations/pipe_tool.rb its commands
 #   codes.rb        the `piping` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -49,6 +51,9 @@ require_relative "declarations/groups"
 require_relative "declarations/pipes"
 require_relative "declarations/schedule"
 require_relative "export"
+require_relative "colour_modes"
+require_relative "pipe_tool"
+require_relative "declarations/pipe_tool"
 
 module PhComposer
   module Piping
@@ -61,7 +66,9 @@ module PhComposer
       GroupRegistration.install(feature)
       PipeRegistration.install(feature)
       ScheduleRegistration.install(feature)
+      PipeToolRegistration.install(feature)
       ExportProjection.install(feature)
+      ColourModes.install(feature)
       Codes.install(feature)
     end
   end

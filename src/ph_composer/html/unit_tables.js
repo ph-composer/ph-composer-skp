@@ -134,7 +134,10 @@ PhComposerUI.define("unit_tables", [], function () {
     ip: unit("kh", "kh/yr") },
     /* A fan's runtime in minutes a year, the same in both systems, as honeybee-ph and WUFI-Passive take it. */
     annual_minutes: { label: "runtime", factor: 1, precision: { SI: 1, IP: 1 }, si: unit("min", "min/yr"),
-    ip: unit("min", "min/yr") }
+    ip: unit("min", "min/yr") },
+    /* A recirculation pipe's hours a day, the same in both systems, as honeybee-ph's daily_period takes it. */
+    hours_per_day: { label: "hours a day", factor: 1, precision: { SI: 1, IP: 1 }, si: unit("h_day", "h/day"),
+    ip: unit("h_day", "h/day") }
   };
 
   var DIMENSION_FORMATS = [

@@ -73,7 +73,8 @@ class UnitsTest < PhComposerTestCase
       [300, "volume_l", "300 L", "79.3 gal"],
       [45, "electric_power", "45 W", "45 W"],
       [8.76, "kilohours", "8.76 kh/yr", "8.76 kh/yr"],
-      [10_950, "annual_minutes", "10,950 min/yr", "10,950 min/yr"]
+      [10_950, "annual_minutes", "10,950 min/yr", "10,950 min/yr"],
+      [18, "hours_per_day", "18 h/day", "18 h/day"]
     ].each do |value, quantity, si, ip|
       assert_equal si, Units.format(value, :quantity => quantity, :system => "SI")
       assert_equal ip, Units.format(value, :quantity => quantity, :system => "IP")

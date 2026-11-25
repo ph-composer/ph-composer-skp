@@ -1650,7 +1650,79 @@
           exhaust_flow_rate_m3h: 40, annual_runtime_minutes: 30000, norm_energy_demand_w: 8,
           in_conditioned_space: false, annual_period_operation_khrs: 2 })],
       serves: { zon_apt1: ["fan_Aa11Bb22Cc33", "fan_Dd44Ee55Ff66"], zon_apt2: ["fan_Dd44Ee55Ff66"] } }
-  } });
+  }, piping: piping() });
+
+  /* Hot water piping on DHW-1 Central: the hot water piping case's riser trunk (x 12), three branches with two twigs
+     each and a recirculation loop of two runs, in Piping group Riser; group Floor 2 linked to DHW-1 holds nothing
+     yet and group Spare is linked to no System. PT-1 is PEX 3/4 in, PT-2 bare Copper L 1/2 in. Two selected lines
+     sit in Riser, one outside every Piping group. A branch on floor 3 is broken from the trunk. */
+  function piping() {
+    var dhw1 = "hws_Aa11Bb22Cc33", dhw2 = "hws_Dd44Ee55Ff66";
+    function type(id, name, color, values) {
+      return { id: id, kind: "ph_composer.piping.pipe_type", schema_version: 1, user_data: {}, extension_data: {},
+        extension_status: {}, findings: [], export_ready: true, export_blockers: [], display: { color: color },
+        values: Object.assign({ name: name, notes: "", datasheet_links: [], source: { kind: "manual" },
+          insulation_reflective: true, insulation_quality: 1 }, values) };
+    }
+    function group(id, path, name, system, extra) {
+      return Object.assign({ path: [path], reference: { group_id: id, group_path: [path] }, name: name,
+        values: { hot_water_system_id: system }, pipe_count: 0, copied: false, findings: [], record_problem: null,
+        write_refusal: null }, extra || {});
+    }
+    var count = 0;
+    function run(role, number, parent, type, length, lines, values, findings) {
+      count += 1;
+      return { identifier: "pipe_preview" + String(count).padStart(4, "0"), role: role,
+        display_name: role[0].toUpperCase() + role.slice(1) + " " + number, hot_water_system_id: dhw1,
+        hot_water_system_name: "DHW-1 Central", group: { group_id: "ppg_Riser0000001", group_path: [500],
+          name: "Riser" }, parent: parent, parent_name: null, pipe_type_id: type, length_m: length,
+        line_count: lines, values: values || {}, closed: false, shared: false, findings: findings || [],
+        edge_paths: [[500, 600 + count]] };
+    }
+    var trunk = run("trunk", 1, null, "ppt_Pp11Tt22Yy33", 9, 3, { multiplier: 12, demand_recirculation: false });
+    var runs = [trunk];
+    [1, 2, 3].forEach(function (floor) {
+      var broken = floor === 3;
+      var branch = run("branch", floor, broken ? null : trunk.identifier, "ppt_Qq44Rr55Ss66", 4, 2, {}, broken ?
+        [{ code: "piping.branch_unconnected", message: "Branch 3 reaches no trunk in Riser: draw it to the trunk.",
+          blocks_export: true, locate: { edge_paths: [[500, 640]] } }] : []);
+      runs.push(branch);
+      [1, 2].forEach(function () {
+        runs.push(run("twig", runs.length, branch.identifier, "ppt_Qq44Rr55Ss66", 1.25, 1));
+      });
+    });
+    runs.push(run("recirculation", 1, null, "ppt_Pp11Tt22Yy33", 9, 1, { water_temp_c: 55, daily_period: 18 }));
+    runs.push(run("recirculation", 2, null, "ppt_Pp11Tt22Yy33", 2, 1, { water_temp_c: 50, daily_period: 24 }));
+    runs.forEach(function (entry) {
+      var parent = runs.filter(function (other) { return other.identifier === entry.parent; })[0];
+      entry.parent_name = parent ? parent.display_name : null;
+    });
+    function selected(id, values) {
+      var path = [500, id];
+      return { path: path, reference: { group_path: [500], entity_path: path, entity_id: values.role ?
+        "ppe_preview" + id : null }, group: { group_id: "ppg_Riser0000001", group_path: [500],
+        hot_water_system_id: dhw1 }, reason: null, values: values, copied: false, record_problem: null,
+        write_refusal: null };
+    }
+    return {
+      types: [type("ppt_Pp11Tt22Yy33", "PT-1 PEX 3/4", "#3b7ea1", { material: 6, diameter_mm: 19.05,
+        insulation_thickness_mm: 12.7, insulation_conductivity_w_mk: 0.04 }),
+      type("ppt_Qq44Rr55Ss66", "PT-2 Copper 1/2", "#c26a2e", { material: 2, diameter_mm: 12.7,
+        insulation_thickness_mm: 0, insulation_reflective: false })],
+      groups: [group("ppg_Riser0000001", 500, "Riser", dhw1, { pipe_count: 17 }),
+        group("ppg_Floor0000002", 510, "Floor 2", dhw1),
+        group("ppg_Spare0000003", 520, "Spare", null)],
+      runs: runs,
+      selected: [selected(601, {}), selected(602, { pipe_type_id: "ppt_Qq44Rr55Ss66", role: "twig" }),
+        { path: [5], reference: null, group: null, reason: "outside_group", values: {}, copied: false,
+          record_problem: null, write_refusal: null }],
+      systems: [{ hot_water_system_id: dhw1, name: "DHW-1 Central", distribution_length_m: { trunk: 9, branch: 12,
+        twig: 7.5 }, recirculation_length_m: 11, recirculation_temperature_c: 54.09, recirculation_hours: 19,
+      from_piping: true },
+      { hot_water_system_id: dhw2, name: "DHW-2 Retail", distribution_length_m: { trunk: 0, branch: 0, twig: 0 },
+        recirculation_length_m: 0, recirculation_temperature_c: 60, recirculation_hours: 24, from_piping: false }]
+    };
+  }
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),

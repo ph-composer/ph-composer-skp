@@ -1,7 +1,7 @@
 /* The Mechanical tab in the preview: the Ventilation subtab and its Ventilators pill, in-place edits, electric
    efficiency in both unit systems, the Zone picker with its replace route, By ventilator from the Serves header,
    the optional values, the Columns menu and the record forms; then the Hot Water subtab's Systems, Heaters and
-   Tanks: read-only recirculation, the method badge and the pooling note, Serves and By hot water system, a Heater's
+   Tanks: the recirculation piping contributes, the method badge and the pooling note, Serves and By hot water system, a Heater's
    Type change, litres in US gallons, the export slot, the System delete and New Tank; then the Heat Pumps subtab's
    five pills: capacities in kBtu/h, a rating mode chosen in place, a lacking value, the indoor units grouped by
    outdoor unit with their list Serves slot and New with two parents, and the Blended result with its copy action;
@@ -171,7 +171,7 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
     await page.keyboard.press("Escape");
     await open.waitFor({ state: "hidden" });
   }
-  step("Hot Water › Systems: recirculation read only, the method badge and the pooling note");
+  step("Hot Water › Systems: piping's recirculation read only, the method badge and the pooling note");
   await setPanelSize(page, 1280, 800);
   const hotWater = id => host(`JSON.parse(JSON.stringify(window.previewHost.mechanical.hotWater.${id}))`);
   await pane.getByRole("tab", { name: "Hot Water" }).click();
@@ -181,7 +181,7 @@ check({ name: "mechanical", output }, async ({ newPage, step }) => {
   const systemRow = id => systems.locator(`[data-row-key='${id}']`);
   const DHW1 = "hws_Aa11Bb22Cc33", DHW3 = "hws_Gg77Hh88Ii99";
   await systemRow(DHW1).waitFor();
-  assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c").textContent(), "60");
+  assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c").textContent(), "54.1");
   assert.equal(await systemRow(DHW1).locator(".col-recirculation_temperature_c input").count(), 0, "read only");
   assert.match(await systemRow(DHW1).locator(".col-piping_calc_method .mech-cell-badge").getAttribute("aria-label"),
     /pinned honeybee-ph has no field/);

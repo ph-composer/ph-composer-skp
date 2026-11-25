@@ -109,6 +109,11 @@ module PhComposer
                                                      "#{SchedulePages::DETAILS} pages them."),
         "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
       }, :optional => %w[systems types unreadable system_count type_count])
+      ALL = "#{FEATURE_ID}.schedule.all".freeze
+      WHOLE = %w[totals systems types unreadable unreadable_total].freeze
+      ALL_RESULT = Shapes.object(RESULT.fetch("properties").slice(*WHOLE)
+                                       .merge("runs" => Shapes.list(RUN).merge("description" => "Every run in " \
+                                                                                                "schedule order.")))
       DETAILS_PARAMS = Shapes.object({
         "part" => { "type" => "string", "enum" => SchedulePages::PARTS.keys,
                     "description" => "systems, types or unreadable: which of the schedule's lists to page." },
@@ -181,6 +186,11 @@ module PhComposer
           SchedulePages.page(request)
         end
         install_pages(feature)
+        feature.query(ALL, :description => "Every hot water piping run in one read, for the panel, with the totals, " \
+                                           "System and Pipe Type rows and unreadable records. It walks the Model.",
+                           :response => { "bounded" => false, "prefer" => SchedulePages::PAGE },
+                           :refuses => READ, :params => Shapes::NONE, :result => ALL_RESULT,
+                           :examples => [{}]) { |request| Scan.schedule(request) }
         feature.query(SYSTEMS,
                       :description => "Every Hot Water System's drawn distribution length by role and its " \
                                       "recirculation length, temperature and hours from its recirculation pipes, as " \

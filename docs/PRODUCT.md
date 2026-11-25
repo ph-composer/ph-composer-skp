@@ -337,13 +337,15 @@ Hot water flow stays in L/h per m².
 
 ## Add hot water systems, heaters and tanks
 
-1. Use **Mechanical > Hot Water**. Its pills are **Systems**, **Heaters** and **Tanks**. A Hot Water System
+1. Use **Mechanical > Hot Water**. Its pills are **Systems**, **Heaters**, **Tanks**, **Pipe Types** and
+   **Piping** (see [hot water piping](#draw-hot-water-piping)). A Hot Water System
    is what serves Zones; each Heater and Tank names the System it belongs to.
 2. **+ New Hot Water System** asks for a Tag. Enter its **Tap points**, or leave them blank for the piping
    to count them. Click its **Serves** cell to choose its Zones, as for a Ventilator; each Zone has one
    System. The palette in the **Serves** header colours each Zone by its System.
-3. **Recirculation** temperature and hours are read only. They come from the recirculation piping, and
-   read 60 °C and 24 h, muted, until piping is drawn. A **Calculation method** is stored with the System;
+3. **Recirc.** temperature and hours, at the right of the table, are read only. They come from the
+   recirculation pipes, and read 60 °C and 24 h, muted, until one is drawn. A **Calculation method** is stored
+   with the System;
    the info mark beside it says when the export cannot carry it yet.
 4. When two Systems serve one Building Segment, a note under the table says that WUFI-Passive and METr add
    their tanks and heaters together and keep one tap point count.
@@ -406,20 +408,40 @@ Hot water flow stays in L/h per m².
    heaters, so assigning one never replaces another; unchecking a Zone takes only this heater off it.
 4. Deleting a heater that serves Zones asks which heater takes its place on them, or clears it from them.
 
-## Hot water piping
+## Draw hot water piping
 
 Hot water piping is traced as lines over the model, each line given a Pipe Type and a role, and exported
-into the Hot Water System it belongs to. It is being built in steps. What exists now is the Pipe Type,
-available to scripts and assistants through the [agent guide](AGENT_GUIDE.md#hot-water-piping); the
-panel's Pipe Types table, the Piping groups that hold drawn lines, assignment and the schedule follow.
+into the Hot Water System it belongs to. Scripts and assistants reach the same steps through the
+[agent guide](AGENT_GUIDE.md#hot-water-piping).
 
-A **Pipe Type** is one pipe specification kept in the model: a **Material** (Copper M, L or K, CPVC CTS
-SDR, CPVC Sch 40, PEX, PE or PEX CTS SDR), a **Diameter** from the eight nominal sizes METr takes, 3/8 in
-to 2 in, and its insulation: thickness, conductivity, a reflective facing and the quality of its
-installation. A new type is a 1/2 in Copper L pipe with 12.7 mm of reflective insulation at
-0.04 W/(m K). The same type serves a trunk in one place and a twig in another, so the role is chosen when a
-line is assigned, not on the type. A type with insulation and no conductivity cannot export once a pipe
-uses it; a bare pipe, with no insulation, needs none.
+1. Use **Mechanical > Hot Water > Pipe Types**. A **Pipe Type** is one pipe specification kept in the
+   model: a **Material** (Copper M, L or K, CPVC CTS SDR, CPVC Sch 40, PEX, PE or PEX CTS SDR), a
+   **Diameter** from the eight nominal sizes METr takes, 3/8 in to 2 in, and its **Insulation**: thickness,
+   **Conductivity**, a **Reflective** facing and the **Quality** of its installation. **+ New Pipe Type**
+   asks for a Tag; the new type is a 1/2 in Copper L pipe with 12.7 mm of reflective insulation at
+   0.04 W/(m K). Edit each value in its cell. **Used length** is the drawn length of the pipes using the
+   type. A type with insulation and no conductivity cannot export once a pipe uses it; a bare pipe needs
+   none. Deleting a type in use asks for another to take its place, or clears it from those pipes.
+2. Use the **Piping** pill. **+ New Piping group** asks for the Hot Water System its pipes serve, then adds
+   a group at the top of the model and opens it in SketchUp. Draw the pipes inside it with SketchUp's own
+   Line tool, snapping to the model. Keep Piping groups outside Zones. A tree (a trunk, its branches and
+   their twigs) is drawn in one group; a riser can be drawn once and given a multiplier.
+3. Select lines in the open group, then choose a Pipe Type and a role in the bar above the groups:
+   **Trunk**, **Branch**, **Twig** or **Recirculation**. A trunk also takes a **Multiplier** (how many
+   identical risers it stands for) and **Demand recirculation**; a recirculation pipe takes its **Water
+   temperature** and **Hours a day**. **Assign** writes them to the selected lines as one Undo step, and
+   **Clear** removes them. **Assign by clicking** does the same as you click or drag across lines in
+   SketchUp, one Undo step a gesture, until you click it again or press Escape there.
+4. The **Piping groups** table lists each group with its Hot Water System, chosen in place, and its pipe
+   count. A group linked to no System, or one a Zone holds, says so.
+5. The **Schedule** shows one row per run: the connected lines of one role and Pipe Type. Each branch sits
+   under the trunk it touches and each twig under its branch. A row's alert mark lists what keeps it from
+   the export, such as a branch that reaches no trunk, each with a **Locate**. Click a row to select its
+   lines in SketchUp. **Totals** sum the drawn length by role and by Hot Water System, with each System's
+   recirculation temperature and hours. The schedule reads the model when the pill opens and on
+   **Refresh**; after you draw or assign it says **Changed since read**.
+6. The palette in the schedule's **Role** header colours the pipes in the viewport by role, and the one in
+   the Pipe Types **Tag** header by Pipe Type. The legend sums each colour's length.
 
 ## Reuse library definitions
 

@@ -24,18 +24,11 @@ module PhComposer
       SYSTEM_DELETE = VentilatorRegistration::DELETE
       SYSTEM_REFERENCE = "The Hot Water System it belongs to, which must exist."
       FINDINGS = ServesRegistration::FINDINGS
-      RECIRCULATION = Shapes.described(Shapes.object({
-        "temperature_c" => { "type" => "number", "x-unit" => "C" },
-        "hours" => { "type" => "integer", "x-unit" => "h" },
-        "from_piping" => Shapes.described({ "type" => "boolean" }, "False while no recirculation piping gives them.")
-      }), "Read-only: the recirculation piping's length-weighted temperature and hours, honeybee-ph's 60 C and 24 h " \
-          "while the System has none. This is what the export carries.").freeze
       COUNT = { "type" => "integer", "minimum" => 0 }.freeze
       ROWS = {
         SYSTEMS.id => Shapes.with(Shapes.row(SYSTEMS), ServesRegistration::SERVED.merge(
           "heater_count" => Shapes.described(COUNT, "How many readable Heaters name it."),
-          "tank_count" => Shapes.described(COUNT, "How many readable Tanks name it."),
-          "recirculation" => RECIRCULATION
+          "tank_count" => Shapes.described(COUNT, "How many readable Tanks name it.")
         )),
         HEATERS.id => Shapes.row(HEATERS),
         TANKS.id => Shapes.with(Shapes.row(TANKS), {
@@ -111,15 +104,15 @@ module PhComposer
 
       def read_detail(kind)
         case kind
-        when SYSTEMS then ", with export readiness, the Zones each serves, its Heater and Tank counts, its read-only " \
-                          "recirculation and findings, among them the Building Segment pooling note and a piping " \
-                          "calculation method the export leaves out"
+        when SYSTEMS then ", with export readiness, the Zones each serves, its Heater and Tank counts and findings, " \
+                          "among them the Building Segment pooling note and a piping calculation method the export " \
+                          "leaves out"
         when TANKS then ", with export readiness and the System tank slot each fills"
         else ", with export readiness"
         end
       end
 
-      # What a row adds beside the record: a System's Zones, findings, counts and recirculation, from one Zones read;
+      # What a row adds beside the record: a System's Zones, findings and counts, from one Zones read;
       # a Tank's slot. A Heater adds nothing.
       def extra(request, kind)
         case kind

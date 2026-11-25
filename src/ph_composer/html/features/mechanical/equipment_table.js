@@ -8,6 +8,8 @@
    create, accepts(intent), navigate(intent). spec:
      section, label, className    the snapshot section and its operations' prefix, the record's name, a table class
      columns, editable             [[field, label]] before the identity columns, and the fields edited in place
+     identity                      the hideable columns last, edited in place: Manufacturer, Model and Notes
+                                   unless a kind that has no manufacturer names its own (a Pipe Type, Notes)
      inventory                     further kit Inventory options (quantities, selectFields, normalize, validate,
                                    rawValue, defaultWidths, columnMenus, headerActions, value, search, placeholder,
                                    afterCell); `cell(td, row, field)` draws a family's own cell and answers true
@@ -188,7 +190,7 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
     this.hidden = {};
     var table = ui.element("div", "mech-equipment-table" + (spec.className ? " " + spec.className : ""));
     root.appendChild(table);
-    var extra = spec.inventory || {};
+    var extra = spec.inventory || {}, identity = spec.identity || IDENTITY;
     this.inventory = new inventories.Inventory(table, session, send, panel.notify, changed, Object.assign({
       // Search reads the Tag, the identity and the notes, and whatever else a family adds to it.
       placeholder: "Tag or model", search: function (record) {
@@ -199,9 +201,9 @@ function (panel, snapshot, ui, request, RecordForm, inventories, forms) {
       rawValue: function (row, field) { return stored(row.record, field); }
     }, extra, {
       tableId: spec.section, section: spec.section, action: spec.section + ".update", label: label,
-      columns: [["name", "Tag"]].concat(spec.columns, IDENTITY),
-      editable: ["name"].concat(spec.editable, ["manufacturer", "model", "notes"]),
-      optionalColumns: IDENTITY, hiddenColumns: this.hidden,
+      columns: [["name", "Tag"]].concat(spec.columns, identity),
+      editable: ["name"].concat(spec.editable, identity.map(function (column) { return column[0]; })),
+      optionalColumns: identity, hiddenColumns: this.hidden,
       // The Tag stays beside Actions while the table scrolls sideways (mechanical.css).
       stickyWidths: { name: 180 },
       defaultWidths: Object.assign({ name: 180, manufacturer: 130, model: 130 }, extra.defaultWidths),

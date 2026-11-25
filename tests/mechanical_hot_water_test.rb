@@ -59,8 +59,8 @@ class MechanicalHotWaterTest < PhComposerTestCase
     assert_equal HW::Heaters::MONTHLY_DEFAULTS, values(HEATERS, monthly).slice(*HW::Heaters::MONTHLY_DEFAULTS.keys)
 
     system = rows(SYSTEMS).fetch("HWS-1")
-    assert_equal [3, 3, { "temperature_c" => 60.0, "hours" => 24, "from_piping" => false }],
-                 system.values_at("tank_count", "heater_count", "recirculation")
+    assert_equal [3, 3], system.values_at("tank_count", "heater_count")
+    refute system.key?("recirculation"), "piping contributes recirculation to the Systems table; mechanical reads none"
     assert_equal ["mechanical.item_unserved"], codes(system)
     assert_equal USER_DATA, rows(TANKS).fetch("T1").fetch("user_data")
     engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)

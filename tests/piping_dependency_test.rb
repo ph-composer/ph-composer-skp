@@ -4,7 +4,7 @@ require_relative "test_helper"
 
 # Piping sits above Mechanical: it requires Mechanical, whose Hot Water System its pipes export into, and Zones, and
 # installs after them. Nothing of Mechanical's, in Ruby or in its panel, names Piping, so Mechanical keeps its own
-# words for piping (its piping calculation method, the recirculation read from piping) and no more
+# words for piping (its piping calculation method) and no more; piping contributes the Systems table's recirculation
 # (context/EXTENSIBILITY.md, "Organization and dependencies").
 class PipingDependencyTest < PhComposerTestCase
   ROOT = File.join(SOURCE_ROOT, "ph_composer")

@@ -1,6 +1,6 @@
 "use strict";
 /* Mechanical › Hot Water: the Systems, Heaters and Tanks pills, each control sending only the registered hot water
-   operations. The panel computes nothing: recirculation, the tank slots and the findings are the host's. */
+   operations. The panel computes nothing: the tank slots and the findings are the host's. */
 var assert = require("assert");
 var test = require("node:test");
 var dom = require("./support/dom_stub");
@@ -68,7 +68,7 @@ test("the Hot Water subtab holds Systems, Heaters and Tanks, each Tag first, exp
     }), [["Systems", "true"], ["Heaters", "false"], ["Tanks", "false"]]);
     assert.strictEqual(o.root._view.header.root.querySelector(".primary").textContent, "+ New Hot Water System");
     assert.deepStrictEqual(headers(o, SYSTEMS), ["actions", "name", "serves", "number_tap_points", "heaters", "tanks",
-      "recirculation_temperature_c", "recirculation_hours", "piping_calc_method", "manufacturer", "model", "notes"]);
+      "piping_calc_method", "manufacturer", "model", "notes"]);
     o.pills.select(HEATERS);
     assert.deepStrictEqual(headers(o, HEATERS).slice(0, 6), ["actions", "name", "hot_water_system_id", "variant",
       "percent_coverage", "in_conditioned_space"]);
@@ -329,7 +329,7 @@ test("capacity shows litres under SI and US gallons under IP, and a draft keeps 
     assert.deepStrictEqual(clone(sent.expected_values), { storage_capacity_l: 300 });
   });
 
-test("the Systems table: recirculation read only and muted at its defaults, an unexported method badged, and the " +
+test("the Systems table: Heaters and Tanks named, no recirculation of its own, an unexported method badged, and the " +
   "pooling note shown once however many rows carry it", function () {
     var pooled = { code: "mechanical.hot_water_pooled", severity: "info",
       blocks_export: false, message: "HWS-1, HWS-2 serve Building Segment Apartments; WUFI-Passive and METr pool " +
@@ -337,12 +337,8 @@ test("the Systems table: recirculation read only and muted at its defaults, an u
     var o = setup();
     records(o, SYSTEMS).forEach(function (record) { record.findings.push(pooled); });
     o.paint();
-    var hws1 = row(o, fixtures.HWS1.id), temperature = hws1.querySelector(".col-recirculation_temperature_c");
-    assert.deepStrictEqual([temperature.textContent, hws1.querySelector(".col-recirculation_hours").textContent],
-      ["60", "24"]);
-    assert.ok(temperature.classList.contains("mech-muted"));
-    assert.match(temperature.getAttribute("data-tooltip"), /default until recirculation piping is drawn/);
-    assert.strictEqual(temperature.querySelector("input"), null, "nothing to edit");
+    var hws1 = row(o, fixtures.HWS1.id);
+    assert.strictEqual(hws1.querySelector("[class*=recirculation]"), null, "piping contributes recirculation");
     assert.strictEqual(hws1.querySelector(".col-heaters").textContent, "H-E, H-HP");
     assert.strictEqual(hws1.querySelector(".col-tanks").textContent, "T1, T3, T4");
     assert.strictEqual(row(o, fixtures.HWS2.id).querySelector(".col-heaters").textContent, "None");
@@ -353,8 +349,6 @@ test("the Systems table: recirculation read only and muted at its defaults, an u
     var note = o.view(SYSTEMS).note;
     assert.strictEqual(note.hidden, false);
     assert.strictEqual(note.textContent, pooled.message, "one line for one message");
-    o.modules.unit_preferences.set("unit_system", "IP"); o.paint();
-    assert.strictEqual(hws1.querySelector(".col-recirculation_temperature_c").textContent, "140");
   });
 
 test("a Tank's export slot is the host's, read only, and amber with the reason when its Role has none left",

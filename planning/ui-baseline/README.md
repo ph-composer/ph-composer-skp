@@ -87,6 +87,14 @@ family's columns, Manufacturer, Model and Notes behind Columns, New in the page 
 shared dialog. Read-only values (recirculation, a Tank's export slot) are plain cells, muted while they are
 honeybee-ph's defaults; a Heater's Type changes in the shared form dialog, since the new Type needs its own values.
 
+Built by P4-13e on 2026-11-24 (offline; the host review is owed to the MS3 sitting): Hot Water gains two pills after
+Tanks, Pipe Types (the equipment table with Notes as its only hideable column) and Piping, one surface holding the
+assign bar (the thermal-bridge bar's shape with a role and only that role's values, Assign by clicking and New Piping
+group), the Piping groups with their System chosen in place, and the schedule with each branch indented under its
+trunk, totals by role and by System, findings behind an alert glyph and Locate on a row. Pipe Types and the schedule
+are two pills, not one (D4-13 named one); the UI polish review may fold them. The Systems table's recirculation
+columns are piping's, contributed through `table_contributions`, so they sit after Notes at the right.
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the
