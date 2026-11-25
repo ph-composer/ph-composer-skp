@@ -1,7 +1,7 @@
 # P4-13d: piping export
 
 DATE: 2026-11-24
-STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13d`, stacked on P4-13c (#578); offline evidence in [p4-13d-piping-export](../evidence/p4-13d-piping-export.md), host case `M13d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-09, D4-06, D4-18, D4-25, D4-36 and the [piping PRD](../hot-water-piping/PRD.md), "Export mapping" and "Acceptance shape". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13d` runs in the MS3 sitting (D4-31). Stronger review lane: it adds to the Hot Water System's objects before attach (D4-09), the first section to do so.
+STATUS: In review 2026-11-24 on `feat/phase-07-mechanical-p4-13d`, on `main` after #578 merged; offline evidence in [p4-13d-piping-export](../evidence/p4-13d-piping-export.md), host case `M13d` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-09, D4-06, D4-18, D4-25, D4-36 and the [piping PRD](../hot-water-piping/PRD.md), "Export mapping" and "Acceptance shape". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13d` runs in the MS3 sitting (D4-31). Stronger review lane: it adds to the Hot Water System's objects before attach (D4-09), the first section to do so.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 

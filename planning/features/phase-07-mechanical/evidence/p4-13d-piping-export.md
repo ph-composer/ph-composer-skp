@@ -3,7 +3,8 @@
 DATE: 2026-11-24
 Register row: [M13d](../ACCEPTANCE.md). Stage: [P4-13d](../phases/p4-13d-piping-export.md), under the parent index
 [P4-13](../phases/p4-13-hot-water-piping.md).
-Base: `feat/phase-07-mechanical-p4-13c` at `16d701ef` (PR #578, open, auto-merge armed); this stage stacks on it.
+Base: built on `feat/phase-07-mechanical-p4-13c` at `16d701ef`, rebased onto `main` at `4331c16c` after #578 merged
+(identical tree).
 
 Offline evidence only. No SketchUp process was started. The host case `M13d` (in
 `planning/native-acceptance/cases.json`: export, reload the exact HBJSON and read both Rooms' tree and recirculation, a
