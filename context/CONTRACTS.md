@@ -1425,7 +1425,40 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   group and Ventilator, values, `copied` and `write_refusal`. `duct_types.delete` with `replacement_id` rewrites
   every duct naming the type, with null nulls its `duct_type_id`, in the delete's proposal; a duct the rewrite cannot
   reach refuses the whole delete as `reference.in_use`. A Ventilator delete with an id or null moves or clears the
-  Ducting groups naming it through ducting's retargeter `ph_composer.ducting.groups.retarget_ventilator`.
+  Ducting groups naming it through ducting's retargeter `ph_composer.ducting.groups.retarget_ventilator`. A duct's
+  `quantity` is at most 10,000 (P4-14d), so a length times it stays finite; a stored record above it is unreadable.
+- **Runs** (`features/ducting/runs.rb`, `findings.rb`, `schedule.rb`, pure Ruby over detached facts; the live read in
+  `scan.rb` over the layer's `Scan.edges`). Runs are derived, never stored. A run is every duct of one Ducting group
+  occurrence with one direction, Duct Type and quantity, whether they touch or not: the chain rule is not used, since
+  only the sum matters. Its `identifier` is `duct_` and 16 hex digits of the digest of its container path, direction,
+  type, quantity and each duct's sorted micrometre endpoints; a duct's segment identifier is `duct_seg_` and 16 hex
+  digits of its Edge path and sorted endpoints, so a split Edge is two segments. `display_name` is the direction word
+  and a counter per Ventilator and direction ("Outdoor air 1"); schedule order is Ventilator id, group path,
+  direction, smallest point. A run row's `length_m` is drawn length beside its `quantity`; every total, a
+  Ventilator's two lengths and a Duct Type's used length apply the quantity, as the export writes a run of quantity N
+  as N elements.
+- **The schedule** `ph_composer.ducting.schedule` (bounded, `limit`, `cursor` and `compact`; it refuses
+  `record.unreadable` and `validation.failed` for an unreadable Duct Type or Ventilator, and Mechanical's Serves
+  refusals) walks the Model once, with no snapshot section, and answers one page of runs, each with `direction`,
+  `ventilator_id` and name, `group`, `duct_type_id` and name, `length_m`, `quantity`, `line_count`, `edge_paths`,
+  `shared` and `findings`; beside them `totals` (`by_direction`, run and line counts, length), `ventilators` (every
+  Ventilator's `outdoor_air_length_m` and `exhaust_air_length_m` and its `findings`), `types` (every Duct Type's
+  `used_length_m` and line count) and the first 50 `unreadable` records with `unreadable_total`, as piping's: names
+  and messages cut, `compact` leaving out the paths and lists, `ph_composer.ducting.schedule.details` paging the
+  `ventilators`, `types` and `unreadable` rows and `ph_composer.ducting.runs.members` one run's ducts. A duct or group
+  record that cannot be read, or fails its schema, a duct with no direction included, is an `unreadable` row
+  (`record.unreadable`), never a raise, and blocks export. Which Ventilators serve a Zone it reads from
+  `ph_composer.mechanical.ventilators.all`. `ph_composer.ducting.ventilators` answers the `ventilators` rows without
+  findings and is the snapshot section `ph_composer.ducting.ducting_ventilators`; `duct_types.list` and
+  `duct_types.all` add `used_length_m`. Both walk without Zones' containment or Mechanical's read.
+- **Findings.** On a run, each `{code, message, blocks_export, locate: {edge_paths}}`: blocking
+  `ducting.type_missing` (no or a deleted Duct Type), `ducting.group_unlinked` (no or a deleted Ventilator),
+  `ducting.group_in_zone` and `ducting.insulation_conductivity_missing`; the warning `ducting.shared_definition`. On
+  a `ventilators` row, the warning `ducting.run_missing` for a Ventilator that serves a Zone and has no Outdoor air or
+  no Exhaust air run, its `locate` `{name: "ph_composer.mechanical.locate", params: {ventilator_ids}}`; a Ventilator
+  serving no Zone has Mechanical's `mechanical.item_unserved` instead.
+- **`ph_composer.ducting.runs.locate`** (view command), as piping's: one run's or finding's `edge_paths` in one group
+  occurrence, refusing `ducting.hidden` for a hidden duct, Group or tag.
 
 ## This computer's settings file
 

@@ -1381,9 +1381,24 @@ references with their `values` as `expected_values`, and any of `duct_type_id`, 
 (`outdoor_air`, shown Outdoor air, or `exhaust_air`, shown Exhaust air) and `quantity` (a whole number of
 identical ducts the line stands for). A line with no assignment needs a type and a direction and takes
 quantity 1 unless you give one; an assigned line keeps whatever you leave out, so sending only
-`quantity` 2 keeps its type and direction. `ph_composer.ducting.ducts.clear` removes the assignment.
-Each command takes at most 250 Edges, is refused whole if one target is stale or unwritable, and is one
-Undo step. A split line keeps one assignment on both halves, read as `copied`.
+`quantity` 2 keeps its type and direction (at most 10,000). `ph_composer.ducting.ducts.clear` removes
+the assignment. Each command takes at most 250 Edges, is refused whole if one target is stale or
+unwritable, and is one Undo step. A split line keeps one assignment on both halves, read as `copied`.
+
+Read the runs with `ph_composer.ducting.schedule`, a bounded page at a time; it walks the Model, so read
+it again after drawing. A run is the ducts of one Ducting group with one direction, Duct Type and
+quantity, whether they touch or not. Each gives its `length_m` as drawn beside its `quantity`, its
+`line_count` and `findings`; `blocks_export` marks `ducting.type_missing`, `ducting.group_unlinked`,
+`ducting.group_in_zone`, `ducting.insulation_conductivity_missing` and an unreadable record in
+`unreadable`. Beside the runs are `totals` by direction, one `ventilators` row per Ventilator with its
+`outdoor_air_length_m` and `exhaust_air_length_m`, and one `types` row per Duct Type with its
+`used_length_m`; these apply the quantity, so a line of quantity 2 counts twice. A Ventilator that serves
+a Zone and has no run of a direction carries the warning `ducting.run_missing`.
+`ph_composer.ducting.ventilators` reads the lengths alone. `compact`,
+`ph_composer.ducting.schedule.details` (`part` `ventilators`, `types` or `unreadable`),
+`ph_composer.ducting.runs.members` and `ph_composer.ducting.runs.locate` work as piping's; a hidden duct
+or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store
+one.
 
 ### Library records
 

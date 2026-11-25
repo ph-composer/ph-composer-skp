@@ -5823,6 +5823,35 @@
       "native_control_required": true
     },
     {
+      "id": "M14d",
+      "label": "The ducting schedule with the panel closed, from a fresh process on the installed RBZ and the reference model carrying ACCEPTANCE's ERV ducting case (DG-1 linked to ERV-1, DG-2 to ERV-2, ERV-1 serving Zone A): ph_composer.ducting.schedule read and compared with the hand measurement (four runs of 2.500, 1.800, 2.500 and 1.500 m, ERV-1 at 2.500 and 1.800 m, ERV-2 at 2.500 and 3.000 m with quantity 2), and ph_composer.ducting.ventilators and duct_types.all agreeing; DG-1's two Exhaust air lines cleared gives ducting.run_missing on ERV-1 alone, not blocking; runs.locate into DG-1 placed inside a wrapper Group selects the run and opens DG-1, and a hidden wrapper refuses ducting.hidden; save, fresh-process reopen and the same run and segment identifiers; the schedule, ph_composer.ducting.ventilators and duct_types.all timed on a Model of 50,000 Edges with 200 ducts in forty Ducting groups and forty serving Ventilators against the 200 ms refresh target for the two snapshot sections",
+      "mode": "mixed",
+      "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/features/ducting/install.rb",
+        "src/ph_composer/features/ducting/codes.rb",
+        "src/ph_composer/features/ducting/line_group.rb",
+        "src/ph_composer/features/ducting/runs.rb",
+        "src/ph_composer/features/ducting/findings.rb",
+        "src/ph_composer/features/ducting/schedule.rb",
+        "src/ph_composer/features/ducting/scan.rb",
+        "src/ph_composer/features/ducting/type/reads.rb",
+        "src/ph_composer/features/ducting/group/*",
+        "src/ph_composer/features/ducting/assignment/schema.rb",
+        "src/ph_composer/features/ducting/declarations/*",
+        "src/ph_composer/features/mechanical/declarations/ventilators.rb",
+        "src/ph_composer/features/mechanical/serves/*",
+        "src/ph_composer/features/mechanical/locate.rb",
+        "src/ph_composer/line_groups/*",
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/core/view_framing.rb",
+        "src/ph_composer/core/face_capture.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
+    },
+    {
       "id": "M16",
       "label": "Building Segment mechanical settings on the installed RBZ, with Ed at the mouse, on M08's reference model (Zone A in Main served by ODU-A's indoor unit, which cools; Zone B in Annex served by no heat pump): a Segment's settings dialog lists Mechanical after Comfort with no mechanical cooling, 20 C (68 F under IP), bypass Always, a blank ventilation system rate and both window rates 0; on Main switch mechanical cooling on, enter 18.5 C, Temperature controlled and 0.3, 0.5 and 1.2 1/h, change Phius certification's status in the same dialog and Save: one native Undo step takes both sections back and Redo restores them; a window rate of -1 holds Save with its reason; the Export tab warns mechanical.segment_cooling_mismatch, never blocking, for Annex with cooling switched on and for Main with ODU-A's cooling removed, then native Undo takes both back (Annex unset, ODU-A cooling again) and the Export tab shows no such warning; export, reload the exact HBJSON in the pinned honeybee stack and read Main's set_points.mechanical_cooling, mech_room_temp and summer ventilation as entered, Annex at honeybee-ph's defaults, and both Segments' winter and summer set points as their Programs give; save, fresh-process reopen and re-export give the same HBJSON; the dialog at 1280 x 800, 420 px and 360 x 520",
       "mode": "mixed",

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 105
+    MINOR = 106
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -658,7 +658,15 @@ module PhComposer
                     "showing and declares record.unreadable. piping.groups.all and groups.list rows give the " \
                     "write_refusal a link meets, a nested group or one a Zone holds included; pipes.clear checks " \
                     "every removed pipe id against its referrers; a pipe_types.delete with stale expected_values " \
-                    "refuses target.changed first." }
+                    "refuses target.changed first." },
+      { "minor" => 106, "date" => "2026-11-25",
+        "change" => "ph_composer.ducting adds the schedule: ph_composer.ducting.schedule (runs by Ducting group, " \
+                    "direction, Duct Type and quantity, each Ventilator's two lengths and each Duct Type's used " \
+                    "length, with compact), ph_composer.ducting.schedule.details, ph_composer.ducting.runs.members, " \
+                    "ph_composer.ducting.ventilators and its snapshot section, and the view command " \
+                    "ph_composer.ducting.runs.locate, with the codes ducting.type_missing, ducting.group_unlinked, " \
+                    "ducting.run_missing, ducting.shared_definition and ducting.hidden. duct_types.list and " \
+                    "duct_types.all rows add used_length_m. A duct's quantity is at most 10,000." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
