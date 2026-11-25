@@ -93,8 +93,9 @@ Paths are relative to `src/ph_composer/`.
 1. Layer (`tests/line_groups_test.rb`): a probe spec (a test-only kind and dictionary) finds two placements of one
    group as two occurrences, resolves a group and an Edge path, refuses an Edge outside a group, creates and opens
    an empty group in one Undo step, writes and clears an Edge record, pages a probe schedule and locates two Edges;
-   a grep test that nothing under `line_groups/` names `ph_composer.`, `Piping`, `Ducting`, `Zones::` or
-   `Mechanical`.
+   a grep test that nothing under `line_groups/` names a feature id (`ph_composer.piping`,
+   `ph_composer.ducting`, `ph_composer.zones`, `ph_composer.mechanical`) or a feature module (`Piping`, `Ducting`,
+   `Zones::`, `Mechanical`); the foundation's own `ph_composer.context.open` is allowed.
 2. Piping: every existing test passes with no edit; the goldens are byte-identical.
 
 ## Host gate
