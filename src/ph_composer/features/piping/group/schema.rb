@@ -28,11 +28,7 @@ module PhComposer
       module_function
 
       def validate!(record)
-        found = RECORD_KIND.problems(record)
-        return record if found.empty?
-
-        raise CodedError.new("validation.failed", "A Piping group record is invalid: #{found.first}.",
-                             "findings" => found)
+        LINE_GROUP.validate_group!(record)
       end
 
       def identity(record)
@@ -49,10 +45,8 @@ module PhComposer
           "extension_data" => {} }
       end
 
-      # `record` as the engine's reference scan reads it: a metadata map that is not a JSON object holds no extension
-      # envelope and so names nothing, and is left out rather than failing every delete in the Model.
       def scannable(record)
-        record.reject { |key, value| %w[user_data extension_data].include?(key) && !value.is_a?(Hash) }
+        LineGroups.scannable(record)
       end
 
       def piping_group?(entity)
@@ -60,27 +54,12 @@ module PhComposer
       end
 
       def contents(entity)
-        if entity.is_a?(Sketchup::Group)
-          entity.entities
-        elsif entity.is_a?(Sketchup::ComponentInstance)
-          entity.definition.entities
-        end
+        LineGroups.contents(entity)
       end
 
-      # The record as stored when its text is a JSON object, as `[record, nil]`; `[nil, nil]` with none and
-      # `[nil, problem]` for anything else, which a read reports and a write refuses. It never raises for what is
-      # stored. `store` is the Group's or the Edge's.
+      # The record as stored (LineGroups.read); `store` is the Group's or the Edge's.
       def read(entity, store = STORE)
-        value = entity.get_attribute(store.dictionary, store.key)
-        return [nil, nil] if value.nil?
-        return [nil, "The #{store.dictionary} record is not JSON text."] unless value.is_a?(String)
-
-        record = store.read(entity)
-        record.is_a?(Hash) ? [record, nil] : [nil, "The #{store.dictionary} record is not a JSON object."]
-      rescue CodedError => error
-        raise unless error.code == "record.unreadable"
-
-        [nil, error.message]
+        LineGroups.read(entity, store)
       end
     end
   end

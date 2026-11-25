@@ -6,12 +6,9 @@ module PhComposer
     # directly in it, through Groups and components, once per placement; Zones answers only which group paths a Zone
     # holds. It opens no operation and writes nothing. A record that cannot be read is a row, never a raise.
     module Scan
-      # An unreadable record's message can quote stored text of any length; a row is cut here.
       MAX_MESSAGE = RecordQueries::MAX_MESSAGE
-      # One readable Piping group occurrence as the walk finds it: its root-to-Group path, record and name, the Edges
-      # directly in it carrying a pipe record, the transform mapping its contents to world, and whether another
-      # placement draws its storage.
-      Occurrence = Struct.new(:path, :record, :name, :edges, :transform, :shared, keyword_init: true)
+      # One readable Piping group occurrence as the walk finds it (LineGroups::Scan::Occurrence).
+      Occurrence = LineGroups::Scan::Occurrence
 
       module_function
 
@@ -62,37 +59,9 @@ module PhComposer
         [facts, unreadable.sort_by { |row| row.fetch("path") }]
       end
 
-      # Every readable Piping group occurrence, and the groups that cannot be read. Transforms compose from the root,
-      # so a context open or not gives world points (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit
-      # contexts").
+      # Every readable Piping group occurrence, and the groups that cannot be read (LineGroups::Scan.walk).
       def walk(model)
-        groups = []
-        unreadable = []
-        pending = [[model.entities, [], Geom::Transformation.new, false]]
-        until pending.empty?
-          entities, path, transform, shared = pending.shift
-          entities.each do |entity|
-            contents = Group.contents(entity)
-            next unless contents
-
-            current = path + [entity.persistent_id]
-            placed = transform * entity.transformation
-            inside = shared || shared?(entity)
-            read_group(entity, current, placed, inside, groups, unreadable) if Group.piping_group?(entity)
-            pending << [contents, current, placed, inside]
-          end
-        end
-        [groups, unreadable]
-      end
-
-      def read_group(entity, path, transform, shared, groups, unreadable)
-        record, problem = Group.read(entity)
-        problem ||= record && Group::RECORD_KIND.problems(record).first
-        return unreadable << row(path, problem) if problem
-
-        edges = entity.entities.select { |child| child.is_a?(Sketchup::Edge) && Assignment::STORE.marks?(child) }
-        groups << Occurrence.new(:path => path, :record => record, :name => entity.name.to_s, :edges => edges,
-                                 :transform => transform, :shared => shared)
+        LineGroups::Scan.walk(LINE_GROUP, model)
       end
 
       # One pipe as a fact, or nil with a row in `unreadable` for a record that is not a valid pipe assignment, a
@@ -118,18 +87,9 @@ module PhComposer
       end
 
       def row(path, problem)
-        { "path" => path, "code" => "record.unreadable", "message" => problem.to_s[0, MAX_MESSAGE] }
+        LineGroups::Scan.unreadable_row(path, problem)
       end
-
-      # Component storage, or a Group whose definition another Group shares: geometry every placement of it shows,
-      # counted per placement.
-      def shared?(entity)
-        return true if entity.is_a?(Sketchup::ComponentInstance)
-
-        definition = entity.respond_to?(:definition) ? entity.definition : nil
-        definition.respond_to?(:instances) && definition.instances.length > 1
-      end
-      private_class_method :read_group, :fact, :world_m, :row, :shared?
+      private_class_method :fact, :world_m, :row
     end
   end
 end

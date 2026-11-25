@@ -8,10 +8,10 @@
 #   type/           the Pipe Type kind, its operations and reads; names no Edge, group or run
 #   group/          the Piping group record on a Group, its reference target, create, link and the occurrence rows
 #   assignment/     the pipe record on an Edge, its reference target, assign, clear, the type rewrite and the selection
+#   line_group.rb   the spec the foundation's line_groups/ layer reads piping by
 #   runs/           pure Ruby: runs by the core chain rule, the tree, the recirculation sum, findings, the schedule and
 #                   the export's records
 #   scan/           the live read: one walk for Piping groups and their pipes, the schedule over it, its pages
-#   run_locate.rb   runs.locate, which selects a run's pipes through the foundation's context.open
 #   export.rb       the export contributor over the snapshot, which adds each System's pipes to its hot water
 #                   objects, and its preflight
 #   colour_modes.rb the Colour-by modes, pipes in their role's colour or their Pipe Type's
@@ -30,11 +30,10 @@ require_relative "type/operations"
 require_relative "type/reads"
 require_relative "group/schema"
 require_relative "group/reference_target"
-require_relative "group/steps"
 require_relative "group/operations"
 require_relative "assignment/schema"
+require_relative "line_group"
 require_relative "assignment/reference_target"
-require_relative "assignment/steps"
 require_relative "assignment/operations"
 require_relative "assignment/selection"
 require_relative "runs/tree"
@@ -44,7 +43,6 @@ require_relative "runs/schedule"
 require_relative "runs/extraction"
 require_relative "scan/occurrences"
 require_relative "scan/schedule_pages"
-require_relative "run_locate"
 require_relative "declarations/shapes"
 require_relative "declarations/pipe_types"
 require_relative "declarations/groups"
