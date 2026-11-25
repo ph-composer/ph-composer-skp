@@ -45,13 +45,15 @@ module PhComposer
       # (LineGroups::Scan.edges, which says what `zones` and `walked` do).
       def call(request, zones: true, walked: LineGroups::Scan.walk(LINE_GROUP, request.model))
         edges, unreadable = LineGroups::Scan.edges(LINE_GROUP, request, :zones => zones, :walked => walked)
-        facts = edges.map do |edge|
-          record = edge.record
-          Runs::Fact.new(:path => edge.path, :group => edge.group, :record_id => record.fetch("id"),
-                         :duct_type_id => record.fetch("duct_type_id"), :direction => record.fetch("direction"),
-                         :quantity => record.fetch("quantity"), :points_m => edge.points_m, :shared => edge.shared)
-        end
-        [facts, unreadable]
+        [edges.map { |edge| fact(edge) }, unreadable]
+      end
+
+      # One LineGroups::Scan::Edge, from the live walk or the export snapshot, as a Runs::Fact.
+      def fact(edge)
+        record = edge.record
+        Runs::Fact.new(:path => edge.path, :group => edge.group, :record_id => record.fetch("id"),
+                       :duct_type_id => record.fetch("duct_type_id"), :direction => record.fetch("direction"),
+                       :quantity => record.fetch("quantity"), :points_m => edge.points_m, :shared => edge.shared)
       end
     end
   end

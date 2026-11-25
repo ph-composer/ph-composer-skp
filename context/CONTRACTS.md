@@ -1459,6 +1459,11 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   serving no Zone has Mechanical's `mechanical.item_unserved` instead.
 - **`ph_composer.ducting.runs.locate`** (view command), as piping's: one run's or finding's `edge_paths` in one group
   occurrence, refusing `ducting.hidden` for a hidden duct, Group or tag.
+- **Export** `ph_composer.ducting.export.ducting` (`export.rb`, the pure `extraction.rb`; see "Translation sections and
+  artifacts") and its preflight `ph_composer.ducting.export_preflight`: the export's findings, a run's with
+  `runs.locate` params and a Ventilator's (`ducting.run_missing`, `ducting.ventilator_unexported`) with Mechanical's
+  Locate, each unreadable record and each metadata refusal. `ducting.ventilator_unexported`, a warning, names a
+  Ventilator whose Ducting groups hold ducts and which no exported Zone names, so its ducts go nowhere.
 
 ## This computer's settings file
 
@@ -2526,6 +2531,38 @@ recirculation temperature and hours); conformance reads each back from every rel
 identifier, lengths to 1 mm and hours exactly, and refuses a trunk or recirculation element the run did not report.
 PHX 1.59.4 reads them through a Room's Spaces, keyed by identifier, so a System on two Rooms gives each trunk,
 branch, twig and recirculation element once (`tests/python/test_piping_phx_round_trip.py`).
+
+ERV ducting is the second: `ph_composer.ducting.export.ducting` (Ruby `features/ducting/export.rb` and the pure
+`extraction.rb`, Python `ducting_sections.py`, record `contract/ducting_records.py`) `requires` the ventilation
+section and, in `translate`, appends each Ventilator's duct elements to every `PhVentilationSystem` that section
+built for it, through honeybee-ph's `add_supply_duct_element` and `add_exhaust_duct_element`, attaching nowhere. Its
+Ruby contributor `requires` the Zones section and the Ventilator section, whose projection says which Ventilators an
+exported Zone names. Both line-group features read their Edges from the snapshot through the layer's
+`LineGroups::ExportScan` (`context/EXTENSIBILITY.md`, "Line groups"), which also gives their preflights' unreadable,
+Locate and metadata rows. It writes one record per Ventilator whose Ducting groups hold ducts, `{id, ventilator_id,
+supply, exhaust, supply_length_m, exhaust_length_m}`: each element `{identifier, display_name, duct_type, segments}`,
+`duct_type` 1 for an Outdoor air run in `supply` and 2 for an Exhaust air run in `exhaust`, and each segment
+`{identifier, display_name, points_m, diameter_m, width_m, height_m, insulation_thickness_m,
+insulation_conductivity, insulation_reflective, user_data}`, the Duct Type's millimetres divided by 1,000 in Ruby. A
+round type writes its diameter and null width and height; a rectangular type its width and height and honeybee-ph's
+0.160 m diameter, which `shape_type` ignores; a bare type with no conductivity 0.04 W/(m K). The runs, identifiers
+and names are `ph_composer.ducting.schedule`'s. honeybee-ph 1.33.68's `PhDuctElement` has no quantity, so a run of
+quantity N is N elements: the first takes the run's identifier and name, copy k the identifier with `-k`, the name
+with "(k of N)" and its segments' identifiers the same suffix, so it exports the lengths and element count N copies
+of the Ducting group would, and the two lengths, each direction's, apply the quantity. A blocking finding refuses the section; the other findings,
+`ducting.run_missing` for a Ventilator an exported Zone names and `ducting.ventilator_unexported` for one with ducts
+that none names are notes, and a Model with no ducts notes nothing. A duct's `user_data` rides on its segment, every
+copy's; a Ducting group's and a Duct Type's are left out with `export.metadata_omitted`. honeybee-ph reloads two
+Rooms' ventilation systems sharing an identifier only when their dictionaries are equal, so Python builds every
+system's ducts from the same record before it appends any, never sharing an instance, elements and segments in
+identifier order (a system writes its elements as lists in the order appended, and segments as maps the canonical
+HBJSON sorts), and the section is required for export. Its result fields are `elements` (Ventilator, identifier,
+`duct_type`, segment count, length, shape, sizes and insulation) and `ventilators` (the system identifier, the Rooms reached and
+Ruby's two lengths); conformance refuses a system whose `supply_ducting` or `exhaust_ducting` holds an element of the
+other `duct_type`, reads each element back from every reloaded Room's system of that identifier, lengths and both
+`supply_ducting_total_length` and `exhaust_ducting_total_length` to 1 mm, and refuses an element the run did not
+report. PHX 1.59.4 builds one ventilation device per system key and keys ducts by identifier, each with its device's
+id number, so a Ventilator on two Rooms gives its ducts once (`tests/python/test_ducting_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
 and accumulated transform, with no live SketchUp objects. Its entries are Faces, Edges (world SI

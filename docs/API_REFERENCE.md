@@ -18171,6 +18171,128 @@ Example params:
 {}
 ```
 
+### `ph_composer.ducting.export_preflight`
+
+Ducting export checks: each run's findings with the ducts each one locates, each Ventilator missing a run or whose ducts no exported Zone takes, and each duct or Ducting group record that cannot be read. Owner: `ph_composer.ducting`.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.ducting.groups.all`
 
 Every Ducting group occurrence in one read. Owner: `ph_composer.ducting`.
@@ -130276,6 +130398,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `ducting.run_missing` | A Ventilator serving a Zone has no Outdoor air run or no Exhaust air run; METr assumes none. |
 | `ducting.shared_definition` | Ducts are reached through two placements of one Ducting group's storage, and both count. |
 | `ducting.type_missing` | A duct has no Duct Type, or names one that no longer exists, so it cannot export. |
+| `ducting.ventilator_unexported` | A Ventilator whose Ducting groups hold ducts serves no exported Zone, so its ducts are not exported. |
 
 ### `ph_composer.mechanical`
 
@@ -130632,3 +130755,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.104 | 2026-11-25 | ph_composer.ducting adds Ducting groups and ducts: the reference targets ph_composer.ducting.group and ph_composer.ducting.duct, groups.create, groups.link, groups.unlink, groups.list, groups.all, ducts.assign, ducts.clear, ducts.selection, ducts.selection_all and its snapshot section, with the codes ducting.outside_group, ducting.group_in_zone and ducting.group_nested. duct_types.delete moves or nulls the ducts using a type. A Ventilator delete with a replacement_id, or null, now also moves or clears every other feature's record naming it, through the registered reference retargeters. |
 | 1.105 | 2026-11-25 | ph_composer.piping.groups.create refuses session.inactive for a Model SketchUp is not showing and declares record.unreadable. piping.groups.all and groups.list rows give the write_refusal a link meets, a nested group or one a Zone holds included; pipes.clear checks every removed pipe id against its referrers; a pipe_types.delete with stale expected_values refuses target.changed first. |
 | 1.106 | 2026-11-25 | ph_composer.ducting adds the schedule: ph_composer.ducting.schedule (runs by Ducting group, direction, Duct Type and quantity, each Ventilator's two lengths and each Duct Type's used length, with compact), ph_composer.ducting.schedule.details, ph_composer.ducting.runs.members, ph_composer.ducting.ventilators and its snapshot section, and the view command ph_composer.ducting.runs.locate, with the codes ducting.type_missing, ducting.group_unlinked, ducting.run_missing, ducting.shared_definition and ducting.hidden. duct_types.list and duct_types.all rows add used_length_m. A duct's quantity is at most 10,000. |
+| 1.107 | 2026-11-25 | ph_composer.ducting exports its ducts: the export section ph_composer.ducting.export.ducting appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone takes. |

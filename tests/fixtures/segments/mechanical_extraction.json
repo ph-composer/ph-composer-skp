@@ -113,6 +113,10 @@
       ],
       "version": 1
     },
+    "ph_composer.ducting.export.ducting": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.mechanical.export.electric_heaters": {
       "records": [],
       "version": 1

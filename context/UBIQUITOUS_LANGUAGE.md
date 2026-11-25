@@ -236,7 +236,7 @@ terms are at the end, marked planned.
 | Direction | Which cold run a Duct belongs to: **Outdoor air** or **Exhaust air**. honeybee-ph's `duct_type` 1 (supply) and 2 (exhaust); "supply" is not used, since room supply air is another duct |
 | Outdoor air | The Direction of the intake run, from the outside to the ventilator |
 | Exhaust air | The Direction of the discharge run, from the ventilator to the outside |
-| Duct run | The Ducts of one Ducting group placement with one Direction, one Duct Type and one quantity, whether they touch or not |
+| Duct run | The Ducts of one Ducting group placement with one Direction, one Duct Type and one quantity, whether they touch or not. A run of quantity N exports as N duct elements |
 | Duct-Segment | honeybee-ph's duct segment, one per Duct at export, carrying the Duct Type's values in metres and the line as its geometry. Always written with its qualifier, as Pipe-Segment is |
 
 ## Export

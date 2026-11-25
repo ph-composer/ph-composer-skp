@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One feature owns ERV ducting, the two cold runs between each Ventilator and the outside: the Duct Type catalog, the
-# Ducting groups that hold drawn ducts and the assignment on each duct, and later their runs and their export into
+# Ducting groups that hold drawn ducts and the assignment on each duct, their runs and their export into
 # the Ventilator's ventilation system. It requires Mechanical, which owns the Ventilator and its export, and Zones;
 # no file of theirs, nor any other feature's, names it (context/EXTENSIBILITY.md, "Organization and dependencies").
 #
@@ -14,6 +14,8 @@
 #   findings.rb     pure Ruby: a run's findings and the Ventilators missing a run
 #   schedule.rb     pure Ruby: the schedule's rows and totals, and its pages
 #   scan.rb         the live read: the walk's ducts as facts, the schedule, the Ventilators' lengths and used length
+#   extraction.rb   pure Ruby: the export's findings and its records, one per Ventilator with ducts
+#   export.rb       the export contributor over the snapshot and its preflight over the live Model
 #   codes.rb        the `ducting` noun's codes
 #   declarations/   what the feature registers
 module PhComposer
@@ -37,6 +39,8 @@ require_relative "runs"
 require_relative "findings"
 require_relative "schedule"
 require_relative "scan"
+require_relative "extraction"
+require_relative "export"
 require_relative "declarations/duct_types"
 require_relative "declarations/groups"
 require_relative "declarations/ducts"
@@ -53,6 +57,7 @@ module PhComposer
       GroupRegistration.install(feature)
       DuctRegistration.install(feature)
       ScheduleRegistration.install(feature)
+      ExportProjection.install(feature)
       Codes.install(feature)
     end
   end

@@ -1400,6 +1400,18 @@ a Zone and has no run of a direction carries the warning `ducting.run_missing`.
 or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store
 one.
 
+The export appends each Ventilator's runs to the ventilation system of every Room it serves: each Outdoor
+air run as a supply duct element and each Exhaust air run as an exhaust one, one segment per line with
+its Duct Type's size and insulation in metres. honeybee-ph has no duct quantity, so a run of quantity 2
+exports as two identical elements, the second named "(2 of 2)", with the lengths and element count two
+copies of its Ducting group would give. A bare Duct Type with no conductivity exports 0.04 W/(m K).
+`ph_composer.ducting.export_preflight` lists what the export will say: every finding that blocks it and
+each warning, a run's with `locate` params for `ph_composer.ducting.runs.locate`, an unreadable record,
+`ducting.run_missing`, and `ducting.ventilator_unexported`, a warning, when no exported Zone takes the
+Ventilator, so its ducts go nowhere; a Ventilator's rows locate through `ph_composer.mechanical.locate`.
+A duct's `user_data` rides on its segment, each copy's too; a Ducting group's and a Duct Type's are left
+out with `export.metadata_omitted`.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

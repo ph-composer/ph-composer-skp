@@ -13,7 +13,7 @@ from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from . import JSONObject, RecordError, as_number, as_text, user_data
+from . import JSONObject, RecordError, as_number, as_text, bounded, user_data, whole
 from .mechanical_records import flag
 from .space_records import Point, mapping, rows
 from .thermal_bridge_records import point
@@ -22,24 +22,6 @@ from .thermal_bridge_records import point
 MATERIALS = range(1, 9)
 #: honeybee-ph's `PhHvacPipeInsulationQuality` numbers, 1 None to 3 Good.
 INSULATION_QUALITIES = range(1, 4)
-
-
-def whole(value: object, label: str, allowed: range | None = None, minimum: int | None = None) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise RecordError(f"{label} must be a whole number")
-    if allowed is not None and value not in allowed:
-        raise RecordError(f"{label} must be from {allowed.start} to {allowed.stop - 1}")
-    if minimum is not None and value < minimum:
-        raise RecordError(f"{label} must be at least {minimum}")
-    return value
-
-
-def bounded(value: object, label: str, low: float, high: float | None = None, above: bool = False) -> float:
-    number = as_number(value, label)
-    if number < low or (above and number == low) or (high is not None and number > high):
-        span = f"above {low}" if above else f"from {low} to {high}" if high is not None else f"at least {low}"
-        raise RecordError(f"{label} must be {span}")
-    return number
 
 
 @dataclass(frozen=True)

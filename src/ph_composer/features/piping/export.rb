@@ -75,65 +75,21 @@ module PhComposer
       end
 
       # Every pipe the snapshot holds directly inside a Piping group, as a Runs::Fact, and each pipe's user_data by
-      # path. A Piping group a Zone holds is `in_zone`, from the Zones section's occurrences. A pipe is `shared` when a
-      # ComponentInstance holds it or the snapshot reaches its Edge at two paths, as a pasted Piping group does: the
-      # live scan reads that from the Group's definition, which the snapshot does not keep. A record that cannot be read
-      # refuses the export, as the schedule's unreadable rows block it; an Edge outside every Piping group is not
-      # read, as the live scan does not read it.
+      # path, read through the line-group layer's snapshot read (LineGroups::ExportScan.edges), which says what is
+      # `in_zone` and `shared` and which records refuse the export.
       def facts(reader)
-        snapshot = reader.snapshot
-        groups = groups(reader)
-        pipes = snapshot.entries.filter_map do |entry|
-          next unless entry.kind == "edge" && groups.key?(entry.path[0...-1])
-
-          record = entry.record(Assignment::STORE.dictionary)
-          [entry, record] if record
-        end
-        reached = pipes.map { |entry, _record| entry.path.last }.tally
-        storage = snapshot.entries.select { |entry| entry.kind == "component_instance" }
-                          .to_h { |entry| [entry.path, true] }
-        user_data = {}
-        facts = pipes.map do |entry, record|
-          readable!(record, Assignment::RECORD_KIND, "pipe")
-          read = reader.entity_record(record, :fields => PIPE_FIELDS, :target_kind => PIPE_KIND, :user_data => true,
-                                              :path => entry.path)
-          user_data[entry.path] = read.fetch("user_data", {})
-          geometry = entry.geometry
+        zone_paths = reader.section(ZONES).map { |row| row.fetch("zone_path") }
+        edges, user_data = LineGroups::ExportScan.edges(LINE_GROUP, reader, :zone_paths => zone_paths,
+                                                                            :fields => PIPE_FIELDS)
+        facts = edges.map do |edge|
+          record = edge.record
           role = record.fetch("role")
-          Runs::Fact.new(:path => entry.path, :group => groups.fetch(entry.path[0...-1]),
-                         :record_id => record.fetch("id"), :pipe_type_id => record.fetch("pipe_type_id"),
-                         :role => role, :values => record.slice(*Assignment::ROLE_VALUES.fetch(role).keys),
-                         :points_m => geometry.points_m, :vertex_ids => geometry.vertex_ids,
-                         :shared => reached.fetch(entry.path.last) > 1 ||
-                                    (1...entry.path.length).any? { |length| storage.key?(entry.path[0, length]) })
+          Runs::Fact.new(:path => edge.path, :group => edge.group, :record_id => record.fetch("id"),
+                         :pipe_type_id => record.fetch("pipe_type_id"), :role => role,
+                         :values => record.slice(*Assignment::ROLE_VALUES.fetch(role).keys),
+                         :points_m => edge.points_m, :vertex_ids => edge.vertex_ids, :shared => edge.shared)
         end
         [facts, user_data]
-      end
-
-      # Each Piping group occurrence by path, detached as the live scan detaches it. This section is the source of a
-      # claim another contributor makes on a Piping group or a pipe, so each read passes its occurrence path and the
-      # claimed payload is captured for its claimant.
-      def groups(reader)
-        zone_paths = reader.section(ZONES).map { |row| row.fetch("zone_path") }
-        reader.snapshot.records(Group::STORE.dictionary, :kind => "group").to_h do |entry, record|
-          readable!(record, Group::RECORD_KIND, "Piping group")
-          reader.entity_record(record, :fields => %w[hot_water_system_id], :target_kind => GROUP_KIND,
-                                       :path => entry.path)
-          [entry.path, { "group_id" => record.fetch("id"), "group_path" => entry.path, "name" => entry.native_name,
-                         "hot_water_system_id" => record["hot_water_system_id"],
-                         "in_zone" => zone_paths.any? { |path| inside?(path, entry.path) } }]
-        end
-      end
-
-      def readable!(record, kind, noun)
-        problem = kind.problems(record).first
-        return unless problem
-
-        raise PhComposer::Export::Blocked.new("record.unreadable", "A #{noun} record cannot be read: #{problem}.")
-      end
-
-      def inside?(parent, path)
-        path.length > parent.length && path[0, parent.length] == parent
       end
 
       # The export's findings over the live Model, each with the code and object the export notes and the pipes it
@@ -143,10 +99,18 @@ module PhComposer
         walked = Scan.walk(request.model)
         groups = walked.first
         facts, unreadable = Scan.call(request, :walked => walked)
-        findings = unreadable_findings(unreadable, groups)
+        findings = LineGroups::ExportScan.unreadable_findings(LINE_GROUP, unreadable, groups)
         findings = run_findings(request, facts) + findings unless facts.empty?
-        rows = findings.map { |finding| preflight_row(finding) }
-        { "findings" => rows + metadata_findings(request, groups, :types => !facts.empty?), "repairs" => [] }
+        rows = findings.map do |finding|
+          LineGroups::ExportScan.preflight_row(SECTION, ScheduleRegistration::LOCATE, finding) do |found|
+            next unless found.fetch("code") == Codes::SYSTEM_UNEXPORTED
+
+            Mechanical::Locate.row_locate(found.fetch("object_id"), {})
+          end
+        end
+        metadata = LineGroups::ExportScan.metadata_findings(LINE_GROUP, request, SECTION, groups,
+                                                            :types => !facts.empty?)
+        { "findings" => rows + metadata, "repairs" => [] }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
                            "message" => error.message, "blocks_export" => true }], "repairs" => [] }
@@ -159,42 +123,6 @@ module PhComposer
                                   :types => Scan.records(request.engine, PIPE_TYPE_KIND),
                                   :systems => Scan.records(request.engine, Mechanical::HOT_WATER_SYSTEM_KIND),
                                   :exported => exported_systems(zones))
-      end
-
-      # The scan's unreadable rows as blocking findings. A pipe is read only inside a readable Piping group, so a row
-      # whose parent is one is a pipe, which runs.locate selects; any other is a Piping group.
-      def unreadable_findings(unreadable, groups)
-        group_paths = groups.map(&:path)
-        unreadable.map do |row|
-          path = row.fetch("path")
-          pipe = group_paths.include?(path[0...-1])
-          { "code" => row.fetch("code"), "object_id" => nil, "blocks_export" => true,
-            "message" => "A #{pipe ? 'pipe' : 'Piping group'} record cannot be read: #{row.fetch('message')}",
-            "locate" => pipe ? { "edge_paths" => [path] } : nil }
-        end
-      end
-
-      def preflight_row(finding)
-        row = { "code" => finding.fetch("code"), "section" => SECTION, "object_id" => finding.fetch("object_id"),
-                "message" => finding.fetch("message"), "blocks_export" => finding.fetch("blocks_export") }
-        if (locate = finding["locate"])
-          row.merge("locate" => { "name" => ScheduleRegistration::LOCATE, "params" => locate })
-        elsif finding.fetch("code") == Codes::SYSTEM_UNEXPORTED
-          row.merge("locate" => Mechanical::Locate.row_locate(finding.fetch("object_id"), {}))
-        else
-          row
-        end
-      end
-
-      # The metadata problems extraction refuses, read as `records` and `facts` read them: each Pipe Type and each
-      # Piping group, whose user_data are left out, and each pipe, whose user_data ride. Pipe Types only when there
-      # are pipes, as `records` reads them.
-      def metadata_findings(request, groups, types:)
-        check = PhComposer::Export::MetadataCheck
-        pipes = groups.flat_map(&:edges).uniq.filter_map { |edge| Group.read(edge, Assignment::STORE).first }
-        (types ? check.findings(request, check.definitions(request, PIPE_TYPE_KIND), :section => SECTION) : []) +
-          check.findings(request, groups.map(&:record), :section => SECTION, :target_kind => GROUP_KIND) +
-          check.findings(request, pipes, :section => SECTION, :target_kind => PIPE_KIND, :user_data => true)
       end
     end
   end

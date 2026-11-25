@@ -23,7 +23,7 @@ edge stages merged on 2026-10-26.
 
 ## Next step
 
-P4-14d in review (#586: duct runs, findings and the schedule); then P4-14e, the ducting export.
+P4-14d in review (#586: duct runs, findings and the schedule); P4-14e, the ducting export, in review (#PR); then P4-14f, the view.
 
 ## Blockers
 

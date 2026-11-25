@@ -1,7 +1,7 @@
 # P4-14e: ducting export
 
 DATE: 2026-11-24
-STATUS: Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-09, D4-25, D4-37 (Q4, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Export mapping". Scoped. The quantity bullet waits on Ed's answer to P4-14's quantity inference. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14e` runs in the MS3 sitting (D4-31).
+STATUS: In review (#PR); offline evidence in [p4-14e-ducting-export](../evidence/p4-14e-ducting-export.md), host case `M14e` owed to MS3; corrections recorded under "Recorded at implementation". Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-09, D4-25, D4-37 (Q4, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Export mapping". The quantity bullet was built as inferred, at the conductor's direction, and still waits on Ed's answer to P4-14's quantity inference. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14e` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -133,12 +133,39 @@ Paths are relative to `src/ph_composer/`.
 Batched into the `MS3` sitting (D4-31): case `M14e` on the installed RBZ and the reference model with the ERV ducting
 case: export, reload the exact HBJSON in the pinned honeybee stack and find each run under the right Room's
 ventilation system with its lengths in metres; delete ERV-2 with null and see the export refuse with
-`ducting.group_unlinked` and its Locate; save, reopen and re-export give the same HBJSON. Offline `make ci` and the PHX
+`ducting.group_unlinked` and its Locate, which opens DG-2 and selects that run's ducts; save, reopen and re-export give the same HBJSON. Offline `make ci` and the PHX
 round trip pass on this sub-stage's PR.
 
 ## Out of scope
 
 METr's duct list and `lassVU` (metr-export). Screens (P4-14f).
+
+## Recorded at implementation (2026-11-25)
+
+- **The snapshot read is the layer's.** Piping's export read the snapshot's group and Edge entries, decided
+  `in_zone` and `shared`, captured claims per occurrence and refused unreadable records itself; none of it names
+  piping. It moves to `line_groups/export_scan.rb` (`LineGroups::ExportScan.edges`), with the preflight's unreadable,
+  Locate and metadata rows, and both features call it with their spec. Piping's tests and goldens are unchanged but
+  for the empty ducting section every extraction golden gains.
+- **Python helpers moved down.** `whole` and `bounded` move from `contract/piping_records.py` to `contract/`, and
+  the result-row and length helpers from `piping_sections.py` to `conformance.py` (`result_rows`, `same_length`), so
+  ducting imports nothing of piping's.
+- **Notes only once ducts exist.** As piping's, a Model with no ducts writes no record, reads no Duct Type and notes
+  nothing, so a Model whose served Ventilators have no ducts gains no `ducting.run_missing` notes in its export; the
+  schedule still shows them.
+- **`ducting.run_missing` in the export** is noted for each existing Ventilator an exported Zone names, under the
+  Ventilator id, the served set read from the Ventilator section's ExportZones (export) and the live Serves read
+  (preflight), so the two agree. A Ventilator serving only a left-out Zone gets `ducting.ventilator_unexported`
+  instead.
+- **Result fields** carry each element's insulation beside its shape and sizes, and each Ventilator's
+  `system_identifier`, which conformance finds the reloaded Rooms by.
+- **Locate on `ducting.group_unlinked`** opens DG-2 and selects that run's ducts, as piping's group findings do
+  (conductor decision on P4-14d's question, 2026-11-25; D4-30, the shipped pattern). ACCEPTANCE's case row and
+  P4-14f's host case are worded to match. For Ed.
+- **The quantity bullet stands as inferred** (P4-14, "Inferred in planning"): a run of quantity N writes N elements,
+  and the copies' identifiers and names differ from N pasted groups', whose runs digest their own paths; lengths and
+  element counts agree. Still for Ed, with a consequence: a quantity is at most 10,000 (P4-14d), and every element is
+  written once per served Room, so a large quantity multiplies the HBJSON.
 
 ## Done when
 

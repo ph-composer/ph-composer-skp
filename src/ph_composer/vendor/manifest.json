@@ -906,14 +906,14 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 2062,
+      "bytes": 2129,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "2f6e093637f377269577793be6aa7b2c8520b9c99c46a0ac14d2ce59df8a40ce"
+      "sha256": "d4d531bdd34a0bc7fbef3d9b3a6b1f2c8f46393cb17ec37df2d08cd94ff9654f"
     },
     "python/ph_composer_translation/conformance.py": {
-      "bytes": 2658,
+      "bytes": 3346,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "75c0da2af7b3a437ef349eb7ca4c3162ff109e74e71de3b73718e326ee190330"
+      "sha256": "eba9e63414f2daa137825c65f56bde107f5acd020fca8680508235af9fea2d38"
     },
     "python/ph_composer_translation/constructions.py": {
       "bytes": 9144,
@@ -921,14 +921,19 @@
       "sha256": "bb9ebb913c75c4c958bfd0d9ac159733e1e13434838b04deeaa71ceea03f99a5"
     },
     "python/ph_composer_translation/contract/__init__.py": {
-      "bytes": 2490,
+      "bytes": 3410,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "73514ef467c81e4a83f31900380deeb29a8b2e2fe838360d506a0e9d75c591a7"
+      "sha256": "1d4ad570a1dc1c4691cc042636762e7b94b24c84ddc1af4d4b01788f5b0982fe"
     },
     "python/ph_composer_translation/contract/assembly_records.py": {
       "bytes": 8013,
       "mime": "text/plain; charset=utf-8",
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
+    },
+    "python/ph_composer_translation/contract/ducting_records.py": {
+      "bytes": 6258,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "d3c8ea8fd9885f3a10cc572a4829e4425b2d73e4a9e53b6013b9c25da2991845"
     },
     "python/ph_composer_translation/contract/mechanical_records.py": {
       "bytes": 20534,
@@ -936,9 +941,9 @@
       "sha256": "3dc0a67c9bcd0f0357c3fca8e8114eb32a7f06b2b78a60f698586f5728c612eb"
     },
     "python/ph_composer_translation/contract/piping_records.py": {
-      "bytes": 8517,
+      "bytes": 7613,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "0f9c6581eb0fc109466fb4d7adcc86876f82827d19e82cbc059dddb596c23df9"
+      "sha256": "c6f269df3e9c4e5ce3e4a2d29e76941757753543d85801fcf005a130be8d9dc8"
     },
     "python/ph_composer_translation/contract/shade_records.py": {
       "bytes": 1522,
@@ -964,6 +969,11 @@
       "bytes": 8937,
       "mime": "text/plain; charset=utf-8",
       "sha256": "bdaaa2fa178b5a81ee8e17a51b3f1547917b045da94b977a152062fdad2f66e3"
+    },
+    "python/ph_composer_translation/ducting_sections.py": {
+      "bytes": 12118,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "a0defe356e62b09ba2707c69308d3892057638f287879c27ac8afbc6056bfdba"
     },
     "python/ph_composer_translation/entry.py": {
       "bytes": 3074,
@@ -1001,9 +1011,9 @@
       "sha256": "9910a7df68b6a17c3af52a24e56b6519465ed5734231b4305d4a7b601c1c3538"
     },
     "python/ph_composer_translation/piping_sections.py": {
-      "bytes": 13775,
+      "bytes": 13379,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "d1bbe2cc5cb2bf55be2c3ffd25dbde0b9f10f08f5b7dd3570f59cf5ecf9760a7"
+      "sha256": "f2acd7636c34c99ed00bf31dcdd1bf5057b4224abd1ac0d20320b1d473de147b"
     },
     "python/ph_composer_translation/program_sections.py": {
       "bytes": 31552,
@@ -1257,6 +1267,7 @@
     "python/ph_composer_translation/constructions.py",
     "python/ph_composer_translation/contract/__init__.py",
     "python/ph_composer_translation/contract/assembly_records.py",
+    "python/ph_composer_translation/contract/ducting_records.py",
     "python/ph_composer_translation/contract/mechanical_records.py",
     "python/ph_composer_translation/contract/piping_records.py",
     "python/ph_composer_translation/contract/shade_records.py",
@@ -1264,6 +1275,7 @@
     "python/ph_composer_translation/contract/thermal_bridge_records.py",
     "python/ph_composer_translation/contract/window_records.py",
     "python/ph_composer_translation/coordinator.py",
+    "python/ph_composer_translation/ducting_sections.py",
     "python/ph_composer_translation/entry.py",
     "python/ph_composer_translation/exporters.py",
     "python/ph_composer_translation/material_sources.py",

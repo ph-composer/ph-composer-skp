@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from typing import Any, TypeVar
 
 from . import stack
+from .conformance import result_rows, same_length
 from .contract import JSONValue, RecordError
 from .contract.piping_records import (
     PipeBranchValues,
@@ -40,8 +41,6 @@ from .sections import Inputs, Requirement, Section
 
 PIPING_SECTION_ID = "ph_composer.piping.export.piping"
 HOT_WATER = Requirement(HOT_WATER_SECTION_ID, TranslatedHotWater)
-#: Drawn lengths read back to the millimetre.
-LENGTH_TOLERANCE_M = 0.001
 
 T = TypeVar("T")
 
@@ -184,9 +183,9 @@ class PipingSection(Section[PipingRecord, TranslatedPiping]):
         for room in model.rooms:
             if (system := room.properties.ph_hvac.hot_water_system) is not None:
                 held.setdefault(system.identifier, []).append(system)
-        trunk_rows = rows(fields, "trunks")
-        recirculation_rows = rows(fields, "recirculation")
-        for row in rows(fields, "systems"):
+        trunk_rows = result_rows(fields, "trunks")
+        recirculation_rows = result_rows(fields, "recirculation")
+        for row in result_rows(fields, "systems"):
             found = held.get(str(row.get("system_id")), [])
             if len(found) != row.get("room_count"):
                 raise ValueError(
@@ -228,15 +227,6 @@ def trunk_row(system_id: str, built: Any) -> dict[str, JSONValue]:
 
 def twig_counts(built: Any) -> list[JSONValue]:
     return [part.num_fixtures for part in sorted(built.branches, key=lambda item: item.identifier)]
-
-
-def rows(fields: Mapping[str, JSONValue], key: str) -> list[dict[str, JSONValue]]:
-    reported = fields.get(key)
-    return [row for row in (reported if isinstance(reported, list) else []) if isinstance(row, dict)]
-
-
-def same_length(value: JSONValue, length: float) -> bool:
-    return isinstance(value, (int, float)) and math.isclose(value, length, rel_tol=0.0, abs_tol=LENGTH_TOLERANCE_M)
 
 
 def check_recirculation(system: Any, row: Mapping[str, JSONValue]) -> None:
