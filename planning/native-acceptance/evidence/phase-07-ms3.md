@@ -1,10 +1,7 @@
 # Phase 7 MS3 host sitting, the part needing no full-screen card
 
 DATE: 2026-11-25
-STATUS: Recorded in part. M13a, M14a, M13d, M14d, M14e, T04 and T08 pass. M13b and M14c fail: creating a Piping or
-Ducting group crashes SketchUp. The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass
-and M08, M10 and M16 unknown on named clauses. M13c stays unknown: T09 now passes, but the `groups.create` fix
-stales it. M13e, M14f and M15 not run; they and the reruns the fix requires are owed to the second hold.
+STATUS: Recorded in part. M13a, M14a, T04 and T08 pass (2026-11-25). The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass and M08, M10 and M16 unknown on named clauses. After the `groups.make` fix (#600), M13c, M13d, M14d and M14e were rerun with the panel closed and pass on the fixed build (2026-11-26). M13b and M14c still carry their crash fail; with M13e, M14f and M15 they are staged for the second hold.
 ISSUE: #562
 
 Synthetic summary of the MS3 sitting (D4-31) for [Phase 7 Mechanical](../../features/phase-07-mechanical/ACCEPTANCE.md):
@@ -53,21 +50,21 @@ feature's own group store. A fix to the create step stales M13d, M14d and M14e.
 | --- | --- | --- |
 | `M13a` | pass | walkthrough-registered-actions, native-undo-redo-five-steps, save-reopen-catalog-ids |
 | `M14a` | pass | the same three, the Undo of the shape change bringing the 160 mm diameter back |
-| `M13d` | pass | preflight-empty, export-reload-hot-water, branch-unconnected-refuses-locate-undo, save-reopen-reexport-same |
-| `M14d` | pass | schedule-hand-measurement, run-missing-erv1, locate-wrapped-and-hidden, save-reopen-same-identifiers, measurement-50000-edges |
-| `M14e` | pass | preflight-empty, export-reload-ventilation, shared-case-equal-identifiers, delete-erv2-null-refuses-locate-undo, save-reopen-reexport-same |
+| `M13d` | pass (rerun on 55a1f8f7, 2026-11-26) | preflight-empty, export-reload-hot-water, branch-unconnected-refuses-locate-undo, save-reopen-reexport-same |
+| `M14d` | pass (rerun on 55a1f8f7, 2026-11-26) | schedule-hand-measurement, run-missing-erv1, locate-wrapped-and-hidden, save-reopen-same-identifiers, measurement-50000-edges |
+| `M14e` | pass (rerun on 55a1f8f7, 2026-11-26) | preflight-empty, export-reload-ventilation, shared-case-equal-identifiers, delete-erv2-null-refuses-locate-undo, save-reopen-reexport-same |
 | `T04` | pass | hand-calculation, open-context, counted-twice-undo, outside-zone, locate-nested, measurement |
 | `T08` | pass | export-readback, metadata-guard, save-reopen-reexport, outside-zone-disclosed, warnings-preflight-report, blocking-keeps-prior-pair, forced-refusal, required-refusal-withholds, snapshot-measure |
 | `M13b` | fail | h1-create-empty-group-active fail; h4-assign-clear-one-undo, h4-paste-shared-refuses-until-unique, hws-delete-retargets-one-undo pass; h2-line-tool-in-group, h3-split-tee-copied-record unknown |
 | `M14c` | fail | create-linked-group-active fail; assign-quantity-clear-one-undo, paste-shared-keeps-link-refuses-until-unique, erv-delete-retargets-group-and-zone-one-undo pass; line-tool-in-group unknown |
-| `M13c` | unknown | schedule-hand-measurement, branch-unconnected-floor2, locate-into-wrapped-group, save-reopen-same-identifiers, measurement-50000-edges pass; thermal-bridge-repeats unknown (T09 owed when recorded; T09 has since passed, M13c not re-finished) |
+| `M13c` | pass (rerun on 55a1f8f7, 2026-11-26) | schedule-hand-measurement, branch-unconnected-floor2, locate-into-wrapped-group, save-reopen-same-identifiers, measurement-50000-edges, thermal-bridge-repeats |
 | `M09` | pass (hold, 2026-11-26) | all 13 |
 | `M11` | pass (hold, 2026-11-26) | all 14 |
 | `T09` | pass (hold, 2026-11-26) | all 10 |
 | `M08` | unknown (hold, 2026-11-26) | 12 pass; heating-cooling-data, blended-copy unknown |
 | `M10` | unknown (hold, 2026-11-26) | 13 pass; save-reopen-reexport unknown (list order only) |
 | `M16` | unknown (hold, 2026-11-26) | 6 pass; dialog-defaults unknown (68 °F under IP unchecked) |
-| `M13e`, `M14f` | ready for hold | not begun; they start from `groups.create` |
+| `M13e`, `M14f` | ready for hold | not begun; staged for the second hold on `groups.make` |
 
 ### Fixtures
 
@@ -323,11 +320,44 @@ Product observations, none blocking a clause; MS2's evidence lists those from M0
 
 ### Owed to the second hold
 
-After the `groups.create` fix: M13b, M13c (stale with the fix, though T09 now passes), M13d, M13e, M14c, M14d, M14e,
-M14f and M15, and MS2's eleven Zone views repeats (ZO-H1, ZO-H2, ZO-H3, ZO-O7, PTAB, HGUI, UXR-SOLVE, UXR-FILTER,
-UXR-HATCH, UXR-PAINT, UXR-COLOUR). M13d, M14d and M14e are Pass today and go stale only when the fix lands. The
-unknown clauses of M05, M07, M08 and M16 need a rerun, not yet assigned to a sitting; M10's waits on p4-15
-decision 3.
+After the `groups.create` fix: M13b, M13e, M14c, M14f and M15, and MS2's eleven Zone views repeats (ZO-H1, ZO-H2,
+ZO-H3, ZO-O7, PTAB, HGUI, UXR-SOLVE, UXR-FILTER, UXR-HATCH, UXR-PAINT, UXR-COLOUR). M13c, M13d, M14d and M14e were
+rerun before it (below). The unknown clauses of M05, M07, M08 and M16 need a rerun, not yet assigned to a sitting;
+M10's waits on p4-15 decision 3.
+
+## The second hold's preparation, 2026-11-26
+
+No full-screen control. After #600 replaced `groups.create` with `groups.make` (wrap selected loose lines in a new
+group in one Undo step), the line-group cases the fix stales were rerun with the panel closed, and the rest staged.
+
+- Build: `main` at `55a1f8f7`. `make rbz && make install && make bridge-install`; `dist/ph_composer.rbz` sha256
+  `5801c44522f735652f005e8e09ca019484b65c78550458bced34918cbf70fda0`, 9,101,323 bytes (27,957,539 installed);
+  `acceptance_run.py package` matches, 878 entries, no extras. SketchUp 26.1.188, Ruby 3.2.2, macOS. Same control
+  route as above.
+- M13c, M13d, M14d, M14e: pass. Each driver ran whole on the same fixtures (groups written by labelled setup, as on
+  2026-11-25) in fresh processes, and every recorded output equals the earlier run's. M13c's thermal-bridge repeat
+  is now complete: T04 and T08 passed in this sitting and T09 in the first hold, and the ledger screens all three
+  as unchanged in source. The 50,000 Edge measurements, rerun: piping schedule 81.8 ms, systems 75.2 ms, Pipe Types
+  73.1 ms; ducting Ventilators 15.5 ms, Duct Types 13.5 ms, the on-request schedule 350.8 ms (330.8 ms of it
+  `mechanical.ventilators.all`).
+- `groups.make`, rehearsed as development setup and recorded in no case: for both kinds it wraps Ruby-drawn loose
+  lines with their persistent ids kept and the edit path unchanged, in one step, "Make Piping Group" or "Make Ducting
+  Group", that native Edit > Undo and Redo restore exactly. `make_refusal` and the action refuse an Edge that bounds
+  a Face (`target.wrong_kind`) and lines in an open Zone (`piping.group_in_zone`). The new Group's origin sits at
+  the lines' bounds minimum, so a closed group's Edges read in local coordinates.
+- Staged for the hold, with drivers rehearsed end to end on Ruby lines standing in for the Line tool: M13b and M14c
+  (whole cases, their H1 assertion split into the make and its refusals), M13e and M14f (new fixtures with the
+  ACCEPTANCE lines loose at the root, one run drawn natively), and M15 (a fixture with M08's climate and an ordered
+  recipe; nothing of it ran). Coordinates for the changed Piping and Ducting bars and the Make dialogs were measured
+  on this build.
+- The eleven Zone views repeats (MS2's run directory) have complete recipes now. Since their last runs (2026-10-16
+  to 2026-10-18), Building Segments moved from a dialog to heading rows (P4a-02), Faces became the Geometry subtab,
+  filtered-out Faces lost their wash, and the window defaults gained a psi-value control with "Model value" in
+  place of "None". The recipes run the affected clauses on the current surfaces and name each one for the
+  conductor. ZO-O7's last row is a fail on #181, which #275 fixed by naming the remedies that work; a bridge check on
+  2026-10-20 passed but recorded no row, so the fail stands until the hold.
+- `acceptance_ledger.py status` on `55a1f8f7` also screens M09, M10, M11, M13a and M14a for recheck, through #600's
+  shared paths.
 
 ## Ready for hold
 
@@ -347,13 +377,13 @@ it. M13b and M14c need a whole-case rerun after the fix, not a Line-tool-only ru
 
 ## Open
 
-- The `groups.create` crash (above): a product defect, for a fix and a test before any line-group host case
-  closes.
+- The `groups.create` crash (above): fixed by #600 (`groups.make`, with tests); its host cases M13b and M14c are
+  owed to the second hold.
 - Ed's reading of T04 and T08 under WT-23 (labels still say counted twice), and p4-15 decision 3 (section or whole
   file) for M13d and M14e, and from the first hold for M08, M09, M11 and M16 (compared by section) and M10 (list
   order only).
 - The hold's product findings (above), for issues if Ed wants them.
-- The second hold (above).
+- The second hold (above): M13b, M13e, M14c, M14f, M15 and MS2's eleven Zone views repeats.
 - ACCEPTANCE's piping case: 17 Edges as written, 18 on the host.
 - The whole-panel snapshot at 50,040 Edges: 31.0 s against 12.1 s in October.
 
