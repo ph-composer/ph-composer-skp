@@ -1389,11 +1389,12 @@ Edge names (its kind, field and label) and the query answering which Zone holds 
 | --- | --- |
 | `GroupTarget` | Every group occurrence by root-to-Group path, through Groups and components, once per placement; `along!`, the strict `locate` and the nested and write refusals |
 | `EdgeTarget` | Edge records directly in a group by root-to-Edge path; refuses an Edge outside one with the feature's code |
-| `CreateStep`, `GroupWriteStep`, `EdgeWriteStep` | Create an empty group at the root with its record and open it; rewrite group records; write and clear Edge records, each one operation |
-| `GroupOperations` | `create` (refusing a Model SketchUp is not showing), `link` and unlink, the retarget a linked record's delete runs, the Zone containment read, and the occurrence rows with their placement findings and the `write_refusal` link meets |
+| `MakeStep`, `GroupWriteStep`, `EdgeWriteStep` | Wrap loose lines in a new group with its record where they are drawn, leaving the edit path (SketchUp deletes a Group left empty at commit, so none starts empty); rewrite group records; write and clear Edge records, each one operation |
+| `Make` | The rule `make` and the selection read share: the paths' Edges in one collection, then what wrapping them meets, as `{ code, message }` or nil (a non-Edge, a Face's Edge, lines outside the open context, inside a group of its kind, a Group another feature claims or a Zone, or behind a write refusal) |
+| `GroupOperations` | `make` (loose lines by root-to-Edge path, up to the feature's gesture limit), `link` and unlink, the retarget a linked record's delete runs, the Zone containment read, and the occurrence rows with their placement findings and the `write_refusal` link meets |
 | `EdgeOperations` | `clear`, checking every removed id against its referrers; `delete_type` with the rewrite of every Edge naming the type, a stale type refusing first; and the `resolve`, `update` and `propose` a feature's own assign builds on |
 | `Scan.walk`, `Scan.edges` | Each readable occurrence's path, record, name, direct assigned Edges, transform and `shared`, and the unreadable groups as rows; `edges` detaches each readable assignment with its group, world points in metres and vertex ids, an unreadable one a row, and asks the containment query which groups a Zone holds |
-| `Selection` | The native selection under the active path as Edge references, with ignored entities counted; the caller passes its gesture limit and Zones' containment |
+| `Selection` | The native selection under the active path as Edge references, with ignored entities counted and `make_refusal`, what `make` over it meets; the caller passes its gesture limit and Zones' containment |
 | `SchedulePages` | A schedule a bounded page at a time; the feature supplies its query names, detail lists, count keys, name fields and its whole-schedule read |
 | `Locate` | Select a run's Edges and frame them, opening the group through `ph_composer.context.open` |
 | `ScheduleShapes` | The schemas a schedule's run rows share (the Edge paths, findings, compact counts), the unreadable row, and the members query, the panel's whole `schedule.all` read (`install_all`) and `runs.locate` registrations, worded by the spec's Edge noun |
@@ -1409,11 +1410,11 @@ rule in `core/edge_runs.rb`.
 The panel has the same layer, `html/line_groups/`, which names no feature either. A feature's screens describe it
 once as a plain spec (its prefix, its group and Edge words, its type label, its selection section and the linked
 record's key, label and section; `line_groups/shared.js`), and `line_groups/pill.js` builds the pill from it: the
-one read of `schedule.all` and `groups.all`, the groups with their linked record chosen in place and New <group>, and
+one read of `schedule.all` and `groups.all`, the groups with their linked record chosen in place and Make <group>, and
 the schedule with Locate, findings, totals and "Not in the schedule" (`line_groups/schedule.js`), given the feature's
 columns, words and totals. The feature's assign bar inherits `line_groups/assign_bar.js`'s frame (the selection
-count, the type, Assign with its reason, Clear and New <group>) and adds its own values (`features/piping/` and
-`features/ducting/`).
+count, the type, Assign with its reason, Clear and Make <group> with the selection read's `make_refusal` beside it)
+and adds its own values (`features/piping/` and `features/ducting/`).
 
 ## Scripting as an entry point
 

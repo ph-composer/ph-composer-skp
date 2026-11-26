@@ -130,10 +130,25 @@ module Sketchup
       true
     end
 
+    # A Group `add_group` made empty inside the open operation, which the commit erases if it is still empty.
+    def note_empty_group(group)
+      (@empty_groups ||= []) << group if @current_operation
+    end
+
+    # SketchUp 26.1.188 deletes a Group left empty at the commit of the operation that made it
+    # (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group").
+    def erase_empty_groups
+      Array(@empty_groups).each do |group|
+        group.parent_entities&.delete(group) if group.entities.to_a.empty?
+      end
+      @empty_groups = nil
+    end
+
     def commit_operation
       return false unless @current_operation
 
       operation = @current_operation
+      erase_empty_groups
       @undo_stack << operation.snapshot unless operation.transparent && @undo_stack.any?
       @redo_stack.clear unless operation.transparent
       @operations << [operation.name, operation.disable_ui, :committed]
@@ -150,6 +165,7 @@ module Sketchup
       return false unless @current_operation
 
       operation = @current_operation
+      @empty_groups = nil
       restore_transaction_snapshot(operation.snapshot)
       @operations << [operation.name, operation.disable_ui, :aborted]
       @current_operation = nil

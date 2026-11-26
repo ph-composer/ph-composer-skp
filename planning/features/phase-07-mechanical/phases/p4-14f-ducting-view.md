@@ -10,7 +10,8 @@ ISSUE: #562
 Requires P4-14e. Owns the screen and the viewport:
 
 - Two pills under Ventilation on the Mechanical tab, after Ventilators: `Duct Types` and `Ducting` (D4-13).
-- The assign bar: Duct Type, direction and quantity over the native selection, and New Ducting group.
+- The assign bar: Duct Type, direction and quantity over the native selection, and Make Ducting group (was New Ducting
+  group; 2026-11-26).
 - The schedule table with its totals, findings and Locate, and the line saying which ducts are drawn (Q1).
 - The Ventilators table's `Outdoor air duct` and `Exhaust air duct` columns, contributed by ducting (Q9).
 - Two Colour-by modes, by direction and by Duct Type, with the stroke weight and a legend with lengths.
@@ -50,6 +51,8 @@ Paths are relative to `src/ph_composer/`.
 - **The bar** offers the two directions as a segmented choice in the kit's pattern, the Duct Types as a select and the
   quantity as an integer cell (1 by default); Assign sends `ducts.assign` with the selection's references and their
   `expected_values`; Clear sends `ducts.clear`. New Ducting group asks for a Ventilator and calls `groups.create`.
+  Superseded 2026-11-26 (issue #598): Make Ducting group, as piping's (P4-13e), calls `groups.make` with the selected
+  loose lines' paths.
 - **The Ventilators columns** read the `ducting_ventilators` snapshot section where P4-14d registered it, otherwise the
   schedule's `ventilators` rows, fetched when the Ventilation subtab opens and on Refresh; a Ventilator with no run of
   a direction shows a dash. Their headers follow the unit preference.
@@ -103,8 +106,9 @@ Paths are relative to `src/ph_composer/`.
 ## Host gate (`M14f`, MS3 sitting, D4-31)
 
 Fresh process, the installed RBZ, Ed at the mouse, the PRD's acceptance shape on the reference model with the
-[ERV ducting case](../ACCEPTANCE.md#erv-ducting-case-p4-14): one Round and one Rectangular Duct Type; New Ducting group
-linked to ERV-1 opens for the Line tool; an Outdoor air and an Exhaust air run per Ventilator drawn and assigned from
+[ERV ducting case](../ACCEPTANCE.md#erv-ducting-case-p4-14): one Round and one Rectangular Duct Type; the runs drawn
+loose with the Line tool, selected, and Make Ducting group linked to ERV-1 wraps them (was: New Ducting group opens for
+the Line tool; 2026-11-26); an Outdoor air and an Exhaust air run per Ventilator drawn and assigned from
 the bar, one Undo step each, ERV-2's Exhaust air at quantity 2; the schedule's lengths match hand measurement and the
 Ventilators columns read them; delete ERV-2 with null and read `ducting.group_unlinked`, whose Locate opens the
 group and selects that run's ducts (P4-14e, "Recorded at implementation"); both Colour-by modes with their legend lengths; save and reopen; the panel at 1280 x 800, 420 px and 360 x 520;

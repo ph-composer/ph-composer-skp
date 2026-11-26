@@ -1,9 +1,9 @@
 /* Hot Water's piping pills in the preview: Pipe Types after Tanks with the nominal diameters, an edit in place and
    used length; the Piping pill's assign bar showing only the chosen role's values, Assign with the selection's
-   references, Assign by clicking pressed while the tool runs, the Piping groups linked in place and New Piping group;
-   the schedule with each branch under its trunk, a finding behind its glyph, totals by role and by System, and a row
-   that Locates; By pipe role from the Role header; and the Systems table's recirculation columns contributed by
-   piping; each at the panel's three sizes. Browser evidence; not host acceptance. */
+   references, Assign by clicking pressed while the tool runs, the Piping groups linked in place and Make Piping
+   group from loose lines; the schedule with each branch under its trunk, a finding behind its glyph, totals by role
+   and by System, and a row that Locates; By pipe role from the Role header; and the Systems table's recirculation
+   columns contributed by piping; each at the panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -89,18 +89,30 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
   await bar.getByRole("button", { name: "Stop assigning pipes by clicking" }).click();
   await bar.getByRole("button", { name: "Assign by clicking lines", pressed: false }).waitFor();
 
-  step("the Piping groups: a System chosen in place, and New Piping group");
+  step("the Piping groups: a System chosen in place, and Make Piping group from loose lines");
   const groups = piping.locator(".line-group-groups");
   await groups.locator("[data-row-key='520']").waitFor();
   assert.match(await groups.locator("[data-row-key='520'] .col-note").textContent(), /Link it to a Hot Water/);
   await groups.locator("[data-row-key='520'] .col-link select").selectOption(DHW1);
   await page.waitForFunction(() => window.previewHost.piping.groups[2].values.hot_water_system_id !== null);
-  await bar.getByRole("button", { name: "+ New Piping group" }).click();
-  const dialog = page.getByRole("dialog", { name: "New Piping group" });
+  const make = bar.getByRole("button", { name: "Make Piping group from selected lines" });
+  assert.equal(await make.isDisabled(), true, "lines already in a Piping group cannot make one");
+  await bar.getByRole("button", { name: "Why Make Piping group is unavailable" }).waitFor();
+  await host(`(() => {
+    window.previewHost.piping.selected = [801, 802].map(id => ({ path: [id], reference: null, group: null,
+      reason: "outside_group", values: {}, copied: false, record_problem: null, write_refusal: null }));
+    window.previewHost.snapshot();
+  })()`);
+  await bar.getByText("2 lines selected, 0 assignable").waitFor();
+  await make.click();
+  const dialog = page.getByRole("dialog", { name: "Make Piping group" });
+  await dialog.getByText("2 selected lines move into the new group where they are drawn.", { exact: false }).waitFor();
   await dialog.getByLabel("Hot Water System").selectOption(DHW1);
-  await dialog.getByRole("button", { name: "Create and open" }).click();
+  await dialog.getByRole("button", { name: "Make Piping group", exact: true }).click();
   await dialog.waitFor({ state: "hidden" });
-  assert.equal((await sent(PREFIX + "groups.create")).length, 1);
+  assert.deepEqual((await sent(PREFIX + "groups.make")).pop().payload.params,
+    { edge_paths: [[801], [802]], hot_water_system_id: DHW1 });
+  await bar.getByText("No lines selected").waitFor();
 
   step("the schedule: branches under their trunk, a finding, totals, and a row that Locates");
   const schedule = piping.locator(".line-group-schedule");

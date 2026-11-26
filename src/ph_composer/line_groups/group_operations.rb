@@ -2,7 +2,7 @@
 
 module PhComposer
   module LineGroups
-    # Create, link and unlink a feature's line groups, the retarget its linked record's delete asks for, and the
+    # Make, link and unlink a feature's line groups, the retarget its linked record's delete asks for, and the
     # occurrence rows the reads return. A write resolves every Group before proposing anything and refuses the whole
     # command if one is stale, unwritable or misplaced; the dispatcher owns the native operation.
     module GroupOperations
@@ -12,15 +12,26 @@ module PhComposer
 
       module_function
 
-      # One empty Group at the Model root carrying a new record naming `link_id`, opened for drawing. Opening it moves
-      # the edit path, which SketchUp does only in the Model it shows (EditContext.shown!).
-      def create(spec, request, proposal, link_id)
-        EditContext.shown!(request.model)
+      # A new group, where the lines `edge_paths` name are drawn, wrapping them, with a new record naming `link_id`
+      # (Make). The edit path stays where it is. `limit` is the feature's Edge gesture limit.
+      def make(spec, request, proposal, edge_paths, link_id, limit:)
+        paths = edge_paths.uniq
+        if paths.length > limit
+          raise CodedError.new("gesture.too_large", "Make a #{spec.label} from at most #{limit} lines; " \
+                                                    "#{paths.length} are named.")
+        end
+
         request.engine.find(spec.link_kind, link_id)
+        containers, edges = Make.resolve!(spec, request.model, paths)
+        refusal = Make.refusal(spec, request.model, containers, edges,
+                               :contained => ->(rows) { contained(spec, request, rows) })
+        GroupTarget.raise_refusal(refusal)
         id = Records::Identity.allocator(request, request.params).call(spec.group_record_kind.id_prefix)
         record = spec.validate_group!(spec.new_group(id, link_id))
-        proposal.add_step(CreateStep.new(:spec => spec, :record => record),
-                          :scopes => [PhComposer::Operations::EntityScope.new([])])
+        parent_path = containers.map(&:persistent_id)
+        proposal.add_step(MakeStep.new(:spec => spec, :record => record, :parent_path => parent_path,
+                                       :edge_ids => edges.map(&:persistent_id)),
+                          :scopes => [PhComposer::Operations::EntityScope.new(parent_path)])
         { "group_id" => id }
       end
 

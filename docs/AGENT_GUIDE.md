@@ -1263,9 +1263,15 @@ pipes with no type, which blocks their export. A pipe the delete cannot rewrite 
 or behind a locked or shared Group) refuses the whole delete. Each is one Undo step. Write a type's
 `user_data` with `ph_composer.records.update_metadata`.
 
-A Piping group is a SketchUp Group that holds pipes and names the Hot Water System they serve. Create one
-with `ph_composer.piping.groups.create`, giving `hot_water_system_id`: it adds an empty Group at the Model
-root and opens it, so the lines drawn next land inside it, in one Undo step; read its `group_id`. Read
+A Piping group is a SketchUp Group that holds pipes and names the Hot Water System they serve. Ask the
+user to draw the pipes as loose lines with the Line tool, outside every Zone, and select them. Read
+`ph_composer.piping.pipes.selection`: its `make_refusal` is null when the selected lines can become a group, or
+says what to select instead. Then `ph_composer.piping.groups.make` with `edge_paths`, every row's `path`, and
+`hot_water_system_id`: it wraps the lines in a new Group where they are drawn, in one Undo step, and the lines
+keep their ids and attributes; read its `group_id`. It leaves the edit path as it was, so open the group with
+`ph_composer.context.open` before selecting its lines to assign them. A line bounding a Face, a line already in
+a Piping group or another feature's Group, or lines in two Groups are refused. The user draws more pipes into
+a group by opening it (double-click) and drawing there. Read
 `ph_composer.piping.groups.list`, a bounded page at a time, for every group with its `values`
 (`hot_water_system_id`, null while unlinked), `pipe_count`, `copied` (a pasted copy, which shares
 storage), `findings` and `write_refusal` (a pasted copy refuses writes until made unique; a misplaced
@@ -1360,9 +1366,15 @@ ducts with no type, which blocks their export. A duct the delete cannot rewrite 
 or behind a locked or shared Group) refuses the whole delete. Each is one Undo step. Write a type's
 `user_data` with `ph_composer.records.update_metadata`.
 
-A Ducting group is a SketchUp Group that holds ducts and names the Ventilator they belong to. Create one
-with `ph_composer.ducting.groups.create`, giving `ventilator_id`: it adds an empty Group at the Model
-root and opens it, so the lines drawn next land inside it, in one Undo step; read its `group_id`. Read
+A Ducting group is a SketchUp Group that holds ducts and names the Ventilator they belong to. Ask the
+user to draw the ducts as loose lines with the Line tool, outside every Zone, and select them. Read
+`ph_composer.ducting.ducts.selection`: its `make_refusal` is null when the selected lines can become a group, or
+says what to select instead. Then `ph_composer.ducting.groups.make` with `edge_paths`, every row's `path`, and
+`ventilator_id`: it wraps the lines in a new Group where they are drawn, in one Undo step, and the lines keep
+their ids and attributes; read its `group_id`. It leaves the edit path as it was, so open the group with
+`ph_composer.context.open` before selecting its lines to assign them. A line bounding a Face, a line already in
+a Ducting group or another feature's Group, or lines in two Groups are refused. The user draws more ducts into
+a group by opening it (double-click) and drawing there. Read
 `ph_composer.ducting.groups.list`, a bounded page at a time, for every group with its `values`
 (`ventilator_id`, null while unlinked), `duct_count`, `copied` (another group carries the same id, as a
 pasted copy does, keeping its Ventilator), `findings` and `write_refusal` (a pasted copy shares storage

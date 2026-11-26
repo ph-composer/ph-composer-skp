@@ -1,7 +1,7 @@
 /* A feature's line groups on its pill, as the last read found them (line_groups/shared.js has the spec): each
    group's name, the record it links to, chosen in place (one groups.link, or groups.unlink for None, guarded by the
-   values read), its line count and where it sits somewhere its lines may not. New <group> asks for the record to
-   link and calls groups.create, which opens the new group so the Line tool draws into it. */
+   values read), its line count and where it sits somewhere its lines may not. Make <group> asks for the record to
+   link and calls groups.make with the selected loose lines, which it wraps in the new group where they are drawn. */
 PhComposerUI.define("line_groups/groups", ["panel", "request", "snapshot", "workspace", "table", "record_form",
   "inventory_forms", "choice_cell", "line_groups/shared"],
 function (panel, request, snapshot, ui, tables, RecordForm, forms, choiceCell, shared) {
@@ -12,24 +12,30 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, choiceCell, s
     });
   }
 
-  /* New <group>: the record its lines serve. */
-  function GroupForm(session, send, spec, done) {
+  /* Make <group>: the record its lines serve. `paths()` is the selected lines' paths as the bar read them, or null
+     while Make is blocked. */
+  function GroupForm(session, send, spec, paths, done) {
     var self = this;
     // RecordForm keeps its own spec, so the line group's is held apart.
-    this.lines = spec;
-    RecordForm.call(this, session, send, { title: "New " + spec.label, action: spec.prefix + "groups.create",
-      label: spec.key + "-group-create", submitLabel: "Create and open", pendingText: "Creating...",
-      failureText: "The " + spec.label + " was not created.", changed: function (value) { if (value) done(); } });
+    this.lines = spec; this.paths = paths;
+    RecordForm.call(this, session, send, { title: "Make " + spec.label, action: spec.prefix + "groups.make",
+      label: spec.key + "-group-make", submitLabel: "Make " + spec.label, pendingText: "Making...",
+      failureText: "The " + spec.label + " was not made.", changed: function (value) { if (value) done(); } });
     this.link = forms.labelled(this.form, spec.link.label, ui.element("select"));
     RecordForm.required(this.link.parentNode, this.link);
     this.link.addEventListener("change", function () { self.updateButton(); });
-    this.form.appendChild(ui.element("p", "phc-form-hint", "The new group opens in SketchUp, so the lines you " +
-      "draw next with the Line tool land inside it."));
+    this.hint = ui.element("p", "phc-form-hint");
+    this.form.appendChild(this.hint);
     this.finish();
   }
   RecordForm.extend(GroupForm);
   GroupForm.prototype.updateButton = function () {
-    this.submitButton.disabled = !this.enabled || this.busy() || !this.link.value;
+    var paths = this.paths(), count = paths ? paths.length : 0;
+    var hint = count ? count + " selected line" + (count === 1 ? "" : "s") + " move into the new group where " +
+      (count === 1 ? "it is" : "they are") + " drawn. Double-click the group in SketchUp to draw more lines in it." :
+      "Select the loose lines to make it from.";
+    if (this.hint.textContent !== hint) this.hint.textContent = hint;
+    this.submitButton.disabled = !this.enabled || this.busy() || !this.link.value || !count;
   };
   /* The records as the snapshot has them; the choice is kept while its record exists. */
   GroupForm.prototype.paintLinks = function (state, fresh) {
@@ -48,7 +54,7 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, choiceCell, s
   };
   GroupForm.prototype.submit = function () {
     this.updateButton();
-    var params = {};
+    var params = { edge_paths: this.paths() };
     params[this.lines.link.key] = this.link.value;
     if (!this.submitButton.disabled) this.run(params);
   };
@@ -96,8 +102,8 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, choiceCell, s
       return row.record[name === "line_count" ? spec.noun + "_count" : name];
     },
     cell: function (td, row, name) { return self.cell(td, row.record, name, choices); },
-    empty: this.read.groupRows ? "No " + spec.label + "s yet. New " + spec.label + " makes one to draw " +
-      spec.noun + "s in." : this.read.error || "Reading the " + spec.label + "s..." });
+    empty: this.read.groupRows ? "No " + spec.label + "s yet. Draw " + spec.noun + "s as loose lines, select " +
+      "them and use Make " + spec.label + "." : this.read.error || "Reading the " + spec.label + "s..." });
   };
   Groups.prototype.cell = function (td, group, name, choices) {
     var self = this, spec = this.spec, label = shared.groupLabel(spec, group.name, group.path);

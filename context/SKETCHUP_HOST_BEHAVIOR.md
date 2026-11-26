@@ -204,6 +204,19 @@ Measured in PH-Composer on 26.1.188, 2026-09-20
 | Endpoints created in one Entities collection merged through 0.0254 mm (0.001 in) separation and remained distinct at 0.0255 mm. | Phase 1 freezes 0.0254 mm as its coincidence tolerance pending SketchUp 2023 and Windows evidence. Do not infer a wider tolerance from drawing inference. |
 | A nested Zone under a wrapper rotated 30 degrees and scaled -1.0, 1.5, 0.75 retained manifold geometry and produced the expected world points and negative handedness through one accumulated transform. | Geometry reads keep the complete occurrence path, accumulate transforms once and preserve mirror handedness. |
 
+## Making a line group
+
+Measured in PH-Composer on 26.1.188: the crash and its isolation in the MS3 sitting, 2026-11-25, and the probe of
+the fix's assumptions in the conductor's first full-screen hold, 2026-11-26
+([phase-07-ms3](../planning/native-acceptance/evidence/phase-07-ms3.md),
+[line-group-create-fix](../planning/features/phase-07-mechanical/evidence/line-group-create-fix.md)).
+
+| Fact | Consequence | Pinned by |
+| --- | --- | --- |
+| A Group made empty in an operation is deleted at that operation's commit (a later read reports a reference to a deleted Entity). Made empty, written and made the active path in one operation, it crashed SketchUp (`EXC_BAD_ACCESS`), through `groups.create` three times and once in raw Ruby on a blank Model. | No operation makes an empty Group, and nothing moves the edit path into a Group the same operation made. A line group is made by wrapping lines already drawn (`LineGroups::MakeStep`). | Stub `Model#commit_operation` erases a Group `add_group` made empty in it |
+| `Entities#add_group` over selected loose Edges in one collection keeps every Edge's persistent id and attribute dictionaries inside the new Group, as one Undo step; Undo restores the loose Edges with the same ids. | Make Piping group and Make Ducting group keep each line's id and any record on it, and one Undo takes the group away. | `test_make_wraps_loose_lines_in_a_new_group_keeping_their_ids_and_records_in_one_undo_step` |
+| With a labelled Piping group open, the native Line tool adds its Edges to that group, and a new line meeting an Edge part way along splits it there (18 Edges became 20, three meeting at the new vertex). Undo "Draw Line" restores the 18. | The user draws more pipes or ducts into a group by opening it; the panel never opens one for drawing. Whether the split halves both carry an assigned Edge's record, and whether two crossing loose lines split each other, is still owed to `M13b`. | Host case `M13b` |
+
 ## Re-placing a Group's definition
 
 Measured in PH-Composer on 26.1.188, 2026-10-15

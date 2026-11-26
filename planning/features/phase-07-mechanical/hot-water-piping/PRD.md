@@ -128,7 +128,9 @@ the Assembly delete contract (refuse in use, name a replacement, or clear).
 Pipes are drawn with SketchUp's native Line tool inside a Piping group. "New Piping group" in
 the panel creates the group, links it to a Hot Water System and opens it for editing through the
 session's edit context (`session/edit_context.rb`, the one `active_path=` writer), so the next
-lines land inside. Membership is by parent group, the same rule Spaces follow. Lines outside a
+lines land inside. (Changed 2026-11-26, issue #598: SketchUp deletes an empty Group at commit, so
+"Make Piping group" wraps loose lines already drawn and selected in a new Piping group linked to a
+Hot Water System, the Make Zone shape, and the user opens the group to draw more.) Membership is by parent group, the same rule Spaces follow. Lines outside a
 Piping group are never Pipes, so tagging cannot leak onto envelope edges. Where a Piping group
 may sit relative to Zone groups is Q13.
 

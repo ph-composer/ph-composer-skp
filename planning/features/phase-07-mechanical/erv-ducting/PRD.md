@@ -83,7 +83,8 @@ A Rectangular type holds the reverse. Timestamps from the first draft are gone, 
 Draw, Assign, the schedule and the Colour-by mode work as in hot-water-piping, with these
 differences.
 
-- "New Ducting group" asks for the Ventilator it serves.
+- "New Ducting group" asks for the Ventilator it serves. (Changed 2026-11-26, issue #598: "Make
+  Ducting group" wraps selected loose lines in a new Ducting group and asks for the Ventilator.)
 - Assign sets a Duct Type and a direction. There is no tree and no parent. Connection between
   lines does not matter, only the sum, so the chain rule is not needed here.
 - A Ventilator's row in the Systems > Equipment subtab shows its two duct lengths, so a missing

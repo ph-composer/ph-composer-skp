@@ -24,7 +24,7 @@ Each is one pull request with its own document, written to be handed to a coding
 | [P4-14c](p4-14c-ducting-groups-and-assignment.md) | Ducting groups linked to a Ventilator, the duct assignment on an Edge (Duct Type, direction, quantity), assign, clear, selection, delete in use for Duct Types and Ventilators | ordinary, `gpt-6.2-sol` | `M14c` | 45 KB |
 | [P4-14d](p4-14d-duct-runs-and-schedule.md) | Runs, findings, the schedule read, `runs.locate`, used length per Duct Type and the per-Ventilator lengths | ordinary, `gpt-6.2-sol` | `M14d` | 30 KB |
 | [P4-14e](p4-14e-ducting-export.md) | The ducting contributor and Python section appending `PhDuctElement`s to every (Ventilator, Zone) system before attach (D4-09), conformance and a PHX round trip (D4-25) | ordinary, `gpt-6.2-sol`; the conductor may take `gpt-6-astra` for the export | `M14e` | 30 KB |
-| [P4-14f](p4-14f-ducting-view.md) | The Duct Types and Ducting pills under Ventilation, the assign bar and New Ducting group, the schedule table, the Ventilators table's two duct columns and the two Colour-by modes | ordinary, UI, `gpt-6.2-sol` | `M14f` | 52 KB |
+| [P4-14f](p4-14f-ducting-view.md) | The Duct Types and Ducting pills under Ventilation, the assign bar and New Ducting group (Make Ducting group since 2026-11-26), the schedule table, the Ventilators table's two duct columns and the two Colour-by modes | ordinary, UI, `gpt-6.2-sol` | `M14f` | 52 KB |
 
 Their register rows are M14a to M14f in [ACCEPTANCE](../ACCEPTANCE.md) (P4-14b's row records that piping is unchanged), and the geometry they test against is its [ERV ducting case](../ACCEPTANCE.md#erv-ducting-case-p4-14); their ledger rows are in [STATUS](../STATUS.md).
 
@@ -104,7 +104,7 @@ M14c in the MS3 sitting.
 
 Measured and cited, not owed: an Edge's dictionary survives split, copy and paste, weld, Undo, Redo and reopen ([B4, T01](../../../../context/SKETCHUP_HOST_BEHAVIOR.md#components-glue-and-edge-attributes)); a pasted Group carries its dictionary and shares storage (SD01).
 
-Owed by piping and relied on here, not repeated: an empty Group created by an operation survives the commit and opens for editing, and the native Line tool drawing in it puts its Edges there (P4-13b's H1 and H2, case `M13b`). If those fail in the MS3 sitting, P4-14c's `groups.create` fails with them and both features take the "Make group over selected lines" route P4-13b names.
+Owed by piping and relied on here, not repeated: an empty Group created by an operation survives the commit and opens for editing, and the native Line tool drawing in it puts its Edges there (P4-13b's H1 and H2, case `M13b`). If those fail in the MS3 sitting, P4-14c's `groups.create` fails with them and both features take the "Make group over selected lines" route P4-13b names. H1 failed on 2026-11-25 and that route was taken for both on 2026-11-26 (issue #598; P4-13b and P4-14c, "The fallback taken").
 
 ## Out of scope
 

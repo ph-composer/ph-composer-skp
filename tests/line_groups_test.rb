@@ -3,9 +3,9 @@
 require_relative "test_helper"
 
 # The shared line-group layer (src/ph_composer/line_groups/) over a probe spec no feature registers: the walk finds
-# each placement, the resolvers take and refuse paths, the steps create, write and clear in one Undo step, the
-# schedule pages and Locate selects. Nothing under the package names a feature (context/EXTENSIBILITY.md, "Line
-# groups").
+# each placement, the resolvers take and refuse paths, the steps make a group from loose lines, write and clear in
+# one Undo step, the schedule pages and Locate selects. Nothing under the package names a feature
+# (context/EXTENSIBILITY.md, "Line groups").
 class LineGroupsTest < PhComposerTestCase
   L = PhComposer::LineGroups
   R = PhComposer::Records
@@ -77,17 +77,39 @@ class LineGroupsTest < PhComposerTestCase
     assert_equal "The Edge is not directly inside a Probe group.", error.message
   end
 
-  def test_create_adds_an_empty_open_group_in_one_undo_step
+  # The host deletes a Group left empty at commit, so the layer makes no empty one: it wraps lines already drawn, in
+  # their own collection, and leaves the edit path where it is.
+  def test_make_wraps_loose_lines_in_a_new_group_keeping_their_ids_and_records_in_one_undo_step
+    loose = [801, 802].map { |id| line(id) }
+    loose.each { |edge| @model.entities << edge }
     record = { "id" => "prg_BBBBBBBBBBBB", "schema_version" => 1, "owner_id" => nil, "user_data" => {},
                "extension_data" => {} }
-    step = L::CreateStep.new(:spec => SPEC, :record => record)
+    step = L::MakeStep.new(:spec => SPEC, :record => record, :parent_path => [], :edge_ids => [801, 802])
     operate { step.apply(@model, nil) }
-    created = @model.entities.to_a.last
-    assert_equal [record, [created], 0], [GROUP_STORE.read(created), Array(@model.active_path), created.entities.length]
-    assert_equal ["probe_group", "create_probe_group"], [step.affected.first.fetch("kind"), step.descriptor["name"]]
-    assert_equal [created.persistent_id], step.affected.first.dig("reference", "group_path")
+    made = @model.entities.to_a.find { |entity| GROUP_STORE.read(entity) == record }
+    assert_equal [loose, nil], [made.entities.to_a, @model.active_path]
+    assert_equal [[801, 802], [EDGE_STORE.read(loose.first)] * 2],
+                 [made.entities.map(&:persistent_id), made.entities.map { |edge| EDGE_STORE.read(edge) }]
+    assert_equal ["probe_group", "make_probe_group", [made.persistent_id]],
+                 [step.affected.first.fetch("kind"), step.descriptor["name"],
+                  step.affected.first.dig("reference", "group_path")]
     @model.undo
-    assert_equal [700, 710], @model.entities.to_a.select { |entity| GROUP_STORE.marks?(entity) }.map(&:persistent_id)
+    assert_equal [700, 710, 730, 801, 802], @model.entities.map(&:persistent_id)
+    assert_nil GROUP_STORE.read(@model.entities.to_a.last)
+  end
+
+  # The plan is checked again at apply: the open context moved, or a line gone or no longer loose, writes nothing.
+  def test_make_refuses_at_apply_when_the_context_or_a_line_changed
+    @model.entities << line(801)
+    record = { "id" => "prg_BBBBBBBBBBBB", "schema_version" => 1, "owner_id" => nil, "user_data" => {},
+               "extension_data" => {} }
+    make = ->(ids) { L::MakeStep.new(:spec => SPEC, :record => record, :parent_path => [], :edge_ids => ids) }
+    @model.active_path = [@group]
+    assert_refused("target.edit_path_changed") { make.call([801]).apply(@model, nil) }
+    @model.active_path = nil
+    assert_refused("target.changed") { make.call([801, 899]).apply(@model, nil) }
+    assert_refused("target.changed") { make.call([700]).apply(@model, nil) }
+    assert_equal [700, 710, 730, 801], @model.entities.map(&:persistent_id)
   end
 
   def test_an_edge_record_is_written_and_cleared

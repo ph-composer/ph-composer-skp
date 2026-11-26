@@ -10,7 +10,7 @@ ISSUE: #562
 Requires P4-13d. Owns the screen and the viewport:
 
 - Two pills under Hot Water on the Mechanical tab, after Tanks: `Pipe Types` and `Piping` (D4-13).
-- The assign bar: Pipe Type, role and the role's values over the native selection, New Piping group, and the pipe
+- The assign bar: Pipe Type, role and the role's values over the native selection, Make Piping group (was New Piping group; 2026-11-26), and the pipe
   tool as the secondary route (PRD, "Assign").
 - The schedule table with its totals, findings and Locate.
 - The Systems table's recirculation columns, moved from mechanical to piping (P4-13, "Inferred in planning").
@@ -70,7 +70,9 @@ Paths are relative to `src/ph_composer/`.
   The move, if made, is a second core move of shipped thermal-bridge code: that slice takes the strong lane,
   `gpt-6-astra`, and repeats the thermal-bridge tool cases `acceptance_ledger.py status --changed` names.
 - **New Piping group** in the bar asks for a Hot Water System and calls `groups.create` (P4-13b), which opens it for
-  the Line tool.
+  the Line tool. Superseded 2026-11-26 (issue #598, P4-13b "The fallback taken"): **Make Piping group**, enabled only
+  while the selection read's `make_refusal` is null, with that reason beside it otherwise, asks for a Hot Water System
+  and calls `groups.make` with the selected loose lines' paths; the group is not opened.
 - **Slices.** If the PR grows past one coherent review it splits along two slices, each merging whole: the pills, bar
   and Systems columns; then Colour-by and the pipe tool.
 
@@ -123,7 +125,7 @@ Paths are relative to `src/ph_composer/`.
 ## Host gate (`M13e`, MS3 sitting, D4-31)
 
 Fresh process, the installed RBZ, Ed at the mouse, the PRD's acceptance shape on the reference model with the
-[piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13) (three storeys of lines): two Pipe Types; New Piping group linked to HWS-1 opens for the Line tool; one riser trunk with multiplier 12, three
+[piping case](../ACCEPTANCE.md#hot-water-piping-case-p4-13) (three storeys of lines): two Pipe Types; the lines drawn loose with the Line tool, selected, and Make Piping group linked to HWS-1 wraps them (was: New Piping group opens for the Line tool; 2026-11-26); one riser trunk with multiplier 12, three
 branches, six twigs and a recirculation loop drawn and assigned from the bar, one Undo step each; one branch assigned
 with the pipe tool; the schedule's lengths match hand measurement; break a branch from its trunk and read the finding,
 whose Locate selects it; both Colour-by modes with their legend lengths; the Systems table's recirculation reads the

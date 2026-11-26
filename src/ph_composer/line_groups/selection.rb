@@ -2,8 +2,9 @@
 
 module PhComposer
   module LineGroups
-    # The native selection as Edge references, for the feature's assign and clear. The caller passes its gesture
-    # `limit` and `contained`, which answers containment rows (`{ path, zone }`, zone nil or named) for Group paths.
+    # The native selection as Edge references, for the feature's assign and clear, and what Make <group> over it
+    # meets. The caller passes its gesture `limit` and `contained`, which answers containment rows (`{ path, zone }`,
+    # zone nil or named) for root-to-entity paths.
     module Selection
       # Selected entities that are not Edges are listed up to this many and counted in full.
       IGNORED_ROWS = 50
@@ -12,7 +13,7 @@ module PhComposer
 
       def all(spec, request, limit:, contained:)
         rows, others = rows(spec, request, :limit => limit, :contained => contained)
-        { "edges" => rows }.merge(ignored(others))
+        { "edges" => rows, "make_refusal" => make_refusal(spec, request, others, contained) }.merge(ignored(others))
       end
 
       # The rows a bounded page at a time under `query`; a cursor is bound to the selection too.
@@ -21,7 +22,15 @@ module PhComposer
         binding = "#{request.revision}/#{CanonicalJson.digest(rows.map { |row| row.fetch('path') })}"
         page, cursor = Pages.bounded(request, query, rows, :key => ->(row) { row.fetch("path") },
                                                            :revision => binding)
-        { "edges" => page, "next_cursor" => cursor, "total" => rows.length }.merge(ignored(others))
+        { "edges" => page, "next_cursor" => cursor, "total" => rows.length,
+          "make_refusal" => make_refusal(spec, request, others, contained) }.merge(ignored(others))
+      end
+
+      # What Make <group> meets over the whole selection, or nil when it can run with every selected line's path.
+      def make_refusal(spec, request, others, contained)
+        model = request.model
+        Make.refusal(spec, model, Array(model.active_path), model.selection.to_a.grep(Sketchup::Edge),
+                     :others => others.length, :contained => contained)
       end
 
       def ignored(others)

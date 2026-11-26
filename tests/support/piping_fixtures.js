@@ -62,7 +62,8 @@ function state() {
       insulation_conductivity_w_mk: 0.04 }, 9),
     type(PT2, "PT-2", { material: 2, diameter_mm: 12.7, insulation_thickness_mm: 0, insulation_reflective: false },
       0)] } };
-  built.sections[PREFIX + "pipes.selected"] = { status: "completed", value: { ignored: [], ignored_total: 0, edges: [
+  built.sections[PREFIX + "pipes.selected"] = { status: "completed", value: { ignored: [], ignored_total: 0,
+    make_refusal: { code: "piping.group_nested", message: "The lines are already in a Piping group." }, edges: [
     selected(601, {}), selected(602, { pipe_type_id: PT2, role: "twig" }),
     { path: [5], reference: null, group: null, reason: "outside_group", values: {}, copied: false,
       record_problem: null, write_refusal: null }] } };

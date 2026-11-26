@@ -22,20 +22,23 @@ class PipingAssignmentWalkthroughTest < PhComposerTestCase
     end
   end
 
+  # Undo, Redo and a reopen close the group and clear the selection, as the host does.
   def reselect(group_id, edge_ids)
-    group = @model.entities.to_a.find { |entity| entity.persistent_id == group_id }
-    @model.active_path = [group]
-    @model.selection.clear
-    @model.selection.add(group.entities.to_a.select { |entity| edge_ids.include?(entity.persistent_id) })
+    assert_equal "completed", W.open_group(group_id)["status"]
+    W.reselect(edge_ids)
   end
 
-  def test_the_walkthrough_creates_a_group_draws_assigns_and_clears_through_public_calls
-    assert_equal "committed", W.create("HWS-1")["effect"]
-    group = Array(@model.active_path).last
-    line_tool(group.entities)
+  def test_the_walkthrough_draws_makes_a_group_assigns_and_clears_through_public_calls
+    line_tool(@model.entities)
     edges = W.draw
+    made = W.make("HWS-1")
+    assert_equal "committed", made["effect"], made.inspect
+    group_id = made.dig("value", "group_id")
+    group = @model.entities.to_a.find { |entity| entity.is_a?(Sketchup::Group) }
+    assert_equal [edges, nil], [group.entities.map(&:persistent_id), @model.active_path]
+    reselect(group_id, edges)
     assert_equal "committed", W.assign("PT-1", "trunk", "multiplier" => 12)["effect"]
-    reselect(group.persistent_id, edges)
+    reselect(group_id, edges)
     assert_equal [["PT-1", "trunk", 12]] * 3, W.selection.map { |row|
       [row["type"], row["role"], row.dig("values", "multiplier")]
     }
@@ -43,13 +46,13 @@ class PipingAssignmentWalkthroughTest < PhComposerTestCase
                     "findings" => [] }], W.groups
 
     assert_equal "committed", W.clear["effect"]
-    reselect(group.persistent_id, edges)
+    reselect(group_id, edges)
     assert_equal [nil] * 3, W.selection.map { |row| row["role"] }
     @model.undo
-    reselect(group.persistent_id, edges)
+    reselect(group_id, edges)
     assert_equal ["trunk"] * 3, W.selection.map { |row| row["role"] }
     @model.redo
-    reselect(group.persistent_id, edges)
+    reselect(group_id, edges)
     assert_equal [nil] * 3, W.selection.map { |row| row["role"] }
     text = File.read(File.expand_path("../tools/examples/authoring/piping_assignment_walkthrough.rb", __dir__))
     refute_match(/PhComposer::Piping|PhComposer::Mechanical/, text)

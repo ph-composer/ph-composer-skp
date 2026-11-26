@@ -144,6 +144,23 @@
     return Object.keys(sums).map(function (key) { return sums[key]; });
   };
 
+  /* What groups.make over the selected lines meets, as the host's selection read answers it for these fixtures:
+     nothing selected, or a line already in a group, refuses; loose lines alone can be wrapped. */
+  function makeRefusal(rows, feature, label) {
+    if (!rows.length) {
+      return { code: "params.invalid", message: "Select the loose lines to make a " + label + " from." };
+    }
+    return rows.every(function (row) { return row.reason === "outside_group"; }) ? null :
+      { code: feature + ".group_nested", message: "The lines are already in a " + label + "." };
+  }
+
+  /* The new group a groups.make adds over the selected loose lines, which leave the selection as they move in. */
+  function madeGroup(data, id, path, link, count) {
+    data.groups.push(Object.assign({ path: path, reference: { group_id: id, group_path: path }, name: "",
+      values: link, copied: false, findings: [], record_problem: null, write_refusal: null }, count));
+    data.selected = [];
+  }
+
   Host.prototype.publish = function (type, payload) {
     this.window.PhComposerUI.get("panel").receive({ type: type, payload: payload });
   };
@@ -231,13 +248,15 @@
           unreadable: [] } },
         [PIPING + "pipe_types"]: { status: "completed", value: { records: this.pipeTypeRows(), unreadable: [] } },
         [PIPING + "pipes.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
-          this.piping.selected)), ignored: [], ignored_total: 0 } },
+          this.piping.selected)), ignored: [], ignored_total: 0,
+        make_refusal: makeRefusal(this.piping.selected, "piping", "Piping group") } },
         [PIPING + "pipe_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.pipeTool)) },
         [PIPING + "piping_systems"]: { status: "completed", value: { systems: JSON.parse(JSON.stringify(
           this.piping.systems)) } },
         [DUCTING + "duct_types"]: { status: "completed", value: { records: this.ductTypeRows(), unreadable: [] } },
         [DUCTING + "ducts.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
-          this.ducting.selected)), ignored: [], ignored_total: 0 } },
+          this.ducting.selected)), ignored: [], ignored_total: 0,
+        make_refusal: makeRefusal(this.ducting.selected, "ducting", "Ducting group") } },
         [DUCTING + "ducting_ventilators"]: { status: "completed", value: { ventilators: this.ductVentilatorRows() } },
         [MECHANICAL + "serves"]: { status: "completed", value: { zones: this.servesRows() } },
         [MECHANICAL + "hot_water_systems"]: { status: "completed", value: { records: this.hotWaterSystemRows(),
@@ -612,12 +631,10 @@
           }
         });
       });
-    } else if (name === "groups.create") {
+    } else if (name === "groups.make") {
       id = "ppg_preview" + String(++this.sequence).padStart(5, "0");
-      var path = [9000 + this.sequence];
-      data.groups.push({ path: path, reference: { group_id: id, group_path: path }, name: "",
-        values: { hot_water_system_id: params.hot_water_system_id }, pipe_count: 0, copied: false, findings: [],
-        record_problem: null, write_refusal: null });
+      madeGroup(data, id, [9000 + this.sequence], { hot_water_system_id: params.hot_water_system_id },
+        { pipe_count: 0 });
     } else if (name === "groups.link" || name === "groups.unlink") {
       params.targets.forEach(function (row) {
         data.groups.forEach(function (group) {
@@ -740,12 +757,9 @@
           }
         });
       });
-    } else if (name === "groups.create") {
+    } else if (name === "groups.make") {
       id = "dcg_preview" + String(++this.sequence).padStart(5, "0");
-      var path = [9500 + this.sequence];
-      data.groups.push({ path: path, reference: { group_id: id, group_path: path }, name: "",
-        values: { ventilator_id: params.ventilator_id }, duct_count: 0, copied: false, findings: [],
-        record_problem: null, write_refusal: null });
+      madeGroup(data, id, [9500 + this.sequence], { ventilator_id: params.ventilator_id }, { duct_count: 0 });
     } else if (name === "groups.link" || name === "groups.unlink") {
       params.targets.forEach(function (row) {
         data.groups.forEach(function (group) {

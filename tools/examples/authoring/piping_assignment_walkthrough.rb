@@ -4,38 +4,67 @@ require_relative "client"
 
 # Piping groups and pipe assignment with the panel closed, through the public API only, in a scratch Model with a Hot
 # Water System and a Pipe Type (PipeTypesWalkthrough.run makes PT-1):
-#   PipingAssignmentWalkthrough.create("HWS-1")       a new Piping group linked to that System, opened for drawing
-#   PipingAssignmentWalkthrough.draw                  three connected lines in the open group, selected; on the host
-#                                                     draw them with the Line tool instead (case M13b, H2)
+#   PipingAssignmentWalkthrough.draw                  three connected loose lines at the root, selected; on the host
+#                                                     draw them with the Line tool instead (case M13b)
+#   PipingAssignmentWalkthrough.make("HWS-1")         the selected lines wrapped in a new Piping group linked to that
+#                                                     System, one Undo step; the group is not opened
+#   PipingAssignmentWalkthrough.open_group(group_id)  opens that group with ph_composer.context.open
+#   PipingAssignmentWalkthrough.reselect(edge_ids)    selects those lines in the open group
 #   PipingAssignmentWalkthrough.assign("PT-1", "trunk", "multiplier" => 12)
 #                                                     the selection as pipes, one Undo step
 #   PipingAssignmentWalkthrough.selection             the selected Edges as pipes.selection reads them
 #   PipingAssignmentWalkthrough.clear                 clears the selection's pipes, one Undo step
 #   PipingAssignmentWalkthrough.groups                every Piping group with its System and pipe count
-# Each write sends the references and values the selection read returned, so an Edge changed since refuses.
+# Each write sends the paths, references and values the selection read returned, so an Edge changed since refuses.
 module PipingAssignmentWalkthrough
   PREFIX = "ph_composer.piping"
   RISER = [[0, 0, 0], [0, 0, 3000], [0, 0, 6000], [0, 0, 9000]].freeze
 
   module_function
 
-  def create(system_name)
+  # Three connected lines up a 9 m riser, given in millimetres, in `entities` (the root unless a Group is open),
+  # selected. SketchUp's internal unit is the inch.
+  def draw(entities = Sketchup.active_model.active_entities)
+    points = RISER.map { |point| Geom::Point3d.new(*point.map { |mm| mm / 25.4 }) }
+    lines = points.each_cons(2).map { |start, finish| entities.add_line(start, finish) }
+    select_lines(lines)
+    lines.map(&:persistent_id)
+  end
+
+  # The selected loose lines as the selection read gives them, wrapped in a new Piping group; refused as the read's
+  # make_refusal says when they cannot be.
+  def make(system_name)
     systems = read("ph_composer.mechanical.hot_water_systems.all").fetch("records")
     system = systems.find { |row| row.dig("values", "name") == system_name }
     raise ArgumentError, "No Hot Water System is named #{system_name}." unless system
 
-    AuthoringExample::Client.new.invoke("#{PREFIX}.groups.create", "hot_water_system_id" => system.fetch("id"))
+    refusal = read("#{PREFIX}.pipes.selection", "limit" => 1).fetch("make_refusal")
+    return refusal.merge("status" => "refused", "effect" => "none") if refusal
+
+    AuthoringExample::Client.new.invoke("#{PREFIX}.groups.make",
+                                        "edge_paths" => selected_rows.map { |row| row.fetch("path") },
+                                        "hot_water_system_id" => system.fetch("id"))
   end
 
-  # Three connected lines up a 9 m riser, given in millimetres, in `entities` (the open group), selected. SketchUp's
-  # internal unit is the inch.
-  def draw(entities = Sketchup.active_model.active_entities)
-    points = RISER.map { |point| Geom::Point3d.new(*point.map { |mm| mm / 25.4 }) }
-    lines = points.each_cons(2).map { |start, finish| entities.add_line(start, finish) }
+  # Opens the Piping group `group_id` names, found in groups.all, so its lines can be selected and assigned.
+  def open_group(group_id)
+    row = read("#{PREFIX}.groups.all").fetch("groups").find { |entry| entry.dig("reference", "group_id") == group_id }
+    raise ArgumentError, "No Piping group has the id #{group_id}." unless row
+
+    client = AuthoringExample::Client.new
+    PhComposer::API.view(:context => client.context, :name => "ph_composer.context.open",
+                         :params => { "path" => row.fetch("path") })
+  end
+
+  # Selects the lines with these persistent ids in the open context.
+  def reselect(edge_ids)
+    select_lines(Sketchup.active_model.active_entities.to_a.select { |entity| edge_ids.include?(entity.persistent_id) })
+  end
+
+  def select_lines(lines)
     selection = Sketchup.active_model.selection
     selection.clear
     selection.add(lines)
-    lines.map(&:persistent_id)
   end
 
   def assign(type_name, role, role_values = {})

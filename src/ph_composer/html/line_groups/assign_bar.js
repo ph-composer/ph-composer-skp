@@ -1,8 +1,9 @@
 /* The assign bar a line group's pill opens with, in the shape of an edge feature's (line_groups/shared.js has the
    spec): what SketchUp has selected and how many of those lines a write can reach, the feature's type, the feature's
-   own values, Assign and Clear, and New <group> last. It always shows, so selecting never moves what is under it;
-   with nothing to assign, Assign is disabled and its reason sits beside it. Each press is one <noun>s.assign or
-   <noun>s.clear over the lines as the selection read them, one Undo step.
+   own values, Assign and Clear, and Make <group> last. It always shows, so selecting never moves what is under it;
+   with nothing to assign, Assign is disabled and its reason sits beside it, and Make <group> waits, with the host's
+   reason beside it, for loose lines it can wrap. Each press is one <noun>s.assign or <noun>s.clear over the lines as
+   the selection read them, one Undo step.
 
    A feature's bar calls Bar from its constructor and inherits from it, places its own controls with `place`, and
    gives `params()` (what Assign sends beside the targets), `blocked()` beyond the base's, `done(params, type,
@@ -19,9 +20,9 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     return label;
   }
 
-  /* `guard()` names what holds the pill; `notify(message, tone)` raises the panel's notice; `newGroup()` opens New
+  /* `guard()` names what holds the pill; `notify(message, tone)` raises the panel's notice; `makeGroup()` opens Make
      <group>. */
-  function Bar(session, send, spec, guard, notify, newGroup) {
+  function Bar(session, send, spec, guard, notify, makeGroup) {
     var self = this;
     this.spec = spec; this.guard = guard; this.notify = notify;
     this.requests = request.channel(session, send, spec.key + "-assign");
@@ -37,17 +38,19 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     this.clear = ui.button("Clear", function () { self.submit("clear"); });
     this.clear.setAttribute("aria-label", "Clear " + spec.noun + " from selected lines");
     this.reason = ui.element("span", "line-group-bar-reason");
-    this.newGroup = ui.button("+ New " + spec.label, function () {
+    this.make = ui.button("Make " + spec.label, function () {
       var reason = self.guard();
-      if (reason) notify(reason, "warning"); else newGroup();
+      if (reason) notify(reason, "warning"); else if (!self.makeBlocked()) makeGroup();
     });
-    this.newGroup.className = "line-group-new";
-    this.rows = []; this.writable = []; this.types = []; this.chosen = "";
+    this.make.className = "line-group-new";
+    this.make.setAttribute("aria-label", "Make " + spec.label + " from selected lines");
+    this.makeReason = ui.element("span", "line-group-bar-reason");
+    this.rows = []; this.writable = []; this.types = []; this.chosen = ""; this.makeRefusal = null;
   }
   /* Lays the bar out: the count and the type, the feature's `middle` controls, Assign with its reason and Clear,
-     the feature's `end` controls, then New <group>. */
+     the feature's `end` controls, then Make <group> with its reason. */
   Bar.prototype.place = function (middle, end) {
-    [this.count, this.type].concat(middle, [this.assign, this.reason, this.clear], end, [this.newGroup])
+    [this.count, this.type].concat(middle, [this.assign, this.reason, this.clear], end, [this.make, this.makeReason])
       .forEach(function (node) { this.root.appendChild(node); }, this);
   };
   Bar.prototype.changed = function () { this.paint(); };
@@ -65,6 +68,16 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     if (this.unavailable) return this.unavailable;
     if (!this.rows.length) return "Select lines in a " + this.spec.label + " in SketchUp.";
     return this.writable.length ? null : this.why(this.rows[0]);
+  };
+  /* Why Make <group> cannot run for the selection, as the selection read says (make_refusal), or null. */
+  Bar.prototype.makeBlocked = function () {
+    if (this.unavailable) return this.unavailable;
+    if (this.makeRefusal) return this.makeRefusal.message;
+    return this.rows.length ? null : "Select the loose lines to make a " + this.spec.label + " from.";
+  };
+  /* The selected lines' paths Make <group> sends, or null while it is blocked. */
+  Bar.prototype.makePaths = function () {
+    return this.makeBlocked() ? null : this.rows.map(function (row) { return row.path.slice(); });
   };
   Bar.prototype.chosenType = function () {
     return this.types.filter(function (entry) { return entry.id === this.type.value; }, this)[0] || null;
@@ -96,6 +109,7 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     this.requests.consume(state);
     this.unavailable = value ? null : snapshot.message(section || {}, "The selected lines cannot be read.");
     this.rows = value ? value.edges : [];
+    this.makeRefusal = value ? value.make_refusal || null : null;
     this.writable = this.rows.filter(assignable);
     this.types = types.slice().sort(function (a, b) {
       return ui.compareText(a.values.name, b.values.name) || ui.compareText(a.id, b.id);
@@ -125,7 +139,8 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     }
     this.type.value = this.types.some(function (type) { return type.id === this.chosen; }, this) ? this.chosen : "";
   };
-  /* The count, Assign's reason, Assign, Clear and the type, from the state read; answers why Assign is blocked. */
+  /* The count, Assign's reason, Assign, Clear, the type and Make <group> with its reason, from the state read;
+     answers why Assign is blocked. */
   Bar.prototype.paintBase = function (busy) {
     var self = this, total = this.rows.length, writable = this.writable.length;
     var text = this.unavailable ? "Selected lines" : !total ? "No lines selected" :
@@ -144,6 +159,13 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     this.type.disabled = busy;
     this.assign.disabled = busy || Boolean(blocked);
     this.clear.disabled = busy || !self.writable.some(assigned);
+    var making = this.makeBlocked();
+    this.makeReason.hidden = !making;
+    if (making && this.makeReason._reason !== making) {
+      this.makeReason._reason = making;
+      this.makeReason.replaceChildren(ui.reasonButton("Make " + this.spec.label, making));
+    }
+    this.make.disabled = busy || Boolean(making);
     return blocked;
   };
   Bar.prototype.dispose = function () { this.disposed = true; this.requests.reset(); };

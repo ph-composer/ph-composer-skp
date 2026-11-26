@@ -181,9 +181,9 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/ducting/assign_bar.js": {
-      "bytes": 4609,
+      "bytes": 4613,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "7d309292cb9dba51d476e7eace011d6132c07095ca3ac85c01bb2a042a0721d6"
+      "sha256": "f0bbf1394993a77bf724be9af590f6162021244730fca22988763e54e01d6385"
     },
     "html/features/ducting/duct_types.js": {
       "bytes": 7381,
@@ -201,9 +201,9 @@
       "sha256": "e11b6a80dd833956b7e80a33e48d78981c833d58412af87066d8ef5f3dbac536"
     },
     "html/features/ducting/section.js": {
-      "bytes": 1211,
+      "bytes": 1213,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "710eb115a164094896ab560f011adb69b66b7e382d31a7ed47c1ec5d73a90c8b"
+      "sha256": "66d7dee444635c5e144333f2fcf5e03fe5d68121c6a283a5bb009492a06885a3"
     },
     "html/features/ducting/shared.js": {
       "bytes": 1560,
@@ -301,9 +301,9 @@
       "sha256": "b1f410e5e479269353893963d6024c8fdbd3e9779174f2658fd8f4d92efd19d7"
     },
     "html/features/piping/assign_bar.js": {
-      "bytes": 11061,
+      "bytes": 11065,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "faf66f8cec111c799df9e9ad73a2a3e38cb9950b6ea9dd0802a242f9d083a141"
+      "sha256": "f78fa863ac098fc3a9e82b3b77cb3568684aca1f48f122073a60747947062298"
     },
     "html/features/piping/pipe_tool.js": {
       "bytes": 3279,
@@ -326,9 +326,9 @@
       "sha256": "fc584f07935b320abee69895b1c75a395bc25b7dd43e36b164c7782c6dd0fa10"
     },
     "html/features/piping/section.js": {
-      "bytes": 994,
+      "bytes": 996,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "0dcc3406db1cea3af3b9a40858fdb0715cc590edef85c6ae63c11b89dfef5c1b"
+      "sha256": "1de5f55c547c3d45d87af9052bd208c06fb9ed8ae6fbb23d096a1726617736c2"
     },
     "html/features/piping/shared.js": {
       "bytes": 1581,
@@ -726,14 +726,14 @@
       "sha256": "32a94d159fec4ad46489552205e09ac3763ec0e234bb5f50cd8b5df8fa185d7d"
     },
     "html/line_groups/assign_bar.js": {
-      "bytes": 9001,
+      "bytes": 10340,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "daed09bc36b22f1d6e6bbfb5ab555c23352f154c4d3a46a4c6485f8bd3f945cd"
+      "sha256": "cf7bb75529348bc979c021327cfd503690a6fa4b33460deb5969b11b209088e2"
     },
     "html/line_groups/groups.js": {
-      "bytes": 7414,
+      "bytes": 7953,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e43f5ebebf63b939bd26f10f62026114e40f5e99638ae6c31a70d318210b3820"
+      "sha256": "bf15d8e4661f1ff12405148f53558b59b244ca0357f6e1f834fb8d70e56fab50"
     },
     "html/line_groups/line_groups.css": {
       "bytes": 3207,
@@ -741,9 +741,9 @@
       "sha256": "02fe15cc6d7bdea38febc368229460a0e22be8cd005125b8e11fead96066595a"
     },
     "html/line_groups/pill.js": {
-      "bytes": 3055,
+      "bytes": 3251,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "fe9da1a42b1122de30150c984a28c956a4dc22b090312859f4e6d478f84c8429"
+      "sha256": "b6be45c3c60caf28308ca578624883ae8e7ec717e0e65d3b17f2b617b07e092a"
     },
     "html/line_groups/schedule.js": {
       "bytes": 12983,

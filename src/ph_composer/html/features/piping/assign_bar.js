@@ -14,10 +14,10 @@ function (ui, fields, unitFields, lineBars, shared, pipeTool) {
   /* A unit field's value as typed, or as last committed. */
   function read(field) { return field.editing ? field.parse() : { ok: true, value: field.baseline }; }
 
-  /* `newGroup()` opens New Piping group; `notify(message, tone)` raises the panel's notice. */
-  function AssignBar(session, send, guard, notify, newGroup) {
+  /* `makeGroup()` opens Make Piping group; `notify(message, tone)` raises the panel's notice. */
+  function AssignBar(session, send, guard, notify, makeGroup) {
     var self = this;
-    Bar.call(this, session, send, shared.SPEC, guard, notify, newGroup);
+    Bar.call(this, session, send, shared.SPEC, guard, notify, makeGroup);
     this.role = ui.element("select");
     this.role.setAttribute("aria-label", "Role for selected lines");
     shared.ROLES.forEach(function (role) { self.role.appendChild(ui.option(role.value, role.label)); });

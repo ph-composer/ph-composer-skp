@@ -4,10 +4,10 @@ require_relative "test_helper"
 require_relative "support/space_fixtures"
 require_relative "support/zone_options"
 
-# Ducting groups through their registered actions (context/CONTRACTS.md, "ERV ducting"): create opens a new group at
-# the root in one Undo step, link and unlink are guarded, a group inside a Zone or another Ducting group refuses, a
-# pasted copy reads copied and keeps its Ventilator, and a Ventilator delete moves, clears or refuses the groups
-# naming it beside the Zones it serves.
+# Ducting groups through their registered actions (context/CONTRACTS.md, "ERV ducting"): make wraps loose lines in a
+# new group in one Undo step and refuses lines it cannot wrap, the selection read says which, link and unlink are
+# guarded, a group inside a Zone or another Ducting group refuses, a pasted copy reads copied and keeps its
+# Ventilator, and a Ventilator delete moves, clears or refuses the groups naming it beside the Zones it serves.
 class DuctingGroupTest < PhComposerTestCase
   include SpaceFixtures
   include ZoneOptionsSupport
@@ -28,8 +28,12 @@ class DuctingGroupTest < PhComposerTestCase
     @erv2 = invoke("#{VENTILATORS}.create", "values" => { "name" => "ERV-2" }).dig("value", "id")
   end
 
-  def test_create_adds_one_open_group_at_the_root_linked_to_the_ventilator_in_one_undo_step
-    result = invoke("#{PREFIX}.create", "ventilator_id" => @erv1)
+  def test_make_wraps_loose_lines_in_a_group_linked_to_the_ventilator_in_one_undo_step
+    lines = [801, 802].map { |id| edge(id) }
+    lines.each { |line| @model.entities << line }
+    lines.last.set_attribute("user.notes", "kept", 2)
+    steps = @model.operations.length
+    result = make([[801], [802]], @erv1)
     assert_equal "committed", result["effect"], result.inspect
     id = result.dig("value", "group_id")
     assert_match(/\Adcg_[A-Za-z0-9]{12}\z/, id)
@@ -37,22 +41,64 @@ class DuctingGroupTest < PhComposerTestCase
     assert_equal 1, groups.length
     assert_equal({ "id" => id, "schema_version" => 1, "ventilator_id" => @erv1, "user_data" => {},
                    "extension_data" => {} }, STORE.read(groups.first))
-    assert_equal [groups.first], Array(@model.active_path)
+    assert_equal [lines, 2, nil], [groups.first.entities.to_a, lines.last.get_attribute("user.notes", "kept"),
+                                   @model.active_path]
+    assert_equal [["Make Ducting Group", true, :committed]], @model.operations.drop(steps)
     assert_equal [{ "group_id" => id, "group_path" => [groups.first.persistent_id] }, 0, false, [], nil],
                  all.first.values_at("reference", "duct_count", "copied", "findings", "write_refusal")
-    assert_equal %w[refused target.not_found], invoke("#{PREFIX}.create", "ventilator_id" => "vnt_ZZZZZZZZZZZZ")
-      .values_at("status", "code")
     @model.undo
     assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+    assert_equal [801, 802], @model.entities.to_a.grep(Sketchup::Edge).map(&:persistent_id)
+    assert_equal %w[refused target.not_found], make([[801]], "vnt_ZZZZZZZZZZZZ").values_at("status", "code")
     engine = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
     kind = PhComposer::Mechanical::VENTILATOR_KIND
     engine.kind(kind).store.write(@model, engine.find(kind, @erv2).merge("schema_version" => 9))
-    assert_equal %w[refused record.unreadable], invoke("#{PREFIX}.create", "ventilator_id" => @erv2)
-      .values_at("status", "code")
+    assert_equal %w[refused record.unreadable], make([[801]], @erv2).values_at("status", "code")
     Sketchup.active_model = Sketchup::Model.new
-    assert_equal %w[refused session.inactive], invoke("#{PREFIX}.create", "ventilator_id" => @erv1)
-      .values_at("status", "code")
-    assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+    assert_equal "committed", make([[801]], @erv1)["effect"]
+  end
+
+  # Each refusal writes nothing: no group, and every line where it was.
+  def test_make_refuses_lines_it_cannot_wrap_and_writes_nothing
+    face = Sketchup::Face.new(890)
+    plain = Sketchup::Group.new(600, Sketchup::Entities.new([edge(601)]))
+    zone = Sketchup::Group.new(100, Sketchup::Entities.new([edge(101)]))
+    PhComposer::Zones::ZONE_STORE.write(zone, "id" => "zon_BBBBBBBBBBBB", "schema_version" => 1, "name" => "Zone B",
+                                              "building_segment" => "Building", "level" => nil,
+                                              "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {})
+    ducting = ducting_group(520, "dcg_CCCCCCCCCCCC", @erv1, [edge(521)])
+    piping = Sketchup::Group.new(530, Sketchup::Entities.new([edge(531)]))
+    PhComposer::Piping::Group::STORE.write(piping, PhComposer::Piping::Group.new_record("ppg_AAAAAAAAAAAA", nil))
+    [edge(801), face, plain, zone, ducting, piping].each { |entity| @model.entities << entity }
+    { [[], nil] => "params.invalid", [[[890]], nil] => "target.wrong_kind",
+      [[[801], [600, 601]], nil] => "target.wrong_hierarchy", [[[600, 601]], nil] => "target.edit_path_changed",
+      [[[100, 101]], [zone]] => "ducting.group_in_zone", [[[520, 521]], [ducting]] => "ducting.group_nested",
+      [[[530, 531]], [piping]] => "target.wrong_hierarchy" }.each do |(paths, open), code|
+      @model.active_path = open
+      assert_equal ["refused", code], make(paths, @erv1).values_at("status", "code"), paths.inspect
+    end
+    @model.active_path = nil
+    D::Assignment.gesture_edge_limit = 1
+    assert_equal %w[refused gesture.too_large], make([[801], [600, 601]], @erv1).values_at("status", "code")
+    assert_equal [ducting], @model.entities.to_a.select { |entity| STORE.marks?(entity) }
+    assert_equal [[601], [101], [521], [531]], [plain, zone, ducting, piping].map { |group|
+      group.entities.map(&:persistent_id)
+    }
+  end
+
+  def test_the_selection_read_says_whether_its_lines_make_a_group
+    lines = [801, 802].map { |id| edge(id) }
+    ducting = ducting_group(520, "dcg_CCCCCCCCCCCC", @erv1, [edge(521)])
+    [*lines, ducting].each { |entity| @model.entities << entity }
+    assert_equal "params.invalid", make_refusal
+    @model.selection.add(lines)
+    assert_nil make_refusal
+    @model.selection.add([ducting])
+    assert_equal "target.wrong_kind", make_refusal
+    @model.selection.clear
+    @model.active_path = [ducting]
+    @model.selection.add(ducting.entities.to_a)
+    assert_equal "ducting.group_nested", make_refusal
   end
 
   def test_link_and_unlink_are_guarded_and_each_one_undo_step
@@ -196,6 +242,20 @@ class DuctingGroupTest < PhComposerTestCase
 
   def slot(name)
     serves_rows.fetch(name).dig("slots", "ventilator_id")
+  end
+
+  def edge(persistent_id)
+    Sketchup::Edge.new(persistent_id, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(100, persistent_id, 0))
+  end
+
+  def make(edge_paths, ventilator_id)
+    invoke("#{PREFIX}.make", "edge_paths" => edge_paths, "ventilator_id" => ventilator_id)
+  end
+
+  def make_refusal
+    result = API.query(:context => @context, :name => "ph_composer.ducting.ducts.selection_all")
+    assert_equal "completed", result["status"], result.inspect
+    result.dig("value", "make_refusal", "code")
   end
 
   def ducting_group(persistent_id, id, ventilator_id, children = [])

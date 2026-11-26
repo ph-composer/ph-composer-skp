@@ -64,6 +64,12 @@ module PhComposer
                                                    "#{LineGroups::Selection::IGNORED_ROWS}; never assigned."),
         "ignored_total" => { "type" => "integer", "minimum" => 0 }
       }.freeze
+      MAKE_REFUSAL = {
+        "make_refusal" => GroupRegistration::REFUSAL.merge(
+          "description" => "What groups.make over every selected line meets, or null when it can run with each " \
+                           "row's path."
+        )
+      }.freeze
       PRECONDITIONS = ["Each Edge sits directly in a Ducting group outside every Zone, reached through no locked or " \
                        "shared storage.",
                        "Each target carries the reference and values ducts.selection last read."].freeze
@@ -76,18 +82,20 @@ module PhComposer
         feature.query("#{PREFIX}.selection",
                       :description => "One bounded page of the selected Edges under the active path, each with the " \
                                       "Ducting group holding it, its assignment and the refusal a write meets; other " \
-                                      "entities are reported as ignored.",
+                                      "entities are reported as ignored, with what making a " \
+                                      "Ducting group from the selection meets.",
                       :refuses => SELECTION_PAGE,
                       :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
                                                :optional => %w[limit cursor]),
                       :result => Shapes.object({ "edges" => Shapes.list(ROW), "next_cursor" => Pages::NEXT_CURSOR,
-                                                 "total" => Pages::TOTAL }.merge(IGNORED)),
+                                                 "total" => Pages::TOTAL }.merge(IGNORED).merge(MAKE_REFUSAL)),
                       :examples => [{}, { "limit" => 50 }]) { |request| Assignment::Selection.page(request) }
         feature.query("#{PREFIX}.selection_all",
                       :description => "Every selected Edge in one read, for the panel.",
                       :response => { "bounded" => false, "prefer" => "#{PREFIX}.selection" },
                       :refuses => SELECTION, :params => Shapes::NONE,
-                      :result => Shapes.object({ "edges" => Shapes.list(ROW) }.merge(IGNORED)),
+                      :result => Shapes.object({ "edges" => Shapes.list(ROW) }.merge(IGNORED)
+                                                                                .merge(MAKE_REFUSAL)),
                       :examples => [{}]) { |request| Assignment::Selection.all(request) }
         feature.snapshot_section("#{PREFIX}.selected", :query => "#{PREFIX}.selection_all")
       end
