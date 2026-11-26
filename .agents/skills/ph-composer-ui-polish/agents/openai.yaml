@@ -1,3 +1,4 @@
 interface:
   display_name: "PH-Composer UI Polish"
   short_description: "Polish PH-Composer screens consistently"
+  default_prompt: "Use $ph-composer-ui-polish to design, polish, or review the PH-Composer HtmlDialog screen or mockup."

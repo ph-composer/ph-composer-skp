@@ -1,0 +1,4 @@
+interface:
+  display_name: "PH-Composer Ruby quality"
+  short_description: "Review Ruby readability and guide scoped module refactors"
+  default_prompt: "Use $ph-composer-ruby-quality to assess the affected Ruby diff or guide the authorized module refactor against PH-Composer's Ruby standards."
