@@ -1,7 +1,7 @@
 # Phase 7 MS3 host sitting, the part needing no full-screen card
 
 DATE: 2026-11-25
-STATUS: Recorded in part. M13a, M14a, T04 and T08 pass (2026-11-25). The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass and M08, M10 and M16 unknown on named clauses. After the `groups.make` fix (#600), M13c, M13d, M14d and M14e were rerun with the panel closed and pass on the fixed build (2026-11-26). M13b and M14c still carry their crash fail; with M13e, M14f and M15 they are staged for the second hold.
+STATUS: Recorded in part. M13a, M14a, T04 and T08 pass (2026-11-25). The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass and M08, M10 and M16 unknown on named clauses. After the `groups.make` fix (#600), M13c, M13d, M14d and M14e were rerun with the panel closed and pass on the fixed build (2026-11-26). The second hold (2026-11-26) recorded M13b, M14c, M13e and M14f pass on `groups.make`. M15 is not run.
 ISSUE: #562
 
 Synthetic summary of the MS3 sitting (D4-31) for [Phase 7 Mechanical](../../features/phase-07-mechanical/ACCEPTANCE.md):
@@ -55,8 +55,8 @@ feature's own group store. A fix to the create step stales M13d, M14d and M14e.
 | `M14e` | pass (rerun on 55a1f8f7, 2026-11-26) | preflight-empty, export-reload-ventilation, shared-case-equal-identifiers, delete-erv2-null-refuses-locate-undo, save-reopen-reexport-same |
 | `T04` | pass | hand-calculation, open-context, counted-twice-undo, outside-zone, locate-nested, measurement |
 | `T08` | pass | export-readback, metadata-guard, save-reopen-reexport, outside-zone-disclosed, warnings-preflight-report, blocking-keeps-prior-pair, forced-refusal, required-refusal-withholds, snapshot-measure |
-| `M13b` | fail | h1-create-empty-group-active fail; h4-assign-clear-one-undo, h4-paste-shared-refuses-until-unique, hws-delete-retargets-one-undo pass; h2-line-tool-in-group, h3-split-tee-copied-record unknown |
-| `M14c` | fail | create-linked-group-active fail; assign-quantity-clear-one-undo, paste-shared-keeps-link-refuses-until-unique, erv-delete-retargets-group-and-zone-one-undo pass; line-tool-in-group unknown |
+| `M13b` | pass (second hold, 2026-11-26; fail on 2026-11-25, the crash) | h1-make-wraps-loose-lines, h1-make-refusals, h2-line-tool-in-group, h3-split-tee-copied-record, h4-assign-clear-one-undo, h4-paste-shared-refuses-until-unique, hws-delete-retargets-one-undo |
+| `M14c` | pass (second hold, 2026-11-26; fail on 2026-11-25, the crash) | make-wraps-loose-lines, line-tool-in-group, assign-quantity-clear-one-undo, paste-shared-keeps-link-refuses-until-unique, erv-delete-retargets-group-and-zone-one-undo |
 | `M13c` | pass (rerun on 55a1f8f7, 2026-11-26) | schedule-hand-measurement, branch-unconnected-floor2, locate-into-wrapped-group, save-reopen-same-identifiers, measurement-50000-edges, thermal-bridge-repeats |
 | `M09` | pass (hold, 2026-11-26) | all 13 |
 | `M11` | pass (hold, 2026-11-26) | all 14 |
@@ -64,7 +64,8 @@ feature's own group store. A fix to the create step stales M13d, M14d and M14e.
 | `M08` | unknown (hold, 2026-11-26) | 12 pass; heating-cooling-data, blended-copy unknown |
 | `M10` | unknown (hold, 2026-11-26) | 13 pass; save-reopen-reexport unknown (list order only) |
 | `M16` | unknown (hold, 2026-11-26) | 6 pass; dialog-defaults unknown (68 °F under IP unchecked) |
-| `M13e`, `M14f` | ready for hold | not begun; staged for the second hold on `groups.make` |
+| `M13e` | pass (second hold, 2026-11-26) | all 11 |
+| `M14f` | pass (second hold, 2026-11-26) | all 9 |
 
 ### Fixtures
 
@@ -131,6 +132,8 @@ H1 and its ducting twin fail: they are the crash. On a labelled group, the rest 
 - Delete with a replacement: HWS-1 to HWS-2 retargets both groups and both Zones, and ERV-1 to ERV-2 retargets the
   groups and Zone A. Each is one Undo step that restores.
 - Line tool: H2, H3 and M14c's Line-tool clause need the native Line tool and the created group. They stay unknown.
+
+Both cases were rerun whole on `groups.make` in the second hold and pass (below).
 
 ### T04 and T08
 
@@ -359,6 +362,157 @@ group in one Undo step), the line-group cases the fix stales were rerun with the
 - `acceptance_ledger.py status` on `55a1f8f7` also screens M09, M10, M11, M13a and M14a for recheck, through #600's
   shared paths.
 
+## The second hold, 2026-11-26
+
+One full-screen hold from the conductor ran M13b, M14c, M13e and M14f, then MS2's Zone views repeats
+([phase-07-ms2](phase-07-ms2.md)). Each case was recorded with `acceptance_case.py finish`; the four MS3 rows were
+written between 10:54 and 11:02. M15 was not run.
+
+- Build: installed RBZ `5801c445`, the preparation's build above. The rows for M13b, M14c and M13e record `main` at
+  `55a1f8f7`, M14f's `75ae8020` (#601); there is no `src/` or `tools/` change between them. `acceptance_run.py
+  package` matches, 878 entries, no extras. SketchUp 26.1.188, Ruby 3.2.2, macOS 26.7.1, a fresh process per case.
+- Control: the native Line tool, panel and viewport gestures by full-screen computer use from the conductor; bridge
+  reads and labelled setup (Ruby selection, opening a group, Make Unique, a line moved) in separate calls; native
+  Undo, Redo, Copy and Paste In Place by System Events Edit-menu presses with the model window raised (with the
+  panel key the Edit items are disabled); save-and-reopen steps quit SketchUp and relaunch with `host_bridge.py
+  launch`.
+- Fixtures: M13b and M14c on fresh copies of MS1's `reference.skp`; M13e on `fixtures/m13e-loose.skp` (ACCEPTANCE's
+  piping lines loose at the root except Floor 2's two, drawn in the hold) and M14f on `fixtures/m14f-loose.skp`
+  (the ducting lines loose except ERV-1's Outdoor air, drawn in the hold).
+
+### M13b: pass
+
+- H1 make: the native Line tool drew three loose lines at the root. With them selected (labelled), `make_refusal`
+  read null and `groups.make` completed "Done: Make Piping Group.": a new Group holds the three Edges under their
+  persistent ids, the edit path unchanged and the selection empty. One native Undo Make Piping Group gave the lines
+  back loose with the same ids and lengths; Redo restored the Group.
+- H1 refusals: a line bounding a Face refuses `target.wrong_kind` ("A selected line bounds a Face; a Piping group
+  holds loose lines only. Nothing was written."), and loose lines inside Zone A refuse `piping.group_in_zone`; the
+  group count stays 3.
+- H2: with the group open, the native Line tool drew a fourth Edge into it; the root gained no loose Edge or vertex.
+- H3: an Edge assigned PT-2 branch, a tee drawn from its Midpoint cue, then two crossing lines. The tagged Edge split
+  at a degree-3 vertex into two Edges, both carrying the assignment with `copied: true`; the tee carries no values;
+  the crossing lines split into four. After save and a fresh-process reopen the group reads HWS-1, `pipe_count` 2
+  and no findings.
+- H4: Clear Pipe and Assign Pipe are one native Undo step each, and Undo and Redo restore them.
+- Paste: Edit > Copy and Paste In Place give two instances of one definition, each run reading
+  `piping.shared_definition`; an explicit assign on the shared copy refuses `target.shared_definition` and completes
+  after Make Unique.
+- Deleting HWS-1 with HWS-2 as replacement moves both groups and both Zones; one native Undo restores HWS-1 on all
+  four.
+
+Evidence: `_private/host/phase-07-ms3/M13b/` (`24-h1-make.txt`, `26-h1-undo-redo.jsonl`, `29-refuse-zone.txt`,
+`32-h2-group-edges.json`, `41-reopened.json`, `08-undo-redo-assign.jsonl`, `12-assign-shared-explicit.txt`,
+`19-undo-delete.jsonl`, shots `h1-drawn.jpg`, `h2-drawn.jpg`, `h3-drawn.jpg`).
+
+### M14c: pass
+
+- Make: the native Line tool drew two connected loose lines; `groups.make` linked to ERV-1 completed "Done: Make
+  Ducting Group.", the Group holding both Edges under their ids, the edit path unchanged. One native Undo gave them
+  back loose; Redo restored the Group, which reads ERV-1.
+- Line tool in the group: with the group open, a native line went into it; no loose Edge or vertex at the root.
+  After save and a fresh-process reopen the group resolves and reads ERV-1.
+- Assign Duct DT-2 outdoor air, quantity 2 and Clear Duct: one native Undo step each, restored by Undo and Redo.
+- Paste In Place: both instances keep ERV-1 and read `ducting.shared_definition`; the explicit assign refuses
+  `target.shared_definition` and completes after Make Unique.
+- Deleting ERV-1 with ERV-2 as replacement moves both groups and both Zones; one native Undo restores ERV-1 on both
+  groups and Zone A, Zone B staying on ERV-2.
+
+Evidence: `_private/host/phase-07-ms3/M14c/` (`26-h1-undo-redo.jsonl`, `28-h2-group-edges.json`, `32-reopened.json`,
+`09-undo-redo-clear.jsonl`, `13-assign-shared-explicit.txt`, `19-undo-delete.jsonl`).
+
+### M13e: pass
+
+- Pipe Types: + New Pipe Type created PT-1 (Copper L, 1/2 in, 12.7 mm at 0.04, reflective, quality None, used
+  length 0); cells set to ACCEPTANCE's table: PT-1 PEX 3/4 in, PT-2 PEX 1/2 in uninsulated. Records match
+  (`03-pipe-types.json`, shots `01-pipe-types-pill.jpg`).
+- Make Piping group: Floor 2 drawn with the native Line tool from the riser's Endpoint cue. With Zone A in the
+  selection, Make is disabled and its Why reads "Select lines only: 1 other selected entity is not a line."
+  (shots `03-make-disabled-reason.jpg`). Lines only, Make refused on a Face (deviation below); after the Face was
+  erased natively the dialog prefilled HWS-1 and Make gave one Piping group, the 20 Edge ids kept. One native Undo
+  Make Piping Group and Redo (`13-undo-redo-make.jsonl`).
+- The bar: each run assigned with its role (Riser PT-1 Trunk multiplier 12; Floors 1 and 3 PT-2 Branch; Twigs PT-2
+  Twig; Loop up PT-1 Recirculation 55 °C, 18 h; Loop across 50 °C, 24 h). Multiplier and Demand recirculation show
+  for Trunk only, temperature and hours for Recirculation only. The last assign is one Undo step.
+- Assign by clicking: Floor 2's three pieces read PT-2 branch, the others unchanged; Undo takes back the last
+  click's piece only; Escape returns to the Select tool.
+- Schedule: 12 runs on HWS-1, lengths as ACCEPTANCE's piping case (Trunk 9.000 x12, Branches 4.000, 4.000, 3.000,
+  Recirculation 9.000 and 2.000); HWS-1 recirculation 11.000 m, 54.09 °C, 19 h; no findings. The Systems table shows
+  Recirc. 54.1 °C and 19 h/day (shots `10-systems-recirc.jpg`).
+- Broken branch: Floor 2's first piece moved (labelled) gives `piping.branch_unconnected`, blocking, on Branch 3
+  alone; the Findings note's Locate opened the group and selected its three Edges; native Undo cleared the finding.
+- Colour by Pipe role and Pipe Type: legend lengths equal the schedule totals (Trunk 9, Branch 11, Twig 7,
+  Recirculation 11 m; PT-1 20, PT-2 18 m).
+- Save and a fresh-process reopen: the case brief reads back equal.
+- Panel sizes: at 1280 x 800, 420 x 732 and 360 x 520 no page-level sideways scroll; the bar wraps and Assign by
+  clicking becomes an icon.
+- Supplementary, after the row was written and after a relaunch: the Pipe Types pill's Used length column reads
+  PT-1 20 m and PT-2 18 m (`34-used-length.json`, shots `14-pipe-types-used-length.jpg`), equal to the legend.
+
+Evidence: `_private/host/phase-07-ms3/M13e/` (`observations.json` names one file per assertion; shots `01` to `14`).
+
+### M14f: pass
+
+- Duct Types: DT-1 and DT-2 created; DT-2's shape changed to Rectangular through "Change DT-2 to Rectangular"
+  (Width 200, Height 100), one native Undo Edit Duct Type step that Redo restores; records match ACCEPTANCE's values
+  (`02-undo-redo-shape.jsonl`, `03-duct-types.json`).
+- Make Ducting group: ERV-1's Outdoor air drawn with the native Line tool from a Guide Point cue, two Edges and no
+  Face. "Choose a Ventilator" (two exist, no prefill) > ERV-1 > Make; one native Undo and Redo. ERV-2's two lines
+  made the same way.
+- The bar: four assigns by direction, type and quantity; the last is one Undo step.
+- Schedule and Ventilators columns: ERV-1 2.5 / 1.8 m and ERV-2 2.5 / 3.0 m (quantity 2), no findings.
+- Unlinked group: ERV-2 deleted with Clear existing uses leaves its group's runs `ducting.group_unlinked`, blocking;
+  Export's rows carry Locate. Locate first refused while the Line tool was active (finding below); after Select it
+  opened the group and selected the duct. Native Undo restored ERV-2 on the group and Zone B.
+- Colour by Duct direction and Duct Type: legend lengths equal the schedule with quantity counted (Exhaust 4.8 m;
+  DT-1 4.3, DT-2 5.5 m).
+- Save and a fresh-process reopen: the case brief reads back equal.
+- Panel sizes: 1280 x 800, 420 x 732 and 360 x 520 (placed at (900, 245)), no page-level sideways scroll,
+  `visibilityState` visible.
+- Supplementary, after the row was written: the Duct Types pill's Used length column reads DT-1 4.3 m and DT-2
+  5.5 m (`21-used-length.json`, shots `13-duct-types-used-length.jpg`).
+
+Evidence: `_private/host/phase-07-ms3/M14f/` (`observations.json`; shots `01` to `13`).
+
+### Deviations
+
+- M13e, Floor 2: the line drawn natively crossed the Loop up line at (1.2, 1, 6), so both split (20 root Edges, not
+  18), and riser, Floor 2, Loop up and Floor 3 closed a 0.2 x 3 m rectangle that SketchUp filled with a Face. Make
+  refused ("A selected line bounds a Face; a Piping group holds loose lines only.") until the Face was erased with
+  a native click and Delete. The recipe had no erase step. For Ed: whether a Face that SketchUp closes between
+  pipes should block Make, or Make should name the fix.
+- M13e, panel sizes: the 360 x 520 panel placed at screen (1628, 245) painted blank and its page reported
+  `document.visibilityState` hidden (shots `13b-360x520-at-1628-blank.jpg`). At the same position 360 x 560,
+  360 x 600 and 420 x 520 were visible, and 360 x 520 at (900, 245) was visible; the passing capture is the latter.
+  The behaviour depends on position and its cause is not established. The case's observation attributes it to host
+  occlusion; nothing recorded shows that.
+- M13e and M14f: the first viewport click after the panel was key only keyed the window, and Locate refuses while a
+  drawing tool is active, so Select was chosen first. The recipe named neither.
+
+### Findings from the second hold (MS3 cases)
+
+Product observations from the UI-polish review of M13e's and M14f's captures, none blocking a clause:
+
+- Piping and Ducting groups are named by persistent id ("Piping group 49013", "Ducting group 48989").
+- Every new Pipe Type gets the same colour, #c9a227, so Colour by Pipe Type cannot tell PT-1 from PT-2. Duct Types
+  get distinct colours.
+- At 1280 x 800 the Make Piping group Why icon wraps alone under "No lines selected".
+- Refusal and finding text doubles the noun: "Zone Zone A" (M13b), "Zone Zone B has no Ventilator." (M14f).
+- The refusal for a Face between pipes names the cause but not the fix (the deviation above).
+- The Ventilator delete dialog lists the Zones it serves but not the Ducting group it leaves unlinked, whose runs
+  then block export.
+- "The SketchTool tool is in use in SketchUp; the edit path moves once the user returns to Select. Nothing moved."
+  shows a raw tool identifier and doubles the noun (Words rule), and stayed on screen across a tab switch and the
+  next Locate until dismissed.
+- A pipe-tool click 4 px off a line missed it.
+- SketchUp's Tags and Entity Info tray overlaps the panel's lower right (host).
+
+### Owed after the second hold
+
+M15, the integrated run, is not run. The cases `acceptance_ledger.py status` screens `needs_recheck`: M01, M04,
+M06, M08 to M11, M13a, M14a, M16 and UXR-FILTER-OCC. MS2's ZO-O7 (unfinished) and HGUI (not run) are in
+[phase-07-ms2](phase-07-ms2.md).
+
 ## Ready for hold
 
 Written before the first hold, which used this recipe for M08 to M11, M16 and T09 (above).
@@ -377,13 +531,15 @@ it. M13b and M14c need a whole-case rerun after the fix, not a Line-tool-only ru
 
 ## Open
 
-- The `groups.create` crash (above): fixed by #600 (`groups.make`, with tests); its host cases M13b and M14c are
-  owed to the second hold.
+- The `groups.create` crash (above): fixed by #600 (`groups.make`, with tests); M13b and M14c pass on it at the
+  second hold.
 - Ed's reading of T04 and T08 under WT-23 (labels still say counted twice), and p4-15 decision 3 (section or whole
   file) for M13d and M14e, and from the first hold for M08, M09, M11 and M16 (compared by section) and M10 (list
   order only).
-- The hold's product findings (above), for issues if Ed wants them.
-- The second hold (above): M13b, M13e, M14c, M14f, M15 and MS2's eleven Zone views repeats.
+- The hold's product findings (above), for issues if Ed wants them, and the second hold's.
+- From the second hold, for Ed: whether a Face SketchUp closes between pipes should block Make Piping group (M13e),
+  and the 360 x 520 panel painting blank at one screen position, cause not established.
+- M15, not run. MS2's ZO-O7 (unfinished) and HGUI (not run), in [phase-07-ms2](phase-07-ms2.md).
 - ACCEPTANCE's piping case: 17 Edges as written, 18 on the host.
 - The whole-panel snapshot at 50,040 Edges: 31.0 s against 12.1 s in October.
 
@@ -398,3 +554,7 @@ now (768, 245), 1280 x 800, where MS2's notes cite (-1282, 292). SketchUp was qu
 The first hold: no fault and no provider override. Each of its exports revoked its approved location. Both operator
 errors were reverted at once by native Undo (M05 in MS2's evidence, M08 above). The hold ended at a case boundary
 and SketchUp was quit.
+
+The second hold, MS3 cases: no fault and no provider override; none of the four exported. Each save-and-reopen
+step quit SketchUp cleanly before the fresh launch. The Face in M13e's model was erased by the case itself, as
+recorded above.
