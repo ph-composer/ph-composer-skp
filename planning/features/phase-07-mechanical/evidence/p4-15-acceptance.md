@@ -101,6 +101,23 @@ From `acceptance_ledger.py status` on this head, with `--changed` for each of th
 Most of the 48 are named only because `extension.rb`, `shell/api.rb`, `index.html` or a shared kit file changed with
 every stage. Which of them the MS3 sitting repeats is Ed's call ("For Ed"); no stage document names them.
 
+### After the sittings and the first hold (2026-11-26)
+
+The table above is the 2026-11-25 snapshot. The MS1 to MS3 sittings and the conductor's first full-screen hold
+recorded the assigned cases as below ([phase-07-ms1](../../../native-acceptance/evidence/phase-07-ms1.md),
+[phase-07-ms2](../../../native-acceptance/evidence/phase-07-ms2.md),
+[phase-07-ms3](../../../native-acceptance/evidence/phase-07-ms3.md)).
+
+| Sitting | Pass | Recorded unknown or fail | Still owed |
+| --- | --- | --- | --- |
+| MS1 | `M02`, `M03`, `M04` | `M01` unknown (load order not observable on the host) | none run again |
+| MS2 | `M06`, `UXR-FILTER-OCC` | `M05`, `M07` unknown (hold 1) | the eleven other Zone views repeats (`ZO-H1`, `ZO-H2`, `ZO-H3`, `ZO-O7`, `PTAB`, `HGUI`, `UXR-SOLVE`, `UXR-FILTER`, `UXR-HATCH`, `UXR-PAINT`, `UXR-COLOUR`), to hold 2 |
+| MS3 | `M09`, `M11`, `M13a`, `M13d`, `M14a`, `M14d`, `M14e`, `T04`, `T08`, `T09` | `M08`, `M10`, `M16` unknown (hold 1); `M13c` unknown; `M13b`, `M14c` fail (`groups.create` crashes SketchUp) | after the crash fix, to hold 2: `M13b`, `M13c`, `M13d`, `M13e`, `M14c`, `M14d`, `M14e`, `M14f`, `M15` |
+
+`M13d`, `M14d` and `M14e` are Pass today; the fix to the create step stales them. The unknown clauses of `M05`,
+`M07`, `M08` and `M16` need a rerun, not yet assigned to a sitting; `M10`'s waits on decision 3 below (its
+re-export differs in list order only). The 48 stale cases not assigned to a sitting are unchanged.
+
 ## Steps 4 and 5: context and product documents
 
 | Document | State | Change here |
