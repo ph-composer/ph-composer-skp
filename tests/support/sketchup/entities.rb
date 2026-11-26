@@ -830,6 +830,7 @@ module Sketchup
       self << group
       group.reads_world_while_open = true
       group.layer = Sketchup.active_model.active_layer if Sketchup.active_model&.active_layer
+      Sketchup.active_model&.note_empty_group(group) if members.empty?
       group
     end
 

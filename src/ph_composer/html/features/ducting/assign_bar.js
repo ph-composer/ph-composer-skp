@@ -6,10 +6,10 @@ function (ui, lineBars, shared) {
   "use strict";
   var Bar = lineBars.Bar;
 
-  /* `newGroup()` opens New Ducting group; `notify(message, tone)` raises the panel's notice. */
-  function AssignBar(session, send, guard, notify, newGroup) {
+  /* `makeGroup()` opens Make Ducting group; `notify(message, tone)` raises the panel's notice. */
+  function AssignBar(session, send, guard, notify, makeGroup) {
     var self = this;
-    Bar.call(this, session, send, shared.SPEC, guard, notify, newGroup);
+    Bar.call(this, session, send, shared.SPEC, guard, notify, makeGroup);
     this.direction = "outdoor_air";
     this.directions = ui.element("div", "ducting-directions");
     this.directions.setAttribute("role", "group");

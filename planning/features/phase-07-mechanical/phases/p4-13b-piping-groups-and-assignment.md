@@ -1,7 +1,7 @@
 # P4-13b: Piping groups and the pipe assignment
 
 DATE: 2026-11-24
-STATUS: Merged to main 2026-11-24 (#577, squash `2f360b5b`); offline evidence in [p4-13b-piping-groups-and-assignment](../evidence/p4-13b-piping-groups-and-assignment.md), host case `M13b` owed to MS3. Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q2, Q3, Q6, Q7, Q8, Q13), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "Draw" and "Assign". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13b` runs in the MS3 sitting (D4-31), and carries the Line tool cases nothing has measured.
+STATUS: Merged to main 2026-11-24 (#577, squash `2f360b5b`); offline evidence in [p4-13b-piping-groups-and-assignment](../evidence/p4-13b-piping-groups-and-assignment.md), host case `M13b` owed to MS3. H1 failed on the host at MS3 (2026-11-25: `groups.create` crashes SketchUp), so the fallback this document names was taken on 2026-11-26 (issue #598): `groups.make` over selected loose lines, recorded in "The fallback taken" below. Planned in full 2026-11-24 from [P4-13](p4-13-hot-water-piping.md), D4-36 (Q1, Q2, Q3, Q6, Q7, Q8, Q13), D4-18 and the [piping PRD](../hot-water-piping/PRD.md), "Draw" and "Assign". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M13b` runs in the MS3 sitting (D4-31), and carries the Line tool cases nothing has measured.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -10,7 +10,8 @@ ISSUE: #562
 Requires P4-13a. Owns, panel closed:
 
 - The Piping group: an entity-owned record on a SketchUp Group linking it to one Hot Water System (Q7: many groups
-  per System), created by `groups.create`, which also opens it for drawing (Q2).
+  per System), made by `groups.make` from loose lines already drawn and selected ("The fallback taken"; the planned
+  `groups.create`, which opened an empty group for drawing (Q2), crashed the host).
 - The pipe assignment: an entity-owned record on an Edge with its Pipe Type, its role and the role's values, its
   reference target, `pipes.assign`, `pipes.clear`, the selection read, and delete in use for Pipe Types and for
   Hot Water Systems a group names.
@@ -48,10 +49,12 @@ Paths are relative to `src/ph_composer/`.
 - **Membership is the direct parent.** An Edge is a Pipe only when its parent container is a Piping group (PRD:
   "Membership is by parent group, the same rule Spaces follow"). An Edge in a plain Group inside a Piping group is not
   a Pipe; assign refuses it.
-- **Where a group may sit (Q13).** At the Model root or inside plain wrapper Groups. `groups.create` and
+- **Where a group may sit (Q13).** At the Model root or inside plain wrapper Groups. `groups.create` (now
+  `groups.make`) and
   `pipes.assign` refuse `piping.group_in_zone` for a group that `zones.containment` says a Zone holds, and
   `piping.group_nested` for a Piping group inside another.
-- **`groups.create`** adds an empty Group at the Model root, writes its record with the given System and opens it
+- **`groups.create`** (superseded 2026-11-26 by "The fallback taken") adds an empty Group at the Model root, writes
+  its record with the given System and opens it
   through `EditContext.enter`, in one Undo step. Whether an empty Group survives the commit and opens is not measured
   (Host gate, H1); the design rests on it. If it fails on the host, this sub-stage stops and records it, and the
   route becomes "Make Piping group" over selected loose lines, the Make Zone shape, which keeps the wrapped Edges' ids
@@ -102,14 +105,46 @@ Paths are relative to `src/ph_composer/`.
 - **No repair route.** An Edge or group whose stored text is not a JSON object refuses every write
   (`record.unreadable`); unreadable text names nothing, so deletes pass over it, as thermal bridges' do.
 - **`groups.create`** does not check that the Model is shown or that no tool is active, as `ph_composer.context.open`
-  does; H1 measures the path change inside the operation.
+  does; H1 measures the path change inside the operation. (Superseded: `groups.make` moves no edit path, so it takes
+  no shown-Model check, as Make Zone takes none.)
+
+## The fallback taken (2026-11-26, issue #598)
+
+H1 failed in the MS3 sitting: SketchUp 26.1.188 deletes a Group left empty at the commit of the operation that made
+it, and `LineGroups::CreateStep` made the empty Group the active path in that operation, so SketchUp crashed
+(`EXC_BAD_ACCESS`; [phase-07-ms3](../../../native-acceptance/evidence/phase-07-ms3.md)). A probe in the
+conductor's first full-screen hold, 2026-11-26, confirmed the fallback's assumptions: wrapping selected loose Edges in
+a new Group keeps their persistent ids and dictionaries as one Undo step that Undo restores, and the native Line tool
+drawing in an open labelled Piping group adds its Edges to it and splits an Edge it meets
+(`context/SKETCHUP_HOST_BEHAVIOR.md`, "Making a line group"). Built for piping and ducting at once through the shared
+`line_groups/` layer ([evidence](../evidence/line-group-create-fix.md)):
+
+- **`groups.make`** replaces `groups.create`. It takes `edge_paths`, root-to-Edge paths of loose lines as
+  `pipes.selection` gives them (at most the pipe gesture limit, 250), and `hot_water_system_id`; it wraps the lines in
+  a new Group where they are drawn with `entities.add_group(edges)`, writes the `ppg_` record, in one Undo step
+  ("Make Piping Group"), and does not open the group: the user double-clicks it to draw more. No operation in the
+  layer makes an empty Group.
+- **Refusals**, each writing nothing: a path naming no Edge or an Edge bounding a Face `target.wrong_kind`; lines in
+  two collections, or in a Group another feature claims (a Ducting group, a Space), `target.wrong_hierarchy`; lines
+  outside the open context `target.edit_path_changed`; lines in a Piping group `piping.group_nested`; lines a Zone
+  holds, by an Edge's own path so an open Zone counts, `piping.group_in_zone`; a component, a locked or a shared
+  Group on the path, as a group write meets them; more than 250 lines `gesture.too_large`. No new codes.
+- **The selection read** (`pipes.selection`, `pipes.selection_all` and the `pipes.selected` section) adds
+  `make_refusal`, the same rule over the whole selection: nothing selected `params.invalid`, a selected non-Edge
+  `target.wrong_kind`, otherwise the make's own refusal, or null.
+- **The panel**: the bar's **+ New Piping group** becomes **Make Piping group**, enabled only while `make_refusal` is
+  null, with its reason beside it otherwise; its form asks for the Hot Water System and sends the selected lines'
+  paths (P4-13e).
+- **Inferred**: an Edge bounding a Face is refused because wrapping only the Edge was not measured; a Zone the
+  containment read reports `outside_envelope` or `cutting_instance` for does not refuse, as link and assign
+  already read it.
 
 ## Steps
 
 1. **Piping group store and target.** `features/piping/group/schema.rb`, `store.rb`, `reference_target.rb`: the record
    above on `Records::EntityStore`, the target `ph_composer.piping.group` resolving a Group by path.
 2. **Group operations.** `group/operations.rb`: `groups.create` (System id, opens the group through
-   `EditContext.enter`), `groups.link`, `groups.unlink`, `groups.all` (every Piping group occurrence with its System,
+   `EditContext.enter`; now `groups.make`, "The fallback taken"), `groups.link`, `groups.unlink`, `groups.all` (every Piping group occurrence with its System,
    pipe count, `copied` and placement findings) and a bounded `groups.list`.
 3. **Assignment store and target.** `features/piping/assignment/schema.rb`, `store.rb`, `reference_target.rb`: the
    record above, the role values validated per role, `GESTURE_EDGE_LIMIT` 250.
@@ -146,7 +181,9 @@ Paths are relative to `src/ph_composer/`.
    System and opens it, in one Undo step that Undo removes; `groups.link` with stale `expected_values` refuses; a
    group inside a Zone Group refuses `piping.group_in_zone` and one inside a Piping group `piping.group_nested`; a
    copied group reads `copied`; deleting a System a group names refuses `reference.in_use`, and with a replacement
-   retargets the group in one Undo step that Undo restores.
+   retargets the group in one Undo step that Undo restores. Since the fallback: `groups.make` wraps three loose lines
+   in one Undo step keeping their ids and dictionaries, and each refusal above writes nothing; the selection read's
+   `make_refusal`.
 2. Assignment (`tests/piping_assignment_test.rb`): assign three Edges in a Piping group as a trunk with multiplier 12,
    one Undo step; reassign one as recirculation with 55 °C and 18 h, and its trunk values are gone; a trunk with a
    `water_temp_c`, a branch with a `multiplier` and a recirculation pipe with `daily_period` 25 refuse `params.invalid`;
@@ -160,7 +197,8 @@ Paths are relative to `src/ph_composer/`.
    assignment.
 5. The walkthrough (`tests/piping_assignment_walkthrough_test.rb`, the shape of
    `thermal_bridge_assignment_walkthrough_test.rb`): create a group, draw three lines through the stub host, assign,
-   clear, Undo, Redo, reopen.
+   clear, Undo, Redo, reopen. Since the fallback: draw three loose lines, make the group from them, open it, assign,
+   clear, Undo, Redo.
 
 ## Host gate
 
@@ -168,8 +206,10 @@ Batched into the `MS3` sitting (D4-31): case `M13b`, panel closed, on the instal
 evidence covers yet, and the design above rests on them:
 
 - H1. `groups.create` on the root: the empty Group survives the operation's commit, is the active path afterwards,
-  and survives Undo, Redo, save and reopen once lines are in it.
-- H2. The native Line tool, drawing in that open group, puts its Edges in the group's entities.
+  and survives Undo, Redo, save and reopen once lines are in it. **Failed 2026-11-25 (crash)**; replaced by: loose
+  lines drawn at the root with the Line tool and selected, `groups.make` wraps them in one Undo step keeping their
+  ids, leaves the edit path, and the group survives Undo, Redo, save and reopen.
+- H2. The native Line tool, drawing in the made group once opened, puts its Edges in the group's entities.
 - H3. A line started on the middle of a loose Edge in the faceless group splits that Edge and shares the new vertex
   (one vertex id at the tee), and two crossing loose lines split each other; a tagged Edge split this way puts its
   dictionary on both halves (T01 measured this for an Edge on a Face only).

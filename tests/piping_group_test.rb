@@ -2,9 +2,10 @@
 
 require_relative "test_helper"
 
-# Piping groups through their registered actions (context/CONTRACTS.md, "Hot water piping"): create opens a new
-# group at the root in one Undo step, link and unlink are guarded, a group inside a Zone or another Piping group
-# refuses, a pasted copy reads copied, and a Hot Water System delete moves or refuses the groups naming it.
+# Piping groups through their registered actions (context/CONTRACTS.md, "Hot water piping"): make wraps loose lines
+# in a new group in one Undo step and refuses lines it cannot wrap, the selection read says which, link and unlink
+# are guarded, a group inside a Zone or another Piping group refuses, a pasted copy reads copied, and a Hot Water
+# System delete moves or refuses the groups naming it.
 class PipingGroupTest < PhComposerTestCase
   API = PhComposer::API
   P = PhComposer::Piping
@@ -22,8 +23,12 @@ class PipingGroupTest < PhComposerTestCase
     @hws2 = invoke("#{SYSTEMS}.create", "values" => { "name" => "HWS-2" }).dig("value", "id")
   end
 
-  def test_create_adds_one_open_group_at_the_root_linked_to_the_system_in_one_undo_step
-    result = invoke("#{PREFIX}.create", "hot_water_system_id" => @hws1)
+  def test_make_wraps_loose_lines_in_a_group_linked_to_the_system_in_one_undo_step
+    lines = [801, 802, 803].map { |id| edge(id) }
+    lines.each { |line| @model.entities << line }
+    lines.first.set_attribute("user.notes", "kept", 1)
+    steps = @model.operations.length
+    result = make(lines.map { |line| [line.persistent_id] }, @hws1)
     assert_equal "committed", result["effect"], result.inspect
     id = result.dig("value", "group_id")
     assert_match(/\Appg_[A-Za-z0-9]{12}\z/, id)
@@ -31,14 +36,92 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal 1, groups.length
     assert_equal({ "id" => id, "schema_version" => 1, "hot_water_system_id" => @hws1, "user_data" => {},
                    "extension_data" => {} }, STORE.read(groups.first))
-    assert_equal [groups.first], Array(@model.active_path)
-    row = all.first
+    assert_equal [lines, 1, nil], [groups.first.entities.to_a, lines.first.get_attribute("user.notes", "kept"),
+                                   @model.active_path]
+    assert_equal [["Make Piping Group", true, :committed]], @model.operations.drop(steps)
     assert_equal [{ "group_id" => id, "group_path" => [groups.first.persistent_id] }, 0, false, [], nil],
-                 row.values_at("reference", "pipe_count", "copied", "findings", "write_refusal")
-    assert_equal %w[refused target.not_found], invoke("#{PREFIX}.create", "hot_water_system_id" => "hws_ZZZZZZZZZZZZ")
-      .values_at("status", "code")
+                 all.first.values_at("reference", "pipe_count", "copied", "findings", "write_refusal")
+    assert_equal %w[refused target.not_found], make([[801]], "hws_ZZZZZZZZZZZZ").values_at("status", "code")
     @model.undo
     assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+    assert_equal [801, 802, 803], @model.entities.to_a.grep(Sketchup::Edge).map(&:persistent_id)
+  end
+
+  # Each refusal writes nothing: no group, and every line where it was.
+  def test_make_refuses_lines_it_cannot_wrap_and_writes_nothing
+    face = Sketchup::Face.new(890)
+    bounding = edge(891).tap { |line| line.attach_face(face) }
+    plain = Sketchup::Group.new(600, Sketchup::Entities.new([edge(601)]))
+    inner = Sketchup::Group.new(110, Sketchup::Entities.new([edge(111)]))
+    zone = zone_group(100, [edge(101), inner])
+    piping = piping_group(520, "ppg_CCCCCCCCCCCC", @hws1, [edge(521)])
+    ducting = Sketchup::Group.new(530, Sketchup::Entities.new([edge(531)]))
+    PhComposer::Ducting::Group::STORE.write(ducting, PhComposer::Ducting::Group.new_record("dcg_AAAAAAAAAAAA", nil))
+    locked = Sketchup::Group.new(540, Sketchup::Entities.new([edge(541)])).tap { |group| group.locked = true }
+    shared = Sketchup::Entities.new([edge(551)])
+    copies = [550, 560].map { |id| Sketchup::Group.new(id, shared) }
+    component = @model.definitions.add("Riser").tap { |definition| definition.entities << edge(571) }
+    instance = @model.entities.add_instance(component, Geom::Transformation.new)
+    entities = [edge(801), face, bounding, plain, zone, piping, ducting, locked, *copies]
+    entities.each { |entity| @model.entities << entity }
+    { [[], nil] => "params.invalid", [[[890]], nil] => "target.wrong_kind", [[[891]], nil] => "target.wrong_kind",
+      [[[999]], nil] => "target.not_found", [[[801], [600, 601]], nil] => "target.wrong_hierarchy",
+      [[[600, 601]], nil] => "target.edit_path_changed", [[[100, 101]], [zone]] => "piping.group_in_zone",
+      [[[100, 110, 111]], [zone, inner]] => "piping.group_in_zone", [[[520, 521]], [piping]] => "piping.group_nested",
+      [[[530, 531]], [ducting]] => "target.wrong_hierarchy", [[[540, 541]], [locked]] => "target.locked",
+      [[[550, 551]], [copies.first]] => "target.shared_definition",
+      [[[instance.persistent_id, 571]], [instance]] => "target.wrong_hierarchy" }.each do |(paths, open), code|
+      @model.active_path = open
+      assert_equal ["refused", code], make(paths, @hws1).values_at("status", "code"), paths.inspect
+    end
+    @model.active_path = nil
+    assert_equal [piping], all_groups
+    assert_equal [[601], [101, 110], [521], [531]], [plain, zone, piping, ducting].map { |group|
+      group.entities.map(&:persistent_id)
+    }
+  end
+
+  # In an open plain Group the new group is made inside it, where the lines are, and the Group stays open.
+  def test_make_in_an_open_plain_group_wraps_the_lines_there
+    plain = Sketchup::Group.new(600, Sketchup::Entities.new([edge(601), edge(602)]),
+                                {}, :transformation => Geom::Transformation.translation([100, 0, 0]))
+    @model.entities << plain
+    @model.active_path = [plain]
+    assert_equal "committed", make([[600, 601], [600, 602]], @hws1)["effect"]
+    made = plain.entities.to_a.find { |entity| STORE.marks?(entity) }
+    assert_equal [[601, 602], [plain]], [made.entities.map(&:persistent_id), Array(@model.active_path)]
+    assert_equal [[600, made.persistent_id]], all.map { |row| row.fetch("path") }
+  end
+
+  # The gesture limit is the handler's, so 251 lines refuse with its code and 250 are made.
+  def test_make_takes_250_lines_and_refuses_251_as_too_large
+    lines = (1000..1250).map { |id| edge(id) }
+    lines.each { |line| @model.entities << line }
+    paths = lines.map { |line| [line.persistent_id] }
+    assert_equal %w[refused gesture.too_large], make(paths, @hws1).values_at("status", "code")
+    assert_equal "committed", make(paths.first(250), @hws1)["effect"]
+    assert_equal [250], all_groups.map { |group| group.entities.count }
+  end
+
+  # The selection read answers what make would meet over the selection, so the panel offers it only when it can run.
+  def test_the_selection_read_says_whether_its_lines_make_a_group
+    lines = [801, 802].map { |id| edge(id) }
+    piping = piping_group(520, "ppg_CCCCCCCCCCCC", @hws1, [edge(521)])
+    face = Sketchup::Face.new(890)
+    [*lines, piping, face].each { |entity| @model.entities << entity }
+    assert_equal ["params.invalid"] * 2, make_refusals
+    @model.selection.add(lines)
+    assert_equal [nil, nil], make_refusals
+    assert_equal "committed", make(selection_paths, @hws2)["effect"]
+    @model.selection.add([face])
+    assert_equal ["target.wrong_kind"] * 2, make_refusals
+    @model.selection.clear
+    @model.selection.add([face])
+    assert_equal ["target.wrong_kind"] * 2, make_refusals, "a Face alone is no line either"
+    @model.selection.clear
+    @model.active_path = [piping]
+    @model.selection.add(piping.entities.to_a)
+    assert_equal ["piping.group_nested"] * 2, make_refusals
   end
 
   def test_link_and_unlink_are_guarded_and_each_one_undo_step
@@ -77,12 +160,14 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal @hws1, STORE.read(in_zone).fetch("hot_water_system_id")
   end
 
-  # Opening the new group moves the edit path, which SketchUp does only in the Model it shows.
-  def test_create_refuses_session_inactive_for_a_model_sketchup_is_not_showing
+  # Make moves no edit path, so a Model SketchUp is not showing takes it, as it takes Make Zone.
+  def test_make_groups_lines_in_a_model_sketchup_is_not_showing
+    @model.entities << edge(801)
     Sketchup.active_model = Sketchup::Model.new
-    assert_equal %w[refused session.inactive], invoke("#{PREFIX}.create", "hot_water_system_id" => @hws1)
-      .values_at("status", "code")
-    assert(@model.entities.to_a.none? { |entity| STORE.marks?(entity) })
+    assert_equal "committed", make([[801]], @hws1)["effect"]
+    assert_equal [[801]], @model.entities.to_a.select { |entity| STORE.marks?(entity) }.map { |group|
+      group.entities.map(&:persistent_id)
+    }
   end
 
   # A group row's write_refusal is what link meets, in its order: nested, the path's own, then in a Zone.
@@ -144,6 +229,42 @@ class PipingGroupTest < PhComposerTestCase
   end
 
   private
+
+  def edge(persistent_id)
+    Sketchup::Edge.new(persistent_id, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(100, persistent_id, 0))
+  end
+
+  def zone_group(persistent_id, children)
+    zone = Sketchup::Group.new(persistent_id, Sketchup::Entities.new(children))
+    PhComposer::Zones::ZONE_STORE.write(zone, "id" => "zon_AAAAAAAAAAAA", "schema_version" => 1, "name" => "Zone A",
+                                              "building_segment" => "Building", "level" => nil,
+                                              "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {})
+    zone
+  end
+
+  def make(edge_paths, system_id)
+    invoke("#{PREFIX}.make", "edge_paths" => edge_paths, "hot_water_system_id" => system_id)
+  end
+
+  # The selected lines' paths as the selection read gives them, which is what the panel sends make.
+  def selection_paths
+    selection("selection_all").fetch("edges").map { |row| row.fetch("path") }
+  end
+
+  # The make_refusal code of the whole and the paged selection read.
+  def make_refusals
+    %w[selection_all selection].map { |name| selection(name).dig("make_refusal", "code") }
+  end
+
+  def selection(name)
+    result = API.query(:context => @context, :name => "ph_composer.piping.pipes.#{name}")
+    assert_equal "completed", result["status"], result.inspect
+    result.fetch("value")
+  end
+
+  def all_groups
+    @model.entities.to_a.select { |entity| STORE.marks?(entity) }
+  end
 
   def piping_group(persistent_id, id, system_id, children = [])
     group = Sketchup::Group.new(persistent_id, Sketchup::Entities.new(children))

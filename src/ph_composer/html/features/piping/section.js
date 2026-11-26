@@ -8,8 +8,8 @@ function (systems, hotWater, pills, shared, bars, schedule) {
   systems.table({ system: hotWater.SYSTEM, id: shared.PREFIX + "piping", label: "Piping", order: 50,
     build: function (surface, context) {
       return new pills.Pill(surface, context, shared.SPEC, { types: shared.TYPES, view: schedule.VIEW,
-        bar: function (session, send, guard, notify, newGroup) {
-          return new bars.AssignBar(session, send, guard, notify, newGroup);
+        bar: function (session, send, guard, notify, makeGroup) {
+          return new bars.AssignBar(session, send, guard, notify, makeGroup);
         } });
     } });
   return {};

@@ -1,7 +1,7 @@
 # P4-14c: Ducting groups and the duct assignment
 
 DATE: 2026-11-24
-STATUS: Merged to main 2026-11-25 (#583, squash `13bb8f88`); offline evidence in [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md), host case `M14c` owed to MS3. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
+STATUS: Merged to main 2026-11-25 (#583, squash `13bb8f88`); offline evidence in [p4-14c-ducting-groups-and-assignment](../evidence/p4-14c-ducting-groups-and-assignment.md), host case `M14c` owed to MS3. `groups.create` crashed the host at MS3 (2026-11-25), so piping's fallback was taken for ducting too on 2026-11-26 (issue #598): `groups.make`, below. Planned in full 2026-11-24 from [P4-14](p4-14-erv-ducting.md), D4-37 (Q2, Q3, Q4, Q5, Q6) and the [ducting PRD](../erv-ducting/PRD.md), "Behaviors". Scoped. Authorized with every stage on 2026-11-23 (STATUS, "Entry gates"). Host case `M14c` runs in the MS3 sitting (D4-31).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -10,8 +10,9 @@ ISSUE: #562
 Requires P4-14b (or, if Ed chose the copy, P4-14a alone, with piping's files as the pattern for each part). Owns,
 panel closed:
 
-- The Ducting group: an entity-owned record on a SketchUp Group linking it to one Ventilator, created by
-  `groups.create`, which also opens it for drawing with the native Line tool (Q5).
+- The Ducting group: an entity-owned record on a SketchUp Group linking it to one Ventilator, made by `groups.make`
+  from loose lines already drawn and selected ("The fallback taken"; the planned `groups.create`, which opened an
+  empty group for the native Line tool (Q5), crashed the host).
 - The duct assignment: an entity-owned record on an Edge with its Duct Type, direction and quantity, its reference
   target, `ducts.assign`, `ducts.clear`, the selection read, and delete in use for Duct Types and for Ventilators a
   group names.
@@ -39,8 +40,9 @@ Paths are relative to `src/ph_composer/`.
   with no Ventilator"), `user_data`, schema version 1. A copy shares the id, read as `copied`, and keeps its link (Q4).
 - **Membership is the direct parent**, and a Ducting group sits at the Model root or in plain wrapper Groups, never in
   a Zone Group (`ducting.group_in_zone`) nor in another Ducting group (`ducting.group_nested`), as piping's (Q5).
-- **`groups.create`** adds an empty Group at the root with the given Ventilator and opens it, in one Undo step; it
-  rests on P4-13b's unmeasured H1 and H2 (P4-14, "Host cases owed to MS3"). `groups.link` sets or replaces the
+- **`groups.create`** (superseded 2026-11-26 by "The fallback taken") adds an empty Group at the root with the given
+  Ventilator and opens it, in one Undo step; it rests on P4-13b's unmeasured H1 and H2 (P4-14, "Host cases owed to
+  MS3"). `groups.link` sets or replaces the
   Ventilator with `expected_values`; `groups.unlink` sets it to null.
 - **Duct assignment record.** Dictionary `ph_composer.ducting` on the Edge: `id` (`dce_`), `duct_type_id` (a declared
   `one` reference to `ph_composer.ducting.duct_type`, nullable: null is the PRD's blocking "Duct with no Duct
@@ -79,7 +81,7 @@ Paths are relative to `src/ph_composer/`.
 
 1. **Group record and target.** `features/ducting/group/schema.rb` (the record on `Records::EntityStore`),
    `reference_target.rb` over `LineGroups::GroupTarget`.
-2. **Group operations.** `group/operations.rb`: `groups.create`, `groups.link`, `groups.unlink`, `groups.all` (every
+2. **Group operations.** `group/operations.rb`: `groups.create` (now `groups.make`, "The fallback taken"), `groups.link`, `groups.unlink`, `groups.all` (every
    occurrence with its Ventilator, duct count, `copied` and placement findings) and a bounded `groups.list`.
 3. **Assignment record and target.** `features/ducting/assignment/schema.rb`, `reference_target.rb` over
    `LineGroups::EdgeTarget`, `GESTURE_EDGE_LIMIT` 250.
@@ -127,12 +129,28 @@ Paths are relative to `src/ph_composer/`.
    `duct_type_id` is null; each one Undo step; through two placements of one group the delete refuses atomically.
 5. Selection: two Edges and a Face give the Face as ignored and each Edge's group, Ventilator and assignment.
 6. The walkthrough (`tests/ducting_assignment_walkthrough_test.rb`, the shape of piping's): create a group, draw two
-   lines through the stub host, assign, clear, Undo, Redo, reopen.
+   lines through the stub host, assign, clear, Undo, Redo, reopen. Since the fallback: draw two loose lines, make the
+   group from them, open it, then the same.
+
+## The fallback taken (2026-11-26, issue #598)
+
+P4-13b's H1 failed in the MS3 sitting: `groups.create` crashed SketchUp 26.1.188, for ducting as for piping, through
+the shared `LineGroups::CreateStep` (an empty Group made the active path, which SketchUp deletes at commit). The
+fallback P4-13b names was built for both features in the shared layer ([P4-13b](p4-13b-piping-groups-and-assignment.md),
+"The fallback taken", which holds the rule, the refusals and the host evidence;
+[evidence](../evidence/line-group-create-fix.md)). For ducting: `groups.make` takes `edge_paths` (as
+`ducts.selection` gives them) and `ventilator_id`, wraps the loose lines in a new Ducting group where they are drawn
+in one Undo step ("Make Ducting Group") and leaves the edit path; refusals use `ducting.group_nested` and
+`ducting.group_in_zone`, a Piping group counting as another feature's Group (`target.wrong_hierarchy`);
+`ducts.selection`, `ducts.selection_all` and `ducts.selected` add `make_refusal`; the bar's **+ New Ducting group**
+becomes **Make Ducting group** (P4-14f).
 
 ## Host gate
 
 Batched into the `MS3` sitting (D4-31): case `M14c`, panel closed, on the installed RBZ: `groups.create` linked to
-ERV-1 opens for the Line tool and the lines drawn land in it (resting on M13b's H1 and H2, run first in the sitting);
+ERV-1 opens for the Line tool and the lines drawn land in it (resting on M13b's H1 and H2, run first in the sitting;
+since the fallback, `groups.make` over loose lines drawn with the Line tool, linked to ERV-1, keeps their ids in one
+Undo step, and the Line tool draws into the made group once opened);
 assign and clear over a native selection, one Undo step each; a pasted Ducting group shares storage, keeps ERV-1, and
 its assign refuses until made unique; deleting ERV-1 with a replacement retargets the group in one Undo step. Record
 with `acceptance_case.py begin` and `finish`. Offline `make ci` passes on this sub-stage's PR.

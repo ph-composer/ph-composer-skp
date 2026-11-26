@@ -2,31 +2,55 @@
 
 module PhComposer
   module LineGroups
-    # Adds one empty Group at the root with its record and opens it for drawing, so one Undo removes both. The path
-    # change runs every edit context boundary (EditContext.enter) and joins the operation.
-    class CreateStep
+    # Wraps loose lines already drawn in one collection in a new Group with its record, so one Undo restores them
+    # loose with their ids and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group"). The edit path
+    # stays where it is: the user opens the group to draw more lines in it.
+    class MakeStep
       attr_reader :affected
 
-      def initialize(spec:, record:)
+      def initialize(spec:, record:, parent_path:, edge_ids:)
         @spec = spec
         @record = DeepCopy.frozen(record)
+        @parent_path = parent_path.dup.freeze
+        @edge_ids = edge_ids.dup.freeze
         @affected = [{ "kind" => spec.group_noun, "id" => @record.fetch("id"), "change" => "created" }]
       end
 
       def descriptor
-        { "name" => "create_#{@spec.group_noun}", "record" => @record }
+        { "name" => "make_#{@spec.group_noun}", "record" => @record, "parent_path" => @parent_path,
+          "edge_ids" => @edge_ids }
       end
 
       def temporary_ids
         [@record.fetch("id")]
       end
 
+      # Each line is found again, still loose, in the open context the plan read; SketchUp deletes a Group left empty
+      # at commit, so nothing here adds one.
       def apply(model, _slots)
-        group = model.entities.add_group
+        unless Array(model.active_path).map(&:persistent_id) == @parent_path
+          raise CodedError.new("target.edit_path_changed", "The open edit context changed. Nothing was written.")
+        end
+
+        entities = PhComposer::Operations::EntityScope.new(@parent_path).resolve(model)
+        children = entities.to_a.group_by(&:persistent_id)
+        lines = @edge_ids.map { |id| loose_line(children.fetch(id, [])) }
+        raise CodedError.new("params.invalid", "A #{@spec.label} is made from at least one line.") if lines.empty?
+
+        group = entities.add_group(lines)
         @spec.group_store.write(group, @record)
-        EditContext.enter(model, [group])
         @affected = [@affected.first.merge("reference" => { "group_id" => @record.fetch("id"),
-                                                            "group_path" => [group.persistent_id] })]
+                                                            "group_path" => @parent_path + [group.persistent_id] })]
+      end
+
+      private
+
+      def loose_line(matches)
+        line = matches.first
+        return line if matches.length == 1 && line.is_a?(Sketchup::Edge) && line.faces.empty?
+
+        raise CodedError.new("target.changed", "A line changed after the #{@spec.label} was planned. Nothing was " \
+                                               "written.")
       end
     end
 

@@ -220,7 +220,9 @@ and ERV ducting reuse these rules.
   does not hold them and its resolver does not apply: piping's `locate:` walks the root-to-Edge path itself, and
   `ph_composer.zones.containment` is read only to refuse a Piping group a Zone holds. That walk, the two resolvers,
   the write steps, the selection rows, the schedule's paging and Locate are the foundation's line-group layer,
-  `line_groups/` (`context/EXTENSIBILITY.md`, "Line groups"), which piping calls with its spec.
+  `line_groups/` (`context/EXTENSIBILITY.md`, "Line groups"), which piping calls with its spec. A group is made by
+  wrapping loose lines already drawn and selected (`groups.make`), never created empty: SketchUp deletes a Group left
+  empty at commit (`context/SKETCHUP_HOST_BEHAVIOR.md`, "Making a line group").
 - Ducting's Edges follow piping's rule: they live directly in Ducting groups at the Model root or in plain Groups,
   never inside a Zone, ducting calls the same layer with its own spec, and `ph_composer.zones.containment` is read
   only to refuse a Ducting group a Zone holds.

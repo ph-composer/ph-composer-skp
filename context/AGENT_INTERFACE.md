@@ -936,14 +936,15 @@ are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapsho
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a row's `export_blockers` names
 `piping.insulation_conductivity_missing` for an insulated type with no conductivity. The
 [Pipe Types walkthrough](../tools/examples/authoring/pipe_types_walkthrough.rb) authors with the panel closed.
-Piping groups are `ph_composer.piping.groups` (`create`, which opens the new group, `link`, `unlink`, `list`, `all`)
-and pipes `ph_composer.piping.pipes` (`assign` and `clear` over explicit Edges, at most 250, and `selection`,
-`selection_all` with the snapshot section `ph_composer.piping.pipes.selected`); the reference targets are
-`ph_composer.piping.group` and `ph_composer.piping.pipe`, and the codes `piping.outside_group`,
-`piping.group_in_zone` and `piping.group_nested`. As ducting's, `groups.create` refuses `session.inactive` for a
-Model SketchUp is not showing and a group row's `write_refusal` is the one `groups.link` meets. The
-[piping assignment walkthrough](../tools/examples/authoring/piping_assignment_walkthrough.rb) creates a group, draws,
-assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
+Piping groups are `ph_composer.piping.groups` (`make`, which wraps selected loose lines in a new group where they
+are drawn and leaves the edit path, `link`, `unlink`, `list`, `all`) and pipes `ph_composer.piping.pipes` (`assign`
+and `clear` over explicit Edges, at most 250, and `selection`, `selection_all` with the snapshot section
+`ph_composer.piping.pipes.selected`, each with `make_refusal`, what `groups.make` over the selection meets); the
+reference targets are `ph_composer.piping.group` and `ph_composer.piping.pipe`, and the codes
+`piping.outside_group`, `piping.group_in_zone` and `piping.group_nested`. As ducting's, a group row's
+`write_refusal` is the one `groups.link` meets. The
+[piping assignment walkthrough](../tools/examples/authoring/piping_assignment_walkthrough.rb) draws loose lines,
+makes a group from them, opens it, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Hot water piping", is the recipe.
 The bounded read `ph_composer.piping.schedule` (with `compact`, `ph_composer.piping.schedule.details` for its System, Pipe
 Type and unreadable rows and `ph_composer.piping.runs.members` for one run's pipes) walks the Model for runs by connection, their parents, lengths and findings, with totals by role, each Hot Water System's distribution and recirculation (also
 `ph_composer.piping.systems`, the snapshot section `ph_composer.piping.piping_systems`) and each Pipe Type's used length,
@@ -964,14 +965,15 @@ requires Mechanical and Zones. Its Duct Types are the catalog `ph_composer.ducti
 `duplicate` and `delete` (with `replacement_id`), each write one Undo step; a missing or other-shape dimension refuses
 `params.invalid`, and a row's `export_blockers` names `ducting.insulation_conductivity_missing` for an insulated type
 with no conductivity. The [Duct Types walkthrough](../tools/examples/authoring/duct_types_walkthrough.rb) authors
-with the panel closed. Ducting groups are `ph_composer.ducting.groups` (`create`, which opens the new group, `link`,
-`unlink`, `list`, `all`) and ducts `ph_composer.ducting.ducts` (`assign` and `clear` over explicit Edges, at most
-250, and `selection`, `selection_all` with the snapshot section `ph_composer.ducting.ducts.selected`); the reference
+with the panel closed. Ducting groups are `ph_composer.ducting.groups` (`make`, which wraps selected loose lines in a
+new group where they are drawn and leaves the edit path, `link`, `unlink`, `list`, `all`) and ducts
+`ph_composer.ducting.ducts` (`assign` and `clear` over explicit Edges, at most 250, and `selection`, `selection_all`
+with the snapshot section `ph_composer.ducting.ducts.selected`, each with `make_refusal`); the reference
 targets are `ph_composer.ducting.group` and `ph_composer.ducting.duct`, and the codes `ducting.outside_group`,
 `ducting.group_in_zone` and `ducting.group_nested`. A Ventilator delete with an id or null moves or clears the
 groups naming it through the registered reference retargeters. The
-[ducting assignment walkthrough](../tools/examples/authoring/ducting_assignment_walkthrough.rb) creates a group,
-draws, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
+[ducting assignment walkthrough](../tools/examples/authoring/ducting_assignment_walkthrough.rb) draws loose lines,
+makes a group from them, opens it, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
 The bounded read `ph_composer.ducting.schedule` (with `compact`, `ph_composer.ducting.schedule.details` for its
 Ventilator, Duct Type and unreadable rows and `ph_composer.ducting.runs.members` for one run's ducts) walks the Model
 for runs by group, direction, Duct Type and quantity with their lengths and findings, totals by direction, each

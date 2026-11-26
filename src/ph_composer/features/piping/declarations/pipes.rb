@@ -59,9 +59,13 @@ module PhComposer
                                                    "#{Assignment::Selection::IGNORED_ROWS}; never assigned."),
         "ignored_total" => { "type" => "integer", "minimum" => 0 }
       }.freeze
-      SELECTION_ALL = Shapes.object({ "edges" => Shapes.list(ROW) }.merge(IGNORED))
+      MAKE_REFUSAL = {
+        "make_refusal" => REFUSAL.merge("description" => "What groups.make over every selected line meets, or null " \
+                                                         "when it can run with each row's path.")
+      }.freeze
+      SELECTION_ALL = Shapes.object({ "edges" => Shapes.list(ROW) }.merge(IGNORED).merge(MAKE_REFUSAL))
       SELECTION_PAGE_RESULT = Shapes.object({ "edges" => Shapes.list(ROW), "next_cursor" => Pages::NEXT_CURSOR,
-                                              "total" => Pages::TOTAL }.merge(IGNORED))
+                                              "total" => Pages::TOTAL }.merge(IGNORED).merge(MAKE_REFUSAL))
       PRECONDITIONS = ["Each Edge sits directly in a Piping group outside every Zone, reached through no locked or " \
                        "shared storage.",
                        "Each target carries the reference and values pipes.selection last read."].freeze
@@ -74,7 +78,8 @@ module PhComposer
         feature.query("#{PREFIX}.selection",
                       :description => "One bounded page of the selected Edges under the active path, each with the " \
                                       "Piping group holding it, its assignment and the refusal a write meets; other " \
-                                      "entities are reported as ignored.",
+                                      "entities are reported as ignored, with what making a " \
+                                      "Piping group from the selection meets.",
                       :refuses => SELECTION_PAGE,
                       :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
                                                :optional => %w[limit cursor]),

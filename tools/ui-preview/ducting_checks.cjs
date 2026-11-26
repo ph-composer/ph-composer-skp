@@ -1,9 +1,9 @@
 /* Ventilation's ducting pills in the preview: Duct Types after Ventilators with a Shape change asking for the new
    dimensions and used length; the Ducting pill's cold-runs line, the assign bar's direction choice and quantity with
-   Assign sending the selection's references, the Ducting groups linked in place and New Ducting group; the schedule
-   with a finding behind its glyph, totals by direction and by Ventilator, and a row that Locates; Colour by duct
-   direction from the Direction header; and the Ventilators table's two duct-length columns contributed by ducting;
-   each at the panel's three sizes. Browser evidence; not host acceptance. */
+   Assign sending the selection's references, the Ducting groups linked in place and Make Ducting group from loose
+   lines; the schedule with a finding behind its glyph, totals by direction and by Ventilator, and a row that
+   Locates; Colour by duct direction from the Direction header; and the Ventilators table's two duct-length columns
+   contributed by ducting; each at the panel's three sizes. Browser evidence; not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -81,18 +81,30 @@ check({ name: "ducting", output }, async ({ newPage, step }) => {
     [DT1, "exhaust_air", 2, 2]);
   await page.screenshot({ path: path.join(output, "ducting-bar.png") });
 
-  step("the Ducting groups: a Ventilator chosen in place, and New Ducting group");
+  step("the Ducting groups: a Ventilator chosen in place, and Make Ducting group from loose lines");
   const groups = ducting.locator(".line-group-groups");
   await groups.locator("[data-row-key='720']").waitFor();
   assert.match(await groups.locator("[data-row-key='720'] .col-note").textContent(), /Link it to a Ventilator/);
   await groups.locator("[data-row-key='720'] .col-link select").selectOption(ERV2);
   await page.waitForFunction(() => window.previewHost.ducting.groups[2].values.ventilator_id !== null);
-  await bar.getByRole("button", { name: "+ New Ducting group" }).click();
-  const dialog = page.getByRole("dialog", { name: "New Ducting group" });
+  const make = bar.getByRole("button", { name: "Make Ducting group from selected lines" });
+  assert.equal(await make.isDisabled(), true, "lines already in a Ducting group cannot make one");
+  await bar.getByRole("button", { name: "Why Make Ducting group is unavailable" }).waitFor();
+  await host(`(() => {
+    window.previewHost.ducting.selected = [801, 802].map(id => ({ path: [id], reference: null, group: null,
+      reason: "outside_group", values: {}, copied: false, record_problem: null, write_refusal: null }));
+    window.previewHost.snapshot();
+  })()`);
+  await bar.getByText("2 lines selected, 0 assignable").waitFor();
+  await make.click();
+  const dialog = page.getByRole("dialog", { name: "Make Ducting group" });
+  await dialog.getByText("2 selected lines move into the new group where they are drawn.", { exact: false }).waitFor();
   await dialog.getByLabel("Ventilator").selectOption(ERV1);
-  await dialog.getByRole("button", { name: "Create and open" }).click();
+  await dialog.getByRole("button", { name: "Make Ducting group", exact: true }).click();
   await dialog.waitFor({ state: "hidden" });
-  assert.equal((await sent(PREFIX + "groups.create")).length, 1);
+  assert.deepEqual((await sent(PREFIX + "groups.make")).pop().payload.params,
+    { edge_paths: [[801], [802]], ventilator_id: ERV1 });
+  await bar.getByText("No lines selected").waitFor();
 
   step("the schedule: runs by Ventilator, a finding, totals with the quantity, and a row that Locates");
   const schedule = ducting.locator(".line-group-schedule");

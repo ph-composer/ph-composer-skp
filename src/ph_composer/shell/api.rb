@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 108
+    MINOR = 109
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -676,7 +676,13 @@ module PhComposer
       { "minor" => 108, "date" => "2026-11-25",
         "change" => "ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes " \
                     "ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its " \
-                    "direction or Duct Type with legend lengths, quantity applied." }
+                    "direction or Duct Type with legend lengths, quantity applied." },
+      { "minor" => 109, "date" => "2026-11-26",
+        "change" => "ph_composer.piping.groups.make and ph_composer.ducting.groups.make replace groups.create: they " \
+                    "wrap loose lines drawn in the open context, named by edge_paths, in a new group with its " \
+                    "linked record, and leave the edit path where it is, since SketchUp deletes an empty Group at " \
+                    "commit. pipes.selection, pipes.selection_all, ducts.selection and ducts.selection_all add " \
+                    "make_refusal, what groups.make over the selection meets." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

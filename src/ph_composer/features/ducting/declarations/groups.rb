@@ -2,7 +2,7 @@
 
 module PhComposer
   module Ducting
-    # What Ducting groups register: the group reference target, create, link and unlink, two reads, and the retargeter
+    # What Ducting groups register: the group reference target, make, link and unlink, two reads, and the retargeter
     # a Ventilator delete runs. Each write is one native Undo step.
     module GroupRegistration
       PREFIX = "#{FEATURE_ID}.groups".freeze
@@ -12,8 +12,8 @@ module PhComposer
       OBJECT = { "type" => "object" }.freeze
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
-      CREATE = %w[record.unreadable session.inactive target.not_found validation.failed].freeze
       LINK = (LOCATE + %W[gesture.too_large #{Codes::GROUP_IN_ZONE} #{Codes::GROUP_NESTED}]).freeze
+      MAKE = (LINK + %w[target.edit_path_changed]).sort.freeze
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
 
@@ -46,6 +46,17 @@ module PhComposer
         "record_problem" => { "type" => %w[string null], "description" => "Why its record is invalid, or null." },
         "write_refusal" => REFUSAL.merge("description" => "What a write through its path meets, or null.")
       })
+      EDGE_PATHS = Shapes.list(LineGroups::PATH)
+                         .merge("minItems" => 1,
+                                "description" => "Root-to-Edge paths of loose lines in one collection, as " \
+                                                 "ducts.selection gives them; at most " \
+                                                 "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
+                                                 "gesture.too_large.")
+      MAKE_PRECONDITIONS = ["The Ventilator exists.",
+                            "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
+                            "Zone and every Group another feature owns, reached through plain unlocked unshared " \
+                            "Groups.",
+                            "ducts.selection reads make_refusal null over them."].freeze
       PRECONDITIONS = ["Each group sits at the Model root or in plain Groups, outside every Zone and Ducting group.",
                        "Each target carries the reference and values groups.all last read."].freeze
 
@@ -84,17 +95,20 @@ module PhComposer
       end
 
       def install_writes(feature)
-        feature.action("#{PREFIX}.create",
-                       :description => "Add one empty Ducting group at the Model root linked to a Ventilator and " \
-                                       "open it, so lines drawn next land inside it.",
-                       :refuses => CREATE, :params => Shapes.object({ "ventilator_id" => VENTILATOR_ID }),
+        feature.action("#{PREFIX}.make",
+                       :description => "Wrap loose lines drawn in the open context in a new Ducting group linked to " \
+                                       "a Ventilator, where they are; the lines keep their ids and the edit path " \
+                                       "stays.",
+                       :refuses => MAKE,
+                       :params => Shapes.object({ "edge_paths" => EDGE_PATHS, "ventilator_id" => VENTILATOR_ID }),
                        :result => Shapes.object({ "group_id" => Shapes::TEXT }),
-                       :undo_name => "New Ducting Group",
-                       :preconditions => ["The Ventilator exists.", "SketchUp shows this Model."],
-                       :side_effects => "Adds a Group at the root with a Ducting group record and moves the edit " \
-                                        "path into it, closing any Group open before.",
-                       :examples => [{ "ventilator_id" => "vnt_Ab12Cd34Ef56" }]) do |request, proposal|
-          Operations.create(LINE_GROUP, request, proposal, request.params.fetch("ventilator_id"))
+                       :undo_name => "Make Ducting Group", :preconditions => MAKE_PRECONDITIONS,
+                       :side_effects => "Adds a Group with a Ducting group record in the lines' collection and " \
+                                        "moves the lines into it; their persistent ids and dictionaries stay.",
+                       :examples => [{ "edge_paths" => [[1305], [1306]],
+                                       "ventilator_id" => "vnt_Ab12Cd34Ef56" }]) do |request, proposal|
+          Operations.make(LINE_GROUP, request, proposal, request.params.fetch("edge_paths"),
+                          request.params.fetch("ventilator_id"), :limit => Assignment.gesture_edge_limit)
         end
         result = Shapes.object({ "group_ids" => Shapes.described(Shapes.list(Shapes::TEXT),
                                                                  "Groups rewritten; empty when none changed.") })

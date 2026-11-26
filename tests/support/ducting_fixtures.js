@@ -58,7 +58,8 @@ function state() {
     type(DT1, "DT-1", { shape: "round", diameter_mm: 160 }, 4.3),
     type(DT2, "DT-2", { shape: "rectangular", width_mm: 200, height_mm: 100, insulation_thickness_mm: 50.8,
       insulation_conductivity_w_mk: 0.035, insulation_reflective: false }, 5.5)] } };
-  built.sections[PREFIX + "ducts.selected"] = { status: "completed", value: { ignored: [], ignored_total: 0, edges: [
+  built.sections[PREFIX + "ducts.selected"] = { status: "completed", value: { ignored: [], ignored_total: 0,
+    make_refusal: { code: "ducting.group_nested", message: "The lines are already in a Ducting group." }, edges: [
     selected(601, {}), selected(602, { duct_type_id: DT2, direction: "exhaust_air", quantity: 2 }),
     { path: [5], reference: null, group: null, reason: "outside_group", values: {}, copied: false,
       record_problem: null, write_refusal: null }] } };

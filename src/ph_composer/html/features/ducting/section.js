@@ -10,8 +10,8 @@ function (systems, ventilators, pills, shared, bars, schedule) {
   systems.table({ system: ventilators.SYSTEM, id: shared.PREFIX + "ducting", label: "Ducting", order: 30,
     build: function (surface, context) {
       return new pills.Pill(surface, context, shared.SPEC, { types: shared.TYPES, view: schedule.VIEW, intro: INTRO,
-        bar: function (session, send, guard, notify, newGroup) {
-          return new bars.AssignBar(session, send, guard, notify, newGroup);
+        bar: function (session, send, guard, notify, makeGroup) {
+          return new bars.AssignBar(session, send, guard, notify, makeGroup);
         } });
     } });
   return {};

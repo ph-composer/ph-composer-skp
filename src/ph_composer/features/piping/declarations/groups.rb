@@ -2,16 +2,16 @@
 
 module PhComposer
   module Piping
-    # What Piping groups register: the group reference target, create, link and unlink, two reads, and the
-    # retargeter a Hot Water System delete runs. Each write is one native Undo step.
+    # What Piping groups register: the group reference target, make, link and unlink, two reads, and the retargeter
+    # a Hot Water System delete runs. Each write is one native Undo step.
     module GroupRegistration
       PREFIX = "#{FEATURE_ID}.groups".freeze
       # The shared layer runs every group operation with this feature's spec (LINE_GROUP).
       Operations = LineGroups::GroupOperations
       LOCATE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
-      CREATE = %w[record.unreadable session.inactive target.not_found validation.failed].freeze
       LINK = (LOCATE + %w[gesture.too_large piping.group_in_zone piping.group_nested]).freeze
+      MAKE = (LINK + %w[target.edit_path_changed]).sort.freeze
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
 
@@ -46,6 +46,17 @@ module PhComposer
       ALL = Shapes.object({ "groups" => Shapes.list(ROW) })
       LIST = Shapes.object({ "groups" => Shapes.list(ROW), "next_cursor" => Pages::NEXT_CURSOR,
                              "total" => Pages::TOTAL })
+      EDGE_PATHS = Shapes.list(LineGroups::PATH)
+                         .merge("minItems" => 1,
+                                "description" => "Root-to-Edge paths of loose lines in one collection, as " \
+                                                 "pipes.selection gives them; at most " \
+                                                 "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
+                                                 "gesture.too_large.")
+      MAKE_PRECONDITIONS = ["The Hot Water System exists.",
+                            "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
+                            "Zone and every Group another feature owns, reached through plain unlocked unshared " \
+                            "Groups.",
+                            "pipes.selection reads make_refusal null over them."].freeze
       PRECONDITIONS = ["Each group sits at the Model root or in plain Groups, outside every Zone and Piping group.",
                        "Each target carries the reference and values groups.all last read."].freeze
 
@@ -78,18 +89,20 @@ module PhComposer
       end
 
       def install_writes(feature)
-        feature.action("#{PREFIX}.create",
-                       :description => "Add one empty Piping group at the Model root linked to a Hot Water System " \
-                                       "and open it, so lines drawn next land inside it.",
-                       :refuses => CREATE,
-                       :params => Shapes.object({ "hot_water_system_id" => SYSTEM_ID }),
+        feature.action("#{PREFIX}.make",
+                       :description => "Wrap loose lines drawn in the open context in a new Piping group linked to " \
+                                       "a Hot Water System, where they are; the lines keep their ids and the edit " \
+                                       "path stays.",
+                       :refuses => MAKE,
+                       :params => Shapes.object({ "edge_paths" => EDGE_PATHS, "hot_water_system_id" => SYSTEM_ID }),
                        :result => Shapes.object({ "group_id" => Shapes::TEXT }),
-                       :undo_name => "New Piping Group",
-                       :preconditions => ["The Hot Water System exists.", "SketchUp shows this Model."],
-                       :side_effects => "Adds a Group at the root with a Piping group record and moves the edit " \
-                                        "path into it, closing any Group open before.",
-                       :examples => [{ "hot_water_system_id" => "hws_Ab12Cd34Ef56" }]) do |request, proposal|
-          Operations.create(LINE_GROUP, request, proposal, request.params.fetch("hot_water_system_id"))
+                       :undo_name => "Make Piping Group", :preconditions => MAKE_PRECONDITIONS,
+                       :side_effects => "Adds a Group with a Piping group record in the lines' collection and moves " \
+                                        "the lines into it; their persistent ids and dictionaries stay.",
+                       :examples => [{ "edge_paths" => [[1305], [1306]],
+                                       "hot_water_system_id" => "hws_Ab12Cd34Ef56" }]) do |request, proposal|
+          Operations.make(LINE_GROUP, request, proposal, request.params.fetch("edge_paths"),
+                          request.params.fetch("hot_water_system_id"), :limit => Assignment.gesture_edge_limit)
         end
         result = Shapes.object({ "group_ids" => Shapes.described(Shapes.list(Shapes::TEXT),
                                                                  "Groups rewritten; empty when none changed.") })

@@ -157,33 +157,60 @@ test("opening Piping reads the schedule and groups once; the tree orders twigs u
     assert.strictEqual(named(o, PREFIX + "schedule.all").length, 2);
   });
 
-test("a group's System links in place, None unlinks, and New Piping group creates and opens one", function () {
-  var o = setup();
-  read(o);
-  var select = o.view(PIPING).groups.mount.querySelector("[data-row-key='500']").querySelector(".col-link")
-    .querySelector("select");
-  change(select, fixtures.mechanical.HWS2.id);
-  var link = named(o, PREFIX + "groups.link")[0];
-  assert.deepStrictEqual(clone(link.payload.params), { hot_water_system_id: fixtures.mechanical.HWS2.id,
-    targets: [{ reference: { group_id: fixtures.GROUP, group_path: [500] },
-      expected_values: { hot_water_system_id: fixtures.mechanical.HWS1.id } }] });
-  act(o, link, { status: "completed", value: { group_ids: [] } });
-  assert.strictEqual(named(o, PREFIX + "groups.all").length, 2, "a link reads the groups again");
-  change(select, "");
-  var unlink = named(o, PREFIX + "groups.unlink");
-  assert.strictEqual(unlink.length, 1);
-  press(o.view(PIPING).bar.newGroup);
-  assert.match(o.notices[o.notices.length - 1].message, /Wait for the Piping group/, "a link in flight holds the bar");
-  act(o, unlink[0], { status: "completed", value: { group_ids: [] } });
-  var bar = o.view(PIPING).bar;
-  press(bar.newGroup);
-  var form = o.view(PIPING).groupForm;
-  assert.strictEqual(form.link.children.length, 3, "a prompt and the two Systems");
-  change(form.link, fixtures.mechanical.HWS1.id);
-  form.submit();
-  assert.deepStrictEqual(clone(named(o, PREFIX + "groups.create")[0].payload.params),
-    { hot_water_system_id: fixtures.mechanical.HWS1.id });
-});
+/* Loose lines selected at the root, which the host says Make Piping group can wrap. */
+function looseLines(o) {
+  o.state.sections[PREFIX + "pipes.selected"].value = { ignored: [], ignored_total: 0, make_refusal: null,
+    edges: [801, 802].map(function (id) {
+      return { path: [id], reference: null, group: null, reason: "outside_group", values: {}, copied: false,
+        record_problem: null, write_refusal: null };
+    }) };
+  o.paint();
+}
+
+test("a group's System links in place, None unlinks, and Make Piping group wraps the selected loose lines",
+  function () {
+    var o = setup();
+    read(o);
+    var select = o.view(PIPING).groups.mount.querySelector("[data-row-key='500']").querySelector(".col-link")
+      .querySelector("select");
+    change(select, fixtures.mechanical.HWS2.id);
+    var link = named(o, PREFIX + "groups.link")[0];
+    assert.deepStrictEqual(clone(link.payload.params), { hot_water_system_id: fixtures.mechanical.HWS2.id,
+      targets: [{ reference: { group_id: fixtures.GROUP, group_path: [500] },
+        expected_values: { hot_water_system_id: fixtures.mechanical.HWS1.id } }] });
+    act(o, link, { status: "completed", value: { group_ids: [] } });
+    assert.strictEqual(named(o, PREFIX + "groups.all").length, 2, "a link reads the groups again");
+    change(select, "");
+    var unlink = named(o, PREFIX + "groups.unlink");
+    assert.strictEqual(unlink.length, 1);
+    var bar = o.view(PIPING).bar;
+    assert.strictEqual(bar.make.textContent, "Make Piping group");
+    assert.ok(bar.make.disabled, "lines already in a Piping group cannot make one");
+    assert.ok(shown(bar.makeReason));
+    assert.strictEqual(bar.makeReason._reason,
+      "The lines are already in a Piping group.");
+    looseLines(o);
+    press(bar.make);
+    assert.match(o.notices[o.notices.length - 1].message, /Wait for the Piping group/,
+      "a link in flight holds the bar");
+    act(o, unlink[0], { status: "completed", value: { group_ids: [] } });
+    read(o);
+    assert.strictEqual(bar.make.disabled, false);
+    assert.ok(!shown(bar.makeReason));
+    press(bar.make);
+    var form = o.view(PIPING).groupForm;
+    assert.strictEqual(form.title.textContent, "Make Piping group");
+    assert.strictEqual(form.link.children.length, 3, "a prompt and the two Systems");
+    assert.match(form.hint.textContent, /^2 selected lines move into the new group/);
+    change(form.link, fixtures.mechanical.HWS1.id);
+    form.submit();
+    var made = named(o, PREFIX + "groups.make")[0];
+    assert.deepStrictEqual(clone(made.payload.params),
+      { edge_paths: [[801], [802]], hot_water_system_id: fixtures.mechanical.HWS1.id });
+    act(o, made, { status: "completed", value: { group_id: "ppg_NEWNEWNEWNEW" } });
+    assert.match(o.notices[o.notices.length - 1].message, /holds the selected lines. Double-click it/);
+    assert.strictEqual(named(o, PREFIX + "groups.all").length, 3, "a make reads the groups again");
+  });
 
 test("Assign by clicking arms the pipe tool with the bar's type, role and values", function () {
   var o = setup(), bar = o.view(PIPING).bar;
@@ -299,7 +326,7 @@ test("a recirculation draft keeps the unit it was typed in through a unit switch
   assert.ok(Math.abs(sent.water_temp_c - 55) < 1e-9, String(sent.water_temp_c));
 });
 
-test("a tool armed without a value shows its default, typing repaints Assign, and New Piping group follows the Systems",
+test("a tool armed without a value shows its default, typing repaints Assign, and Make Piping group follows Systems",
   function () {
     var o = setup(), bar = o.view(PIPING).bar;
     bar.multiplier.value = "12"; bar.multiplier.listeners.input({});
@@ -313,7 +340,8 @@ test("a tool armed without a value shows its default, typing repaints Assign, an
     assert.ok(bar.assign.disabled);
     bar.hours.input.value = "8"; bar.hours.input.listeners.input({});
     assert.strictEqual(bar.assign.disabled, false, "Assign follows the text as typed");
-    press(bar.newGroup);
+    looseLines(o);
+    press(bar.make);
     var form = o.view(PIPING).groupForm;
     change(form.link, fixtures.mechanical.HWS2.id);
     var systems = o.state.sections[MECHANICAL + "hot_water_systems"].value.records;
@@ -321,6 +349,13 @@ test("a tool armed without a value shows its default, typing repaints Assign, an
     o.paint();
     assert.strictEqual(form.link.value, "", "a deleted System is no longer chosen");
     assert.ok(form.submitButton.disabled);
+    change(form.link, fixtures.mechanical.HWS1.id);
+    assert.strictEqual(form.submitButton.disabled, false);
+    o.state.sections[PREFIX + "pipes.selected"].value.make_refusal = { code: "target.wrong_kind",
+      message: "Select lines only: 1 other selected entity is not a line." };
+    o.paint();
+    assert.ok(form.submitButton.disabled, "a selection Make cannot wrap holds the form");
+    assert.strictEqual(form.hint.textContent, "Select the loose lines to make it from.");
   });
 
 /* The tool as the host reports it after a choose: running, with `role` and `values`, and the choose settled. */

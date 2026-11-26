@@ -450,10 +450,12 @@ into the Hot Water System it belongs to. Scripts and assistants reach the same s
    0.04 W/(m K). Edit each value in its cell. **Used length** is the drawn length of the pipes using the
    type. A type with insulation and no conductivity cannot export once a pipe uses it; a bare pipe needs
    none. Deleting a type in use asks for another to take its place, or clears it from those pipes.
-2. Use the **Piping** pill. **+ New Piping group** asks for the Hot Water System its pipes serve, then adds
-   a group at the top of the model and opens it in SketchUp. Draw the pipes inside it with SketchUp's own
-   Line tool, snapping to the model. Keep Piping groups outside Zones. A tree (a trunk, its branches and
-   their twigs) is drawn in one group; a riser can be drawn once and given a multiplier.
+2. Draw the pipes with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
+   A tree (a trunk, its branches and their twigs) belongs in one group; a riser can be drawn once and given
+   a multiplier. Select the lines, then use the **Piping** pill. **Make Piping group** asks for the Hot
+   Water System the pipes serve and wraps the selected lines in a new Piping group where they are drawn, as
+   one Undo step. It waits until the selection is loose lines alone, and its alert mark says what to select
+   instead. To draw more pipes later, double-click the group to open it and draw inside it.
 3. Select lines in the open group, then choose a Pipe Type and a role in the bar above the groups:
    **Trunk**, **Branch**, **Twig** or **Recirculation**. A trunk also takes a **Multiplier** (how many
    identical risers it stands for) and **Demand recirculation**; a recirculation pipe takes its **Water
@@ -487,10 +489,12 @@ never the room-side supply and extract ducts. Scripts and assistants reach the s
    is the length of the ducts using the type, each line counted as many times as its quantity. A type
    with insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
    Deleting a type in use asks for another to take its place, or clears it from those ducts.
-2. Use the **Ducting** pill. **+ New Ducting group** asks for the Ventilator its ducts belong to, then adds
-   a group at the top of the model and opens it in SketchUp. Draw the ducts inside it with SketchUp's own
-   Line tool, snapping to the model. Keep Ducting groups outside Zones. One group per ventilator holds
-   both of its runs. For identical units, copy the group, or give its lines a quantity.
+2. Draw the ducts with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
+   One group per ventilator holds both of its runs. Select the lines, then use the **Ducting** pill. **Make
+   Ducting group** asks for the Ventilator the ducts belong to and wraps the selected lines in a new Ducting
+   group where they are drawn, as one Undo step. It waits until the selection is loose lines alone, and its
+   alert mark says what to select instead. To draw more ducts later, double-click the group to open it and
+   draw inside it. For identical units, copy the group, or give its lines a quantity.
 3. Select lines in the open group, then choose a Duct Type, **Outdoor air** or **Exhaust air**, and a
    **Quantity** (how many identical ducts each line stands for, 1 unless you change it) in the bar above
    the groups. **Assign** writes them to the selected lines as one Undo step, and **Clear** removes them.

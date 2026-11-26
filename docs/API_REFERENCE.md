@@ -17736,7 +17736,7 @@ Example params:
 
 ### `ph_composer.ducting.ducts.selection`
 
-One bounded page of the selected Edges under the active path, each with the Ducting group holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.ducting`.
+One bounded page of the selected Edges under the active path, each with the Ducting group holding it, its assignment and the refusal a write meets; other entities are reported as ignored, with what making a Ducting group from the selection meets. Owner: `ph_composer.ducting`.
 
 Refuses: `gesture.too_large`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
 
@@ -17771,7 +17771,8 @@ Result:
     "next_cursor",
     "total",
     "ignored",
-    "ignored_total"
+    "ignored_total",
+    "make_refusal"
   ],
   "properties": {
     "edges": {
@@ -17948,6 +17949,26 @@ Result:
     "ignored_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "make_refusal": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "description": "What groups.make over every selected line meets, or null when it can run with each row's path."
     }
   }
 }
@@ -17995,7 +18016,8 @@ Result:
   "required": [
     "edges",
     "ignored",
-    "ignored_total"
+    "ignored_total",
+    "make_refusal"
   ],
   "properties": {
     "edges": {
@@ -18160,6 +18182,26 @@ Result:
     "ignored_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "make_refusal": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "description": "What groups.make over every selected line meets, or null when it can run with each row's path."
     }
   }
 }
@@ -33871,7 +33913,7 @@ Example params:
 
 ### `ph_composer.piping.pipes.selection`
 
-One bounded page of the selected Edges under the active path, each with the Piping group holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.piping`.
+One bounded page of the selected Edges under the active path, each with the Piping group holding it, its assignment and the refusal a write meets; other entities are reported as ignored, with what making a Piping group from the selection meets. Owner: `ph_composer.piping`.
 
 Refuses: `gesture.too_large`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
 
@@ -33906,7 +33948,8 @@ Result:
     "next_cursor",
     "total",
     "ignored",
-    "ignored_total"
+    "ignored_total",
+    "make_refusal"
   ],
   "properties": {
     "edges": {
@@ -34083,6 +34126,26 @@ Result:
     "ignored_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "make_refusal": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "description": "What groups.make over every selected line meets, or null when it can run with each row's path."
     }
   }
 }
@@ -34130,7 +34193,8 @@ Result:
   "required": [
     "edges",
     "ignored",
-    "ignored_total"
+    "ignored_total",
+    "make_refusal"
   ],
   "properties": {
     "edges": {
@@ -34295,6 +34359,26 @@ Result:
     "ignored_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "make_refusal": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "description": "What groups.make over every selected line meets, or null when it can run with each row's path."
     }
   }
 }
@@ -78614,60 +78698,6 @@ Example params:
 }
 ```
 
-### `ph_composer.ducting.groups.create`
-
-Add one empty Ducting group at the Model root linked to a Ventilator and open it, so lines drawn next land inside it. Owner: `ph_composer.ducting`.
-
-Undo step: New Ducting Group. Adds a Group at the root with a Ducting group record and moves the edit path into it, closing any Group open before.
-
-Before calling: The Ventilator exists. SketchUp shows this Model.
-
-Refuses: `record.unreadable`, `session.inactive`, `target.not_found`, `validation.failed`, and the `action` common set.
-
-Params:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "ventilator_id"
-  ],
-  "properties": {
-    "ventilator_id": {
-      "type": "string",
-      "pattern": "^vnt_[A-Za-z0-9]{12}$",
-      "description": "The Ventilator whose ducts the group holds."
-    }
-  }
-}
-```
-
-Result:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "group_id"
-  ],
-  "properties": {
-    "group_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
-Example params:
-
-```json
-{
-  "ventilator_id": "vnt_Ab12Cd34Ef56"
-}
-```
-
 ### `ph_composer.ducting.groups.link`
 
 Link explicit Ducting groups to one Ventilator, replacing any link. Owner: `ph_composer.ducting`.
@@ -78773,6 +78803,80 @@ Example params:
         ]
       }
     }
+  ],
+  "ventilator_id": "vnt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.ducting.groups.make`
+
+Wrap loose lines drawn in the open context in a new Ducting group linked to a Ventilator, where they are; the lines keep their ids and the edit path stays. Owner: `ph_composer.ducting`.
+
+Undo step: Make Ducting Group. Adds a Group with a Ducting group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay.
+
+Before calling: The Ventilator exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. ducts.selection reads make_refusal null over them.
+
+Refuses: `ducting.group_in_zone`, `ducting.group_nested`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_paths",
+    "ventilator_id"
+  ],
+  "properties": {
+    "edge_paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "minItems": 1,
+      "description": "Root-to-Edge paths of loose lines in one collection, as ducts.selection gives them; at most 250, more refusing gesture.too_large."
+    },
+    "ventilator_id": {
+      "type": "string",
+      "pattern": "^vnt_[A-Za-z0-9]{12}$",
+      "description": "The Ventilator whose ducts the group holds."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "edge_paths": [
+    [
+      1305
+    ],
+    [
+      1306
+    ]
   ],
   "ventilator_id": "vnt_Ab12Cd34Ef56"
 }
@@ -91524,60 +91628,6 @@ Example params:
 }
 ```
 
-### `ph_composer.piping.groups.create`
-
-Add one empty Piping group at the Model root linked to a Hot Water System and open it, so lines drawn next land inside it. Owner: `ph_composer.piping`.
-
-Undo step: New Piping Group. Adds a Group at the root with a Piping group record and moves the edit path into it, closing any Group open before.
-
-Before calling: The Hot Water System exists. SketchUp shows this Model.
-
-Refuses: `record.unreadable`, `session.inactive`, `target.not_found`, `validation.failed`, and the `action` common set.
-
-Params:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "hot_water_system_id"
-  ],
-  "properties": {
-    "hot_water_system_id": {
-      "type": "string",
-      "pattern": "^hws_[A-Za-z0-9]{12}$",
-      "description": "The Hot Water System the group's pipes serve."
-    }
-  }
-}
-```
-
-Result:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "group_id"
-  ],
-  "properties": {
-    "group_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
-Example params:
-
-```json
-{
-  "hot_water_system_id": "hws_Ab12Cd34Ef56"
-}
-```
-
 ### `ph_composer.piping.groups.link`
 
 Link explicit Piping groups to one Hot Water System, replacing any link. Owner: `ph_composer.piping`.
@@ -91683,6 +91733,80 @@ Example params:
         ]
       }
     }
+  ],
+  "hot_water_system_id": "hws_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.piping.groups.make`
+
+Wrap loose lines drawn in the open context in a new Piping group linked to a Hot Water System, where they are; the lines keep their ids and the edit path stays. Owner: `ph_composer.piping`.
+
+Undo step: Make Piping Group. Adds a Group with a Piping group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay.
+
+Before calling: The Hot Water System exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. pipes.selection reads make_refusal null over them.
+
+Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_paths",
+    "hot_water_system_id"
+  ],
+  "properties": {
+    "edge_paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "minItems": 1,
+      "description": "Root-to-Edge paths of loose lines in one collection, as pipes.selection gives them; at most 250, more refusing gesture.too_large."
+    },
+    "hot_water_system_id": {
+      "type": "string",
+      "pattern": "^hws_[A-Za-z0-9]{12}$",
+      "description": "The Hot Water System the group's pipes serve."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_id"
+  ],
+  "properties": {
+    "group_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "edge_paths": [
+    [
+      1305
+    ],
+    [
+      1306
+    ]
   ],
   "hot_water_system_id": "hws_Ab12Cd34Ef56"
 }
@@ -131191,3 +131315,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.106 | 2026-11-25 | ph_composer.ducting adds the schedule: ph_composer.ducting.schedule (runs by Ducting group, direction, Duct Type and quantity, each Ventilator's two lengths and each Duct Type's used length, with compact), ph_composer.ducting.schedule.details, ph_composer.ducting.runs.members, ph_composer.ducting.ventilators and its snapshot section, and the view command ph_composer.ducting.runs.locate, with the codes ducting.type_missing, ducting.group_unlinked, ducting.run_missing, ducting.shared_definition and ducting.hidden. duct_types.list and duct_types.all rows add used_length_m. A duct's quantity is at most 10,000. |
 | 1.107 | 2026-11-25 | ph_composer.ducting exports its ducts: the export section ph_composer.ducting.export.ducting appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone takes. |
 | 1.108 | 2026-11-25 | ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its direction or Duct Type with legend lengths, quantity applied. |
+| 1.109 | 2026-11-26 | ph_composer.piping.groups.make and ph_composer.ducting.groups.make replace groups.create: they wrap loose lines drawn in the open context, named by edge_paths, in a new group with its linked record, and leave the edit path where it is, since SketchUp deletes an empty Group at commit. pipes.selection, pipes.selection_all, ducts.selection and ducts.selection_all add make_refusal, what groups.make over the selection meets. |

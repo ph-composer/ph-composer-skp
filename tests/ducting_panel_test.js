@@ -235,7 +235,7 @@ test("a Shape change held after the shape changed elsewhere sends nothing on Ent
   assert.strictEqual(named(o, TYPES + ".update").length, 0);
 });
 
-test("a group's Ventilator links in place, and New Ducting group asks for one", function () {
+test("a group's Ventilator links in place, and Make Ducting group wraps the selected loose lines", function () {
   var o = setup();
   read(o);
   var select = o.view(DUCTING).groups.mount.querySelector("[data-row-key='600']").querySelector(".col-link")
@@ -245,14 +245,24 @@ test("a group's Ventilator links in place, and New Ducting group asks for one", 
     targets: [{ reference: { group_id: fixtures.DG1, group_path: [600] },
       expected_values: { ventilator_id: fixtures.mechanical.ERV1.id } }], ventilator_id: fixtures.mechanical.ERV2.id });
   act(o, named(o, PREFIX + "groups.link")[0], { status: "completed", value: { group_ids: [] } });
-  press(o.view(DUCTING).bar.newGroup);
+  var bar = o.view(DUCTING).bar;
+  assert.ok(bar.make.disabled, "lines already in a Ducting group cannot make one");
+  assert.strictEqual(bar.makeReason._reason,
+    "The lines are already in a Ducting group.");
+  o.state.sections[PREFIX + "ducts.selected"].value = { ignored: [], ignored_total: 0, make_refusal: null,
+    edges: [{ path: [801], reference: null, group: null, reason: "outside_group", values: {}, copied: false,
+      record_problem: null, write_refusal: null }] };
+  o.paint();
+  assert.strictEqual(bar.make.disabled, false);
+  press(bar.make);
   var form = o.view(DUCTING).groupForm;
-  assert.strictEqual(form.title.textContent, "New Ducting group");
+  assert.strictEqual(form.title.textContent, "Make Ducting group");
   assert.strictEqual(form.link.children.length, 4, "a prompt and the three Ventilators");
+  assert.match(form.hint.textContent, /^1 selected line moves? into the new group where it is drawn/);
   change(form.link, fixtures.mechanical.ERV1.id);
   form.submit();
-  assert.deepStrictEqual(clone(named(o, PREFIX + "groups.create")[0].payload.params),
-    { ventilator_id: fixtures.mechanical.ERV1.id });
+  assert.deepStrictEqual(clone(named(o, PREFIX + "groups.make")[0].payload.params),
+    { edge_paths: [[801]], ventilator_id: fixtures.mechanical.ERV1.id });
 });
 
 test("the Ventilators table shows ducting's two duct lengths in the unit read, a dash with none", function () {

@@ -1283,10 +1283,17 @@ pipe segment carries its pipe's.
   plain Group inside a Piping group is not one. A Piping group sits at the Model root or in plain Groups (Q13):
   `groups.link`, `groups.unlink`, `pipes.assign` and `pipes.clear` refuse `piping.group_in_zone` where
   `ph_composer.zones.containment` says a Zone holds the group, and `piping.group_nested` inside another Piping group.
-  A Pipe Type or Hot Water System delete still rewrites a group a Zone holds, so no reference is left dangling. `groups.create` adds an empty
-  Group at the root with a new record naming an existing System and opens it through `EditContext.enter`, in one Undo
-  step, refusing `session.inactive` for a Model SketchUp is not showing; whether the host keeps an empty Group
-  through the commit is owed to the host case M13b. `groups.all` and the bounded `groups.list` give every occurrence
+  A Pipe Type or Hot Water System delete still rewrites a group a Zone holds, so no reference is left dangling.
+  `groups.make` (`LineGroups::GroupOperations.make`) takes `edge_paths`, root-to-Edge paths of loose lines, and an
+  existing System, and wraps the lines in a new Group in their own collection with a new record, in one Undo step;
+  the lines keep their persistent ids and dictionaries and the edit path stays. It refuses, writing nothing:
+  `target.wrong_kind` for a path naming no Edge or an Edge bounding a Face, `target.wrong_hierarchy` for lines in
+  two collections or in a Group another feature claims, `target.edit_path_changed` for lines outside the open
+  context, `piping.group_nested` inside a Piping group, `piping.group_in_zone` where a Zone holds an Edge's own path,
+  the path's write refusal (a component, a locked or shared Group) and `gesture.too_large` above the pipe gesture
+  limit. SketchUp deletes a Group left empty at commit, so no operation makes an empty one
+  (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group"). `pipes.selection` and `pipes.selection_all` give
+  `make_refusal`, the same rule over the selection, null when every selected line's path can be made. `groups.all` and the bounded `groups.list` give every occurrence
   in path order with `values`, `pipe_count` (Edges directly inside with a pipe record), `copied`, `findings` (the two
   placement codes) and `write_refusal`, the refusal `groups.link` meets in its order: nested, the path's own (a
   component, a locked or shared step), then in a Zone. No Model-level registry lists groups or pipes (Q1).
@@ -1410,10 +1417,9 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   a Ducting group sits at the Model root or in plain Groups (Q5): `groups.link`, `groups.unlink`, `ducts.assign` and
   `ducts.clear` refuse `ducting.group_in_zone` where `ph_composer.zones.containment` says a Zone holds it, and
   `ducting.group_nested` inside another Ducting group; a Duct Type delete still rewrites a duct, and a Ventilator
-  delete a group, that a Zone holds. `groups.create` adds an empty Group at the root with a new record naming an
-  existing Ventilator and opens it through `EditContext.enter`, in one Undo step, refusing `session.inactive` for a
-  Model SketchUp is not showing; whether the host keeps an empty Group through the commit is owed to
-  the host cases M13b and M14c. A pasted copy keeps its Ventilator. `groups.all` and the bounded `groups.list` give
+  delete a group, that a Zone holds. `groups.make` takes `edge_paths` and an existing Ventilator and wraps the loose
+  lines in a new group where they are drawn, in one Undo step, by piping's rule and refusals with the `ducting`
+  codes; `ducts.selection` and `ducts.selection_all` give `make_refusal`. A pasted copy keeps its Ventilator. `groups.all` and the bounded `groups.list` give
   every occurrence in path order with `values` (`ventilator_id`), `duct_count`, `copied`, `findings` and
   `write_refusal`.
 - **Duct** (reference target `ph_composer.ducting.duct`, `features/ducting/assignment/`): the assignment on an Edge,

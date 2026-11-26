@@ -143,6 +143,20 @@ class SketchupStubTest < PhComposerTestCase
     assert_same group.entities, second.parent_entities
   end
 
+  # As SketchUp 26.1.188 does (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group").
+  def test_an_empty_group_made_in_an_operation_is_erased_at_its_commit
+    model = Sketchup::Model.new
+    Sketchup.active_model = model
+    kept = model.entities.add_group
+    model.start_operation("probe", true)
+    empty = model.entities.add_group
+    filled = model.entities.add_group
+    filled.entities << Sketchup::Edge.new(1, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(1, 0, 0))
+    model.commit_operation
+    assert_equal [kept, filled], model.entities.to_a
+    assert_nil empty.parent_entities
+  end
+
   def test_explode_restores_members_to_the_parent
     face = Sketchup::Face.new(1)
     entities = Sketchup::Entities.new([face])
