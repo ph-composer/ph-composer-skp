@@ -2,8 +2,9 @@
 
 DATE: 2026-11-25
 STATUS: Recorded in part. M06 and UXR-FILTER-OCC pass. M05 and M07 ran in the conductor's first full-screen hold
-on 2026-11-26 and are recorded unknown on named clauses. The other eleven Zone views cases were not reached in that
-hold and are owed to the second one.
+on 2026-11-26 and are recorded unknown on named clauses. The second hold (2026-11-26) recorded UXR-SOLVE,
+UXR-FILTER, UXR-PAINT, UXR-HATCH, ZO-H1, ZO-H2, ZO-H3 and PTAB pass and UXR-COLOUR fail; ZO-O7 was begun and not
+finished after SketchUp crashed, and HGUI was not run.
 ISSUE: #562
 
 Synthetic summary of the MS2 sitting (D4-31) for [Phase 7 Mechanical](../../features/phase-07-mechanical/ACCEPTANCE.md):
@@ -45,7 +46,17 @@ therefore left for one full-screen hold from the conductor session, with its fix
 | `UXR-FILTER-OCC` | pass | distinct-paths, mask-west-pair, mask-east, clear-restores, no-model-write |
 | `M05` | unknown (hold, 2026-11-26) | 14 pass; by-program-flow, panel-sizes unknown |
 | `M07` | unknown (hold, 2026-11-26) | 10 pass; systems-table, heater-type-change, columns-hide-identity, locate-from-export unknown |
-| `ZO-H1`, `ZO-H2`, `ZO-H3`, `ZO-O7`, `PTAB`, `HGUI`, `UXR-SOLVE`, `UXR-FILTER`, `UXR-HATCH`, `UXR-PAINT`, `UXR-COLOUR` | ready for hold | not reached in the first hold; owed to the second |
+| `UXR-SOLVE` | pass (second hold, 2026-11-26) | checked-qualification, solve-surfaces, native-undo-redo |
+| `UXR-FILTER` | pass (second hold, 2026-11-26) | type-show-walls, mask-persists-modes, composed-empty, clear-restores, no-write |
+| `UXR-PAINT` | pass (second hold, 2026-11-26) | type-paint-drag, type-undo-redo, boundary-paint-click, assembly-paint, no-icons, narrow-menus |
+| `UXR-COLOUR` | fail (second hold, 2026-11-26) | paint-selects-mode, override-survives pass; escape-retains-boundary, assembly-stop-retains fail |
+| `UXR-HATCH` | pass (second hold, 2026-11-26) | hatch-with-selection-edges, service-readback |
+| `ZO-H1` | pass (second hold, 2026-11-26) | manage-empty-escape, dialog-sizes, draft-add-escape-enter, modal-and-defaults, model-switch-draft, fresh-make |
+| `ZO-H2` | pass (second hold, 2026-11-26) | adoption-undo-redo, chip-assignment, management-batch, used-merge, used-removal, default-replacement, fresh-reopen |
+| `ZO-H3` | pass (second hold, 2026-11-26) | normal-panel-no-dev-style, custom-hue-edges-hatch, filter-composes, held-filter-rename, new-model-clear |
+| `PTAB` | pass (second hold, 2026-11-26) | heading-new, create-undo-redo, depth-bubble, psi-default-choice, defaults-native-undo, narrow-layout, long-name, escape-draft |
+| `ZO-O7` | begun, not finished (second hold, 2026-11-26) | no row; the 2026-10-18 fail row stands |
+| `HGUI` | not run | owed |
 
 ### M06
 
@@ -170,10 +181,137 @@ Product observations, none blocking a clause:
 - At 420 and 360 px the Ventilators table keeps its horizontal scroll position, which hides the Tag column.
 - In the Hot Water Systems table the read-only recirculation columns sit after Notes, at the far right.
 
+## The second hold, 2026-11-26
+
+The conductor's second full-screen hold ran MS3's line-group cases ([phase-07-ms3](phase-07-ms3.md)), then the
+Zone views repeats on the recipes in the run directory's `HOLD2-REPEATS.md`. Each finished case was recorded with
+`acceptance_case.py finish`; these rows were written between 11:07 and 11:40.
+
+- Build: `main` at `75ae8020`, installed RBZ `5801c44522f735652f005e8e09ca019484b65c78550458bced34918cbf70fda0`,
+  the build MS3's second-hold section records. SketchUp 26.1.188, Ruby 3.2.2, macOS 26.7.1.
+- Control: panel and viewport gestures by full-screen computer use from the conductor; bridge reads and labelled
+  setup in separate calls; native Undo and Redo by System Events Edit-menu presses with the model window raised
+  (`edit_raise.py`).
+- Chains: UXR-SOLVE, UXR-FILTER, UXR-PAINT and UXR-COLOUR ran in one process on one file, each saved under its own
+  name; ZO-H3 continued in ZO-H2's reopened process. The others started from fresh fixture copies.
+- Changed surfaces, recorded as the recipe's decisions and named in each observation: ZO-H1's dialog clauses ran on
+  Manage Levels, the same dialog component, because the Building Segments dialog no longer exists, and its default
+  clause reads the heading's Default tag and the Settings checkbox; ZO-H2's `default-replacement` ran through the
+  heading's Delete dialog; PTAB reads "Model value" where it read "None" and has a third control in the narrow row.
+
+### UXR-SOLVE: pass
+
+The check-all box gave "12 Faces selected", "2 Zones checked" and Solve enabled; unchecking one row gave 11, 1 and
+Solve disabled; the panel's check state did not touch SketchUp's selection. Solve gave the two facing walls Surface,
+each naming the other under October's pair id; native Undo and Redo Solve Zone Adjacency return the snapshots
+before and after exactly. Evidence: `UXR-SOLVE/05-solved.json`, `06-edit.jsonl`.
+
+### UXR-FILTER: pass
+
+The Type menu's Show list narrowed to Walls: eight Wall paths in `filter_paths`, "12 Faces selected, 4 hidden", the
+roof left plain. The mask held through Colour by Zone, Off and Boundary. Unticking Outdoors and Surface too gave
+"No Zones match this filter." and an empty mask; each Clear filter restored its step. Revision and `modified`
+unchanged throughout, and the Edit menu's top title the same before and after. Evidence: `UXR-FILTER/01-walls.json`,
+`03-empty.json`, `05-type-cleared.json`, `06-no-write.json`.
+
+### UXR-PAINT: pass
+
+The Type menu's paint icon turned Colour by Face type on and armed the tool. One drag across the two front walls
+classified exactly those two as Roof or ceiling ("Classified 2 Faces.", October's Faces); Undo and Redo return the
+snapshots. Boundary Ground and the local Assembly each painted one click's Face only. Paint icons appear beside
+Ground, Outdoors, To neighbour and the Assembly, not beside Attached zone, Surface or None. At 420 x 732 and
+360 x 520 the bar and menus stay in the pane and Escape stops the tool with no write. Evidence:
+`UXR-PAINT/03-paint-type.json`, `04-edit.jsonl`, `06-boundary.json`, `09-edit.jsonl`, `14-rev-end.json`.
+
+### UXR-COLOUR: fail, 2 pass, 2 fail
+
+- Pass: `paint-selects-mode` (each menu's paint icon switches Colour by to its mode) and `override-survives` (with
+  Assembly paint active, Colour by > Face type from the Extensions menu takes over and Escape keeps Face type).
+- Fail: `escape-retains-boundary`. Starting from Colour by Off, Boundary > Ground paint set Boundary condition; a
+  click on empty sky left it; Escape, with the viewport or the panel key, returned to the Select tool with Colour by
+  Off and the legend gone, reproduced twice. With Boundary on before painting, Escape leaves Boundary.
+- Fail: `assembly-stop-retains`. With Boundary on, Assembly paint set Assembly; Escape left Boundary condition, not
+  Assembly.
+
+This build's Escape restores the Colour-by mode active before paint started instead of keeping the paint's mode.
+No recorded decision for the change was found. For Ed: an intended change, which rewrites both clauses, or a
+regression. Evidence: `UXR-COLOUR/02e-after-escape.json`, `02h-explicit-then-escape.json`,
+`03b-assembly-escape.json`, `04b-override-escape.json`.
+
+### UXR-HATCH: pass
+
+With West's front wall selected, Colour by > Assembly from the Extensions menu hatches all twelve unclassified Faces
+grey with West's selection edges drawn over the hatch (shots `01-hatch-selection.jpg`). The service reads
+`unclassified_hatch` 1,144 (October's count), no fills, and no write. Its session revision reads 1, not the recipe's 4, which
+was October's session count. Evidence: `UXR-HATCH/02-hatch-service.json`.
+
+### ZO-H1: pass
+
+On Manage Levels: the empty dialog's Escape writes nothing; with three rows Save and Cancel stay visible at
+1280 x 800, 420 x 732 and 360 x 520, the list scrolling at 360; Add focuses the new name, a draft Escape writes
+nothing and Enter saves one Level in one Undo step ("Undo Manage Zone Options"); a click on another tab leaves the
+dialog open; switching Models with a draft open drops the dialog and writes nothing. A new Building Segment carries
+the Default tag and its Settings checkbox is locked. Make Zone on a new Model's box gives one Zone in one default
+Segment. Evidence: `ZO-H1/01-empty-escape.json`, `02-sizes-escape.json`, `04-add-enter.json`,
+`05-new-segment.json`, `05-switch-return.json`, `06-first-make.json`.
+
+### ZO-H2: pass
+
+From the legacy fixture: Adopt, a Level chip, a rename and recolour batch, merging a used Level (its orphan stamp
+included) and removing one, and deleting the default Segment with its Zones moving to the new one. For each write,
+the read after Undo equals the read before and the read after Redo equals the read after, field by field. After save
+and a fresh-process reopen the reads equal the saved ones. `default-replacement`'s Cancel half was not observed.
+Evidence: `ZO-H2/01-adopted.json` to `06-default-replaced.json`, `edit.jsonl`, `09-reopened.json`.
+
+### ZO-H3: pass
+
+The panel opened normally shows no row actions forced visible. A custom-hue Level colours Zone 1 with its selection
+edges, Zone 2 hatched; hiding that Level in the Show list masks Zone 1 and keeps its selection edges; renaming and
+recolouring it keeps the mask; a new Model reads Colour by Off, no mask and no Zones. Evidence:
+`ZO-H3/03-filter.json`, `04b-mask.json`, `05-new-model.json`, shots `02-custom-hue-edges-hatch.jpg`.
+
+### PTAB: pass
+
+Library > Frames and Psi-Install Types carry "+ New" in the Library heading with the action bar below. Create Frame
+is one Undo step. The Depth bubble holds invalid text with its message and stores 0.12 m from "120 mm"; the
+Psi-Install choice offers "Model value" and applies at once; two native Undos return both defaults. At 420 px Depth
+wraps to a second row and its bubble opens inside the panel; a 59-character Psi-Install name ellipsises with both
+chevrons inside; a draft Escape writes nothing. Evidence: `PTAB/edit.jsonl`, `04-depth.json`, `05-psi-default.json`,
+`edit-defaults.jsonl`, `09-escape-draft.json`.
+
+### ZO-O7: begun, not finished
+
+`begin` ran and no `finish` followed, so there is no row; the 2026-10-18 fail row on #181 stands. From the hold log
+(`ZO-O7/steps.md`):
+
+- Legacy options adopted from the heading's Adopt. `same-model-copy-independent` was observed to pass: the paste is
+  independent and Undo Paste returns the adopted read.
+- `component-copy-shared`: a native Paste In Place of a wrapper Group holding Zone 1, and a labelled
+  `add_instance` of its definition, were each made unique at once with a new Zone identity, so the copied-Group
+  refusal the clause names could not be reached. A component placed twice read `shared_definition`, as expected.
+- A labelled bridge evaluation setting `active_path` to a component placement and selecting the Zone inside it then
+  crashed SketchUp 26.1.188 at 11:32:56 with `EXC_BAD_ACCESS` (`KERN_INVALID_ADDRESS`). The hold log reads the crash
+  in SketchUp's notification code, called from the Ruby C function, with no PH-Composer Ruby frames above it; the
+  crash file names PH-Composer only as the development bridge's thread. Unsaved state was lost. Crash log:
+  `ZO-O7/crash-113259.ips`.
+
+The rest of the case is owed to a later sitting, and how to reach the copied-Group refusal needs a recipe change.
+
+### HGUI: not run
+
+It rewrites this machine's library setup and drives native Save panels, so it was left for a sitting with Ed
+present.
+
+### Findings from the second hold (MS2 cases)
+
+- UXR-COLOUR's Escape behaviour (above), for Ed.
+- ZO-H1: a long Level name is clipped at the field edge without an ellipsis once the field loses focus.
+- ZO-H2's `default-replacement` passed with its Cancel half not observed.
+
 ## Ready for hold
 
-Written before the first hold. M05 and M07 have since run (above); the eleven Zone views cases below are still
-staged, unchanged. No case folder held a baseline, so the conductor's `begin` started cleanly. What is staged
+Written before the first hold. M05 and M07 have since run (above), and the Zone views cases ran in the second hold
+on the recipes in `HOLD2-REPEATS.md`, not on the stubs below. No case folder held a baseline, so the conductor's `begin` started cleanly. What is staged
 differs by case:
 
 - `M05` and `M07`: a driver that launches the fixture, opens the panel and runs `begin`, and a clause-level
@@ -193,8 +331,10 @@ display left of the main one.
 
 ## Open
 
-- The second hold: the eleven Zone views cases. M05's and M07's unknown clauses need a rerun, not yet assigned to a
-  sitting.
+- From the second hold: ZO-O7 unfinished (the SketchUp crash, and a recipe that reaches the copied-Group refusal)
+  and HGUI not run. M05's and M07's unknown clauses need a rerun, not yet assigned to a sitting.
+- For Ed from the second hold: UXR-COLOUR's Escape restoring the prior Colour-by mode, an intended change or a
+  regression; the ZO-O7 host crash on an `active_path` change into a component placement.
 - Two pass readings for Ed: M05's `electric-efficiency-units` passed with the draft committed on blur rather than
   kept as a draft across the switch, and M05's `each-write-one-undo` passed without the cell edits and the
   duplicate pressed one by one.
@@ -207,3 +347,7 @@ display left of the main one.
 No fault, provider override or preference change. Each approved location created was revoked after its export.
 SketchUp was quit at the end with no open document. Every save used an absolute path under `_private/host/`.
 The first hold ended at a case boundary with SketchUp quit; MS3's evidence records its restoration.
+
+The second hold: no fault and no provider override in these cases. ZO-O7's process crashed and its unsaved state
+was lost; its run directory keeps the `begin` baseline with no `finish`. HGUI did not run, so the machine's library
+setup was not touched.
