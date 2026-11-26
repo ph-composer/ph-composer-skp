@@ -71,8 +71,8 @@ On a fresh copy of MS1's reference model (Zone A and Zone B in Segment Main), pa
   M04; p4-15 decision 3 governs both.
 
 Copy defect noted, not blocking: the variant refusal reads "A electric heater takes no total_system_perf_ratio..",
-with the wrong article and a doubled full stop. The preflight lists `mechanical.hot_water_pooled` once per System
-(two identical rows for one Segment).
+with the wrong article and a doubled full stop. The preflight lists `mechanical.hot_water_pooled` in one row per
+System.
 
 ### UXR-FILTER-OCC
 
@@ -85,16 +85,19 @@ counts are not repeated; the helper copy for this run drops them.
 
 ## Ready for hold
 
-Each case folder holds a `steps.md` recipe and a driver whose first lines launch the fixture and run `begin`. The
-folders hold no baseline, so the conductor's `begin` starts cleanly.
+No case folder holds a baseline, so the conductor's `begin` starts cleanly. What is staged differs by case:
 
-- `M05`: a fresh copy of MS1's reference model, sixteen assertions, one per clause group of its label. The tab
-  order (Mechanical after Thermal Bridges, before Library) was seen in a probe capture but not recorded.
-- `M07`: a fresh copy of the built fixture `m07-reference.skp` (M06's reference System on both Zones), fourteen
-  assertions.
-- The eleven other Zone views cases: the prior runs' fixtures, assertion ids and recipes
-  ([phase 3a rerun](phase-3a-rerun-2026-10-16.md), [Ruby readability batch](ruby-readability-2026-10-17.md)), with
-  the wash change noted. `ZO-O7` last recorded fail on its component-copy clause (#181).
+- `M05` and `M07`: a driver that launches the fixture, opens the panel and runs `begin`, and a clause-level
+  `steps.md` with the host facts above and no coordinates. `M05` uses a fresh copy of MS1's reference model, sixteen
+  assertions, one per clause group of its label; the tab order (Mechanical after Thermal Bridges, before Library)
+  was seen in a probe capture but not recorded. `M07` uses the built fixture `m07-reference.skp` (M06's reference
+  System on both Zones), fourteen assertions.
+- The eleven other Zone views cases: driver stubs the conductor completes (the `--target` and `--probe` text, and
+  for `ZO-H3`, `UXR-FILTER`, `UXR-PAINT` and `UXR-COLOUR` the predecessor's process and saved file, since they have no
+  launch of their own). Their `steps.md` points at the prior runs' fixtures, assertion ids and observations
+  ([phase 3a rerun](phase-3a-rerun-2026-10-16.md), [Ruby readability batch](ruby-readability-2026-10-17.md)); those
+  runs left no step-by-step recipe. The fixture sources exist. `ZO-O7` last recorded fail on its component-copy
+  clause (#181).
 
 Windows on this host: the model window 2028 x 1058 at (0, 30); the panel opens 1149 x 809 at (-1282, 292), on the
 display left of the main one.
