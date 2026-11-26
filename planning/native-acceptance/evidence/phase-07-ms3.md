@@ -2,8 +2,9 @@
 
 DATE: 2026-11-25
 STATUS: Recorded in part. M13a, M14a, M13d, M14d, M14e, T04 and T08 pass. M13b and M14c fail: creating a Piping or
-Ducting group crashes SketchUp. M13c unknown until T09. M08 to M11, M13e, M14f, M16 and T09 are staged for one
-full-screen hold. M15 not run.
+Ducting group crashes SketchUp. The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass
+and M08, M10 and M16 unknown on named clauses. M13c stays unknown: T09 now passes, but the `groups.create` fix
+stales it. M13e, M14f and M15 not run; they and the reruns the fix requires are owed to the second hold.
 ISSUE: #562
 
 Synthetic summary of the MS3 sitting (D4-31) for [Phase 7 Mechanical](../../features/phase-07-mechanical/ACCEPTANCE.md):
@@ -59,8 +60,14 @@ feature's own group store. A fix to the create step stales M13d, M14d and M14e.
 | `T08` | pass | export-readback, metadata-guard, save-reopen-reexport, outside-zone-disclosed, warnings-preflight-report, blocking-keeps-prior-pair, forced-refusal, required-refusal-withholds, snapshot-measure |
 | `M13b` | fail | h1-create-empty-group-active fail; h4-assign-clear-one-undo, h4-paste-shared-refuses-until-unique, hws-delete-retargets-one-undo pass; h2-line-tool-in-group, h3-split-tee-copied-record unknown |
 | `M14c` | fail | create-linked-group-active fail; assign-quantity-clear-one-undo, paste-shared-keeps-link-refuses-until-unique, erv-delete-retargets-group-and-zone-one-undo pass; line-tool-in-group unknown |
-| `M13c` | unknown | schedule-hand-measurement, branch-unconnected-floor2, locate-into-wrapped-group, save-reopen-same-identifiers, measurement-50000-edges pass; thermal-bridge-repeats unknown (T09 owed) |
-| `M08`, `M09`, `M10`, `M11`, `M13e`, `M14f`, `M16`, `T09` | ready for hold | not begun |
+| `M13c` | unknown | schedule-hand-measurement, branch-unconnected-floor2, locate-into-wrapped-group, save-reopen-same-identifiers, measurement-50000-edges pass; thermal-bridge-repeats unknown (T09 owed when recorded; T09 has since passed, M13c not re-finished) |
+| `M09` | pass (hold, 2026-11-26) | all 13 |
+| `M11` | pass (hold, 2026-11-26) | all 14 |
+| `T09` | pass (hold, 2026-11-26) | all 10 |
+| `M08` | unknown (hold, 2026-11-26) | 12 pass; heating-cooling-data, blended-copy unknown |
+| `M10` | unknown (hold, 2026-11-26) | 13 pass; save-reopen-reexport unknown (list order only) |
+| `M16` | unknown (hold, 2026-11-26) | 6 pass; dialog-defaults unknown (68 °F under IP unchecked) |
+| `M13e`, `M14f` | ready for hold | not begun; they start from `groups.create` |
 
 ### Fixtures
 
@@ -151,7 +158,180 @@ These repeat the October runs with M13c, because the chain rule moved to `core/e
   (319.0 ms); it is read on request only.
 - Every snapshot section is under the 200 ms target.
 
+## The first hold, 2026-11-26
+
+One full-screen hold from the conductor, 07:47 to 08:30, ran a probe and then, in order, MS2's M05 and M07
+([phase-07-ms2](phase-07-ms2.md)), M09, M10, M11, M08, M16 and T09. It ended at a case boundary within its time
+box; the Zone views repeats were not reached. Each case was recorded with `acceptance_case.py finish`. The cases
+the `groups.create` fix will stale were left out by plan.
+
+- Build: `main` at `d0adcba8`, installed RBZ `b2b6bfdf`, the build above; no `src/` or `tools/` change between
+  `d8759630` and `d0adcba8`. SketchUp 26.1.188, Ruby 3.2.2, macOS 26.7.1, a fresh process per case.
+- Control: panel and viewport gestures by full-screen computer use, panel 1280 x 800 at (768, 245); bridge reads and
+  labelled setup in separate calls; native Undo and Redo by System Events Edit-menu presses; exports with the
+  approved-location stand-in, revoked after each; HBJSON reloaded in the pinned stack.
+
+### The probe for the fix
+
+Not a case and no ledger row; recorded in the hold log. It tested two assumptions a `groups.create` fix would rest
+on:
+
+- Wrapping selected loose lines in a new Group by Ruby keeps their persistent ids and attribute dictionaries, as one
+  Undo step ("Make probe group"), and Undo restores the loose lines.
+- The native Line tool draws into an open, labelled Piping group: a line ending on a branch Edge
+  T-splits it, 18 Edges becoming 20 with three meeting at the new vertex. Undo Draw Line restores the 18.
+
+### M09: pass
+
+On a fresh copy of MS1's reference model:
+
+- Electric Heating shows the Heaters pill, an empty table and + New Electric Heater. A create gives coverage 100 and
+  "Serves no Zone" in amber, stored 1.0. Coverage edited to 60 stores 0.6; 120 holds the cell with "Enter a
+  percentage from 0 to 100.", Escape shows 60 and the Model keeps 0.6.
+- The Zone picker is grouped under MAIN. EH-1 on both Zones and EH-2 on Zone A leaves Zone A with two heaters.
+  Duplicate prefills "EH-1 (copy)" with its coverage. Columns hides Manufacturer, Model and Notes, and the hidden
+  set survives save and reopen.
+- Export > Worth checking: no coverage finding although Zone A sums 160 percent; the copy is reported unserved, and
+  its Locate filters the Heaters table to it ("1 of 3"), Clear filter restoring all rows.
+- The export reloads with Room A holding EH-1 (0.6) and EH-2 (1.0) as `PhHeatingDirectElectric`, and Room B EH-1.
+- Delete EH-1 with replacement EH-2 leaves EH-2 once on Zone A and on Zone B; native Undo restores both lists, Redo
+  reapplies, Undo again restores. Unchecking Zone A in EH-2's picker clears it; Undo Clear Equipment puts it back.
+- Save, a fresh-process reopen and re-export: `heating_systems` equal by section (p4-15 decision 3).
+- At 420 x 732 and 360 x 520 the subtab row scrolls with arrows and there is no page-level sideways scroll.
+
+### M10: unknown, 13 pass, 1 unknown
+
+On a fresh copy of `reference-zone-c.skp` (the Zone C box without a Space):
+
+- Pumps shows its pill, the table and + New Pump. A create gives hot water circulation (`device_type` 6), quantity 1,
+  0 W, 8.76 kh. Type, Power and Operation edited in place, one guarded update each, store 4, 45 W and 5 kh. A
+  negative Power holds the cell with "Power cannot be negative."; Escape restores it.
+- The row's first button opens the internal heat gain values, the usage profile following the heating type.
+- P-1 on Zone A and P-2 on Zones A and C leave Zone A with two pumps. Duplicate copies the values; Columns hides the
+  identity columns.
+- Export lists the pump on Zone C as `mechanical.zone_without_spaces`, not blocking, its Locate filtering Pumps to it,
+  and the copy as `mechanical.item_unserved`. The reload gives Room A both pumps as supportive devices with their
+  values, Zone C's Room the second pump, Room B none.
+- Delete with a replacement keeps the replacement once on Zone A; native Undo, Redo and Undo again behave.
+- Unknown: after save and a fresh-process reopen the re-export has equal Rooms and identifiers, but Room A's
+  `supportive_devices` list holds the two devices in swapped order, so the section comparison reports not equal.
+  Whether order alone counts as the same HBJSON is p4-15 decision 3, Ed's.
+- At 420 x 732 and 360 x 520 the table scrolls inside its frame, with no page-level sideways scroll.
+
+### M11: pass
+
+On a fresh copy of `reference-zone-c.skp`:
+
+- Fans shows its pill, the table and + New Fan. A create gives User-defined, quantity 1, flow 0, runtime 0 and a
+  blank Power. Type Kitchen hood, flow 300 m³/h, runtime 10,950 min and 120 W store as entered; a negative Power
+  is held and Escape restores it.
+- The row's first button opens the electric values: in conditioned space, and Operation empty with the placeholder
+  derived from the runtime (0.18 kh a year, 10,950 / 60,000).
+- F-1 on Zones A and B and a Dryer F-2 on Zones A and C; Duplicate copies the values; Columns hides the identity
+  columns.
+- Export lists F-2 on Zone C as `zone_without_spaces`, not blocking, its Locate filtering Fans to it, and the copy as
+  unserved. The reload gives Room A F-1 as a type 10 supportive device (120 W, 0.1825 kh) and both fans as exhaust
+  ventilators of their classes, Room B F-1 as both objects, and Zone C's Room the dryer only.
+- Delete F-1 with replacement F-2 retargets all three Zones; native Undo, Redo and Undo again behave.
+- Save, a fresh-process reopen and re-export: `supportive_devices` and `exhaust_vent_devices` equal by section
+  (p4-15 decision 3).
+- At 420 x 732 and 360 x 520 the subtab row and the table scroll inside the pane.
+
+### M08: unknown, 12 pass, 2 unknown
+
+On a fresh copy of `m07-reference.skp` with a labelled, typed complete climate (design temperatures -10 and 35 °C),
+saved before `begin`:
+
+- Heat Pumps sits after Ventilation with five pills: Equipment - Outdoor, Equipment - Indoor, Units - Outdoor,
+  Units - Indoor, Blended result.
+- New outdoor equipment ODU-A: the 17 °F and 47 °F heating capacities are amber until entered; 5 and 7 kW read
+  17.1 and 23.9 kBtu/h under IP and return under SI.
+- Indoor equipment is identity only. An outdoor unit names its equipment, with quantity 2; indoor units name their
+  indoor equipment and outdoor unit and are grouped under it. Two indoor units on Zone A, then one unchecked, leave
+  Zone A with the other (`hp_indoor_unit_ids`).
+- Deleting ODU-A while an outdoor unit names it offers only a replacement, disabled until one is chosen; with ODU-B
+  the unit retargets, and one native Undo restores ODU-A and the unit's reference.
+- With the climate cleared (labelled), Blended result and the Export tab say the blended heat pump is left out of the
+  export, still ready to export; native Undo Clear Climate restores it.
+- The export reloads with Zone A's Room holding one heat pump system for Segment Main: equal COP 1 and COP 2 (the
+  blend), coverage 1.0, recirculation cooling, minimum coil temperature 12.0 °C. A labelled second Segment for Zone
+  B, with an indoor unit on it, gives Room B a second heat pump system under its own identifier.
+- Save, a fresh-process reopen and re-export: `heat_pump_systems` equal by section (p4-15 decision 3).
+- Single native Undo presses each reverted one write: Delete outdoor equipment, Clear Climate, Assign Equipment and
+  Edit Selected Zones.
+- At 420 x 732 and 360 x 520 the Blended result's pills wrap and the content fits.
+- Unknown, each with what was seen:
+  - `heating-cooling-data`: COPs to HSPF2 keeps the COPs muted and stored, HSPF amber until entered; EER2/SEER2
+    cooling data set with the cooling capacity inactive while cooling data is None; the paired indoor model chosen
+    in place. IEER was not exercised.
+  - `blended-copy`: the Blended result shows one block, Main, in the estimator's sections, and Copy for the
+    estimator put 37 tab-separated rows on the clipboard with its toast. They were not pasted into a spreadsheet,
+    and `pbpaste` shows a replacement character where "Inputs · Cooling" has a middle dot.
+
+Operator error, recorded in the case's hold log: during labelled setup, before `begin`, a `zones.update_field` with a
+nil Segment moved Zone B out of its Segment; native Undo Edit Selected Zones reverted it at once, and the Segment
+was then made with `zones.create_segment`.
+
+### M16: unknown, 6 pass, 1 unknown
+
+On M08's model as saved at its end (Zone A in Main served by a heat pump, Zone B alone in Building Segment 2):
+
+- Saving Main's settings (cooling on, 18.5 °C, temperature-controlled bypass, three air-change values) together with
+  a Phius certification field in the same dialog is one native Undo step that returns both sections; Redo restores
+  both.
+- A negative daytime window rate disables Save with the field's message.
+- Cooling switched on for Building Segment 2 while ODU-A's cooling data is None: Export, still ready, warns for both
+  Segments that their export carries no heat pump cooling. Two native Undos restore the settings and the cooling
+  data, and the warnings go.
+- The export reloads with Main's set points and summer ventilation as entered and Building Segment 2 at the
+  defaults; winter and summer temperatures come from the Programs. Save, reopen and re-export give the same set
+  points and summer ventilation, honeybee-ph's random identifiers aside, and equal `heat_pump_systems`.
+- The dialog fits the pane at 1280 x 800, 420 x 732 and 360 x 520, with a scrolling body and Cancel and Save visible.
+- Unknown: `dialog-defaults` saw the Mechanical section after Comfort with cooling off, 20 °C, bypass Always, a blank
+  ventilation rate and zero window rates, but not the 68 °F reading under IP.
+
+### T09: pass
+
+On a fresh copy of `t09-reference-base.skp`, the thermal-bridge panel run M13c repeats:
+
+- Five Thermal Bridge Types created through the dialog, one without a psi-value. The assign bar assigned Parapet to
+  two Zones' roof Edges as two runs; native Undo removed the second run alone and Redo restored it.
+- SketchUp's Edit menu route (the selection's PH-Composer > Thermal bridge submenu) assigned two more types.
+- Assign by clicking Edges: Balcony at quantity 2 on one Edge, after two clicks that missed the line, and Parapet on
+  a rotated Zone's four roof Edges under a labelled top-down camera; Escape returned to the Select tool.
+- A second Model through File > New read its own empty state; closing it left the first Model's runs and psi total
+  unchanged.
+- A labelled line drawn from the middle of a roof Edge split it and both pieces kept the run's record; erasing the
+  line healed it, the length unchanged.
+- Save and a fresh-process reopen kept types and runs. The export reloads with each run's psi-value, length,
+  quantity and group. A fresh launch with no case helper loaded reads the extension registered and the same totals
+  through the shipped walkthrough.
+
+### Findings from the hold (MS3 cases)
+
+Product observations, none blocking a clause; MS2's evidence lists those from M05 and M07:
+
+- Finding text doubles the noun: "Building Segment Building Segment 2 has mechanical cooling switched on ..." (M16),
+  as "Zone Zone B" in M05 and M07.
+- SketchUp's Tags and Entity Info tray overlaps the Serves picker's Assign button near the screen's right edge; it
+  was clicked at its visible edge (M10).
+- At 420 px the Zones table drops the Actions column, so a Segment's settings button cannot be reached at that width
+  (M16).
+- The Fans Tag filter lists F-1 (copy), F-2, F-1, unsorted (M11's hold log).
+- The estimator clipboard, read through `pbpaste`, shows a replacement character for the middle dot in
+  "Inputs · Cooling" (M08); whether the clipboard or `pbpaste` loses it was not checked.
+
+### Owed to the second hold
+
+After the `groups.create` fix: M13b, M13c (stale with the fix, though T09 now passes), M13d, M13e, M14c, M14d, M14e,
+M14f and M15, and MS2's eleven Zone views repeats (ZO-H1, ZO-H2, ZO-H3, ZO-O7, PTAB, HGUI, UXR-SOLVE, UXR-FILTER,
+UXR-HATCH, UXR-PAINT, UXR-COLOUR). M13d, M14d and M14e are Pass today and go stale only when the fix lands. The
+unknown clauses of M05, M07, M08 and M16 need a rerun, not yet assigned to a sitting; M10's waits on p4-15
+decision 3.
+
 ## Ready for hold
+
+Written before the first hold, which used this recipe for M08 to M11, M16 and T09 (above).
 
 `HOLD.md` sets the panel's placement (1280 x 800 at (768, 245) on the main display) and a calibration step. It gives
 coordinates for the tabs, subtabs, pills, New dialogs, the Heaters, Pumps and Fans rows with their hover actions,
@@ -170,7 +350,10 @@ it. M13b and M14c need a whole-case rerun after the fix, not a Line-tool-only ru
 - The `groups.create` crash (above): a product defect, for a fix and a test before any line-group host case
   closes.
 - Ed's reading of T04 and T08 under WT-23 (labels still say counted twice), and p4-15 decision 3 (section or whole
-  file) for M13d and M14e.
+  file) for M13d and M14e, and from the first hold for M08, M09, M11 and M16 (compared by section) and M10 (list
+  order only).
+- The hold's product findings (above), for issues if Ed wants them.
+- The second hold (above).
 - ACCEPTANCE's piping case: 17 Edges as written, 18 on the host.
 - The whole-panel snapshot at 50,040 Edges: 31.0 s against 12.1 s in October.
 
@@ -181,3 +364,7 @@ revokes its own, and the four the reused T08 helper approved were revoked at the
 from earlier sittings are untouched. Four crashes each left SketchUp's BugSplat Problem Report on the next launch,
 dismissed with Cancel; nothing was sent. No recovered or autosave file was found. The panel's stored position is
 now (768, 245), 1280 x 800, where MS2's notes cite (-1282, 292). SketchUp was quit at the end with no open document.
+
+The first hold: no fault and no provider override. Each of its exports revoked its approved location. Both operator
+errors were reverted at once by native Undo (M05 in MS2's evidence, M08 above). The hold ended at a case boundary
+and SketchUp was quit.
