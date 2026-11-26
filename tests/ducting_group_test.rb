@@ -78,8 +78,8 @@ class DuctingGroupTest < PhComposerTestCase
       assert_equal ["refused", code], make(paths, @erv1).values_at("status", "code"), paths.inspect
     end
     @model.active_path = nil
-    D::Assignment.gesture_edge_limit = 1
-    assert_equal %w[refused gesture.too_large], make([[801], [600, 601]], @erv1).values_at("status", "code")
+    paths = (1000..1250).map { |id| edge(id).tap { |line| @model.entities << line }.persistent_id }.map { |id| [id] }
+    assert_equal %w[refused gesture.too_large], make(paths, @erv1).values_at("status", "code"), "the handler's limit"
     assert_equal [ducting], @model.entities.to_a.select { |entity| STORE.marks?(entity) }
     assert_equal [[601], [101], [521], [531]], [plain, zone, ducting, piping].map { |group|
       group.entities.map(&:persistent_id)

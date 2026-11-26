@@ -75,12 +75,32 @@ class PipingGroupTest < PhComposerTestCase
       assert_equal ["refused", code], make(paths, @hws1).values_at("status", "code"), paths.inspect
     end
     @model.active_path = nil
-    P::Assignment.gesture_edge_limit = 1
-    assert_equal %w[refused gesture.too_large], make([[801], [891]], @hws1).values_at("status", "code")
     assert_equal [piping], all_groups
     assert_equal [[601], [101, 110], [521], [531]], [plain, zone, piping, ducting].map { |group|
       group.entities.map(&:persistent_id)
     }
+  end
+
+  # In an open plain Group the new group is made inside it, where the lines are, and the Group stays open.
+  def test_make_in_an_open_plain_group_wraps_the_lines_there
+    plain = Sketchup::Group.new(600, Sketchup::Entities.new([edge(601), edge(602)]),
+                                {}, :transformation => Geom::Transformation.translation([100, 0, 0]))
+    @model.entities << plain
+    @model.active_path = [plain]
+    assert_equal "committed", make([[600, 601], [600, 602]], @hws1)["effect"]
+    made = plain.entities.to_a.find { |entity| STORE.marks?(entity) }
+    assert_equal [[601, 602], [plain]], [made.entities.map(&:persistent_id), Array(@model.active_path)]
+    assert_equal [[600, made.persistent_id]], all.map { |row| row.fetch("path") }
+  end
+
+  # The gesture limit is the handler's, so 251 lines refuse with its code and 250 are made.
+  def test_make_takes_250_lines_and_refuses_251_as_too_large
+    lines = (1000..1250).map { |id| edge(id) }
+    lines.each { |line| @model.entities << line }
+    paths = lines.map { |line| [line.persistent_id] }
+    assert_equal %w[refused gesture.too_large], make(paths, @hws1).values_at("status", "code")
+    assert_equal "committed", make(paths.first(250), @hws1)["effect"]
+    assert_equal [250], all_groups.map { |group| group.entities.count }
   end
 
   # The selection read answers what make would meet over the selection, so the panel offers it only when it can run.

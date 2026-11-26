@@ -50,7 +50,7 @@ Offline evidence only. No SketchUp process was started. The host cases stay owed
 | Lines in a group of its kind | `piping.group_nested`, `ducting.group_nested` | both | both |
 | Lines in another feature's line group | `target.wrong_hierarchy` | refuse test (a Ducting group) | refuse test (a Piping group) |
 | A locked Group, shared storage | `target.locked`, `target.shared_definition` | refuse test | |
-| More lines than the gesture limit | `gesture.too_large` | refuse test (limit lowered to 1) | |
+| More lines than the gesture limit | `gesture.too_large` | `test_make_takes_250_lines_and_refuses_251_as_too_large` | refuse test (251 lines) |
 
 At apply, `MakeStep` refuses `target.edit_path_changed` when the open context moved and `target.changed` when a line
 is gone, no longer an Edge or bounds a Face (`tests/line_groups_test.rb`,

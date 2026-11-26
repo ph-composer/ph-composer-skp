@@ -47,9 +47,11 @@ module PhComposer
         "write_refusal" => REFUSAL.merge("description" => "What a write through its path meets, or null.")
       })
       EDGE_PATHS = Shapes.list(LineGroups::PATH)
-                         .merge("minItems" => 1, "maxItems" => Assignment::GESTURE_EDGE_LIMIT,
+                         .merge("minItems" => 1,
                                 "description" => "Root-to-Edge paths of loose lines in one collection, as " \
-                                                 "ducts.selection gives them.")
+                                                 "ducts.selection gives them; at most " \
+                                                 "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
+                                                 "gesture.too_large.")
       MAKE_PRECONDITIONS = ["The Ventilator exists.",
                             "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
                             "Zone and every Group another feature owns, reached through plain unlocked unshared " \

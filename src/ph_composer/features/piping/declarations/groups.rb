@@ -47,9 +47,11 @@ module PhComposer
       LIST = Shapes.object({ "groups" => Shapes.list(ROW), "next_cursor" => Pages::NEXT_CURSOR,
                              "total" => Pages::TOTAL })
       EDGE_PATHS = Shapes.list(LineGroups::PATH)
-                         .merge("minItems" => 1, "maxItems" => Assignment::GESTURE_EDGE_LIMIT,
+                         .merge("minItems" => 1,
                                 "description" => "Root-to-Edge paths of loose lines in one collection, as " \
-                                                 "pipes.selection gives them.")
+                                                 "pipes.selection gives them; at most " \
+                                                 "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
+                                                 "gesture.too_large.")
       MAKE_PRECONDITIONS = ["The Hot Water System exists.",
                             "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
                             "Zone and every Group another feature owns, reached through plain unlocked unshared " \

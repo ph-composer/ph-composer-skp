@@ -78838,8 +78838,7 @@ Params:
         }
       },
       "minItems": 1,
-      "maxItems": 250,
-      "description": "Root-to-Edge paths of loose lines in one collection, as ducts.selection gives them."
+      "description": "Root-to-Edge paths of loose lines in one collection, as ducts.selection gives them; at most 250, more refusing gesture.too_large."
     },
     "ventilator_id": {
       "type": "string",
@@ -91769,8 +91768,7 @@ Params:
         }
       },
       "minItems": 1,
-      "maxItems": 250,
-      "description": "Root-to-Edge paths of loose lines in one collection, as pipes.selection gives them."
+      "description": "Root-to-Edge paths of loose lines in one collection, as pipes.selection gives them; at most 250, more refusing gesture.too_large."
     },
     "hot_water_system_id": {
       "type": "string",
