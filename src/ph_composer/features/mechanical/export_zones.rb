@@ -80,11 +80,11 @@ module PhComposer
         end
       end
 
-      # Per item of a family PHX reads through a Room's Spaces (supportive devices, exhaust ventilators): one
-      # finding naming every exported Zone it serves that no Space names, so two Zones sharing a name stay two in the
-      # message. Not blocking: the HBJSON carries the item on those Rooms, and PHX reads it only through another Room
-      # it serves. `spaced` holds the ids of the exported Zones with a Space; `slot` and `label` are as
-      # `item_findings` takes them.
+      # Per item of a family PHX reads through a Room's Spaces (supportive devices, exhaust ventilators, heating
+      # systems): one finding naming every exported Zone it serves that no Space names, so two Zones sharing a name
+      # stay two in the message. Not blocking: the HBJSON carries the item on those Rooms, and PHX reads it only
+      # through another Room it serves. `spaced` holds the ids of the exported Zones with a Space; `slot` and `label`
+      # are as `item_findings` takes them.
       def spaceless_findings(exported, items, slot, label, spaced)
         items.keys.sort.filter_map do |id|
           name = items.fetch(id).fetch("name")
@@ -94,8 +94,9 @@ module PhComposer
           next if bare.empty?
 
           zones = bare.length == 1 ? "Zone #{bare.first}, which has" : "Zones #{bare.join(', ')}, which have"
+          article = label.match?(/\A[AEIOU]/) ? "an" : "a"
           Finding.new(:code => Codes::ZONE_WITHOUT_SPACES, :record_id => id, :blocks => false,
-                      :message => "#{name} serves #{zones} no Spaces. PHX reads a #{label} through a Room's " \
+                      :message => "#{name} serves #{zones} no Spaces. PHX reads #{article} #{label} through a Room's " \
                                   "Spaces, so a Building Segment's WUFI-Passive and METr model gets #{name} only " \
                                   "through another Room it serves in that Segment. Add Spaces to " \
                                   "#{bare.length == 1 ? 'that Zone' : 'those Zones'}.")

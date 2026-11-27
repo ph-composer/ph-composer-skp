@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 111
+    MINOR = 112
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -697,8 +697,14 @@ module PhComposer
         "change" => "ph_composer.ducting.ventilators rows add blocking_group_names and blocking_group_count: the " \
                     "Ducting groups whose record fails its schema but still names the Ventilator, over which " \
                     "every delete of it refuses reference.in_use. group_names and group_count no longer list them. A " \
-                    "Ventilator or System delete stranded by a group whose record fails its schema says to repair " \
-                    "the record." }
+                    "Ventilator or System delete stranded by a group whose record fails its schema and names it in " \
+                    "its link says to repair the record; a group naming it only through an extension envelope " \
+                    "refuses with the generic reference.in_use message." },
+      { "minor" => 112, "date" => "2026-11-27",
+        "change" => "ph_composer.mechanical.preflight and the export note mechanical.zone_without_spaces for an " \
+                    "Electric Heater serving an exported Zone with no Spaces, once per heater and never blocking, " \
+                    "as for Pumps and Fans. The export section ph_composer.mechanical.export.electric_heaters " \
+                    "requires the Spaces export." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

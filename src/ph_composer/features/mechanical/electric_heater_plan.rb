@@ -10,22 +10,27 @@ module PhComposer
     # same values under the heater's id, so honeybee-ph reloads one heating system for them all and PHX keys one
     # device. A Zone may hold several heaters; their coverages are not summed or checked against each other or
     # against a heat pump's. A heater that serves no Zone, and a Zone in no Building Segment, give no pair; each has
-    # its finding.
+    # its finding. PHX reads heating systems through a Room's Spaces, so a served Zone with no Space has a finding
+    # too, and its pair is still written.
     module ElectricHeaterPlan
       SLOT = "heater_ids"
+      LABEL = "Electric Heater"
       Finding = ExportZones::Finding
       Plan = Struct.new(:pairs, :findings, keyword_init: true)
 
       module_function
 
       # `zones` are ExportZones::Zone values, one per Zone id; `heaters` maps each stored heater's id to its values,
-      # with its `name` and, where the caller passes it through, its `user_data`. `unreadable` are the ids of stored
-      # heaters that cannot be read, which the caller reports itself: a Zone naming one is not missing one.
-      def call(zones:, heaters:, unreadable: [])
+      # with its `name` and, where the caller passes it through, its `user_data`. `spaced` holds the ids of the Zones
+      # a Space names, or is nil when they cannot be read, which skips the no-Spaces finding. `unreadable` are the
+      # ids of stored heaters that cannot be read, which the caller reports itself: a Zone naming one is not missing
+      # one.
+      def call(zones:, heaters:, spaced:, unreadable: [])
         exported, left_out = zones.sort_by(&:id).partition(&:exported)
+        spaceless = spaced ? ExportZones.spaceless_findings(exported, heaters, SLOT, LABEL, spaced) : []
         Plan.new(:pairs => pairs(exported, heaters),
                  :findings => zone_findings(exported, heaters, unreadable) +
-                              ExportZones.item_findings(exported, left_out, heaters, SLOT, "Electric Heater"))
+                              ExportZones.item_findings(exported, left_out, heaters, SLOT, LABEL) + spaceless)
       end
 
       def pairs(zones, heaters)
