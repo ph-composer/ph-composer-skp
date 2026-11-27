@@ -45,6 +45,9 @@
 .phc-color-swatch[aria-pressed="true"], .phc-color-swatch:hover:enabled {
   outline: 2px solid var(--interaction-highlight); outline-offset: 2px;
 }
+/* Reset to default sits under the swatches it is one more choice among, showing the colour it returns to. */
+.phc-color-reset { display: inline-flex; align-items: center; gap: 8px; margin: -4px 0 14px; }
+.phc-color-reset-swatch { width: 14px; height: 14px; border: 1px solid #8c989e; border-radius: var(--radius-sm); }
 .phc-custom-color { display: flex; gap: 14px; width: 100%; margin-bottom: 4px; }
 .phc-graphical-color { flex: 1; min-width: 0; }
 .phc-custom-color label { width: 100px; }

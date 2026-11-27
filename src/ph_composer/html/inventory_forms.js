@@ -217,6 +217,7 @@ function (RecordForm, request, snapshot, ui) {
     return "#" + rgb.map(function (value) { return ("0" + Math.round((value +
       m) * 255).toString(16)).slice(-2); }).join("");
   }
+  var HEX = /^#[0-9a-f]{6}$/i;
   var SWATCHES = [
     ["White", "#ffffff"], ["Light gray", "#e0e0e0"], ["Gray", "#9e9e9e"], ["Charcoal", "#424242"],
     ["Cream", "#fff2cc"], ["Sand", "#e6c99c"], ["Wood", "#c69c6d"], ["Brown", "#8d6e63"],
@@ -258,10 +259,14 @@ function (RecordForm, request, snapshot, ui) {
     this.wheel.disabled = Boolean(disabled);
     this.swatches.forEach(function (swatch) { swatch.button.disabled = Boolean(disabled); });
   };
-  function ColorForm(session, send, action, changed) {
+  /* `options.defaultColor(record)` names the colour a record returns to once its own is cleared, for a kind that
+     has one; the form then offers Reset to default while the stored colour differs from it, which clears the
+     stored colour through the same update. A kind without one passes nothing and shows no reset. */
+  function ColorForm(session, send, action, changed, options) {
     var self = this;
     this.action = action;
     this.changed = changed;
+    this.defaultColor = (options && options.defaultColor) || function () { return null; };
     this.requests = request.channel(session, send, "color");
     this.root = ui.element("div", "phc-form phc-color-form");
     this.root.hidden = true;
@@ -294,6 +299,13 @@ function (RecordForm, request, snapshot, ui) {
       self.palette.appendChild(button);
     });
     this.root.appendChild(this.palette);
+    this.reset = ui.button("", function () { self.resetToDefault(); });
+    this.reset.className = "phc-color-reset";
+    this.resetSwatch = ui.element("span", "phc-color-reset-swatch");
+    this.resetSwatch.setAttribute("aria-hidden", "true");
+    this.reset.replaceChildren(this.resetSwatch, ui.element("span", "", "Reset to default"));
+    this.reset.hidden = true;
+    this.root.appendChild(this.reset);
     this.form = ui.element("form");
     this.hex = ui.element("input");
     this.hex.setAttribute("aria-label", "Custom color hex value");
@@ -389,7 +401,7 @@ function (RecordForm, request, snapshot, ui) {
     this.hue.value = String(Math.round(this.hsv.h));
     this.hue.disabled = disabled;
     this.preview.style.backgroundColor = colorHex(this.hsv);
-    this.hex.disabled = this.cancel.disabled = disabled;
+    this.hex.disabled = this.cancel.disabled = this.reset.disabled = disabled;
     this.apply.disabled = disabled || !/^#[0-9a-f]{6}$/.test(value);
   };
   ColorForm.prototype.open = function (record, trigger) {
@@ -398,9 +410,18 @@ function (RecordForm, request, snapshot, ui) {
     if (this.trigger) this.trigger.setAttribute("aria-expanded", "false");
     this.record = JSON.parse(JSON.stringify(record));
     this.trigger = trigger;
+    this.focusAfterPaint = null;
     this.hex.value = record.values.color || (record.display || {}).color || "#ffffff";
     // Compared as the field is, in lower case, so a stored "#1F77B4" opened and left alone is not an edit.
     this.initialColor = this.hex.value.trim().toLowerCase();
+    var fallback = this.defaultColor(record), stored = record.values.color;
+    this.resetColor = HEX.test(fallback || "") && HEX.test(stored || "") &&
+      stored.toLowerCase() !== fallback.toLowerCase() ? fallback.toLowerCase() : null;
+    this.reset.hidden = !this.resetColor;
+    if (this.resetColor) {
+      this.resetSwatch.style.backgroundColor = this.resetColor;
+      ui.tooltip(this.reset, "Return to the default color, " + this.resetColor);
+    }
     this.title.textContent = "Color for " + record.values.name;
     this.error.textContent = "";
     this.root.setAttribute("aria-label", this.title.textContent);
@@ -429,6 +450,8 @@ function (RecordForm, request, snapshot, ui) {
     if (this.requests.pending) return;
     this.root.hidden = true;
     this.record = null;
+    this.resetColor = null;
+    this.reset.hidden = true;
     this.error.textContent = "";
     document.body.removeEventListener("mousedown", this.dismissOutside, true);
     document.body.removeEventListener("focusin", this.dismissOutside, true);
@@ -436,7 +459,10 @@ function (RecordForm, request, snapshot, ui) {
     if (window.removeEventListener) window.removeEventListener("resize", this.resize);
     if (this.trigger) {
       this.trigger.setAttribute("aria-expanded", "false");
-      if (restoreFocus !== false) this.trigger.focus();
+      /* A completed request closes the form while the repaint still holds the cell disabled, and a disabled
+         button takes no focus: colorCell gives it back once the same repaint enables the cell. */
+      if (restoreFocus !== false && this.trigger.disabled) this.focusAfterPaint = this.trigger;
+      else if (restoreFocus !== false) this.trigger.focus();
     }
   };
   ColorForm.prototype.dispose = function () {
@@ -451,6 +477,14 @@ function (RecordForm, request, snapshot, ui) {
     if (value === this.record.values.color) { this.hide(); return; }
     this.requests.run(this.action, { id: this.record.id, values: { color: value },
       expected_values: { color: this.record.values.color || null } });
+    this.paint();
+    if (this.changed) this.changed();
+  };
+  /* Clears the stored colour, so the record draws in its default again: one update, one Undo step. */
+  ColorForm.prototype.resetToDefault = function () {
+    if (!this.record || !this.resetColor || this.requests.pending || this.enabled === false) return;
+    this.requests.run(this.action, { id: this.record.id, values: { color: null },
+      expected_values: { color: this.record.values.color } });
     this.paint();
     if (this.changed) this.changed();
   };
@@ -484,6 +518,10 @@ function (RecordForm, request, snapshot, ui) {
     td._color.style.backgroundColor = color;
     td._color.setAttribute("aria-label", "Color for " + record.values.name + ": " + color);
     td._color.disabled = !form.enabled || form.requests.busy();
+    if (form.focusAfterPaint === td._color && !td._color.disabled) {
+      form.focusAfterPaint = null;
+      td._color.focus();
+    }
   }
   return { contributeUsage: contributeUsage, ReplacementForm: ReplacementForm,
     DuplicateForm: DuplicateForm, ColorForm: ColorForm, ColorChoice: ColorChoice, colorCell: colorCell,

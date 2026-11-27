@@ -34,7 +34,8 @@ function (panel, ui, fields, forms, colourBy, systems, equipment, ventilators, l
 
   function DuctTypes(root, context) {
     var self = this;
-    this.colour = new forms.ColorForm(context.session, context.send, SECTION + ".update", panel.repaint);
+    this.colour = new forms.ColorForm(context.session, context.send, SECTION + ".update", panel.repaint,
+      { defaultColor: lineGroups.assignedColor });
     this.shapeForm = new equipment.VariantForm(context.session, context.send, { section: SECTION,
       label: "duct-type-shape", key: "shape", word: "Shape", choices: SHAPES, values: SIZES, fields: SHAPE_FIELDS,
       positive: Object.keys(DIMENSIONS), none: "", changed: function () { panel.repaint(); } });

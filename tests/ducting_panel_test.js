@@ -92,6 +92,18 @@ test("Duct Types and Ducting follow Ventilators; a Duct Type edits with its guar
       { count: 1, description: "Ducts 5.5 m long use it." }, "Delete names the ducts it moves or clears");
   });
 
+test("a Duct Type's colour resets to its assigned one", function () {
+  var o = setup(TYPES), record = o.state.sections[TYPES].value.records[0];
+  Object.assign(record.values, { assigned_color: "#1f77b4", color: "#123456" });
+  o.paint();
+  var form = o.view(TYPES).colour;
+  form.open(record, row(o, record.id).querySelector(".col-color")._color);
+  assert.strictEqual(form.reset.hidden, false);
+  press(form.reset);
+  assert.deepStrictEqual(clone(last(o, TYPES + ".update").payload.params), { id: record.id,
+    values: { color: null }, expected_values: { color: "#123456" } });
+});
+
 test("a Shape change asks for the new shape's dimensions and sends one guarded update", function () {
   var o = setup(TYPES), table = o.view(TYPES);
   var select = row(o, fixtures.DT1).querySelector(".col-shape").querySelector("select");

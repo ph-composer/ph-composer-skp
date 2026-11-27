@@ -1705,10 +1705,12 @@
         write_refusal: null };
     }
     return {
+      // PT-1 stores a colour of its own over the one it was assigned; PT-2 draws in its assigned colour.
       types: [type("ppt_Pp11Tt22Yy33", "PT-1 PEX 3/4", "#3b7ea1", { material: 6, diameter_mm: 19.05,
-        insulation_thickness_mm: 12.7, insulation_conductivity_w_mk: 0.04 }),
+        insulation_thickness_mm: 12.7, insulation_conductivity_w_mk: 0.04, color: "#3b7ea1",
+        assigned_color: "#1f77b4" }),
       type("ppt_Qq44Rr55Ss66", "PT-2 Copper 1/2", "#c26a2e", { material: 2, diameter_mm: 12.7,
-        insulation_thickness_mm: 0, insulation_reflective: false })],
+        insulation_thickness_mm: 0, insulation_reflective: false, assigned_color: "#c26a2e" })],
       groups: [group("ppg_Riser0000001", 500, "Riser", dhw1, { pipe_count: 17 }),
         group("ppg_Floor0000002", 510, "Floor 2", dhw1),
         group("ppg_Spare0000003", 520, "Spare", null)],
