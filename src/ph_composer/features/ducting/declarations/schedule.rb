@@ -59,10 +59,20 @@ module PhComposer
         "locate" => Shapes.described({ "type" => "object" }, "The view command and params opening the Ventilator: " \
                                                              "ph_composer.mechanical.locate.")
       })
-      LINKED_VENTILATOR = Shapes.with(VENTILATOR, "group_names" => Shapes.list(Shapes::TEXT).merge(
-        "description" => "The first #{Scan::GROUP_NAMES} Ducting groups linked to it, by name, each cut to " \
-                         "#{OccurrencePath::NAME_CHARACTERS} characters."
-      ), "group_count" => Shapes.described(COUNT, "Every Ducting group linked to it."))
+      LINKED_VENTILATOR = Shapes.with(
+        VENTILATOR,
+        "group_names" => Shapes.list(Shapes::TEXT).merge(
+          "description" => "The first #{Scan::GROUP_NAMES} Ducting groups linked to it that its delete moves to a " \
+                           "replacement or unlinks, by name, each cut to #{OccurrencePath::NAME_CHARACTERS} characters."
+        ),
+        "group_count" => Shapes.described(COUNT, "Every Ducting group its delete moves or unlinks."),
+        "blocking_group_names" => Shapes.list(Shapes::TEXT).merge(
+          "description" => "The first #{Scan::GROUP_NAMES} Ducting groups whose record fails its schema but still " \
+                           "names it, cut as group_names are. Every delete of it refuses reference.in_use until " \
+                           "they are repaired."
+        ),
+        "blocking_group_count" => Shapes.described(COUNT, "Every Ducting group blocking its delete.")
+      )
       SCHEDULE_VENTILATOR = Shapes.with(VENTILATOR, "findings" => Shapes.list(VENTILATOR_FINDING).merge(
         "description" => "ducting.run_missing when it serves a Zone and has no run of a direction."
       ))

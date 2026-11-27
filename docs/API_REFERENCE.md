@@ -19975,7 +19975,9 @@ Result:
           "outdoor_air_length_m",
           "exhaust_air_length_m",
           "group_names",
-          "group_count"
+          "group_count",
+          "blocking_group_names",
+          "blocking_group_count"
         ],
         "properties": {
           "ventilator_id": {
@@ -20008,12 +20010,24 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The first 20 Ducting groups linked to it, by name, each cut to 256 characters."
+            "description": "The first 20 Ducting groups linked to it that its delete moves to a replacement or unlinks, by name, each cut to 256 characters."
           },
           "group_count": {
             "type": "integer",
             "minimum": 0,
-            "description": "Every Ducting group linked to it."
+            "description": "Every Ducting group its delete moves or unlinks."
+          },
+          "blocking_group_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The first 20 Ducting groups whose record fails its schema but still names it, cut as group_names are. Every delete of it refuses reference.in_use until they are repaired."
+          },
+          "blocking_group_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Every Ducting group blocking its delete."
           }
         }
       }
@@ -131475,3 +131489,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.108 | 2026-11-25 | ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its direction or Duct Type with legend lengths, quantity applied. |
 | 1.109 | 2026-11-26 | ph_composer.piping.groups.make and ph_composer.ducting.groups.make replace groups.create: they wrap loose lines drawn in the open context, named by edge_paths, in a new group with its linked record, and leave the edit path where it is, since SketchUp deletes an empty Group at commit. pipes.selection, pipes.selection_all, ducts.selection and ducts.selection_all add make_refusal, what groups.make over the selection meets. |
 | 1.110 | 2026-11-27 | groups.make (piping and ducting) names the new group the first free "Piping group N" or "Ducting group N" and erases, in the same Undo step, each Face the lines alone close; its result adds name and removed_faces. A Face with an unselected Edge still refuses target.wrong_kind. Pipe Types and Duct Types add assigned_color, the next unused colour of the shared categorical ramp, set on create and duplicate; a null color returns to it. ph_composer.ducting.ventilators rows add group_names and group_count. session.busy from ph_composer.context.open and ph_composer.context.root names a native tool by its menu name, or "A SketchUp tool". Messages quote a Zone's name after the word Zone. |
+| 1.111 | 2026-11-27 | ph_composer.ducting.ventilators rows add blocking_group_names and blocking_group_count: the Ducting groups whose record fails its schema but still names the Ventilator, over which every delete of it refuses reference.in_use. group_names and group_count no longer list them. |

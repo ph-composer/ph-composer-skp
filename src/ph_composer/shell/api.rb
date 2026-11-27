@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 110
+    MINOR = 111
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -692,7 +692,11 @@ module PhComposer
                     "ph_composer.ducting.ventilators rows add group_names and group_count. session.busy from " \
                     "ph_composer.context.open and ph_composer.context.root names a native tool by its menu name, " \
                     "or \"A SketchUp tool\". " \
-                    "Messages quote a Zone's name after the word Zone." }
+                    "Messages quote a Zone's name after the word Zone." },
+      { "minor" => 111, "date" => "2026-11-27",
+        "change" => "ph_composer.ducting.ventilators rows add blocking_group_names and blocking_group_count: the " \
+                    "Ducting groups whose record fails its schema but still names the Ventilator, over which " \
+                    "every delete of it refuses reference.in_use. group_names and group_count no longer list them." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

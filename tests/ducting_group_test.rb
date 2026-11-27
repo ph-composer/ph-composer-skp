@@ -200,8 +200,32 @@ class DuctingGroupTest < PhComposerTestCase
     assert_match(/\[570\] still refers/, refusal["message"])
     rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
     linked = rows.find { |row| row["ventilator_id"] == @erv2 }
-    assert_equal [["Ducting group 570"], 1], linked.values_at("group_names", "group_count"),
-                 "a group the delete refuses over is named, though its record fails its schema"
+    assert_equal [[], 0, ["Ducting group 570"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count"),
+                 "a group whose record fails its schema but names the Ventilator blocks its delete, not unlinked"
+  end
+
+  # One schema-invalid group naming the Ventilator refuses every delete of it, beside a group the delete could move.
+  def test_a_group_failing_its_schema_blocks_every_delete_beside_one_the_delete_could_unlink
+    no_id = Sketchup::Group.new(571, Sketchup::Entities.new([]), :name => "DG-bad")
+    STORE.write(no_id, "schema_version" => 1, "ventilator_id" => @erv1)
+    @model.entities << ducting_group(572, "dcg_LLLLLLLLLLLL", @erv1) << no_id
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+    end
+    assert_equal @erv1, ventilator_of(572)
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [["Ducting group 572"], 1, ["DG-bad"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
+  def test_the_ventilators_read_walks_the_model_once
+    @model.entities << ducting_group(573, "dcg_MMMMMMMMMMMM", @erv1, [edge(574)])
+    before = @model.entities.each_count
+    query("ph_composer.ducting.ventilators", {})
+    assert_equal 1, @model.entities.each_count - before
   end
 
   def test_the_list_pages_the_occurrences_in_path_order

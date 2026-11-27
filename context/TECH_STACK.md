@@ -199,7 +199,8 @@ and ERV ducting reuse these rules.
   Zones, and at 2,000 pipes in twenty groups in a stub Model of 50,000 Edges each costs about 55 ms
   on Ruby 3.2 and 70 ms on 2.7, offline (P4-13c); the host figure is owed to its host case, and over
   the 200 ms refresh target they leave the snapshot. Ducting's schedule is read the same way, and its
-  Ventilators' lengths and the Duct Types' used length are snapshot sections on the same terms: at 200
+  Ventilators' lengths and the Duct Types' used length are snapshot sections on the same terms (the
+  Ventilators' section names each one's linked groups from the same one walk): at 200
   ducts in forty groups in a stub Model of 50,000 Edges each costs about 12 ms on Ruby 3.2 and 15 ms on
   2.7, offline (P4-14d). Ducting's runs do not use the chain rule below: only a run's sum matters.
 - Runs are derived, never stored. The chain rule is the foundation's, `core/edge_runs.rb` (`EdgeRuns`): it

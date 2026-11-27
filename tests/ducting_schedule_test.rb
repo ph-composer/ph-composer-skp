@@ -112,8 +112,9 @@ class DuctingScheduleTest < PhComposerTestCase
     assert_empty rows.flat_map { |row| row.fetch("findings") }
     assert_equal [4, 0, [], nil], result.values_at("total", "unreadable_total", "unreadable", "next_cursor")
     assert_equal({ "ERV-1" => [2.5, 1.8], "ERV-2" => [2.5, 3.0] }, lengths(result.fetch("ventilators")))
+    linked = /\A(blocking_)?group_/
     assert_equal result.fetch("ventilators").map { |row| row.reject { |key, _value| key == "findings" } },
-                 query("ventilators").fetch("ventilators").map { |row| row.reject { |key| key.start_with?("group_") } }
+                 query("ventilators").fetch("ventilators").map { |row| row.reject { |key| key.match?(linked) } }
     assert_equal [{ @dt1 => 4.3, @dt2 => 5.5 }] * 2, [used("duct_types.all"), used("duct_types.list")]
 
     locate = API.view(:context => @context, :name => "#{PREFIX}.runs.locate",

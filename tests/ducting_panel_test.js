@@ -323,3 +323,38 @@ test("a Ventilator's Delete names the Ducting groups it leaves unlinked, for the
   assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 will lose its Ventilator unless you choose a " +
     "replacement.", "the words follow the choice the select keeps");
 });
+
+test("a Ventilator's Delete lists the Ducting groups that block it apart and offers no choice while they do",
+  function () {
+    var o = setup(VENTILATORS), form = o.view(VENTILATORS).table.replacement;
+    var records = o.state.sections[VENTILATORS].value.records;
+    var rows = o.state.sections[PREFIX + "ducting_ventilators"].value.ventilators;
+    Object.assign(rows[0], { blocking_group_names: ["DG-bad"], blocking_group_count: 1 });
+    o.paint();
+    form.open(records[0], records);
+    assert.deepStrictEqual([form.inUse, form.select.parentNode.hidden, form.submitButton.disabled], [false, true, true],
+      "no replacement or Clear can move a blocking group, so neither is offered");
+    assert.strictEqual(form.title.textContent, "Delete ERV-1");
+    assert.strictEqual(form.explanation.textContent, "DG-bad cannot be read and still names this Ventilator. " +
+      "Repair it before deleting the Ventilator.");
+    assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 is linked to this Ventilator.");
+    form.submit();
+    assert.strictEqual(named(o, VENTILATORS + ".delete").length, 0, "a blocked delete sends nothing");
+    Object.assign(rows[0], { blocking_group_names: [], blocking_group_count: 0 });
+    o.paint();
+    assert.strictEqual(form.inUse, true, "once repaired, the replacement is offered again");
+    form.select.focus();
+    var cancelled = 0;
+    form.cancel.focus = function () { cancelled += 1; };
+    Object.assign(rows[0], { blocking_group_names: ["DG-bad"], blocking_group_count: 1 });
+    o.paint();
+    assert.strictEqual(cancelled, 1, "a blocker arriving while the select has focus moves focus to Cancel");
+    Object.assign(rows[2], { group_names: [], group_count: 0, blocking_group_names: ["DG-8", "DG-9"],
+      blocking_group_count: 2 });
+    o.paint();
+    form.open(records[2], records);
+    assert.deepStrictEqual([form.submitButton.disabled, form.uses.textContent], [true, ""],
+      "blockers alone still hold the plain Delete");
+    assert.strictEqual(form.explanation.textContent, "DG-8 and DG-9 cannot be read and still name this Ventilator. " +
+      "Repair them before deleting the Ventilator.");
+  });
