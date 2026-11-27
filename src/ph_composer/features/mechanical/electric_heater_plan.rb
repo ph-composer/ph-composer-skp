@@ -46,7 +46,7 @@ module PhComposer
         zones.flat_map do |zone|
           zone.slot(SLOT).reject { |id| heaters.key?(id) || unreadable.include?(id) }.map do |id|
             Finding.new(:code => Codes::ITEM_MISSING, :record_id => zone.id, :blocks => true,
-                        :message => "#{SLOT} on Zone #{zone.label} names #{id}, which is not in the Model.")
+                        :message => "#{SLOT} on #{zone.titled} names #{id}, which is not in the Model.")
           end
         end
       end

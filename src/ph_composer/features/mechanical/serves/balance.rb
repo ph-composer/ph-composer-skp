@@ -71,9 +71,11 @@ module PhComposer
         end
 
         def program_missing(zone, refusal = nil)
-          return "Zone #{zone.name} is By Program, and Programs cannot be read: #{refusal}" if refusal
+          return "#{Records::Names.titled('Zone',
+                                          zone.name)} is By Program, and Programs cannot be read: #{refusal}" if refusal
 
-          "Zone #{zone.name} is By Program, and its Program's ventilation cannot be worked out yet."
+          "#{Records::Names.titled('Zone',
+                                   zone.name)} is By Program, and its Program's ventilation cannot be worked out yet."
         end
       end
     end

@@ -1249,7 +1249,9 @@ decimals exactly: 9.525, 12.7, 15.875, 19.05, 25.4, 31.75, 38.1 or 50.8. Do not 
 inch size: `0.375 * 25.4` is not exactly 9.525 and is refused. `insulation_quality` is 1 None,
 2 Moderate or 3 Good. A value outside its range, or a diameter off the list, is refused as
 `params.invalid` and nothing is written. The role a pipe plays, its water temperature and its hours are
-not on the type.
+not on the type. A new type, and a copy, takes `assigned_color`, the next colour of the shared categorical
+ramp that no Pipe Type uses; set `color` to draw it in another, and a null `color` returns it to
+`assigned_color`.
 
 Setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then reads
 `export_ready: false` with `piping.insulation_conductivity_missing`, which blocks the export of a pipe
@@ -1268,9 +1270,12 @@ user to draw the pipes as loose lines with the Line tool, outside every Zone, an
 `ph_composer.piping.pipes.selection`: its `make_refusal` is null when the selected lines can become a group, or
 says what to select instead. Then `ph_composer.piping.groups.make` with `edge_paths`, every row's `path`, and
 `hot_water_system_id`: it wraps the lines in a new Group where they are drawn, in one Undo step, and the lines
-keep their ids and attributes; read its `group_id`. It leaves the edit path as it was, so open the group with
-`ph_composer.context.open` before selecting its lines to assign them. A line bounding a Face, a line already in
-a Piping group or another feature's Group, or lines in two Groups are refused. The user draws more pipes into
+keep their ids and attributes; read its `group_id` and `name`, the first free "Piping group N". A Face the
+selected lines alone close, as SketchUp fills a planar loop, is erased in the same Undo step, and
+`removed_faces` counts them. It leaves the edit path as it was, so open the group with
+`ph_composer.context.open` before selecting its lines to assign them. A line bounding a Face that also has an
+unselected Edge, a line already in a Piping group or another feature's Group, or lines in two Groups are
+refused; for the Face, ask the user to erase it, keeping its lines, then make the group again. The user draws more pipes into
 a group by opening it (double-click) and drawing there. Read
 `ph_composer.piping.groups.list`, a bounded page at a time, for every group with its `values`
 (`hot_water_system_id`, null while unlinked), `pipe_count`, `copied` (a pasted copy, which shares
@@ -1352,7 +1357,9 @@ giving at least `name` (shown as Tag). Unless you give them, it is a round duct 
 dimensions and never the other shape's: one missing or extra, a dimension of 0 or less, a negative
 thickness or a conductivity of 0 is refused as `params.invalid` and nothing is written; a null for the
 other shape's dimension is the same as leaving it out. To change the shape, send the new `shape` with
-its dimensions; the old ones are removed in the same edit.
+its dimensions; the old ones are removed in the same edit. A new type, and a copy, takes `assigned_color`,
+the next colour of the shared categorical ramp that no Duct Type uses; a null `color` returns it to
+`assigned_color`.
 
 On an insulated type, setting `insulation_conductivity_w_mk` to null leaves it unknown: the row then
 reads `export_ready: false` with `ducting.insulation_conductivity_missing`, which blocks the export of a
@@ -1371,9 +1378,12 @@ user to draw the ducts as loose lines with the Line tool, outside every Zone, an
 `ph_composer.ducting.ducts.selection`: its `make_refusal` is null when the selected lines can become a group, or
 says what to select instead. Then `ph_composer.ducting.groups.make` with `edge_paths`, every row's `path`, and
 `ventilator_id`: it wraps the lines in a new Group where they are drawn, in one Undo step, and the lines keep
-their ids and attributes; read its `group_id`. It leaves the edit path as it was, so open the group with
-`ph_composer.context.open` before selecting its lines to assign them. A line bounding a Face, a line already in
-a Ducting group or another feature's Group, or lines in two Groups are refused. The user draws more ducts into
+their ids and attributes; read its `group_id` and `name`, the first free "Ducting group N". A Face the
+selected lines alone close is erased in the same Undo step, and `removed_faces` counts them. It leaves the
+edit path as it was, so open the group with `ph_composer.context.open` before selecting its lines to assign
+them. A line bounding a Face that also has an unselected Edge, a line already in a Ducting group or another
+feature's Group, or lines in two Groups are refused; for the Face, ask the user to erase it, keeping its
+lines, then make the group again. The user draws more ducts into
 a group by opening it (double-click) and drawing there. Read
 `ph_composer.ducting.groups.list`, a bounded page at a time, for every group with its `values`
 (`ventilator_id`, null while unlinked), `duct_count`, `copied` (another group carries the same id, as a
@@ -1383,7 +1393,9 @@ Model root or inside plain Groups, never inside a Zone (`ducting.group_in_zone`)
 group (`ducting.group_nested`). Change the Ventilator with `ph_composer.ducting.groups.link` or clear it
 with `ph_composer.ducting.groups.unlink`, sending each row's `reference` and its `values` as
 `expected_values`. Deleting a Ventilator a group names refuses unless `replacement_id` names another
-Ventilator, which the group then names, or is null, which unlinks it.
+Ventilator, which the group then names, or is null, which unlinks it. `ph_composer.ducting.ventilators`
+lists each Ventilator's linked groups in `group_names` (the first 20) and `group_count`, so you can tell the
+user which groups a delete leaves unlinked.
 
 Only an Edge directly inside a Ducting group can be a duct. Select Edges in the open group natively, then
 read `ph_composer.ducting.ducts.selection`: each Edge's `reference`, its `group` with the Ventilator, its
@@ -1406,7 +1418,8 @@ record in `unreadable` blocks export too. Beside the runs are `totals` by direct
 `outdoor_air_length_m` and `exhaust_air_length_m`, and one `types` row per Duct Type with its
 `used_length_m`; these apply the quantity, so a line of quantity 2 counts twice. A Ventilator that serves
 a Zone and has no run of a direction carries the warning `ducting.run_missing`.
-`ph_composer.ducting.ventilators` reads the lengths alone. `compact`,
+`ph_composer.ducting.ventilators` reads the lengths and each Ventilator's linked groups (`group_names`,
+`group_count`), without the runs. `compact`,
 `ph_composer.ducting.schedule.details` (`part` `ventilators`, `types` or `unreadable`),
 `ph_composer.ducting.runs.members` and `ph_composer.ducting.runs.locate` work as piping's; a hidden duct
 or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store

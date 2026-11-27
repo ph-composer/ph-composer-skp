@@ -11,6 +11,8 @@ class PipingPipeTypeTest < PhComposerTestCase
   KIND = P::PipeType::KIND
   PREFIX = "ph_composer.piping.pipe_types"
   COMMON = { "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" } }.freeze
+  # The shared categorical ramp, as each new type takes its next unused colour.
+  RAMP = %w[#1F77B4 #FF7F0E #2CA02C #D62728].freeze
 
   def setup
     super
@@ -25,10 +27,11 @@ class PipingPipeTypeTest < PhComposerTestCase
     assert_match(/\Appt_[A-Za-z0-9]{12}\z/, id)
     assert_equal COMMON.merge("name" => "PT-1", "material" => 2, "diameter_mm" => 12.7,
                               "insulation_thickness_mm" => 12.7, "insulation_conductivity_w_mk" => 0.04,
-                              "insulation_reflective" => true, "insulation_quality" => 1), values(id)
+                              "insulation_reflective" => true, "insulation_quality" => 1,
+                              "assigned_color" => RAMP[0]), values(id)
     row = rows.fetch("PT-1")
     assert_equal [true, []], row.values_at("export_ready", "export_blockers")
-    assert_includes P::PipeType::RAMP, row.dig("display", "color")
+    assert_equal RAMP[0], row.dig("display", "color")
     assert_empty KIND.problems(JSON.parse(JSON.generate(KIND.store.read(@model, id))))
   end
 
@@ -70,7 +73,33 @@ class PipingPipeTypeTest < PhComposerTestCase
                    .values_at("status", "code", "effect"), "a rename onto a taken Tag"
     completed(invoke("delete", "id" => other))
     assert_equal ["PT-1"], rows.keys
-    assert_equal COMMON.merge("name" => "PT-1").merge(P::PipeType::DEFAULTS), values(id)
+    assert_equal COMMON.merge("name" => "PT-1", "assigned_color" => RAMP[0]).merge(P::PipeType::DEFAULTS), values(id)
+  end
+
+  # Each new type, and each copy, takes the ramp's next unused colour; a colour set and then cleared returns the type
+  # to the one it took.
+  def test_each_new_type_takes_the_next_unused_colour_and_a_cleared_colour_returns_to_it
+    first, = %w[PT-1 PT-2].map { |name| create("name" => name) }
+    assert_equal RAMP.first(2), rows.values_at("PT-1", "PT-2").map { |row| row.dig("display", "color") }
+    reassigned = invoke("update", "id" => first, "values" => { "assigned_color" => "#123456" }, "expected_values" => {})
+    assert_equal %w[refused params.invalid], reassigned.values_at("status", "code"), "the assigned colour is no edit"
+    named = invoke("create", "values" => { "name" => "PT-9", "assigned_color" => RAMP[0] })
+    assert_equal %w[refused params.invalid], named.values_at("status", "code"), "nor a create input"
+    completed(invoke("update", "id" => first, "values" => { "color" => "#123456" }, "expected_values" => {}))
+    assert_equal "#123456", rows.fetch("PT-1").dig("display", "color")
+    copy = completed(invoke("duplicate", "id" => first)).fetch("id")
+    assert_equal ["#123456", RAMP[2]], values(copy).values_at("color", "assigned_color"),
+                 "a copy keeps the colour it was given and takes the next unused one as its own"
+    completed(invoke("update", "id" => first, "values" => { "color" => nil }, "expected_values" => {}))
+    assert_equal [RAMP[0], RAMP[3]], [rows.fetch("PT-1").dig("display", "color"),
+                                      values(create("name" => "PT-3")).fetch("assigned_color")]
+  end
+
+  # Past the ramp's ten colours, new types keep cycling through it rather than repeating its first.
+  def test_types_past_the_ramp_keep_cycling_its_colours
+    ids = (1..12).map { |number| create("name" => "PT-#{number}") }
+    colours = ids.map { |id| values(id).fetch("assigned_color") }
+    assert_equal [10, colours.first(2)], [colours.first(10).uniq.length, colours.last(2)]
   end
 
   def test_insulation_with_no_conductivity_blocks_the_type_and_a_bare_pipe_needs_none

@@ -54,20 +54,20 @@ module PhComposer
 
         def zone_findings(zone, items)
           found = items.select { |item| item.fetch("missing") }.map do |item|
-            finding(Codes::ITEM_MISSING, "error", "#{item.fetch('slot')} on Zone #{label(zone)} names " \
+            finding(Codes::ITEM_MISSING, "error", "#{item.fetch('slot')} on #{titled(zone)} names " \
                                                   "#{item.fetch('id')}, which is not in the Model.")
           end
           if zone.left_out
             unless items.empty?
-              found << finding(Codes::ZONE_LEFT_OUT, "info", "Zone #{label(zone)} is in no Building Segment, so " \
+              found << finding(Codes::ZONE_LEFT_OUT, "info", "#{titled(zone)} is in no Building Segment, so " \
                                                              "the export leaves its Room out.")
             end
           else
             if zone.values.fetch("ventilator_id").nil?
-              found << finding(Codes::ZONE_UNVENTILATED, "warning", "Zone #{label(zone)} has no Ventilator.")
+              found << finding(Codes::ZONE_UNVENTILATED, "warning", "#{titled(zone)} has no Ventilator.")
             end
             if zone.values.fetch("hot_water_system_id").nil?
-              found << finding(Codes::ZONE_NO_HOT_WATER, "warning", "Zone #{label(zone)} has no Hot Water System.")
+              found << finding(Codes::ZONE_NO_HOT_WATER, "warning", "#{titled(zone)} has no Hot Water System.")
             end
           end
           found
@@ -122,7 +122,7 @@ module PhComposer
             served.empty?
 
           served.select(&:left_out).map do |zone|
-            finding(Codes::ZONE_LEFT_OUT, "info", "#{name} serves Zone #{label(zone)}, which is in no Building " \
+            finding(Codes::ZONE_LEFT_OUT, "info", "#{name} serves #{titled(zone)}, which is in no Building " \
                                                   "Segment, so the export leaves that Room out.")
           end
         end
@@ -142,6 +142,10 @@ module PhComposer
 
         def label(zone)
           zone.name || zone.id
+        end
+
+        def titled(zone)
+          Records::Names.titled("Zone", zone.name, zone.id)
         end
       end
     end

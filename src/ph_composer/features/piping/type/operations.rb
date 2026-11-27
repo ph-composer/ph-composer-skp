@@ -12,7 +12,9 @@ module PhComposer
 
         module_function
 
+        # A new type takes the next unused colour; `color` overrides how it draws, never the colour it took.
         def create(request, proposal, values:, user_data: nil)
+          values = values.merge("assigned_color" => next_color(request))
           Mechanical::CatalogOperations.create(request, proposal, KIND_ID, :defaults => PipeType, :values => values,
                                                                            :user_data => user_data)
         end
@@ -22,8 +24,16 @@ module PhComposer
                                                                            :expected_values => expected_values)
         end
 
+        # A copy keeps any colour the original was given and takes the next unused one as its own.
         def duplicate(request, proposal, id:, name: nil)
-          Mechanical::CatalogOperations.duplicate(request, proposal, KIND_ID, :id => id, :name => name)
+          colour = { "assigned_color" => next_color(request) }
+          derive = ->(values) { values.merge(colour) }
+          Mechanical::CatalogOperations.duplicate(request, proposal, KIND_ID, :id => id, :name => name,
+                                                                              :derive => derive)
+        end
+
+        def next_color(request)
+          PipeType.next_color(Mechanical::CatalogOperations.records(request, KIND_ID))
         end
 
         # The engine's guarded delete: a type a pipe still names refuses as reference.in_use. A `replacement_id`

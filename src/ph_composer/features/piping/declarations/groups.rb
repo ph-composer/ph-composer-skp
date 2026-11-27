@@ -53,7 +53,8 @@ module PhComposer
                                                  "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
                                                  "gesture.too_large.")
       MAKE_PRECONDITIONS = ["The Hot Water System exists.",
-                            "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
+                            "The lines are loose Edges, bounding no Face but those they alone close, directly in the " \
+                            "open context, outside every " \
                             "Zone and every Group another feature owns, reached through plain unlocked unshared " \
                             "Groups.",
                             "pipes.selection reads make_refusal null over them."].freeze
@@ -95,10 +96,12 @@ module PhComposer
                                        "path stays.",
                        :refuses => MAKE,
                        :params => Shapes.object({ "edge_paths" => EDGE_PATHS, "hot_water_system_id" => SYSTEM_ID }),
-                       :result => Shapes.object({ "group_id" => Shapes::TEXT }),
+                       :result => LineGroups::ScheduleShapes::MAKE_RESULT,
                        :undo_name => "Make Piping Group", :preconditions => MAKE_PRECONDITIONS,
-                       :side_effects => "Adds a Group with a Piping group record in the lines' collection and moves " \
-                                        "the lines into it; their persistent ids and dictionaries stay.",
+                       :side_effects => "Adds a Group named \"Piping group N\" with a Piping group record in the " \
+                                        "lines' collection and moves the lines into it; their persistent ids and " \
+                                        "dictionaries stay. Erases any Face the lines alone close; a Face with an " \
+                                        "unselected Edge refuses as target.wrong_kind.",
                        :examples => [{ "edge_paths" => [[1305], [1306]],
                                        "hot_water_system_id" => "hws_Ab12Cd34Ef56" }]) do |request, proposal|
           Operations.make(LINE_GROUP, request, proposal, request.params.fetch("edge_paths"),

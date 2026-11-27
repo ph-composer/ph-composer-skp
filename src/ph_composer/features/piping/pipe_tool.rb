@@ -108,7 +108,7 @@ module PhComposer
       end
 
       def onMouseMove(flags, x, y, view)
-        path = Pick.edge_path(view, x, y)
+        path = Pick.edge_path(view, x, y, :aperture => Pick::LINE_APERTURE)
         # A move without the button down after a press means the host lost the release.
         cancel_gesture if collecting? && (flags.to_i & MK_LBUTTON).zero?
         if collecting?
@@ -132,7 +132,7 @@ module PhComposer
         @gesture = { "pipe_type_id" => @pipe_type_id, "role" => @role, "values" => @values,
                      "name" => @type.dig("values", "name") }
         @collected = DragSet.new(:limit => Assignment.gesture_edge_limit)
-        collect(Pick.edge_path(view, x, y))
+        collect(Pick.edge_path(view, x, y, :aperture => Pick::LINE_APERTURE))
         view.invalidate if view.respond_to?(:invalidate)
       rescue CodedError => error
         reset_gesture

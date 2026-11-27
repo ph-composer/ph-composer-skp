@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 109
+    MINOR = 110
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -682,7 +682,17 @@ module PhComposer
                     "wrap loose lines drawn in the open context, named by edge_paths, in a new group with its " \
                     "linked record, and leave the edit path where it is, since SketchUp deletes an empty Group at " \
                     "commit. pipes.selection, pipes.selection_all, ducts.selection and ducts.selection_all add " \
-                    "make_refusal, what groups.make over the selection meets." }
+                    "make_refusal, what groups.make over the selection meets." },
+      { "minor" => 110, "date" => "2026-11-27",
+        "change" => "groups.make (piping and ducting) names the new group the first free \"Piping group N\" or " \
+                    "\"Ducting group N\" and erases, in the same Undo step, each Face the lines alone close; its " \
+                    "result adds name and removed_faces. A Face with an unselected Edge still refuses " \
+                    "target.wrong_kind. Pipe Types and Duct Types add assigned_color, the next unused colour of the " \
+                    "shared categorical ramp, set on create and duplicate; a null color returns to it. " \
+                    "ph_composer.ducting.ventilators rows add group_names and group_count. session.busy from " \
+                    "ph_composer.context.open and ph_composer.context.root names a native tool by its menu name, " \
+                    "or \"A SketchUp tool\". " \
+                    "Messages quote a Zone's name after the word Zone." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

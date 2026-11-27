@@ -14,6 +14,11 @@ module PhComposer
           name || id
         end
 
+        # The Zone as a message names it: Zone “<name>”, or Zone <id> with no name.
+        def titled
+          Records::Names.titled("Zone", name, id)
+        end
+
         def slot(key)
           values.fetch(key)
         end
@@ -83,7 +88,9 @@ module PhComposer
       def spaceless_findings(exported, items, slot, label, spaced)
         items.keys.sort.filter_map do |id|
           name = items.fetch(id).fetch("name")
-          bare = exported.select { |zone| zone.names?(slot, id) && !spaced.include?(zone.id) }.map(&:label)
+          bare = exported.select { |zone| zone.names?(slot, id) && !spaced.include?(zone.id) }.map do |zone|
+            zone.name ? Records::Names.quoted(zone.name) : zone.id
+          end
           next if bare.empty?
 
           zones = bare.length == 1 ? "Zone #{bare.first}, which has" : "Zones #{bare.join(', ')}, which have"
@@ -128,7 +135,7 @@ module PhComposer
 
       def left_out(id, name, zone)
         Finding.new(:code => Codes::ZONE_LEFT_OUT, :record_id => id, :blocks => false,
-                    :message => "#{name} serves Zone #{zone.label}, which is in no Building Segment, so the export " \
+                    :message => "#{name} serves #{zone.titled}, which is in no Building Segment, so the export " \
                                 "leaves that Room out.")
       end
 

@@ -101,7 +101,8 @@ module PhComposer
         def face_findings(request, zone, occurrence, index)
           record = Zones::Occurrences.face_record(occurrence.entity)
           issues = if record.nil?
-                     [issue("face.unclassified", "Zone #{zone.record.fetch('name')} has an unclassified Face.", true)]
+                     named = Records::Names.titled("Zone", zone.record.fetch("name"))
+                     [issue("face.unclassified", "#{named} has an unclassified Face.", true)]
                    elsif !Schema.problems(record).empty?
                      [issue("face.invalid", "Face assignment is invalid: #{Schema.problems(record).first}.", true)]
                    else
@@ -403,9 +404,10 @@ module PhComposer
 
         # The refusal for a Surface Face whose other side is in a Zone export leaves out, and its repair.
         def partner_message(record, partner)
-          "Face #{record.fetch('id')} is one side of a Surface pair with Zone #{partner.fetch('name')}, which is in " \
-            "no Building Segment and left out of export. Make #{partner.fetch('name')} the Attached zone for the " \
-            "Faces it shares, or put it in a Building Segment."
+          name = partner.fetch("name")
+          "Face #{record.fetch('id')} is one side of a Surface pair with #{Records::Names.titled('Zone', name)}, " \
+            "which is in no Building Segment and left out of export. Make #{Records::Names.quoted(name)} the " \
+            "Attached zone for the Faces it shares, or put it in a Building Segment."
         end
         private_class_method :face_findings, :issue, :assignment_issues, :attached_zone_issues, :attached_record_state,
                              :omission_reason, :construction_issues, :zone_faces, :attached_zones, :attached_zone,

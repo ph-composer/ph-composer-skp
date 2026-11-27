@@ -29,6 +29,16 @@ class RecordNamesTest < PhComposerTestCase
     assert_equal "ÉRV (copy 2)", NAMES.copy_name("ÉRV", rows)
   end
 
+  # A numbered name takes the first free number, compared as names are, and a kind may fold names its own way; a
+  # name quoted after its kind word, or the kind and its id with no name.
+  def test_numbered_takes_the_first_free_number_and_titled_quotes_a_name
+    assert_equal "Piping group 2", NAMES.numbered("Piping group", ["piping GROUP 1", "Piping group 3", "Riser"])
+    assert_equal "Zone 3", NAMES.numbered("Zone", ["zone 1"], :from => 3)
+    assert_equal "Zone 2", NAMES.numbered("Zone", ["Zone 1", "zone 2"], :compare => :itself.to_proc)
+    assert_equal ["Zone \u201CZone A\u201D", "Zone zon_1"],
+                 [NAMES.titled("Zone", "Zone A"), NAMES.titled("Zone", nil, "zon_1")]
+  end
+
   def test_names_compare_by_case_fold_not_by_lowercase
     rows = [{ "id" => "a", "name" => "Maße" }, { "id" => "b", "name" => "MASSE (copy)" }]
     assert_raises(PhComposer::CodedError) { NAMES.unique!("MASSE", rows) }

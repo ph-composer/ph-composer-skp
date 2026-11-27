@@ -143,8 +143,10 @@ module PhComposer
       name = tools.respond_to?(:active_tool_name) ? tools.active_tool_name.to_s : ""
       return if name.empty? || IDLE_TOOLS.include?(name)
 
-      raise CodedError.new("session.busy", "The #{name} tool is in use in SketchUp; the edit path moves once the " \
-                                           "user returns to Select. Nothing moved.")
+      menu = ModelSession::TOOL_MENU_NAMES[name]
+      tool = menu ? "The #{menu} tool is" : "A SketchUp tool is"
+      raise CodedError.new("session.busy", "#{tool} in use; the edit path moves once the user returns to Select. " \
+                                           "Nothing moved.")
     end
 
     def container?(entity)

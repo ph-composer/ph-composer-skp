@@ -60,7 +60,7 @@ class MechanicalBalanceTest < PhComposerTestCase
     assert_equal [60.0, 60.0, false], sums(BALANCE.call([by_program, detailed(40.0, 40.0)]))
     unknown = BALANCE.call([by_program(nil), detailed(40.0, 40.0)])
     assert_equal [nil, nil, false], sums(unknown)
-    assert_match(/Zone Q is By Program/, unknown.fetch("missing"))
+    assert_match(/Zone “Zone Q” is By Program/, unknown.fetch("missing"))
     assert_match(/serves no Zone/, BALANCE.call([]).fetch("missing"))
   end
 
@@ -80,7 +80,7 @@ class MechanicalBalanceTest < PhComposerTestCase
     assert_equal [60.0, 50.0, true], sums(balance.call([zone.new("zon_1", { "zone_path" => [1] }, "One", false)]))
     by_program = balance.call([zone.new("zon_2", { "zone_path" => [2] }, "Two", false)])
     assert_equal [nil, nil, false], sums(by_program)
-    assert_match(/Zone Two is By Program, and Programs cannot be read: A Program is unreadable/,
+    assert_match(/Zone “Two” is By Program, and Programs cannot be read: A Program is unreadable/,
                  by_program.fetch("missing"))
   end
 

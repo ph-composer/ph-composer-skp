@@ -74,7 +74,7 @@ class MechanicalPumpExportTest < PhComposerTestCase
                     [@ids.fetch("P-2"), zone_id("C")]
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("P-2")]], notes(extraction)
     assert_includes extraction.findings.find { |row| row["code"] == "mechanical.zone_without_spaces" }.fetch("message"),
-                    "P-2 serves Zone Zone C, which has no Spaces. PHX reads a Pump through a Room's Spaces, so a " \
+                    "P-2 serves Zone “Zone C”, which has no Spaces. PHX reads a Pump through a Room's Spaces, so a " \
                     "Building Segment's WUFI-Passive and METr model gets P-2 only through another Room it serves in " \
                     "that Segment"
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("P-2"), false]],
@@ -117,7 +117,7 @@ class MechanicalPumpExportTest < PhComposerTestCase
     pumps = { "pmp_AAAAAAAAAAAA" => { "name" => "P-1", "device_type" => 6 } }
     findings = M::PumpPlan.call(:zones => [zone.call("C"), zone.call("D")], :pumps => pumps, :spaced => []).findings
     assert_equal ["mechanical.zone_without_spaces"], findings.map(&:code), "one per pump, so no two notes collapse"
-    assert_match(/P-1 serves Zones Flat, Flat, which have no Spaces/, findings.first.message)
+    assert_match(/P-1 serves Zones “Flat”, “Flat”, which have no Spaces/, findings.first.message)
   end
 
   def test_a_spaces_read_that_refuses_skips_the_no_spaces_finding_and_keeps_the_pump_rows
@@ -168,7 +168,7 @@ class MechanicalPumpExportTest < PhComposerTestCase
     PhComposer::Zones::ZONE_STORE.write(group, record.merge("extension_data" => { M::Serves::NAMESPACE => envelope }))
     error = assert_raises(PhComposer::Export::Blocked) { extract }
     assert_equal "mechanical.item_missing", error.code
-    assert_match(/pump_ids on Zone Zone B names pmp_ZZZZZZZZZZZZ, which is not in the Model/, error.message)
+    assert_match(/pump_ids on Zone “Zone B” names pmp_ZZZZZZZZZZZZ, which is not in the Model/, error.message)
     assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
                     ["mechanical.item_missing", zone_id("B"), true]
   end

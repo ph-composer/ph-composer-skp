@@ -60,7 +60,7 @@ class SegmentExportRulesTest < PhComposerTestCase
     info = findings.to_h { |row| [row.fetch("code"), row] }
     assert_includes info.fetch("zone.left_out").fetch("message"), "ADU (8 Faces)"
     assert_equal zone_id("ADU"), info.fetch("space.zone_left_out").fetch("object_id")
-    assert_includes info.fetch("thermal_bridge.zone_left_out").fetch("message"), "1 assigned Edge in Zone ADU"
+    assert_includes info.fetch("thermal_bridge.zone_left_out").fetch("message"), "1 assigned Edge in Zone “ADU”"
     assert_equal segment_id("ADU"), info.fetch("zone.segment_empty").fetch("object_id")
 
     extraction = extract
@@ -91,7 +91,7 @@ class SegmentExportRulesTest < PhComposerTestCase
 
     partner = preflight.select { |row| row.fetch("code") == "face.partner_left_out" }
     assert_equal %w[fac_K00000000004 fac_L00000000004], partner.map { |row| row.fetch("object_id") }.sort
-    assert(partner.all? { |row| row.fetch("blocks_export") && row.fetch("message").include?("Zone ADU") })
+    assert(partner.all? { |row| row.fetch("blocks_export") && row.fetch("message").include?("Zone “ADU”") })
     error = assert_raises(PhComposer::Export::Blocked) { extract }
     assert_equal "face.partner_left_out", error.code
     assert_match(/Face fac_[KL]00000000004 /, error.message)

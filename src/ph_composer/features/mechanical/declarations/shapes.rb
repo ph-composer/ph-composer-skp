@@ -29,6 +29,8 @@ module PhComposer
 
       def create(kind)
         values = DeepCopy.call(kind.values_schema).merge("required" => ["name"])
+        # A line type's assigned colour (Duct Types) is the next unused one, set by create itself.
+        values["properties"].delete("assigned_color")
         object({ "values" => described(values, "The new #{kind.label}'s values; name is required and every " \
                                                "other value takes its default."),
                  "user_data" => USER_DATA }, :optional => ["user_data"])
@@ -38,6 +40,8 @@ module PhComposer
       def update(kind)
         patch = kind.descriptor.patch_schema
         patch["properties"].delete("source")
+        # A line type's assigned colour (Pipe and Duct Types) is set when it is made or copied, never by an edit.
+        patch["properties"].delete("assigned_color")
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
                  "values" => described(patch, "The values to change; any not given stay. Null removes an optional " \
                                               "value."),

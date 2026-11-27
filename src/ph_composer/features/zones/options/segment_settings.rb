@@ -92,10 +92,9 @@ module PhComposer
         end
 
         def free_name(engine)
-          taken = Options.records(engine, SEGMENT_KIND).map { |row| Options.name_key(row.fetch("name")) }
-          number = taken.length + 1
-          number += 1 while taken.include?(Options.name_key("#{DEFAULT_NAME} #{number}"))
-          "#{DEFAULT_NAME} #{number}"
+          taken = Options.records(engine, SEGMENT_KIND).map { |row| row.fetch("name") }
+          Records::Names.numbered(DEFAULT_NAME, taken, :from => taken.length + 1,
+                                                       :compare => Options.method(:name_key))
         end
       end
     end

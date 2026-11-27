@@ -207,8 +207,10 @@ test("a group's System links in place, None unlinks, and Make Piping group wraps
     var made = named(o, PREFIX + "groups.make")[0];
     assert.deepStrictEqual(clone(made.payload.params),
       { edge_paths: [[801], [802]], hot_water_system_id: fixtures.mechanical.HWS1.id });
-    act(o, made, { status: "completed", value: { group_id: "ppg_NEWNEWNEWNEW" } });
-    assert.match(o.notices[o.notices.length - 1].message, /holds the selected lines. Double-click it/);
+    act(o, made, { status: "completed", value: { group_id: "ppg_NEWNEWNEWNEW", name: "Piping group 2",
+      removed_faces: 1 } });
+    assert.strictEqual(o.notices[o.notices.length - 1].message, "Piping group 2 holds the selected lines. Removed 1 " +
+      "Face the lines closed. Double-click it in SketchUp to draw more lines in it.");
     assert.strictEqual(named(o, PREFIX + "groups.all").length, 3, "a make reads the groups again");
   });
 

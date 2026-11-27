@@ -102,7 +102,7 @@ class SpacesZoneAirflowsTest < PhComposerTestCase
     @model.entities << zone_group(3000, "C", [])
     findings = query(X::PREFLIGHT).fetch("findings").select { |row| row["code"] == "space.zone_without_spaces" }
     assert_equal [["zon_CCCCCCCCCCCC", false]], findings.map { |row| row.values_at("object_id", "blocks_export") }
-    assert_match(/Zone Zone C has no Spaces/, findings.first["message"])
+    assert_match(/Zone “Zone C” has no Spaces/, findings.first["message"])
   end
 
   # A Zone in no Building Segment leaves export with everything in it, so its emptiness is not reported; a copied

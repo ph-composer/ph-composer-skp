@@ -37,6 +37,16 @@ module PhComposer
           placement_refusal(spec, containers, edges, contained)
       end
 
+      # The Faces `edges` close: every Face one of them bounds whose Edges, every loop's, are all among them. Make
+      # erases these in its own operation, so a planar loop SketchUp filled still makes a group; a Face with any
+      # other Edge refuses, and nothing outside the selection is touched.
+      def closed_faces(edges)
+        chosen = edges.to_h { |edge| [edge.persistent_id, true] }
+        edges.flat_map(&:faces).uniq(&:persistent_id).select do |face|
+          face.edges.all? { |edge| chosen.key?(edge.persistent_id) }
+        end
+      end
+
       # Lines, loose, in the open context: the group is made where they are drawn, the way native Make Group works.
       def shape_refusal(spec, model, containers, edges, others)
         if others.positive?
@@ -48,9 +58,11 @@ module PhComposer
           return coded("target.edit_path_changed", "The lines are not in the open context; open the Group they are " \
                                                    "drawn in first.")
         end
-        return nil if edges.all? { |edge| edge.faces.empty? }
+        closed = closed_faces(edges).map(&:persistent_id)
+        return nil if edges.all? { |edge| (edge.faces.map(&:persistent_id) - closed).empty? }
 
-        coded("target.wrong_kind", "A selected line bounds a Face; a #{spec.label} holds loose lines only.")
+        coded("target.wrong_kind", "A selected line bounds a Face drawn with lines outside the selection; erase " \
+                                   "the Face, keep its lines, then Make #{spec.label} again.")
       end
 
       # The rule a line group's own writes follow: outside every line group of its kind, every Group another feature
@@ -66,8 +78,9 @@ module PhComposer
         end
         zone = contained.call([(containers + [edges.first]).map(&:persistent_id)]).first["zone"]
         if zone
-          return coded(spec.code(:group_in_zone), "The lines sit inside Zone #{zone.fetch('name')}; a #{spec.label} " \
-                                                  "sits outside every Zone, so move them out first.")
+          inside = Records::Names.titled("Zone", zone.fetch("name"))
+          return coded(spec.code(:group_in_zone), "The lines sit inside #{inside}; a #{spec.label} sits outside " \
+                                                  "every Zone, so move them out first.")
         end
 
         GroupTarget.write_refusal(spec, containers)

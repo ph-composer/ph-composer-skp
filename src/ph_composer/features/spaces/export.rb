@@ -168,8 +168,8 @@ module PhComposer
       end
 
       def without_spaces_message(zone_name)
-        "Zone #{zone_name} has no Spaces. It exports its geometry, but WUFI-Passive and METr give it no iCFA, net " \
-          "volume or ventilation. Add Spaces before calculating."
+        "#{Records::Names.titled('Zone', zone_name)} has no Spaces. It exports its geometry, but WUFI-Passive and " \
+          "METr give it no iCFA, net volume or ventilation. Add Spaces before calculating."
       end
 
       # The metadata extraction refuses, read as `records` reads each Space, Volume, Space Floor and Floor
@@ -204,8 +204,8 @@ module PhComposer
       end
 
       def left_out_message(zone_name, count)
-        "#{count} #{count == 1 ? 'Space' : 'Spaces'} in Zone #{zone_name}, which is in no Building Segment, " \
-          "#{count == 1 ? 'is' : 'are'} left out of export with it."
+        "#{count} #{count == 1 ? 'Space' : 'Spaces'} in #{Records::Names.titled('Zone', zone_name)}, which is in no " \
+          "Building Segment, #{count == 1 ? 'is' : 'are'} left out of export with it."
       end
 
       def finding_row(finding, reference, object_id)

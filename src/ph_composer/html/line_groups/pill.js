@@ -13,9 +13,11 @@ function (panel, snapshot, ui, shared, groups, schedules) {
     this.spec = spec; this.types = options.types;
     this.read = new shared.Read(session, send, spec);
     this.groupForm = new groups.GroupForm(session, send, spec, function () { return self.bar.makePaths(); },
-      function () {
-        panel.notify("The new " + spec.label + " holds the selected lines. Double-click it in SketchUp to draw " +
-          "more lines in it.", "info");
+      function (made) {
+        var removed = made.removed_faces || 0;
+        panel.notify((made.name || "The new " + spec.label) + " holds the selected lines. " + (removed ?
+          "Removed " + removed + " Face" + (removed === 1 ? "" : "s") + " the lines closed. " : "") +
+          "Double-click it in SketchUp to draw more lines in it.", "info");
         self.read.read();
         panel.repaint();
       });

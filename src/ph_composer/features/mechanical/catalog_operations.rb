@@ -38,14 +38,15 @@ module PhComposer
       end
 
       # A copy is a new record derived from the original: a fresh id, its own name, the same references, and
-      # `user_data` copied by the engine.
-      def duplicate(request, proposal, kind, id:, name: nil)
+      # `user_data` copied by the engine. `derive`, when given, answers the copy's values from them, for a value a
+      # copy takes afresh rather than copies.
+      def duplicate(request, proposal, kind, id:, name: nil, derive: nil)
         rows = records(request, kind)
         mapping = request.engine.propose_duplicate(kind, [id], proposal) do |values|
           values["name"] = (name || Records::Names.copy_name(values.fetch("name"), rows)).strip
           Records::Names.unique!(values["name"], rows)
           values["source"] = { "kind" => "derived" }
-          values
+          derive ? derive.call(values) : values
         end
         { "id" => mapping.fetch(id) }
       end

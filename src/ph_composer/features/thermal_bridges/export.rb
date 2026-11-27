@@ -202,8 +202,9 @@ module PhComposer
       # Zone id.
       def left_out_counts(counts, names)
         counts.sort.map do |zone_id, count|
-          [zone_id, "#{count} assigned #{count == 1 ? 'Edge' : 'Edges'} in Zone #{names.fetch(zone_id)}, which " \
-                    "is in no Building Segment, #{count == 1 ? 'is' : 'are'} left out of export with it."]
+          zone = Records::Names.titled("Zone", names.fetch(zone_id))
+          [zone_id, "#{count} assigned #{count == 1 ? 'Edge' : 'Edges'} in #{zone}, which is in no Building " \
+                    "Segment, #{count == 1 ? 'is' : 'are'} left out of export with it."]
         end
       end
 

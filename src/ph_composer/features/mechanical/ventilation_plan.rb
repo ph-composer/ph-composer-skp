@@ -53,10 +53,10 @@ module PhComposer
           id = zone.slot(SLOT)
           if id.nil?
             Finding.new(:code => Codes::ZONE_UNVENTILATED, :record_id => zone.id, :blocks => false,
-                        :message => "Zone #{zone.label} has no Ventilator.")
+                        :message => "#{zone.titled} has no Ventilator.")
           elsif !ventilators.key?(id) && !unreadable.include?(id)
             Finding.new(:code => Codes::ITEM_MISSING, :record_id => zone.id, :blocks => true,
-                        :message => "ventilator_id on Zone #{zone.label} names #{id}, which is not in the Model.")
+                        :message => "ventilator_id on #{zone.titled} names #{id}, which is not in the Model.")
           end
         end
       end

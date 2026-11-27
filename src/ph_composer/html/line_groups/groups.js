@@ -13,14 +13,14 @@ function (panel, request, snapshot, ui, tables, RecordForm, forms, choiceCell, s
   }
 
   /* Make <group>: the record its lines serve. `paths()` is the selected lines' paths as the bar read them, or null
-     while Make is blocked. */
+     while Make is blocked; `done(value)` gets the made group's name and the count of Faces it erased. */
   function GroupForm(session, send, spec, paths, done) {
     var self = this;
     // RecordForm keeps its own spec, so the line group's is held apart.
     this.lines = spec; this.paths = paths;
     RecordForm.call(this, session, send, { title: "Make " + spec.label, action: spec.prefix + "groups.make",
       label: spec.key + "-group-make", submitLabel: "Make " + spec.label, pendingText: "Making...",
-      failureText: "The " + spec.label + " was not made.", changed: function (value) { if (value) done(); } });
+      failureText: "The " + spec.label + " was not made.", changed: function (value) { if (value) done(value); } });
     this.link = forms.labelled(this.form, spec.link.label, ui.element("select"));
     RecordForm.required(this.link.parentNode, this.link);
     this.link.addEventListener("change", function () { self.updateButton(); });

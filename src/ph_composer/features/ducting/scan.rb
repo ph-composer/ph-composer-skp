@@ -22,12 +22,22 @@ module PhComposer
                 .merge("unreadable" => unreadable, "unreadable_total" => unreadable.length)
       end
 
+      # The most Ducting group names one Ventilator row lists; `group_count` counts them all.
+      GROUP_NAMES = 20
+
       # Each Ventilator's two duct lengths, quantity applied, for the Ventilators table: the walk and the runs without
-      # findings or Zones, each name cut as a schedule page cuts it.
+      # findings or Zones, each name cut as a schedule page cuts it; and the Ducting groups linked to it, which its
+      # delete leaves unlinked unless a replacement takes them.
       def ventilators(request)
         facts, = call(request, :zones => false)
         rows = Schedule.ventilator_rows(Runs.call(facts), records(request.engine, Mechanical::VENTILATOR_KIND))
-        { "ventilators" => rows.map { |row| row.merge(OccurrencePath.bounded_names(row.slice("name"))) } }
+        linked = LineGroups::GroupOperations.names_by_link(LINE_GROUP, request.model)
+        { "ventilators" => rows.map do |row|
+          names = linked.fetch(row.fetch("ventilator_id"), [])
+          row.merge(OccurrencePath.bounded_names(row.slice("name")))
+             .merge("group_names" => names.first(GROUP_NAMES).map { |name| name[0, OccurrencePath::NAME_CHARACTERS] },
+                    "group_count" => names.length)
+        end }
       end
 
       # Each Duct Type id's used length, quantity applied, as the schedule's types rows give it.

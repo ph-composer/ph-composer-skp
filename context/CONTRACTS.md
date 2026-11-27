@@ -1271,7 +1271,9 @@ Mechanical's `CatalogOperations`, as a flat equipment catalog's are: names are u
 `expected_values` and a null removes an optional value, `duplicate` gives a new id, the source `derived` and a copy of
 the `user_data`, and `delete` is the engine's guarded delete. `delete` takes `replacement_id`, another existing type
 or null, which refuses `params.invalid` when it names the type itself. `pipe_types.list` and `pipe_types.all` (also
-the snapshot section `ph_composer.piping.pipe_types`) answer each record's view with `display.color`,
+the snapshot section `ph_composer.piping.pipe_types`) answer each record's view with `display.color` (its `color`,
+else its `assigned_color`: the first colour of `ColourBy::Palette::RAMP`, the shared categorical ramp, that no Pipe
+Type draws in or would return to, set by `create` and `duplicate`; a null `color` returns to it),
 `export_ready` and `export_blockers`: `piping.insulation_conductivity_missing` for a type with insulation above 0 mm
 and no conductivity, which blocks the export only of a pipe that uses it; a bare pipe needs no conductivity. Its
 `user_data` is written with `ph_composer.records.update_metadata`; the export leaves a Pipe Type's map out, since each
@@ -1286,8 +1288,11 @@ pipe segment carries its pipe's.
   A Pipe Type or Hot Water System delete still rewrites a group a Zone holds, so no reference is left dangling.
   `groups.make` (`LineGroups::GroupOperations.make`) takes `edge_paths`, root-to-Edge paths of loose lines, and an
   existing System, and wraps the lines in a new Group in their own collection with a new record, in one Undo step;
-  the lines keep their persistent ids and dictionaries and the edit path stays. It refuses, writing nothing:
-  `target.wrong_kind` for a path naming no Edge or an Edge bounding a Face, `target.wrong_hierarchy` for lines in
+  the lines keep their persistent ids and dictionaries and the edit path stays. The Group is named the first free
+  "Piping group N" among the Piping groups (`Records::Names.numbered`). Each Face whose Edges, every loop's, are all
+  among the lines (`LineGroups::Make.closed_faces`) is erased in the same step; the result gives `group_id`, `name`
+  and `removed_faces`. It refuses, writing nothing:
+  `target.wrong_kind` for a path naming no Edge or an Edge bounding a Face with an Edge outside the lines, `target.wrong_hierarchy` for lines in
   two collections or in a Group another feature claims, `target.edit_path_changed` for lines outside the open
   context, `piping.group_nested` inside a Piping group, `piping.group_in_zone` where a Zone holds an Edge's own path,
   the path's write refusal (a component, a locked or shared Group) and `gesture.too_large` above the pipe gesture
@@ -1403,7 +1408,8 @@ Mechanical's `CatalogOperations`, with Mechanical's catalog param shapes: names 
 value, `duplicate` gives a new id, the source `derived` and a copy of the `user_data`, and `delete` is the engine's
 guarded delete. `delete` takes `replacement_id`, another existing type or null, which refuses `params.invalid` when
 it names the type itself. `duct_types.list` and `duct_types.all` (also the snapshot section
-`ph_composer.ducting.duct_types`) answer each record's view with `display.color`, `export_ready` and
+`ph_composer.ducting.duct_types`) answer each record's view with `display.color` (as a Pipe Type's, from `color` or
+`assigned_color`), `export_ready` and
 `export_blockers`: `ducting.insulation_conductivity_missing` for a type with insulation above 0 mm and no
 conductivity, which blocks the export only of a duct that uses it; a bare duct needs no conductivity. Its
 `user_data` is written with `ph_composer.records.update_metadata` and kept in the Model.

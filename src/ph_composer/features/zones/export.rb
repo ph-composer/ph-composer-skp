@@ -326,8 +326,8 @@ module PhComposer
         left_out.each do |entry, record|
           count = zone_faces(reader, entry).length
           reader.note("zone.left_out", record.fetch("id"),
-                      "Zone #{record.fetch('name')} is in no Building Segment and was left out with its #{count} " \
-                      "#{count == 1 ? 'Face' : 'Faces'} and everything inside it.")
+                      "#{Records::Names.titled('Zone', record.fetch('name'))} is in no Building Segment and was " \
+                      "left out with its #{count} #{count == 1 ? 'Face' : 'Faces'} and everything inside it.")
         end
         named = (kept + left_out).map { |_entry, record| record["building_segment_id"] }
         choices.fetch(Options::SEGMENTS.id).each do |id, segment|

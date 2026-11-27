@@ -444,10 +444,8 @@ module PhComposer
     end
 
     def default_name(model)
-      used = Occurrences.zones(model).map { |zone| zone.record.fetch("name") }
-      number = 1
-      number += 1 while used.include?("Zone #{number}")
-      "Zone #{number}"
+      Records::Names.numbered("Zone", Occurrences.zones(model).map { |zone| zone.record.fetch("name") },
+                              :compare => :itself.to_proc)
     end
 
     # A copied Zone is ambiguous and shared at once, and shared storage is reported first: it is the

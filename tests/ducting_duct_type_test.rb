@@ -11,6 +11,8 @@ class DuctingDuctTypeTest < PhComposerTestCase
   KIND = D::DuctType::KIND
   PREFIX = "ph_composer.ducting.duct_types"
   COMMON = { "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" } }.freeze
+  # The colour the first type in a Model takes: the shared categorical ramp's first.
+  FIRST = { "assigned_color" => "#1F77B4" }.freeze
   # honeybee-ph's PhDuctSegment defaults (1.33.68), in millimetres: a 0.160 m round duct with 0.0254 m of reflective
   # insulation at 0.04 W/(m K).
   ROUND = { "shape" => "round", "diameter_mm" => 160.0, "insulation_thickness_mm" => 25.4,
@@ -28,11 +30,10 @@ class DuctingDuctTypeTest < PhComposerTestCase
   def test_a_type_created_with_a_tag_is_round_with_honeybee_phs_duct_segment_defaults
     id = create("name" => " DT-1 ")
     assert_match(/\Adct_[A-Za-z0-9]{12}\z/, id)
-    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND), values(id)
+    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND).merge(FIRST), values(id)
     row = rows.fetch("DT-1")
     assert_equal [true, []], row.values_at("export_ready", "export_blockers")
-    ramp = %w[#4a7fb5 #b5634a #5f9a5a #8d6bb0 #c29a3a #4a9a9a]
-    assert_equal ramp.fetch(id.each_byte.sum % 6), row.dig("display", "color"), "the ramp's colour for the id"
+    assert_equal "#1F77B4", row.dig("display", "color"), "the colour it took when made"
     assert_empty KIND.problems(JSON.parse(JSON.generate(KIND.store.read(@model, id))))
   end
 
@@ -40,7 +41,7 @@ class DuctingDuctTypeTest < PhComposerTestCase
     id = create(RECTANGULAR.merge("name" => "DT-2", "diameter_mm" => nil))
     assert_equal COMMON.merge("name" => "DT-2", "insulation_thickness_mm" => 25.4,
                               "insulation_conductivity_w_mk" => 0.04, "insulation_reflective" => true)
-                       .merge(RECTANGULAR), values(id)
+                       .merge(RECTANGULAR).merge(FIRST), values(id)
     refute values(id).key?("diameter_mm"), "a null for the other shape's dimension leaves it absent"
   end
 
@@ -71,7 +72,7 @@ class DuctingDuctTypeTest < PhComposerTestCase
     end
     assert_equal [revision, operations], [@session.revision, @model.operations.length]
     assert_equal %w[DT-1 DT-2], rows.keys.sort
-    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND), values(round)
+    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND).merge(FIRST), values(round)
     assert_equal ["A rectangular Duct Type needs height_mm.", "A rectangular Duct Type takes no diameter_mm."],
                  D::DuctType.shape_problems("shape" => "rectangular", "width_mm" => 1.0, "diameter_mm" => 1.0)
     assert_equal %w[refused validation.failed],
@@ -91,7 +92,7 @@ class DuctingDuctTypeTest < PhComposerTestCase
     assert_equal RECTANGULAR, stored.slice("shape", "width_mm", "height_mm")
     refute stored.key?("diameter_mm"), "the round dimension goes with the shape"
     @model.undo
-    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND), values(id)
+    assert_equal COMMON.merge("name" => "DT-1").merge(ROUND).merge(FIRST), values(id)
     @model.redo
     # A null for the other shape's dimension removes it, as a null removes any optional value.
     round = { "shape" => "round", "diameter_mm" => 125.0, "width_mm" => nil }

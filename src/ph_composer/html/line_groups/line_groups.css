@@ -11,7 +11,9 @@
 .phc-workspace .line-group-bar-field .phc-unit-field input { width: 5em; }
 .line-group-number[aria-invalid="true"] { border-color: var(--red); }
 .line-group-bar-reason { margin-left: -8px; }
-.line-group-new { margin-left: auto; }
+/* Make <group> and its reason are one unit, so a wrap never leaves the reason's icon on a row alone. */
+.line-group-bar-make { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; margin-left: auto; }
+.line-group-bar-make .line-group-bar-reason { margin-left: 0; }
 .line-group-groups h2, .line-group-schedule-title, .line-group-totals h2, .line-group-others h2 {
   margin: 16px 0 4px; font-size: var(--text-md); font-weight: 600;
 }
@@ -44,5 +46,5 @@
 @media (max-width: 500px) {
   .line-group-bar select { flex: 1 1 140px; width: auto; }
   .line-group-bar { gap: 8px; }
-  .line-group-new { margin-left: 0; }
+  .line-group-bar-make { margin-left: 0; }
 }

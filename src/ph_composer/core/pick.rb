@@ -33,11 +33,18 @@ module PhComposer
       first_path(view, x, y, Sketchup::Face)
     end
 
+    # The pick square's side, in pixels (physical before SketchUp 2025, logical from it), that a tool picking
+    # lines passes so a line a few pixels off the pointer still picks. The API documents no value for its
+    # default aperture of 0. PROVISIONAL: the native Select tool's reach is owed to a host measurement, and
+    # this value is set to match it then.
+    LINE_APERTURE = 10
+
     # The same for an Edge: the first picked path ending in an Edge, with the active path prepended, or
     # nil when the pointer is over no Edge. A Face under the pointer is skipped, as `face_path` skips an
-    # Edge, so the two never answer for each other.
-    def edge_path(view, x, y)
-      first_path(view, x, y, Sketchup::Edge)
+    # Edge, so the two never answer for each other. `aperture` is the pick square's side (0, the host's
+    # default, unless the tool asks for more).
+    def edge_path(view, x, y, aperture: 0)
+      first_path(view, x, y, Sketchup::Edge, aperture)
     end
 
     # The same single native pick, plus the camera ray's intersection with that Face's world
@@ -72,11 +79,11 @@ module PhComposer
       [vector.x.to_f, vector.y.to_f, vector.z.to_f]
     end
 
-    def first_path(view, x, y, kind)
+    def first_path(view, x, y, kind, aperture = 0)
       helper = view.respond_to?(:pick_helper) ? view.pick_helper : nil
       return nil unless helper
 
-      count = helper.do_pick(x, y).to_i
+      count = (aperture.positive? ? helper.do_pick(x, y, aperture) : helper.do_pick(x, y)).to_i
       context = view.respond_to?(:model) ? Array(view.model.active_path) : []
       (0...count).each do |index|
         path = Array(helper.path_at(index))

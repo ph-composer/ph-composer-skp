@@ -20,10 +20,15 @@ function selected(id, values) {
     null }, group: { group_id: DG1, group_path: [600], ventilator_id: mechanical.ERV1.id }, reason: null,
   values: values, copied: false, record_problem: null, write_refusal: null };
 }
+/* ERV-1 and ERV-2 each link one Ducting group; ERV-3 serves no Zone and links seven, more than a Delete names. */
 function ventilators() {
-  return [{ ventilator_id: mechanical.ERV1.id, name: "ERV-1", outdoor_air_length_m: 2.5, exhaust_air_length_m: 1.8 },
-    { ventilator_id: mechanical.ERV2.id, name: "ERV-2", outdoor_air_length_m: 2.5, exhaust_air_length_m: 3 },
-    { ventilator_id: mechanical.ERV3.id, name: "ERV-3", outdoor_air_length_m: 0, exhaust_air_length_m: 0 }];
+  var seven = [1, 2, 3, 4, 5, 6, 7].map(function (number) { return "Ducting group " + number; });
+  return [{ ventilator_id: mechanical.ERV1.id, name: "ERV-1", outdoor_air_length_m: 2.5, exhaust_air_length_m: 1.8,
+    group_names: ["DG-1"], group_count: 1 },
+  { ventilator_id: mechanical.ERV2.id, name: "ERV-2", outdoor_air_length_m: 2.5, exhaust_air_length_m: 3,
+    group_names: ["DG-2"], group_count: 1 },
+  { ventilator_id: mechanical.ERV3.id, name: "ERV-3", outdoor_air_length_m: 0, exhaust_air_length_m: 0,
+    group_names: seven, group_count: 7 }];
 }
 function run(identifier, direction, ventilator, group, typeId, length, quantity, findings) {
   return { identifier: identifier, display_name: (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") + " 1",
@@ -43,8 +48,11 @@ function schedule() {
     { direction: "exhaust_air", run_count: 2, line_count: 4, length_m: 4.8 }], run_count: 4, line_count: 8,
   length_m: 9.8 },
   ventilators: ventilators().map(function (row) {
-    return Object.assign({ findings: row.name === "ERV-3" ? [{ code: "ducting.run_missing",
+    // The schedule's rows carry no group names; the Ventilators read does.
+    var scheduled = Object.assign({ findings: row.name === "ERV-3" ? [{ code: "ducting.run_missing",
       message: "ERV-3 has no Outdoor air run.", blocks_export: false, locate: {} }] : [] }, row);
+    delete scheduled.group_names; delete scheduled.group_count;
+    return scheduled;
   }), types: [], unreadable: [], unreadable_total: 0 };
 }
 function groups() {

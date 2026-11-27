@@ -26,6 +26,10 @@ module PhComposer
     # Native tools a commit cancels whose state never leaves 0 while partway: the Rotate tool reports state 0
     # through a whole turn (context/SKETCHUP_HOST_BEHAVIOR.md), so a change waits while it is selected at all.
     SELECTED_TOOLS = { "RotateTool" => "Rotate" }.freeze
+    # The menu name of each native tool whose host name has been read (`Tools#active_tool_name`), for a message
+    # that names the tool in use: the guarded tools above and the Line tool, SketchTool
+    # (context/SKETCHUP_HOST_BEHAVIOR.md). A tool not listed is named as "a SketchUp tool".
+    TOOL_MENU_NAMES = GESTURE_TOOLS.merge(SELECTED_TOOLS).merge("SketchTool" => "Line").freeze
 
     def initialize(model)
       @model = model

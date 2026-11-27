@@ -16,12 +16,14 @@ module PipeTypesWalkthrough
   # PT-1 as `run` leaves it: every stored value, a 3/4 in PEX pipe with 25.4 mm of insulation.
   PT_1 = { "name" => "PT-1", "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" },
            "material" => 6, "diameter_mm" => 19.05, "insulation_thickness_mm" => 25.4,
-           "insulation_conductivity_w_mk" => 0.035, "insulation_reflective" => true, "insulation_quality" => 1 }.freeze
+           "insulation_conductivity_w_mk" => 0.035, "insulation_reflective" => true, "insulation_quality" => 1,
+           "assigned_color" => "#1F77B4" }.freeze
   # The catalog after `run`, one [values, user_data] per record in name order. The copy carries PT-1's values and
-  # user_data.
+  # user_data, and takes the next colour no type had: PT-1 took the ramp's first, PT-2 its second.
   EXPECTED = [
     [PT_1, USER_DATA],
-    [PT_1.merge("name" => "PT-1 (copy)", "source" => { "kind" => "derived" }), USER_DATA]
+    [PT_1.merge("name" => "PT-1 (copy)", "source" => { "kind" => "derived" }, "assigned_color" => "#2CA02C"),
+     USER_DATA]
   ].freeze
 
   module_function

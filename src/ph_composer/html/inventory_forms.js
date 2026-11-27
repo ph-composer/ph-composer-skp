@@ -19,11 +19,25 @@ function (RecordForm, request, snapshot, ui) {
     }
     return form.settle(state);
   }
-  /* What another feature knows about the uses of a section's records: `usage(state, id)` answers
+  /* What other features know about the uses of a section's records: each `usage(state, id, choice)` answers
      `{ count, description, incomplete }`, `incomplete` saying why the uses are not all known (a referring record
-     that cannot be read), or null. Every way into that section's ReplacementForm then lists the same uses. */
+     that cannot be read), or null. `choice` is the replacement chosen so far: "" for none yet, "clear" to clear the
+     uses, or the replacement's id, so a description can say what that choice does to its uses. Every way into that
+     section's ReplacementForm lists the same uses: the owner's own (`options.usage`), then each contributed one. */
   var usageSources = Object.create(null);
-  function contributeUsage(section, usage) { usageSources[section] = usage; }
+  function contributeUsage(section, usage) { (usageSources[section] = usageSources[section] || []).push(usage); }
+  /* Every source's uses as one: the counts summed, the descriptions of the sources with uses and every
+     `incomplete` joined; null when no source answers. */
+  function combinedUsage(sources, state, id, choice) {
+    var parts = sources.map(function (source) { return source(state, id, choice); }).filter(Boolean);
+    if (!parts.length) return null;
+    function joined(key, used) {
+      return parts.filter(function (part) { return part[key] && (!used || part.count); })
+        .map(function (part) { return part[key]; }).join(" ");
+    }
+    return { count: parts.reduce(function (sum, part) { return sum + (part.count || 0); }, 0),
+      description: joined("description", true), incomplete: joined("incomplete", false) || null };
+  }
   function ReplacementForm(session, send, changed, options) {
     var self = this;
     this.options = options;
@@ -35,8 +49,9 @@ function (RecordForm, request, snapshot, ui) {
     this.uses = ui.element("p");
     this.root.appendChild(this.uses);
     this.select = labelled(this.form, "Replacement " + this.options.label.toLowerCase(), ui.element("select"));
+    // The uses read again for the choice, which a contributed description may name.
     this.select.addEventListener("change", function () { self.error.textContent = "";
-    self.updateButton(); });
+      if (self.record) self.reconcile(self.record, self.records); else self.updateButton(); });
     this.finish();
   }
   RecordForm.extend(ReplacementForm);
@@ -45,20 +60,25 @@ function (RecordForm, request, snapshot, ui) {
   };
   /* `allowClear` may be a function of the record: clearing is offered only while it answers true. */
   ReplacementForm.prototype.reconcile = function (record, records) {
-    this.record = record;
+    this.record = record; this.records = records;
     var clear = typeof this.options.allowClear === "function" ? this.options.allowClear(record) :
       Boolean(this.options.allowClear);
-    var source = this.options.usage || usageSources[this.options.section];
-    var usage = source ? source(this.state, record.id) : null;
+    var candidates = records.filter(function (candidate) { return candidate.id !== record.id; });
+    // The choice the select will keep: a replacement gone from the records, or Clear no longer offered, is none.
+    var value = this.select.value, choice = value === "__clear__" ? (clear ? "clear" : "") :
+      candidates.some(function (candidate) { return candidate.id === value; }) ? value : "";
+    var own = this.options.usage ? this.options.usage(this.state, record.id, choice) : null;
+    var usage = combinedUsage([function () { return own; }].concat(usageSources[this.options.section] || []),
+      this.state, record.id, choice);
     // Uses not all known are said beside the choice, which stays what the known uses ask; the host's delete checks
     // the stored references either way. Nothing is cleared that may still be named.
     var unknown = usage && usage.incomplete;
     if (unknown) clear = false;
     this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
       (usage ? usage.count : record.use_count)));
-    var candidates = records.filter(function (candidate) { return candidate.id !== record.id; });
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
-    this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count));
+    // The explanation names what the owner's uses are (`usedOn`), so it shows only while the owner reports some.
+    this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count) && (!own || own.count));
     this.explanation.textContent = this.explanation.hidden ? "" : "Moves every " + this.options.usedOn + " that uses " +
       record.values.name + " to the " + this.options.label + " you choose" +
       (clear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
@@ -379,7 +399,8 @@ function (RecordForm, request, snapshot, ui) {
     this.record = JSON.parse(JSON.stringify(record));
     this.trigger = trigger;
     this.hex.value = record.values.color || (record.display || {}).color || "#ffffff";
-    this.initialColor = this.hex.value;
+    // Compared as the field is, in lower case, so a stored "#1F77B4" opened and left alone is not an edit.
+    this.initialColor = this.hex.value.trim().toLowerCase();
     this.title.textContent = "Color for " + record.values.name;
     this.error.textContent = "";
     this.root.setAttribute("aria-label", this.title.textContent);

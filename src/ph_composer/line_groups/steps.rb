@@ -2,31 +2,35 @@
 
 module PhComposer
   module LineGroups
-    # Wraps loose lines already drawn in one collection in a new Group with its record, so one Undo restores them
-    # loose with their ids and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group"). The edit path
-    # stays where it is: the user opens the group to draw more lines in it.
+    # Wraps loose lines already drawn in one collection in a new Group named `name` with its record, so one Undo
+    # restores them loose with their ids and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md, "Making a line group").
+    # The Faces `face_ids` name, which the lines alone close, are erased first in the same step, so the same Undo
+    # restores them. The edit path stays where it is: the user opens the group to draw more lines in it.
     class MakeStep
       attr_reader :affected
 
-      def initialize(spec:, record:, parent_path:, edge_ids:)
+      def initialize(spec:, record:, name:, parent_path:, edge_ids:, face_ids: [])
         @spec = spec
         @record = DeepCopy.frozen(record)
+        @name = name.dup.freeze
         @parent_path = parent_path.dup.freeze
         @edge_ids = edge_ids.dup.freeze
+        @face_ids = face_ids.dup.freeze
         @affected = [{ "kind" => spec.group_noun, "id" => @record.fetch("id"), "change" => "created" }]
       end
 
       def descriptor
-        { "name" => "make_#{@spec.group_noun}", "record" => @record, "parent_path" => @parent_path,
-          "edge_ids" => @edge_ids }
+        { "name" => "make_#{@spec.group_noun}", "record" => @record, "group_name" => @name,
+          "parent_path" => @parent_path, "edge_ids" => @edge_ids, "face_ids" => @face_ids }
       end
 
       def temporary_ids
         [@record.fetch("id")]
       end
 
-      # Each line is found again, still loose, in the open context the plan read; SketchUp deletes a Group left empty
-      # at commit, so nothing here adds one.
+      # Each line is found again in the open context the plan read, bounding no Face but the planned ones, and each
+      # planned Face still bounded by the lines alone; SketchUp deletes a Group left empty at commit, so nothing here
+      # adds one.
       def apply(model, _slots)
         unless Array(model.active_path).map(&:persistent_id) == @parent_path
           raise CodedError.new("target.edit_path_changed", "The open edit context changed. Nothing was written.")
@@ -34,10 +38,14 @@ module PhComposer
 
         entities = PhComposer::Operations::EntityScope.new(@parent_path).resolve(model)
         children = entities.to_a.group_by(&:persistent_id)
-        lines = @edge_ids.map { |id| loose_line(children.fetch(id, [])) }
+        lines = @edge_ids.map { |id| planned_line(children.fetch(id, [])) }
         raise CodedError.new("params.invalid", "A #{@spec.label} is made from at least one line.") if lines.empty?
 
+        faces = @face_ids.map { |id| closed_face(children.fetch(id, [])) }
+        unchanged! unless lines.all? { |line| (line.faces.map(&:persistent_id) - @face_ids).empty? }
+        entities.erase_entities(faces) unless faces.empty?
         group = entities.add_group(lines)
+        group.name = @name
         @spec.group_store.write(group, @record)
         @affected = [@affected.first.merge("reference" => { "group_id" => @record.fetch("id"),
                                                             "group_path" => @parent_path + [group.persistent_id] })]
@@ -45,10 +53,23 @@ module PhComposer
 
       private
 
-      def loose_line(matches)
+      def planned_line(matches)
         line = matches.first
-        return line if matches.length == 1 && line.is_a?(Sketchup::Edge) && line.faces.empty?
+        return line if matches.length == 1 && line.is_a?(Sketchup::Edge)
 
+        unchanged!
+      end
+
+      # A Face planned for erasing, still bounded by the planned lines alone.
+      def closed_face(matches)
+        face = matches.first
+        return face if matches.length == 1 && face.is_a?(Sketchup::Face) &&
+                       (face.edges.map(&:persistent_id) - @edge_ids).empty?
+
+        unchanged!
+      end
+
+      def unchanged!
         raise CodedError.new("target.changed", "A line changed after the #{@spec.label} was planned. Nothing was " \
                                                "written.")
       end

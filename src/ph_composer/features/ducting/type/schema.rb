@@ -45,8 +45,13 @@ module PhComposer
                                                 "description" => "Whether the insulation has a reflective " \
                                                                  "facing." },
                      :required => true),
-        # Stored only once authored; a read shows the ramp colour for the id until then.
-        Fields.field("color", SchemaShapes::HEX_COLOUR)
+        # Stored only once authored; a read shows the assigned colour until then.
+        Fields.field("color", SchemaShapes::HEX_COLOUR),
+        # Written once, when the type is made or copied; a cleared color returns to it.
+        Fields.field("assigned_color",
+                     SchemaShapes::HEX_COLOUR.merge("description" => "The colour the type took when it was made, " \
+                                                                     "the next unused one of the shared " \
+                                                                     "categorical ramp; a null color returns to it."))
       ])
       SNAPSHOT_SCHEMA = Fields.source_snapshot_schema(FIELDS)
       # A new Duct Type: honeybee-ph's duct segment defaults, a 160 mm round duct with 25.4 mm of reflective
@@ -95,9 +100,17 @@ module PhComposer
         found
       end
 
-      # The colour a type draws in: its own, or the ramp's by id.
+      # The colour a type draws in: its own, the one it took when it was made, or for a type stored before it took
+      # one, the ramp's by id.
       def color(record)
-        record["color"] || RAMP.fetch(record.fetch("id").each_byte.sum % RAMP.length)
+        record["color"] || record["assigned_color"] || RAMP.fetch(record.fetch("id").each_byte.sum % RAMP.length)
+      end
+
+      # The colour a new type takes: the shared categorical ramp's first that no type of the kind draws in or would
+      # return to once its colour is cleared.
+      def next_color(records)
+        taken = records.flat_map { |record| [color(record), record["assigned_color"]] }.compact.uniq
+        ColourBy::Palette.unused(taken, :count => records.length)
       end
 
       # What keeps a type out of an export once a duct uses it: insulation with no conductivity. A bare duct needs

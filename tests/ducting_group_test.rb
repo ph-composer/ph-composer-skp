@@ -39,6 +39,8 @@ class DuctingGroupTest < PhComposerTestCase
     assert_match(/\Adcg_[A-Za-z0-9]{12}\z/, id)
     groups = @model.entities.to_a.select { |entity| STORE.marks?(entity) }
     assert_equal 1, groups.length
+    assert_equal [["Ducting group 1", 0], "Ducting group 1"],
+                 [result["value"].values_at("name", "removed_faces"), groups.first.name]
     assert_equal({ "id" => id, "schema_version" => 1, "ventilator_id" => @erv1, "user_data" => {},
                    "extension_data" => {} }, STORE.read(groups.first))
     assert_equal [lines, 2, nil], [groups.first.entities.to_a, lines.last.get_attribute("user.notes", "kept"),
@@ -196,6 +198,10 @@ class DuctingGroupTest < PhComposerTestCase
     refusal = invoke("#{VENTILATORS}.delete", "id" => @erv2)
     assert_equal %w[refused reference.in_use], refusal.values_at("status", "code")
     assert_match(/\[570\] still refers/, refusal["message"])
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv2 }
+    assert_equal [["Ducting group 570"], 1], linked.values_at("group_names", "group_count"),
+                 "a group the delete refuses over is named, though its record fails its schema"
   end
 
   def test_the_list_pages_the_occurrences_in_path_order
