@@ -235,9 +235,9 @@ and ERV ducting reuse these rules.
 The embedded runtime is served from a token-qualified loopback HTTP origin. `file://` and an
 unqualified loopback URL are not valid shortcuts. The manifest controls the allow-list, MIME type,
 hash, source URL, version and installed size of every runtime asset. `make rbz-check` holds the installed
-extension to the size gates the manifest's `tools/runtime/vendor.py` declares: a 28,000,000-byte ceiling and growth
-of at most 2,500,000 bytes over the 26,093,959-byte baseline (limits from Climate D4c-33, 2026-11-18; baseline reset
-at the Programs phase entry, C4a-14, 2026-11-20). The runtime runs in its own
+extension to the size gates the manifest's `tools/runtime/vendor.py` declares: a 30,000,000-byte ceiling and growth
+of at most 2,500,000 bytes over the 27,987,931-byte baseline (growth allowance from Climate D4c-33, 2026-11-18;
+ceiling raised and baseline reset at the Mechanical phase's close, D4-50, 2026-11-27). The runtime runs in its own
 page, `html/runtime/`, which `runtime/runtime_host.rb` opens on that origin for one Model session;
 the panel never loads Pyodide, and nothing starts the runtime when the extension loads or the panel
 opens. The server's token authorizes loading runtime assets and nothing else; it is not an agent
