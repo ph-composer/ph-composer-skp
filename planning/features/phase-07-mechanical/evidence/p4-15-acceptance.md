@@ -50,8 +50,9 @@ allowance.
 27,987,931 bytes, the size put to him for `main` at `6cad268e`, raised the ceiling to 30,000,000 and kept the growth
 allowance at 2,500,000. On the closeout branch `make rbz rbz-check` reads "RBZ verified: 878 files, 9110858 bytes,
 27987937 bytes installed" with only the keys changed (6 bytes over the figure put to Ed; P4-10 saw the same 6 bytes
-between its Ruby 3.2.2 and 2.7.2 builds), and "RBZ verified: 878 files, 9111313 bytes, 27989817 bytes installed" with
-D4-63's finding and its guide lines: 1,886 over the new baseline and 2,010,183 under the new ceiling.
+between its Ruby 3.2.2 and 2.7.2 builds). On the PR's last code commit, `01c212b5`, `make ci` reads "RBZ verified:
+878 files, 9111308 bytes, 27989751 bytes installed" with D4-63's finding, its guide lines and the API notes: 1,820
+over the new baseline and 2,010,249 under the new ceiling.
 
 ## Step 3: the register
 
