@@ -1,7 +1,7 @@
 # Phase 4, mechanical: findings from source, and the decisions that follow
 
 DATE: 2026-10-21
-STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended. Part 6 records the hold 2 review of 2026-11-27: findings F41 to F45 and decisions D4-38 to D4-48, every one answered as recommended.
+STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended. Part 6 records the hold 2 review of 2026-11-27: findings F41 to F45 and decisions D4-38 to D4-49, every one answered as recommended.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -303,6 +303,7 @@ D4-37. Every answer was the recommendation.
 | D4-46 | UI | The doubled kind word | Quote the user's name after the kind: Zone “Zone A” | follow-up PR |
 | D4-47 | UI, Code | Pipe-assign pick reach | Measure the native Select tool's pick aperture on the host and use the same, so the tool picks what Select would | follow-up PR, host measurement |
 | D4-48 | UI | The Make reason icon at 1280 px | The icon stays beside the reason; the reason text wraps | follow-up PR |
+| D4-49 | UI | A panel reset for type colours: a null `color` returns a Pipe or Duct Type to its `assigned_color` (D4-43), but only through the API; Codex raised the missing panel reset twice on #604 | The shared colour picker offers **Reset to default** for a record whose kind names a default colour, shown only while the stored colour differs from it; it writes `color: null` through the record's own update, one Undo step. A kind with no default shows no reset. Pipe Types and Duct Types name their `assigned_color`; Thermal Bridge Types and Assemblies fall back to a colour by id that their reads do not expose, so they show none until a read carries it | follow-up PR |
 
 ## Ledger
 
@@ -317,3 +318,4 @@ D4-37. Every answer was the recommendation.
 | 2026-11-23 | Kickoff review and remaining interviews (Part 5): F40 verified in PHX 1.59.4; Ed answered D4-28 to D4-37 (Part 3 open items closed, host gates batched by milestone, and all remaining interviews complete: summer ventilation, electric heaters, pumps, fans, hot water piping and ERV ducting). |
 | 2026-11-24 | Ed confirmed D4-29's 12.0 °C minimum coil temperature, knowing the estimator holds 45 °F (7.2 °C) (the note under D4-29). No code change. |
 | 2026-11-27 | Hold 2 review (Part 6): findings F41 to F45; Ed answered D4-38 to D4-48, all as recommended. Two case texts (`UXR-COLOUR`, `ZO-O7`) are rewritten for the next sitting; D4-39 and D4-42 to D4-48 go to one follow-up PR. |
+| 2026-11-27 | Ed answered D4-49 (Part 6): Reset to default in the shared colour picker for Pipe Types and Duct Types, in its own PR stacked on #604. |

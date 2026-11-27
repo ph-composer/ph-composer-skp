@@ -24,7 +24,8 @@ function (panel, fields, forms, colourBy, systems, equipment, hotWater, lineGrou
 
   function PipeTypes(root, context) {
     var self = this;
-    this.colour = new forms.ColorForm(context.session, context.send, SECTION + ".update", panel.repaint);
+    this.colour = new forms.ColorForm(context.session, context.send, SECTION + ".update", panel.repaint,
+      { defaultColor: lineGroups.assignedColor });
     var toggles = new colourBy.HeaderToggles({ name: shared.BY_TYPE });
     var table = this.table = new equipment.EquipmentTable(root, context, {
       section: SECTION, label: LABEL, className: "piping-types", locate: "pipe_type_ids", columns: columns,

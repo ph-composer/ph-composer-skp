@@ -391,6 +391,16 @@ test("a stored upper-case color opened and left alone closes on an outside click
   assert.strictEqual(view.color.root.hidden, true, "an untouched color is no draft, whatever its case");
 });
 
+test("a record kind with no default color offers no Reset to default, whatever color it stores", function () {
+  var o = setup(), view = materials(o);
+  var record = JSON.parse(JSON.stringify(o.state.sections["ph_composer.assemblies.materials"].value.records[0]));
+  record.values.color = "#123456";
+  view.color.open(record, view.inventory.scroll._table.rows.mat_a.cells.color._color);
+  assert.strictEqual(view.color.reset.hidden, true);
+  view.color.resetToDefault();
+  assert.strictEqual(o.sent.length, 0, "nor sends a reset");
+});
+
 test("withdrawn create requests can reopen with an enabled Cancel after their feature returns", function () {
   var cases = [[function (o) { return materials(o).newMaterial; }, "ph_composer.assemblies.materials"]];
   cases.forEach(function (entry) {

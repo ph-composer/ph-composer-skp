@@ -57,6 +57,9 @@ function (request, snapshot, ui, fields, units, preferences) {
   ColourPart.prototype.guard = function () { return this.form.root.hidden ? null : "Finish or cancel the open form."; };
   ColourPart.prototype.refresh = function (state, records) { this.form.refresh(state, true, records); };
   ColourPart.prototype.dispose = function () { this.form.dispose(); };
+  /* The colour a type returns to once its own is cleared: the one it took when it was made, for the colour form's
+     Reset to default. */
+  function assignedColor(record) { return record.values.assigned_color || null; }
 
   function length(value, showUnit) {
     return units.format(value || 0, USED, units.profile(USED, preferences.current()), { showUnit: showUnit });
@@ -74,6 +77,6 @@ function (request, snapshot, ui, fields, units, preferences) {
     ui.tooltip(td, tooltip);
   }
 
-  return { groupLabel: groupLabel, Read: Read, ColourPart: ColourPart, USED: USED, usage: usage,
-    usedCell: usedCell };
+  return { groupLabel: groupLabel, Read: Read, ColourPart: ColourPart, assignedColor: assignedColor, USED: USED,
+    usage: usage, usedCell: usedCell };
 });

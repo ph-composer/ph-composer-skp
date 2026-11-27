@@ -1,9 +1,10 @@
-/* Hot Water's piping pills in the preview: Pipe Types after Tanks with the nominal diameters, an edit in place and
-   used length; the Piping pill's assign bar showing only the chosen role's values, Assign with the selection's
-   references, Assign by clicking pressed while the tool runs, the Piping groups linked in place and Make Piping
-   group from loose lines; the schedule with each branch under its trunk, a finding behind its glyph, totals by role
-   and by System, and a row that Locates; By pipe role from the Role header; and the Systems table's recirculation
-   columns contributed by piping; each at the panel's three sizes. Browser evidence; not host acceptance. */
+/* Hot Water's piping pills in the preview: Pipe Types after Tanks with the nominal diameters, an edit in place,
+   used length and a colour's Reset to default; the Piping pill's assign bar showing only the chosen role's values,
+   Assign with the selection's references, Assign by clicking pressed while the tool runs, the Piping groups linked
+   in place and Make Piping group from loose lines; the schedule with each branch under its trunk, a finding behind
+   its glyph, totals by role and by System, and a row that Locates; By pipe role from the Role header; and the
+   Systems table's recirculation columns contributed by piping; each at the panel's three sizes. Browser evidence;
+   not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -59,6 +60,25 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
     { diameter_mm: 19.05 });
   await pane.getByRole("button", { name: "+ New Pipe Type", exact: true }).first().waitFor();
   await page.screenshot({ path: path.join(output, "pipe-types.png") });
+
+  step("Pipe Types: Reset to default shows only over a colour of the type's own, and clears it");
+  const colourCell = id => typeRow(id).locator(".col-color button");
+  const colourForm = page.locator(".phc-color-form:not([hidden])");
+  const reset = colourForm.getByRole("button", { name: "Reset to default" });
+  await colourCell("ppt_Qq44Rr55Ss66").click();
+  await colourForm.waitFor();
+  assert.equal(await reset.isVisible(), false, "PT-2 draws in its assigned colour");
+  await colourForm.getByRole("button", { name: "Cancel" }).click();
+  await colourCell(PT1).click();
+  await reset.waitFor();
+  await page.screenshot({ path: path.join(output, "pipe-type-colour-reset.png") });
+  await reset.click();
+  await page.waitForFunction(id => !("color" in window.previewHost.piping.types.filter(r => r.id === id)[0].values),
+    PT1);
+  assert.deepEqual((await sent(PREFIX + "pipe_types.update")).pop().payload.params,
+    { id: PT1, values: { color: null }, expected_values: { color: "#3b7ea1" } });
+  await colourForm.waitFor({ state: "detached" });
+  assert.equal(await colourCell(PT1).evaluate(node => node.style.backgroundColor), "rgb(31, 119, 180)");
 
   step("Piping: the bar shows the role's values only, and Assign sends the selection");
   await pills.getByRole("button", { name: "Piping" }).click();

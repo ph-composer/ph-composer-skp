@@ -451,7 +451,8 @@ into the Hot Water System it belongs to. Scripts and assistants reach the same s
    0.04 W/(m K). Edit each value in its cell. **Used length** is the drawn length of the pipes using the
    type. A type with insulation and no conductivity cannot export once a pipe uses it; a bare pipe needs
    none. Deleting a type in use asks for another to take its place, or clears it from those pipes. Each new
-   type takes a colour no other Pipe Type uses; its **Colour** cell changes it.
+   type takes a colour no other Pipe Type uses; its **Colour** cell changes it, and once changed,
+   **Reset to default** in the same picker returns it to the colour it took.
 2. Draw the pipes with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
    A tree (a trunk, its branches and their twigs) belongs in one group; a riser can be drawn once and given
    a multiplier. Select the lines, then use the **Piping** pill. **Make Piping group** asks for the Hot
@@ -493,7 +494,8 @@ never the room-side supply and extract ducts. Scripts and assistants reach the s
    is the length of the ducts using the type, each line counted as many times as its quantity. A type
    with insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
    Deleting a type in use asks for another to take its place, or clears it from those ducts. Each new type
-   takes a colour no other Duct Type uses; its **Colour** cell changes it.
+   takes a colour no other Duct Type uses; its **Colour** cell changes it, and once changed, **Reset to
+   default** in the same picker returns it to the colour it took.
 2. Draw the ducts with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
    One group per ventilator holds both of its runs. Select the lines, then use the **Ducting** pill. **Make
    Ducting group** asks for the Ventilator the ducts belong to and wraps the selected lines in a new Ducting

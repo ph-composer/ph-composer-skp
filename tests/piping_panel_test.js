@@ -97,6 +97,34 @@ test("Pipe Types and Piping follow Tanks; Pipe Types offers the eight nominal di
     assert.strictEqual(used.textContent, "9");
   });
 
+test("Reset to default shows only while a Pipe Type's color differs from its assigned one and clears it",
+  function () {
+    var o = setup(TYPES), records = o.state.sections[TYPES].value.records;
+    records[0].values.assigned_color = "#1F77B4";
+    Object.assign(records[1].values, { assigned_color: "#ff7f0e", color: "#123456" });
+    o.paint();
+    var form = o.view(TYPES).colour;
+    function open(index) {
+      form.hide(false);
+      form.open(records[index], o.root.querySelector("[data-row-key=" + records[index].id + "]")
+        .querySelector(".col-color")._color);
+    }
+    open(0);
+    assert.strictEqual(form.reset.hidden, true, "a type drawing in its assigned color has nothing to reset");
+    records[0].values.color = "#1f77b4";
+    open(0);
+    assert.strictEqual(form.reset.hidden, true, "a stored color matching the assigned one in any case is no change");
+    open(1);
+    assert.strictEqual(form.reset.hidden, false);
+    assert.strictEqual(form.resetSwatch.style.backgroundColor, "#ff7f0e");
+    press(form.reset);
+    assert.deepStrictEqual(clone(last(o, TYPES + ".update").payload.params), { id: fixtures.PT2,
+      values: { color: null }, expected_values: { color: "#123456" } });
+    assert.strictEqual(form.reset.disabled, true, "and waits on the one update");
+    press(form.reset);
+    assert.strictEqual(named(o, TYPES + ".update").length, 1, "a second press sends nothing");
+  });
+
 test("the bar shows only the chosen role's values and Assign sends the selection's references and values",
   function () {
     var o = setup(), bar = o.view(PIPING).bar;

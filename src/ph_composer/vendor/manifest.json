@@ -186,9 +186,9 @@
       "sha256": "f0bbf1394993a77bf724be9af590f6162021244730fca22988763e54e01d6385"
     },
     "html/features/ducting/duct_types.js": {
-      "bytes": 7381,
+      "bytes": 7431,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "aabae52a6ec241529fc081420a5743424a263b9487aa8c82d0cbffb87d3465f3"
+      "sha256": "426915e166149b07b1676da7d248b603dd3e8a10d729ac69156489b10e6052b1"
     },
     "html/features/ducting/ducting.css": {
       "bytes": 474,
@@ -311,9 +311,9 @@
       "sha256": "4067a5def0ba073a1b8f59da68849a141ada8f63290b0c76ca5a876c27415a9b"
     },
     "html/features/piping/pipe_types.js": {
-      "bytes": 5516,
+      "bytes": 5566,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "368fbc64a9225e568cf7df1f5a6e1be84658a375374c2b63bc1e002a003953c3"
+      "sha256": "f80697b17edb330755c2f441523cb16ea9456c92917ef633a17ffd60f23deefb"
     },
     "html/features/piping/piping.css": {
       "bytes": 1026,
@@ -656,9 +656,9 @@
       "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
-      "bytes": 25938,
+      "bytes": 27804,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b63b37a674779ae953ab46218dd7198da34cfb62b0da819db6c5540715a41513"
+      "sha256": "5f7d17620632a126bf21d08fc834d7cd054c1e9990b9af864a79a49a6f3e7e29"
     },
     "html/inventory_grid.js": {
       "bytes": 16516,
@@ -691,9 +691,9 @@
       "sha256": "5e5fefa7bfa58c71868910e6371559e31861490b305e4de8b40f17f9ea45764b"
     },
     "html/library/library.css": {
-      "bytes": 16231,
+      "bytes": 16551,
       "mime": "text/css; charset=utf-8",
-      "sha256": "95d21cf6b23853ffb5b790da2d3f9de415ca4066b584d9fa9acaaa48c4658692"
+      "sha256": "2d76b98be524bb99c333f5da840c9a87c08d5b0b64b07cef00a58462838c0ea9"
     },
     "html/library/locations.js": {
       "bytes": 7573,
@@ -751,9 +751,9 @@
       "sha256": "1c64af6886f65e55e890f2ce09497fd654ab8ec467fa4980cec40ebb03a44f72"
     },
     "html/line_groups/shared.js": {
-      "bytes": 4731,
+      "bytes": 4984,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6946543a891043a33925c172bc09406e2cbed912d1f10a1ed937d2d8ba011722"
+      "sha256": "33a567aa42d30b269271d53720cbb5bee40162eeb4ab66ca294e18995de8e0f5"
     },
     "html/map_borders.js": {
       "bytes": 113186,
