@@ -410,6 +410,7 @@ function (RecordForm, request, snapshot, ui) {
     if (this.trigger) this.trigger.setAttribute("aria-expanded", "false");
     this.record = JSON.parse(JSON.stringify(record));
     this.trigger = trigger;
+    this.focusAfterPaint = null;
     this.hex.value = record.values.color || (record.display || {}).color || "#ffffff";
     // Compared as the field is, in lower case, so a stored "#1F77B4" opened and left alone is not an edit.
     this.initialColor = this.hex.value.trim().toLowerCase();
@@ -458,7 +459,10 @@ function (RecordForm, request, snapshot, ui) {
     if (window.removeEventListener) window.removeEventListener("resize", this.resize);
     if (this.trigger) {
       this.trigger.setAttribute("aria-expanded", "false");
-      if (restoreFocus !== false) this.trigger.focus();
+      /* A completed request closes the form while the repaint still holds the cell disabled, and a disabled
+         button takes no focus: colorCell gives it back once the same repaint enables the cell. */
+      if (restoreFocus !== false && this.trigger.disabled) this.focusAfterPaint = this.trigger;
+      else if (restoreFocus !== false) this.trigger.focus();
     }
   };
   ColorForm.prototype.dispose = function () {
@@ -514,6 +518,10 @@ function (RecordForm, request, snapshot, ui) {
     td._color.style.backgroundColor = color;
     td._color.setAttribute("aria-label", "Color for " + record.values.name + ": " + color);
     td._color.disabled = !form.enabled || form.requests.busy();
+    if (form.focusAfterPaint === td._color && !td._color.disabled) {
+      form.focusAfterPaint = null;
+      td._color.focus();
+    }
   }
   return { contributeUsage: contributeUsage, ReplacementForm: ReplacementForm,
     DuplicateForm: DuplicateForm, ColorForm: ColorForm, ColorChoice: ColorChoice, colorCell: colorCell,

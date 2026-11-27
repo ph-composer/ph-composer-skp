@@ -656,9 +656,9 @@
       "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
-      "bytes": 27804,
+      "bytes": 28281,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "5f7d17620632a126bf21d08fc834d7cd054c1e9990b9af864a79a49a6f3e7e29"
+      "sha256": "2e758e9a4dc251b14aaa4c1be155cb705f6bd582bfff0fe729af1609df2aafa3"
     },
     "html/inventory_grid.js": {
       "bytes": 16516,

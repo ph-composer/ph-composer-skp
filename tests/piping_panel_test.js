@@ -123,6 +123,12 @@ test("Reset to default shows only while a Pipe Type's color differs from its ass
     assert.strictEqual(form.reset.disabled, true, "and waits on the one update");
     press(form.reset);
     assert.strictEqual(named(o, TYPES + ".update").length, 1, "a second press sends nothing");
+    var cell = o.root.querySelector("[data-row-key=" + fixtures.PT2 + "]").querySelector(".col-color")._color;
+    var focused = [];
+    cell.focus = function () { focused.push(this.disabled); };
+    act(o, last(o, TYPES + ".update"), { status: "completed", value: {} });
+    assert.strictEqual(form.root.hidden, true);
+    assert.deepStrictEqual(focused, [false], "focus returns to the Colour cell once the repaint enables it");
   });
 
 test("the bar shows only the chosen role's values and Assign sends the selection's references and values",
