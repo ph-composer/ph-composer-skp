@@ -29,6 +29,8 @@ module PhComposer
 
       def create(kind)
         values = DeepCopy.call(kind.values_schema).merge("required" => ["name"])
+        # A line type's assigned colour (Duct Types) is the next unused one, set by create itself.
+        values["properties"].delete("assigned_color")
         object({ "values" => described(values, "The new #{kind.label}'s values; name is required and every " \
                                                "other value takes its default."),
                  "user_data" => USER_DATA }, :optional => ["user_data"])

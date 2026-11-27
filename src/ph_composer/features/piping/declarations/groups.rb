@@ -53,7 +53,8 @@ module PhComposer
                                                  "#{Assignment::GESTURE_EDGE_LIMIT}, more refusing " \
                                                  "gesture.too_large.")
       MAKE_PRECONDITIONS = ["The Hot Water System exists.",
-                            "The lines are loose Edges bounding no Face, directly in the open context, outside every " \
+                            "The lines are loose Edges, bounding no Face but those they alone close, directly in the " \
+                            "open context, outside every " \
                             "Zone and every Group another feature owns, reached through plain unlocked unshared " \
                             "Groups.",
                             "pipes.selection reads make_refusal null over them."].freeze

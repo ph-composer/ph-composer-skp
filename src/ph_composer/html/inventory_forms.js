@@ -63,7 +63,10 @@ function (RecordForm, request, snapshot, ui) {
     this.record = record; this.records = records;
     var clear = typeof this.options.allowClear === "function" ? this.options.allowClear(record) :
       Boolean(this.options.allowClear);
-    var choice = this.select.value === "__clear__" ? "clear" : this.select.value;
+    var candidates = records.filter(function (candidate) { return candidate.id !== record.id; });
+    // The choice the select will keep: a replacement gone from the records, or Clear no longer offered, is none.
+    var value = this.select.value, choice = value === "__clear__" ? (clear ? "clear" : "") :
+      candidates.some(function (candidate) { return candidate.id === value; }) ? value : "";
     var own = this.options.usage ? this.options.usage(this.state, record.id, choice) : null;
     var usage = combinedUsage([function () { return own; }].concat(usageSources[this.options.section] || []),
       this.state, record.id, choice);
@@ -73,7 +76,6 @@ function (RecordForm, request, snapshot, ui) {
     if (unknown) clear = false;
     this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
       (usage ? usage.count : record.use_count)));
-    var candidates = records.filter(function (candidate) { return candidate.id !== record.id; });
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
     // The explanation names what the owner's uses are (`usedOn`), so it shows only while the owner reports some.
     this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count) && (!own || own.count));

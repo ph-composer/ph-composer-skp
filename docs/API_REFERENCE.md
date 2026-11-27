@@ -77637,11 +77637,6 @@ Params:
         "color": {
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
-        },
-        "assigned_color": {
-          "type": "string",
-          "pattern": "^#[0-9A-Fa-f]{6}$",
-          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "The new Duct Type's values; name is required and every other value takes its default."
@@ -78924,7 +78919,7 @@ Wrap loose lines drawn in the open context in a new Ducting group linked to a Ve
 
 Undo step: Make Ducting Group. Adds a Group named "Ducting group N" with a Ducting group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay. Erases any Face the lines alone close; a Face with an unselected Edge refuses as target.wrong_kind.
 
-Before calling: The Ventilator exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. ducts.selection reads make_refusal null over them.
+Before calling: The Ventilator exists. The lines are loose Edges, bounding no Face but those they alone close, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. ducts.selection reads make_refusal null over them.
 
 Refuses: `ducting.group_in_zone`, `ducting.group_nested`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
@@ -91865,7 +91860,7 @@ Wrap loose lines drawn in the open context in a new Piping group linked to a Hot
 
 Undo step: Make Piping Group. Adds a Group named "Piping group N" with a Piping group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay. Erases any Face the lines alone close; a Face with an unselected Edge refuses as target.wrong_kind.
 
-Before calling: The Hot Water System exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. pipes.selection reads make_refusal null over them.
+Before calling: The Hot Water System exists. The lines are loose Edges, bounding no Face but those they alone close, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. pipes.selection reads make_refusal null over them.
 
 Refuses: `gesture.too_large`, `piping.group_in_zone`, `piping.group_nested`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
@@ -92268,11 +92263,6 @@ Params:
         "color": {
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
-        },
-        "assigned_color": {
-          "type": "string",
-          "pattern": "^#[0-9A-Fa-f]{6}$",
-          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "The new Pipe Type's values; name is required and every other value takes its default."

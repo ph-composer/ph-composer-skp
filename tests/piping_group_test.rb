@@ -80,6 +80,10 @@ class PipingGroupTest < PhComposerTestCase
     loop_lines = [811, 812, 813, 814].map { |id| edge(id) }
     filled = Sketchup::Face.new(819, :edges => loop_lines)
     [*loop_lines, filled].each { |entity| @model.entities << entity }
+    @model.selection.add(loop_lines.first(3) + [filled])
+    assert_equal ["target.wrong_kind"] * 2, make_refusals
+    assert_match(/erase the Face, keep its lines/, selection("selection")["make_refusal"]["message"],
+                 "a selected Face its lines only partly bound gets the repair, not \"Select lines only\"")
     result = make(loop_lines.first(3).map { |line| [line.persistent_id] }, @hws1)
     assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
     assert_equal "A selected line bounds a Face drawn with lines outside the selection; erase the Face, keep its " \

@@ -304,4 +304,10 @@ test("a Ventilator's Delete names the Ducting groups it leaves unlinked, for the
     "replacement.");
   change(form.select, fixtures.mechanical.ERV2.id);
   assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 moves to the replacement.");
+  var section = o.state.sections[VENTILATORS].value;
+  section.records = section.records.filter(function (entry) { return entry.id !== fixtures.mechanical.ERV2.id; });
+  o.paint();
+  assert.strictEqual(form.select.value, "", "the chosen replacement is gone");
+  assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 will lose its Ventilator unless you choose a " +
+    "replacement.", "the words follow the choice the select keeps");
 });

@@ -27,13 +27,13 @@ module PhComposer
       end
 
       # What Make <group> meets over the whole selection, or nil when it can run with every selected line's path. A
-      # selected Face the selected lines close, as a window selection over a filled loop takes, is one Make erases,
-      # so it is not counted against it.
+      # selected Face a selected line bounds, as a window selection over a filled loop takes, is not counted as a
+      # stray entity: Make erases it when the lines close it, and otherwise refuses it with the repair it needs.
       def make_refusal(spec, request, others, contained)
         model = request.model
         edges = model.selection.to_a.grep(Sketchup::Edge)
-        closed = Make.closed_faces(edges).map(&:persistent_id)
-        counted = others.count { |entity| !(entity.is_a?(Sketchup::Face) && closed.include?(entity.persistent_id)) }
+        bounded = edges.flat_map(&:faces).map(&:persistent_id)
+        counted = others.count { |entity| !(entity.is_a?(Sketchup::Face) && bounded.include?(entity.persistent_id)) }
         Make.refusal(spec, model, Array(model.active_path), edges, :others => counted, :contained => contained)
       end
 

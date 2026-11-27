@@ -16,10 +16,10 @@ module PhComposer
 
         module_function
 
-        # A new type takes the next unused colour unless the caller names one.
+        # A new type takes the next unused colour; `color` overrides how it draws, never the colour it took.
         def create(request, proposal, values:, user_data: nil)
           check_shape!(DuctType.defaults(values))
-          values = { "assigned_color" => next_color(request) }.merge(values)
+          values = values.merge("assigned_color" => next_color(request))
           Mechanical::CatalogOperations.create(request, proposal, KIND_ID, :defaults => DuctType, :values => values,
                                                                            :user_data => user_data)
         end

@@ -83,6 +83,8 @@ class PipingPipeTypeTest < PhComposerTestCase
     assert_equal RAMP.first(2), rows.values_at("PT-1", "PT-2").map { |row| row.dig("display", "color") }
     reassigned = invoke("update", "id" => first, "values" => { "assigned_color" => "#123456" }, "expected_values" => {})
     assert_equal %w[refused params.invalid], reassigned.values_at("status", "code"), "the assigned colour is no edit"
+    named = invoke("create", "values" => { "name" => "PT-9", "assigned_color" => RAMP[0] })
+    assert_equal %w[refused params.invalid], named.values_at("status", "code"), "nor a create input"
     completed(invoke("update", "id" => first, "values" => { "color" => "#123456" }, "expected_values" => {}))
     assert_equal "#123456", rows.fetch("PT-1").dig("display", "color")
     copy = completed(invoke("duplicate", "id" => first)).fetch("id")
