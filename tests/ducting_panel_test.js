@@ -356,6 +356,9 @@ test("a Ventilator's Delete lists the Ducting groups that block it apart and off
     Object.assign(rows[0], { blocking_group_names: ["DG-bad"], blocking_group_count: 1 });
     o.paint();
     assert.strictEqual(cancelled, 2, "and so does one arriving while Delete has focus");
+    assert.deepStrictEqual([form.cancel.getAttribute("aria-describedby"),
+      form.submitButton.getAttribute("aria-describedby")], [form.explanation.id, form.explanation.id],
+    "the reason describes both actions while it holds Delete");
     Object.assign(rows[2], { group_names: [], group_count: 0, blocking_group_names: ["DG-8", "DG-9"],
       blocking_group_count: 2 });
     o.paint();

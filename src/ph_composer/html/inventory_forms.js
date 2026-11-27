@@ -41,6 +41,7 @@ function (RecordForm, request, snapshot, ui) {
       description: joined("description", true), incomplete: joined("incomplete", false) || null,
       blocked: joined("blocked", false) || null };
   }
+  var replacementForms = 0;
   function ReplacementForm(session, send, changed, options) {
     var self = this;
     this.options = options;
@@ -48,6 +49,7 @@ function (RecordForm, request, snapshot, ui) {
       action: this.options.section + ".delete", label: "delete-record", submitLabel: "Delete",
       pendingText: "Deleting...", failureText: "The record was not deleted.", destructive: true, changed: changed });
     this.explanation = ui.element("p");
+    this.explanation.id = "phc-replacement-reason-" + (++replacementForms);
     this.root.appendChild(this.explanation);
     this.uses = ui.element("p");
     this.root.appendChild(this.uses);
@@ -103,6 +105,11 @@ function (RecordForm, request, snapshot, ui) {
       "Delete " + this.options.label + ' "' + record.values.name + '"?', unknown || ""].filter(Boolean).join(" ");
     // A refresh that blocks the delete hides the select and holds Delete, so focus held on either moves to Cancel
     // rather than falling to the body.
+    // Both actions are described by the reason while it holds Delete, so focus moved to Cancel hears why.
+    [this.cancel, this.submitButton].forEach(function (button) {
+      if (this.blocked) button.setAttribute("aria-describedby", this.explanation.id);
+      else button.removeAttribute("aria-describedby");
+    }, this);
     var active = document.activeElement;
     if (this.blocked && (active === this.select || active === this.submitButton)) this.cancel.focus();
     this.select.parentNode.hidden = !this.inUse;

@@ -213,6 +213,10 @@ class DuctingGroupTest < PhComposerTestCase
     [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
       refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
       assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+      next if choice.empty?
+
+      assert_equal ["validation.failed"], refusal.dig("detail", "groups").map { |row| row["reason"] }
+      assert_match(/; repair their records, then delete again\.\z/, refusal["message"].split(" Nothing")[0])
     end
     assert_equal @erv1, ventilator_of(572)
     rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
@@ -233,6 +237,25 @@ class DuctingGroupTest < PhComposerTestCase
     rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
     linked = rows.find { |row| row["ventilator_id"] == @erv1 }
     assert_equal [[], 0, ["DG-array"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
+  # A Ventilator named only in a readable extension envelope of an invalid record still blocks every delete.
+  def test_an_invalid_group_naming_the_ventilator_in_an_extension_envelope_blocks_its_delete
+    envelope = { "schema_version" => 1, "payload" => { "serves" => @erv1 },
+                 "references" => [{ "path" => "$.serves", "target_kind" => PhComposer::Mechanical::VENTILATOR_KIND,
+                                    "cardinality" => "one" }] }
+    record = D::Group.new_record("dcg_PPPPPPPPPPPP", nil).merge("extension_data" => { "example.notes" => envelope })
+    enveloped = Sketchup::Group.new(576, Sketchup::Entities.new([]), :name => "DG-envelope")
+    STORE.write(enveloped, record.merge("id" => "bad"))
+    @model.entities << enveloped
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+    end
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [[], 0, ["DG-envelope"], 1],
                  linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
   end
 

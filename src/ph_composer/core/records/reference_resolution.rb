@@ -47,16 +47,13 @@ module PhComposer
           record.fetch("extension_data", {}).each do |namespace, envelope|
             readable = Extension.readable?(envelope)
             status = Extension.status(envelope, @catalog.extension(namespace))
-            if removing && (!readable || status == "invalid")
-              raise CodedError.new("copy.rule_missing", "#{entry.kind} #{record['id']} carries #{namespace} " \
-                                                        "data whose incoming references cannot be established.",
-                                   "namespace" => namespace)
-            end
-            next unless readable
+            next unless removing && (!readable || status == "invalid")
 
-            targets.concat(Extension.referenced_ids(envelope.fetch("payload"), envelope.fetch("references", [])))
+            raise CodedError.new("copy.rule_missing", "#{entry.kind} #{record['id']} carries #{namespace} " \
+                                                      "data whose incoming references cannot be established.",
+                                 "namespace" => namespace)
           end
-          next unless targets.include?([kind_id, id])
+          next unless (targets + Extension.envelope_targets(record)).include?([kind_id, id])
 
           entry
         end
