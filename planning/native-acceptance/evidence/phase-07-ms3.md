@@ -1,7 +1,7 @@
 # Phase 7 MS3 host sitting, the part needing no full-screen card
 
 DATE: 2026-11-25
-STATUS: Recorded in part. M13a, M14a, T04 and T08 pass (2026-11-25). The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass and M08, M10 and M16 unknown on named clauses. After the `groups.make` fix (#600), M13c, M13d, M14d and M14e were rerun with the panel closed and pass on the fixed build (2026-11-26). The second hold (2026-11-26) recorded M13b, M14c, M13e and M14f pass on `groups.make`. M15 is not run.
+STATUS: Recorded in part. M13a, M14a, T04 and T08 pass (2026-11-25). The conductor's first full-screen hold (2026-11-26) recorded M09, M11 and T09 pass and M08, M10 and M16 unknown on named clauses. After the `groups.make` fix (#600), M13c, M13d, M14d and M14e were rerun with the panel closed and pass on the fixed build (2026-11-26). The second hold (2026-11-26) recorded M13b, M14c, M13e and M14f pass on `groups.make`. M15 is not run. The third hold (2026-11-27, PR #604's hold 2 findings) recorded M13e and M14f pass on the branch commit `0e61dfa5`.
 ISSUE: #562
 
 Synthetic summary of the MS3 sitting (D4-31) for [Phase 7 Mechanical](../../features/phase-07-mechanical/ACCEPTANCE.md):
@@ -513,6 +513,61 @@ M15, the integrated run, is not run. The cases `acceptance_ledger.py status` scr
 M06, M08 to M11, M13a, M14a, M16 and UXR-FILTER-OCC. MS2's ZO-O7 (unfinished) and HGUI (not run) are in
 [phase-07-ms2](phase-07-ms2.md).
 
+## Third hold: PR #604's hold 2 findings (2026-11-27)
+
+Decisions D4-39 and D4-42 to D4-48 ([DECISIONS](../../features/phase-07-mechanical/DECISIONS.md), Part 6), checked
+under one full-screen hold from the conductor with Ed at the Mac. The rows record the **branch commit**
+`0e61dfa5` (PR #604's head before merge, code head `cbe1991a`), not a merge head. Build: `dist/ph_composer.rbz`
+sha256 `ab4a6416610e354eb494eb2f98b24909313c87308810c41f2fe6e1969f05e2f8`, installed with `make install`;
+`acceptance_run.py package` matches, no extras. SketchUp 26.1.188, Ruby 3.2.2, macOS. Fixture: a synthetic copy
+of MS1's reference model with HWS-1, ERV-1 and ERV-2, a 2 m loop of lines filled with a Face, a 2 m Face whose
+fourth line the case leaves unselected, and two loose duct lines (sha256 `4d41cb2e`). Each case in a fresh process,
+the panel at 1280 x 800 at (768, 245), moved aside to 420 x 800 for viewport gestures. Raw observations, captures,
+drivers and `steps.md` stay in gitignored `_private/host/phase-07-hold3/`; each case's `observations.json` is the
+row's source, and `extra/NOTES.md` holds the readings with no case.
+
+### M13e: pass (six assertions)
+
+- **Pipe Type colours (D4-43):** PT-1 and PT-2 made from the panel took `#1F77B4` then `#FF7F0E`, their Colour
+  swatches blue and orange.
+- **Make over a filled loop (D4-39):** a native window selection of the loop (its Face and four lines) read
+  `make_refusal` null; Make Piping group raised "Piping group 1 holds the selected lines. Removed 1 Face the lines
+  closed." The group holds the four lines and no Face; the other Face and the duct lines are untouched. One native
+  Edit > Undo "Make Piping Group" gave back the Face and the four loose lines with the same ids; Redo made the group
+  again. This is the first host reading of a Face erased alone leaving its lines.
+- **Group name (D4-42):** "Piping group 1", in the record and the Piping groups table.
+- **Partly bounded Face (D4-39):** three of the Face's lines and the Face, the fourth line unselected: Make
+  disabled, its reason "A selected line bounds a Face drawn with lines outside the selection; erase the Face, keep
+  its lines, then Make Piping group again."
+- **Make reason at 1280 (D4-48):** at 1280 x 800 the reason icon sits directly right of Make Piping group on its row.
+- **Pick reach (D4-47):** native clicks below a line in steps of 1.41 pt. Native Select selected at 1.3 pt and 0 and
+  missed from 2.7 pt out; the pipe tool assigned at the same offsets and missed at the same, with and without a
+  pointer move before each click. The tool's reach equals Select's, so D4-47 holds; `Pick::LINE_APERTURE` 10 adds
+  no reach over Select on SketchUp 26.1. Near a corner the tool took the line under the pointer. Each assignment was
+  undone natively.
+
+### M14f: pass (three assertions)
+
+- **Duct Type colours (D4-43):** DT-1 and DT-2 took `#1F77B4` then `#FF7F0E`.
+- **Group name (D4-42):** Make Ducting group over two selected lines made "Ducting group 1".
+- **Ventilator delete (D4-44):** ERV-1's Delete dialog read "Ducting group 1 will lose its Ventilator unless you
+  choose a replacement."; with Clear existing uses, "Ducting group 1 will lose its Ventilator."; with ERV-2, "Ducting
+  group 1 moves to the replacement." Clear, then Replace and delete: ERV-1 gone and the group unlinked. Native Undo
+  "Delete Ventilator" restored ERV-1 and the link.
+
+### No case (`extra/NOTES.md`)
+
+- **Busy tool (D4-45):** with the native Line tool active, `ph_composer.context.open` refused `session.busy`, "The
+  Line tool is in use; the edit path moves once the user returns to Select. Nothing moved."; with Push/Pull
+  (`PushPullTool`, unmapped), "A SketchUp tool is in use; ...".
+- **Quoted Zone name (D4-46):** bridge reading, labelled setup: lines inside Zone A refuse with "The lines sit
+  inside Zone “Zone A”; ...".
+
+### Restoration
+
+No fault and no provider override; nothing exported. Each case ran in a fresh process from the fixture, and
+SketchUp quit cleanly at the end.
+
 ## Ready for hold
 
 Written before the first hold, which used this recipe for M08 to M11, M16 and T09 (above).
@@ -537,8 +592,8 @@ it. M13b and M14c need a whole-case rerun after the fix, not a Line-tool-only ru
   file) for M13d and M14e, and from the first hold for M08, M09, M11 and M16 (compared by section) and M10 (list
   order only).
 - The hold's product findings (above), for issues if Ed wants them, and the second hold's.
-- From the second hold, for Ed: whether a Face SketchUp closes between pipes should block Make Piping group (M13e),
-  and the 360 x 520 panel painting blank at one screen position, cause not established.
+- From the second hold, for Ed: the 360 x 520 panel painting blank at one screen position, cause not established
+  (D4-40 closed it as a capture artifact). The Face between pipes was answered by D4-39 and passes at the third hold.
 - M15, not run. MS2's ZO-O7 (unfinished) and HGUI (not run), in [phase-07-ms2](phase-07-ms2.md).
 - ACCEPTANCE's piping case: 17 Edges as written, 18 on the host.
 - The whole-panel snapshot at 50,040 Edges: 31.0 s against 12.1 s in October.
