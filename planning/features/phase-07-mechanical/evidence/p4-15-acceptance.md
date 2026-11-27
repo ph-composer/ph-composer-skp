@@ -93,6 +93,14 @@ hot water systems and piping, which were identical. The MS1 sitting reproduced t
 compare by section (D4-52): `rooms` exact, honeybee-ph's random identifiers masked, the `properties.energy` lists as
 sets.
 
+**Re-export pairs, read at closeout on 2026-11-27.** Each of the nine cases saved its first export and its re-export
+after save and a fresh-process reopen in the private run directories of MS1 to MS3. Read as files, every pair
+(`M04`, `M06`, `M08`, `M09`, `M10`, `M11`, `M13d`, `M14e`, `M16`) has equal byte length, `rooms` exactly equal,
+`properties.ph` equal once identifier-shaped values are masked, `properties.energy` equal with its lists compared as
+sets, and nothing else differing. This is a read of saved files, not a ledger result: the sittings recorded
+narrower comparisons (the sections each case names), every one of those rows is stale, and D4-52's comparison is
+what the reruns at the final sitting record.
+
 ## Owed host cases, by sitting
 
 From `acceptance_ledger.py status` on this head, with `--changed` for each of the 449 paths
@@ -235,7 +243,7 @@ D4-64 in this order. Rows 1 to 3 were stale by then and are corrected below; row
 | --- | --- | --- | --- |
 | 1 | Reset the installed-size baseline and say whether the 2,500,000 growth allowance or the 28,000,000 ceiling moves. Corrected 2026-11-27: #592 to #606 took the size on `main` to 27,987,931 bytes at `6cad268e`, about 12 KB under the ceiling, not the 27,943,244 and 56,756 proposed above | This file, step 1; stage document step 1 | D4-50: baseline 27,987,931, ceiling 30,000,000, allowance unchanged |
 | 2 | Which of the stale cases Phase 7's changes name the final sitting repeats (no stage document names them). Corrected 2026-11-27: 70 on `6cad268e`, the 48 above and 22 more | This file, "Owed host cases" and "Closeout screening" | D4-51: `PG03`, `S10` and `T05`; the rest stay `needs_recheck` |
-| 3 | "Same HBJSON" on re-export (cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e`, `M16`): compare the sections, as P4-13d did, or the whole file, which differs across Python processes. Corrected 2026-11-27: the difference is reproduced (MS1's evidence, and the saved pairs of five cases): random identifiers on honeybee-ph objects the export never names, and list order under `properties.energy`; `rooms` is identical | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 | D4-52: by section, `rooms` exact, random identifiers masked, energy lists as sets |
+| 3 | "Same HBJSON" on re-export (cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e`, `M16`): compare the sections, as P4-13d did, or the whole file, which differs across Python processes. Corrected 2026-11-27: the difference is reproduced (MS1's evidence, and the nine saved pairs, "Re-export pairs" above): random identifiers on honeybee-ph objects the export never names, and list order under `properties.energy`; `rooms` is identical | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 | D4-52: by section, `rooms` exact, random identifiers masked, energy lists as sets |
 | 4 | A duct run of quantity N exports as N identical elements, so METr lists N rows of quantity 1; built as inferred. The alternative is carrying it in `user_data` | p4-14e-ducting-export, "Recorded at implementation"; phases/p4-14-erv-ducting, "Inferred in planning" | D4-53: keep |
 | 5 | Whether a Ventilator's own Quantity should multiply its ducts (a Ventilator of Quantity 40 exports the ducts drawn for it) | phases/p4-14-erv-ducting, "Inferred in planning" | D4-54: keep; the ducts are one unit's |
 | 6 | A large duct quantity multiplies the HBJSON, each element once per served Room; only the 10,000 cap bounds it | p4-14e-ducting-export, "Review" (verified 2026-11-27) | D4-55: keep the cap |
@@ -284,12 +292,13 @@ D4-64 in this order. Rows 1 to 3 were stale by then and are corrected below; row
 | 44 | The no-Spaces finding (`mechanical.zone_without_spaces`) for heat pumps, tanks and hot water heaters, which PHX also reads through a Room's Spaces; D4-63 gave it to Electric Heaters only | DECISIONS D4-63 |
 | 45 | A deterministic export: fixed identifiers on the honeybee-ph objects the export never names and sorted `properties.energy` lists, so a re-export is byte-identical. Every canonical hash moves and every export host case goes stale | DECISIONS D4-52; metr-export STATUS |
 | 46 | A valid Ducting group that is locked, shared or nested blocks a Ventilator delete but `ducting.ventilators` lists it among the linked groups, not the blocking ones | Recorded at closeout, 2026-11-27 (not re-verified) |
-| 47 | An invalid Piping or Ducting group that names a System or Ventilator only through an extension envelope gets the engine's generic `reference.in_use` message, not the repair guidance a direct link gets. The API 1.111 note is scoped to that in the closeout PR; the wording itself is unchanged | Codex review of `5f29e2c1` and `ae92b7ac`, 2026-11-27 |
+| 47 | The repair guidance for a System or Ventilator delete stranded by an invalid Piping or Ducting group comes only from the retargeter: a delete with a replacement or null, over a group whose link holds the id. A delete with neither, and a group that names the record only in a malformed link or an extension envelope, get the engine's generic `reference.in_use` message. The API 1.111 note is scoped to that in the closeout PR; the refusals themselves are unchanged | Codex review of `5f29e2c1` and `ae92b7ac`, 2026-11-27 |
 | 48 | Thermal Bridge Types and Assemblies have no colour reset: their reads name no default colour, so the shared picker shows none (D4-49) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 49 | The busy notice maps only the Line tool to its menu name; Push/Pull, Move and Rotate fall back to "A SketchUp tool", and Rotate's host name carries a bracket ("Rotate (RotateTool)") (D4-45) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 50 | A Pipe Type or Duct Type stored before #604 has no assigned colour (D4-43) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 51 | Codex's declined refactor of the one Model walk in `ducting.ventilators` to a named result | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 52 | No JavaScript test covers the plural Make notice, "Removed 2 Faces" (D4-39) | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 53 | Nothing asserts which of `honeybee_ph` and `honeybee_phhvac` is imported first in the export runtime (D4-65): the `hvac_seam` probe runs after a translation, and honeybee's core imports every installed extension when it first loads. A probe that records first imports in a fresh Pyodide runtime would settle it, if the order is ever shown to matter | Codex review of #607, 2026-11-27 |
 
 ## Review
 

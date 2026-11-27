@@ -2954,7 +2954,7 @@
     },
     {
       "id": "ZO-O7",
-      "label": "Managed Zone native copy and recovery. Its component-copy-shared clause: a pasted or added plain Group copy holding a Zone reads a new Zone id at once, one native Undo removes the paste and the original is unchanged; a Zone in a component placed twice reads shared by design, Make Zone independent is refused naming Explode, and after a native Explode that placement is independent. Placements are opened natively (Edit Component or a double-click), never by a bridge active_path change, and the whole case runs from a fresh process",
+      "label": "Managed Zone native copy and recovery. Its component-copy-shared clause, as Phase 7 decision D4-41 rewrote it: a pasted or added plain Group copy holding a Zone reads a new Zone id at once, one native Undo removes the paste and the original is unchanged; a Zone in a component placed twice reads shared by design, Make Zone independent is refused naming Explode, and after a native Explode that placement is independent. Placements are opened natively (Edit Component or a double-click), never by a bridge active_path change, and the whole case runs from a fresh process",
       "mode": "mixed",
       "authority": "planning/archive/zone-field-options/ACCEPTANCE.md",
       "paths": [
@@ -3469,7 +3469,7 @@
     },
     {
       "id": "UXR-COLOUR",
-      "label": "UI refinement: Matching Colour-by and manual override while painting. Choosing a paint selects its matching Colour-by mode (paint-selects-mode). The paint tool leases that mode (context/EXTENSIBILITY.md, Give the Colour-by mode back): stopping the tool, by Escape or Stop, restores the Colour-by mode from before painting, Off included, with no revision change, for a Boundary paint (escape-retains-boundary) and an Assembly paint (assembly-stop-retains), unless the user picked another mode meanwhile, which is then kept (override-survives)",
+      "label": "UI refinement: Matching Colour-by and manual override while painting. Choosing a paint selects its matching Colour-by mode (paint-selects-mode). The paint tool leases that mode (context/EXTENSIBILITY.md, Give the Colour-by mode back; Phase 7 decision D4-38 replaces the authority's older sentence that the mode survives Stop and Escape): stopping the tool, by Escape or Stop, restores the Colour-by mode from before painting, Off included, with no revision change, for a Boundary paint (escape-retains-boundary) and an Assembly paint (assembly-stop-retains), unless the user picked another mode meanwhile, which is then kept (override-survives)",
       "mode": "native",
       "authority": "planning/archive/ui-ux-refinements.md",
       "paths": [
@@ -5381,7 +5381,7 @@
     },
     {
       "id": "M01",
-      "label": "The mechanical stack seam on the installed RBZ from a fresh process, the panel closed: an export of a synthetic two-Zone Model completes in the export runtime the host boots, and the exact HBJSON reloads in the pinned honeybee stack with both Rooms carrying ph_hvac, each a PhVentilationSystem holding a honeybee_phhvac Ventilator. That honeybee_phhvac loads through stack.load after honeybee_ph is offline evidence and no clause of this case: the hvac_seam probe of tools/runtime/browser_check.py --translation loads the two in that order in the shipped Pyodide page under Chromium 88 and reads a Room's ph_hvac",
+      "label": "The mechanical stack seam on the installed RBZ from a fresh process, the panel closed: an export of a synthetic two-Zone Model completes in the export runtime the host boots, and the exact HBJSON reloads in the pinned honeybee stack with both Rooms carrying ph_hvac, each a PhVentilationSystem holding a honeybee_phhvac Ventilator. The load order is no clause of this case (D4-65): the host records no module loads, and offline the hvac_seam probe of tools/runtime/browser_check.py --translation shows stack.load answering for honeybee_ph and then honeybee_phhvac, and a Room's ph_hvac, in the shipped Pyodide page under Chromium 88 once a translation has installed the wheels. Which of the two is imported first is asserted nowhere: honeybee's core imports every installed honeybee_ extension when it first loads",
       "mode": "bridge",
       "authority": "planning/features/phase-07-mechanical/ACCEPTANCE.md",
       "paths": [
