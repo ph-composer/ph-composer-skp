@@ -1,7 +1,7 @@
 # Phase 4, mechanical: findings from source, and the decisions that follow
 
 DATE: 2026-10-21
-STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended.
+STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers. Part 4 records the review of 2026-11-22 after Phase 6 Programs: findings F21 to F39 and decisions D4-21 to D4-27, which Ed answered the same day, every one as recommended. Part 6 records the hold 2 review of 2026-11-27: findings F41 to F45 and decisions D4-38 to D4-48, every one answered as recommended.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: #562
 
@@ -272,6 +272,38 @@ Answered by Ed on 2026-11-23 before kickoff. Findings continue from F39 and deci
 
 Note on D4-29, 2026-11-24: P4-08 found that the Phius estimator's `Inputs for Energy Model` holds a constant 45 °F (7.2 °C) minimum coil temperature in v25.1.1 and v25.1.2, not the 12.0 °C D4-29 records as verified ([p4-08 evidence](evidence/p4-08-heat-pumps.md)). Ed confirmed 12.0 °C on 2026-11-24 knowing that difference ("Keep 12.0 °C"). The code writes 12.0 °C and does not change.
 
+## Part 6: hold 2 review, 2026-11-27
+
+Answered by Ed on 2026-11-27 after the second MS3 full-screen hold ([MS3 evidence](../../native-acceptance/evidence/phase-07-ms3.md),
+[MS2 evidence](../../native-acceptance/evidence/phase-07-ms2.md)). Findings continue from F40 and decisions from
+D4-37. Every answer was the recommendation.
+
+### Findings
+
+| # | Finding | Consequence |
+| --- | --- | --- |
+| F41 | `UXR-COLOUR` was written on 2026-10-07; [#286](https://github.com/bldgtyp/ph-composer/pull/286) (2026-10-21) made a paint tool lease its Colour-by mode and give the prior mode back when it stops ([contributor architecture](../../../context/EXTENSIBILITY.md), "Give the Colour-by mode back"). Hold 2 read exactly the lease: Escape after painting from Off left Off; from Boundary, Boundary; Assembly paint started from Boundary, Boundary; a Face type override picked mid-paint survived | The case text, not the build, is out of date (D4-38) |
+| F42 | A planar recirculation loop closes into a Face SketchUp fills automatically; Make then refuses `target.wrong_kind` ("A selected line bounds a Face", `line_groups/make.rb`), naming the cause and not the fix. M13e passed only with a hand-erase step outside its recipe | Any planar loop or ring main meets it (D4-39) |
+| F43 | The 360 × 520 panel at (1628, 245) painted blank and reported `visibilityState` hidden; the same size at (900, 245) rendered. `document.hidden` is true while the host window is occluded ([measured host behavior](../../../context/SKETCHUP_HOST_BEHAVIOR.md)), and viewport clicks had sent the panel behind the model window, whose frame holds the whole 360 × 520 panel at that position | A capture artifact, not a product defect (D4-40) |
+| F44 | Since [#410](https://github.com/bldgtyp/ph-composer/pull/410) (2026-11-09) a pasted or added plain Group copy is given its own contents at once, joined to the paste (`features/zones/zone/copied_groups.rb`), so `ZO-O7`'s copied-Group refusal cannot be reached through a native copy. Hold 2 read the copy with a new Zone id at once. A labelled bridge `active_path=` into a component placement then crashed SketchUp 26.1 inside its own notification code, with no PH-Composer frames above it | The clause describes the state before #410, and the rerun opens placements natively (D4-41) |
+| F45 | Hold 2 UI findings: line groups named by persistent id ("Piping group 49013"); every new Pipe Type and Duct Type takes one default colour; the Ventilator delete dialog does not name the Ducting groups it leaves unlinked; the `session.busy` refusal prints the host's internal tool name ("The SketchTool tool is in use", `shell/context_commands.rb`); "Zone Zone A" when a Zone is named "Zone A"; the pipe-assign tool misses a line clicked 4 px off it; the Make reason icon wraps onto its own line at 1280 px | D4-42 to D4-48 |
+
+### Decisions
+
+| ID | Kind | Question | Answer, 2026-11-27 | Blocks |
+| --- | --- | --- | --- | --- |
+| D4-38 | Scope | `UXR-COLOUR` `escape-retains-boundary` and `assembly-stop-retains` fail against text older than #286 | Rewrite both clauses to the lease contract (stopping restores the mode from before painting unless the user picked another meanwhile) and rerun them at the next sitting. The hold 2 fail rows stand; the readbacks are not re-graded against text written after the run | next sitting |
+| D4-39 | Code, UI | Make on lines SketchUp closed into a Face | Make erases every Face whose edges are all among the selected lines, in the same Undo step, and reports the count ("Removed 1 Face the lines closed"). A Face with any unselected edge still refuses, and the message names the fix (erase the Face, keep its lines, Make again). Make never touches geometry outside the selection. M13e's recipe drops its hand-erase step | follow-up PR, M13e and M14f rerun |
+| D4-40 | Scope | The blank 360 × 520 panel | Closed as a capture artifact. Hold recipes bring the panel forward (Extensions > Open PH-Composer) before a panel capture that follows a viewport click; it reopens only if it recurs with the panel known to be in front | none |
+| D4-41 | Scope | `ZO-O7` `component-copy-shared` and the crash | Rewrite the Group half: a pasted or added Group copy reads a new Zone id at once, one Undo removes the paste, the original is unchanged. The component half is unchanged (shared by design, refused, Explode, then independent). Placements are opened natively (Edit Component or a double-click), never by a bridge `active_path=`. The whole case reruns from a fresh process | next sitting |
+| D4-42 | UI, Code | Line group names | The first free number per kind: "Piping group 1", "Ducting group 2", as Building Segments take "Building Segment N" | follow-up PR |
+| D4-43 | UI, Code | Pipe Type and Duct Type colours | Each new type takes the next unused colour of the categorical palette; clearing a colour returns the type to its assigned one | follow-up PR |
+| D4-44 | UI | The Ventilator delete dialog | Names the Ducting groups it leaves unlinked ("Ducting group 2 will lose its Ventilator."), capped with "and N more" | follow-up PR |
+| D4-45 | UI, Code | The `session.busy` tool name | Map host tool names to SketchUp's menu names ("The Line tool is in use…"); an unmapped name reads "A SketchUp tool is in use…" | follow-up PR |
+| D4-46 | UI | The doubled kind word | Quote the user's name after the kind: Zone “Zone A” | follow-up PR |
+| D4-47 | UI, Code | Pipe-assign pick reach | Measure the native Select tool's pick aperture on the host and use the same, so the tool picks what Select would | follow-up PR, host measurement |
+| D4-48 | UI | The Make reason icon at 1280 px | The icon stays beside the reason; the reason text wraps | follow-up PR |
+
 ## Ledger
 
 | Date | Event |
@@ -284,3 +316,4 @@ Note on D4-29, 2026-11-24: P4-08 found that the Phius estimator's `Inputs for En
 | 2026-11-22 | Ed answered D4-21 to D4-27, all as recommended. CONTRACTS, ACCEPTANCE, PLAN and the stage documents re-bound to them: Serves as a payload on the Zone record, the feature renamed `ph_composer.mechanical`, the Building Segment as the scope of the blend, the balance reading Programs' flow, PHX round trips in the export stages, mechanical cooling entered, the tab after Thermal Bridges. |
 | 2026-11-23 | Kickoff review and remaining interviews (Part 5): F40 verified in PHX 1.59.4; Ed answered D4-28 to D4-37 (Part 3 open items closed, host gates batched by milestone, and all remaining interviews complete: summer ventilation, electric heaters, pumps, fans, hot water piping and ERV ducting). |
 | 2026-11-24 | Ed confirmed D4-29's 12.0 °C minimum coil temperature, knowing the estimator holds 45 °F (7.2 °C) (the note under D4-29). No code change. |
+| 2026-11-27 | Hold 2 review (Part 6): findings F41 to F45; Ed answered D4-38 to D4-48, all as recommended. Two case texts (`UXR-COLOUR`, `ZO-O7`) are rewritten for the next sitting; D4-39 and D4-42 to D4-48 go to one follow-up PR. |
