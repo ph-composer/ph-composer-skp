@@ -29,10 +29,9 @@ module PhComposer
       # findings or Zones, each name cut as a schedule page cuts it; and the Ducting groups linked to it, which its
       # delete leaves unlinked unless a replacement takes them.
       def ventilators(request)
-        walked = LineGroups::Scan.walk(LINE_GROUP, request.model)
-        facts, = call(request, :zones => false, :walked => walked)
+        facts, = call(request, :zones => false)
         rows = Schedule.ventilator_rows(Runs.call(facts), records(request.engine, Mechanical::VENTILATOR_KIND))
-        linked = LineGroups::GroupOperations.names_by_link(LINE_GROUP, walked.first)
+        linked = LineGroups::GroupOperations.names_by_link(LINE_GROUP, request.model)
         { "ventilators" => rows.map do |row|
           names = linked.fetch(row.fetch("ventilator_id"), [])
           row.merge(OccurrencePath.bounded_names(row.slice("name")))

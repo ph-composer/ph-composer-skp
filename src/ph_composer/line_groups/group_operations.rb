@@ -115,20 +115,23 @@ module PhComposer
         held = contained(spec, request, paths.uniq).find { |row| row["zone"] }
         return unless held
 
-        raise CodedError.new(spec.code(:group_in_zone), "#{spec.label} #{held.fetch('path').last} sits inside " \
+        # The message names no persistent id; the group's path is in the detail.
+        raise CodedError.new(spec.code(:group_in_zone), "A #{spec.label} sits inside " \
                                                         "#{Records::Names.titled('Zone', held.dig('zone', 'name'))}; " \
-                                                        "move it out of the Zone first.")
+                                                        "move it out of the Zone first.",
+                             "group_path" => held.fetch("path"))
       end
 
       # Each linked record's id with the names of the groups naming it, sorted, as a delete of that record lists
-      # what it leaves: a group's own name, or for an unnamed one its label and path, as the panel labels it.
-      # `occurrences` are a Scan.walk's readable groups, so a read that walked already walks no further.
-      def names_by_link(spec, occurrences)
+      # what it leaves: a group's own name, or for an unnamed one its label and path, as the panel labels it. It
+      # walks as `retarget` does, so a group whose record fails its schema but still names the record, which the
+      # delete refuses over, is listed too; Scan.walk leaves such a group out.
+      def names_by_link(spec, model)
         found = Hash.new { |names, link| names[link] = [] }
-        occurrences.each do |occurrence|
-          link = occurrence.record && occurrence.record[spec.link_key]
-          name = occurrence.name.to_s
-          found[link] << (name.empty? ? "#{spec.label} #{occurrence.path.join('/')}" : name) if link
+        GroupTarget.each_group(spec, model) do |group, path, _along|
+          record, = LineGroups.read(group, spec.group_store)
+          link = record && record[spec.link_key]
+          found[link] << (group.name.to_s.empty? ? "#{spec.label} #{path.join('/')}" : group.name.to_s) if link
         end
         found.transform_values { |names| names.sort_by { |name| [name.sub(/\d+\z/, ""), name[/\d+\z/].to_i, name] } }
       end

@@ -198,6 +198,10 @@ class DuctingGroupTest < PhComposerTestCase
     refusal = invoke("#{VENTILATORS}.delete", "id" => @erv2)
     assert_equal %w[refused reference.in_use], refusal.values_at("status", "code")
     assert_match(/\[570\] still refers/, refusal["message"])
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv2 }
+    assert_equal [["Ducting group 570"], 1], linked.values_at("group_names", "group_count"),
+                 "a group the delete refuses over is named, though its record fails its schema"
   end
 
   def test_the_list_pages_the_occurrences_in_path_order
