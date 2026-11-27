@@ -621,3 +621,12 @@ full-screen hold with bridge reads between (`_private/host/phase-07-hold3/D4-49/
 picker shows Cancel and Apply Color only. After a custom green (`#81a784`; assigned `#1F77B4`) the reopened picker
 shows "Reset to default" with the default swatch; clicking it stores `color` null and displays `#1F77B4`. One
 native Edit > Undo "Edit Pipe Type" restores `#81a784`. Pass. No ledger case owns this check; it is recorded here.
+
+## #606 focus host check, 2026-11-27
+
+PR #606 head `4136d433` (code `ae92b7ac`), RBZ built from it, fresh copy of the hold 3 fixture, native panel
+gestures under one full-screen hold (`_private/host/phase-07-hold3/P606/NOTES.md`). A Duct Type's Colour cell >
+green swatch > Apply Color repaints the cell; a native Enter with no click between reopens the picker, so focus
+returned to the cell. After Reset to default the cell repaints to the assigned `#1F77B4` and Enter again reopens
+the picker. Pass. The case where focus moves away before the reply lands has no native route (no reply-delay
+fault) and is covered by the browser test; the blocker dialog has no native route and is covered offline.
