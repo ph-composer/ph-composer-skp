@@ -1138,7 +1138,7 @@ in each Building Segment it serves; a Room with no Spaces gives it none.
    export as their `section`. `mechanical.item_missing` blocks: a Zone the export writes names a heater
    that is not in the Model. `mechanical.item_unserved` names a heater that serves no Zone, `mechanical.zone_left_out` a
    served Zone in no Building Segment, `mechanical.item_across_segments` a heater on Zones in two
-   Building Segments, and `mechanical.zone_without_spaces` the served Zones with no Spaces, once per heater,
+   Building Segments, and `mechanical.zone_without_spaces` the served exported Zones with no Spaces, once per heater,
    whose Rooms carry it in the HBJSON while PHX reads it only through another Room it serves in the same
    Building Segment; none of these blocks. A row about a heater carries `locate` with
    `electric_heater_ids`.

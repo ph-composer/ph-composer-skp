@@ -95,9 +95,12 @@ sets.
 
 **Re-export pairs, read at closeout on 2026-11-27.** Each of the nine cases saved its first export and its re-export
 after save and a fresh-process reopen in the private run directories of MS1 to MS3. Read as files, every pair
-(`M04`, `M06`, `M08`, `M09`, `M10`, `M11`, `M13d`, `M14e`, `M16`) has equal byte length, `rooms` exactly equal,
-`properties.ph` equal once identifier-shaped values are masked, `properties.energy` equal with its lists compared as
-sets, and nothing else differing. This is a read of saved files, not a ledger result: the sittings recorded
+(`M04`, `M06`, `M08`, `M09`, `M10`, `M11`, `M13d`, `M14e`, `M16`) has equal byte length and `rooms` exactly equal,
+and the two files are equal in full once normalised as [ACCEPTANCE](../ACCEPTANCE.md) states above its register
+(the normalisation of `comparable_result` in `tools/runtime/browser_check.py`): the 30 UUIDs under
+`properties.ph.team` and `properties.ph.bldg_segments` (55 in `M08` and `M16`, which have two Segments) masked
+wherever they repeat, and the seven unordered `properties.energy` collections compared as sets of whole records,
+with the order inside each record kept. This is a read of saved files, not a ledger result: the sittings recorded
 narrower comparisons (the sections each case names), every one of those rows is stale, and D4-52's comparison is
 what the reruns at the final sitting record.
 
@@ -292,13 +295,14 @@ D4-64 in this order. Rows 1 to 3 were stale by then and are corrected below; row
 | 44 | The no-Spaces finding (`mechanical.zone_without_spaces`) for heat pumps, tanks and hot water heaters, which PHX also reads through a Room's Spaces; D4-63 gave it to Electric Heaters only | DECISIONS D4-63 |
 | 45 | A deterministic export: fixed identifiers on the honeybee-ph objects the export never names and sorted `properties.energy` lists, so a re-export is byte-identical. Every canonical hash moves and every export host case goes stale | DECISIONS D4-52; metr-export STATUS |
 | 46 | A valid Ducting group that is locked, shared or nested blocks a Ventilator delete but `ducting.ventilators` lists it among the linked groups, not the blocking ones | Recorded at closeout, 2026-11-27 (not re-verified) |
-| 47 | The repair guidance for a System or Ventilator delete stranded by an invalid Piping or Ducting group comes only from the retargeter: a delete with a replacement or null, over a group whose link holds the id. A delete with neither, and a group that names the record only in a malformed link or an extension envelope, get the engine's generic `reference.in_use` message. The API 1.111 note is scoped to that in the closeout PR; the refusals themselves are unchanged | Codex review of `5f29e2c1` and `ae92b7ac`, 2026-11-27 |
+| 47 | The repair guidance for a System or Ventilator delete stranded by an invalid Piping or Ducting group comes only from the retargeter, when it records `validation.failed` for a group it matched: a delete with a replacement or null, over a group whose link holds the id. A delete with neither, a group that names the record only in a malformed link or an extension envelope, and an invalid group that is also locked do not get it. The API 1.111 note is scoped to that in the closeout PR; the refusals themselves are unchanged | Codex review of `5f29e2c1` and `ae92b7ac`, 2026-11-27 |
 | 48 | Thermal Bridge Types and Assemblies have no colour reset: their reads name no default colour, so the shared picker shows none (D4-49) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 49 | The busy notice maps only the Line tool to its menu name; Push/Pull, Move and Rotate fall back to "A SketchUp tool", and Rotate's host name carries a bracket ("Rotate (RotateTool)") (D4-45) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 50 | A Pipe Type or Duct Type stored before #604 has no assigned colour (D4-43) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 51 | Codex's declined refactor of the one Model walk in `ducting.ventilators` to a named result | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 52 | No JavaScript test covers the plural Make notice, "Removed 2 Faces" (D4-39) | Recorded at closeout, 2026-11-27 (not re-verified) |
 | 53 | Nothing asserts which of `honeybee_ph` and `honeybee_phhvac` is imported first in the export runtime (D4-65): the `hvac_seam` probe runs after a translation, and honeybee's core imports every installed extension when it first loads. A probe that records first imports in a fresh Pyodide runtime would settle it, if the order is ever shown to matter | Codex review of #607, 2026-11-27 |
+| 54 | The user guide and the agent guide say a Pump or a Fan warns on "a Zone with no Spaces"; the finding is for an exported Zone, and a Zone in no Building Segment gets `mechanical.zone_left_out`. The Electric Heater lines say "exported" since the closeout PR | Codex review of #607, cycle 2, 2026-11-27 |
 
 ## Review
 

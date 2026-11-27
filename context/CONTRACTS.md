@@ -1444,9 +1444,9 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   reach refuses the whole delete as `reference.in_use`. A Ventilator delete with an id or null moves or clears the
   Ducting groups naming it through ducting's retargeter `ph_composer.ducting.groups.retarget_ventilator`; a group
   whose record fails its schema but still names it, in its link or in a readable extension envelope, strands every
-  delete as `reference.in_use` (the retargeter's refusal, which a delete with a replacement or null meets, says to
-  repair a record whose link holds the id; a delete with neither, and a record that names it only in a malformed link
-  or an envelope, get the engine's generic refusal), so
+  delete as `reference.in_use` (where the retargeter, which a delete with a replacement or null runs, cannot rewrite
+  a group because its record fails its schema, its refusal says to repair the record; a group it does not match, one
+  naming the id only in a malformed link or an envelope, refuses through the engine's reference scan), so
   `ph_composer.ducting.ventilators` lists such groups apart from the linked ones (`blocking_group_names`), from the
   same one walk as its lengths, and the Delete offers no choice while any remains. A duct's
   `quantity` is at most 10,000 (P4-14d), so a length times it stays finite; a stored record above it is unreadable.
