@@ -564,6 +564,19 @@
     }, 0);
   };
 
+  /* The colour a new or copied Pipe or Duct Type takes, as Ruby assigns it: the shared ramp's first that no type of
+     the kind draws in or returns to, else the ramp again by count. */
+  var TYPE_RAMP = ["#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", "#E377C2", "#7F7F7F",
+    "#BCBD22", "#17BECF"];
+  function assignedColour(types) {
+    var taken = [];
+    types.forEach(function (type) {
+      [type.values.color || type.values.assigned_color || type.display.color, type.values.assigned_color]
+        .forEach(function (colour) { if (colour) taken.push(colour.toUpperCase()); });
+    });
+    return TYPE_RAMP.filter(function (hex) { return taken.indexOf(hex) === -1; })[0] ||
+      TYPE_RAMP[types.length % TYPE_RAMP.length];
+  }
   /* The Pipe Type rows, each with its colour (its own, else the one it was assigned) and the drawn length of the
      fixture's runs naming it. */
   Host.prototype.pipeTypeRows = function () {
@@ -618,6 +631,7 @@
         diameter_mm: 12.7, insulation_thickness_mm: 12.7, insulation_conductivity_w_mk: 0.04,
         insulation_reflective: true, insulation_quality: 1 }, copy(params.values)) :
         Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
+      values.assigned_color = assignedColour(data.types);
       data.types.push({ id: id, kind: PIPING + "pipe_type", schema_version: 1, user_data: {}, extension_data: {},
         extension_status: {}, findings: [], values: values, display: { color: "#6b8f3a" }, export_ready: true,
         export_blockers: [] });
@@ -675,13 +689,13 @@
   function counted(runs, matches) {
     return runs.filter(matches).reduce(function (sum, run) { return sum + run.length_m * run.quantity; }, 0);
   }
-  /* The Duct Type rows, each with its colour and used length. */
+  /* The Duct Type rows, each with its colour (its own, else the one it was assigned) and used length. */
   Host.prototype.ductTypeRows = function () {
     var runs = this.ducting.runs;
     return this.ducting.types.map(function (type) {
       return Object.assign(JSON.parse(JSON.stringify(type)), { used_length_m: counted(runs, function (run) {
         return run.duct_type_id === type.id;
-      }) });
+      }), display: { color: type.values.color || type.values.assigned_color || type.display.color } });
     });
   };
   /* Every Ventilator's two duct lengths, 0 with none. */
@@ -747,6 +761,7 @@
         diameter_mm: 160, insulation_thickness_mm: 25.4, insulation_conductivity_w_mk: 0.04,
         insulation_reflective: true }, copy(params.values)) :
         Object.assign(copy(target.values), { name: params.name || target.values.name + " (copy)" });
+      values.assigned_color = assignedColour(data.types);
       data.types.push({ id: id, kind: DUCTING + "duct_type", schema_version: 1, user_data: {}, extension_data: {},
         extension_status: {}, findings: [], values: values, display: { color: "#5f9a5a" }, export_ready: true,
         export_blockers: [] });

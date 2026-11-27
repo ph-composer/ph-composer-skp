@@ -72,6 +72,21 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
   await colourCell(PT1).click();
   await reset.waitFor();
   await page.screenshot({ path: path.join(output, "pipe-type-colour-reset.png") });
+  // Reset, Cancel and Apply stay reachable inside the panel at each of its sizes.
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    if (!await colourForm.count()) await colourCell(PT1).click();
+    for (const name of ["Reset to default", "Cancel", "Apply Color"]) {
+      const button = colourForm.getByRole("button", { name, exact: true });
+      await button.scrollIntoViewIfNeeded();
+      const box = await button.boundingBox();
+      assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width && box.y + box.height <= height,
+        `${name} is reachable at ${width} x ${height}`);
+    }
+    await page.screenshot({ path: path.join(output, `pipe-type-colour-reset-${width}x${height}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  if (!await colourForm.count()) await colourCell(PT1).click();
   await reset.click();
   await page.waitForFunction(id => !("color" in window.previewHost.piping.types.filter(r => r.id === id)[0].values),
     PT1);
