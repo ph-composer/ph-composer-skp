@@ -143,10 +143,11 @@ module PhComposer
       private_class_method :reference_mapping
 
       # [[target_kind, id], ...] that every readable envelope in `record`'s extension_data declares it names, its
-      # extension installed or not: what the incoming-reference scan reads beside the core references.
+      # extension installed or not: what the incoming-reference scan reads beside the core references. A null
+      # `references`, which `readable?` accepts, names nothing.
       def self.envelope_targets(record)
         record.fetch("extension_data", {}).values.select { |envelope| readable?(envelope) }.flat_map do |envelope|
-          referenced_ids(envelope.fetch("payload"), envelope.fetch("references", []))
+          referenced_ids(envelope.fetch("payload"), Array(envelope.fetch("references", [])))
         end
       end
 

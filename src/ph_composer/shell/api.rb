@@ -696,7 +696,9 @@ module PhComposer
       { "minor" => 111, "date" => "2026-11-27",
         "change" => "ph_composer.ducting.ventilators rows add blocking_group_names and blocking_group_count: the " \
                     "Ducting groups whose record fails its schema but still names the Ventilator, over which " \
-                    "every delete of it refuses reference.in_use. group_names and group_count no longer list them." }
+                    "every delete of it refuses reference.in_use. group_names and group_count no longer list them. A " \
+                    "Ventilator or System delete stranded by a group whose record fails its schema says to repair " \
+                    "the record." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

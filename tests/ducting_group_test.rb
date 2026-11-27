@@ -248,7 +248,10 @@ class DuctingGroupTest < PhComposerTestCase
     record = D::Group.new_record("dcg_PPPPPPPPPPPP", nil).merge("extension_data" => { "example.notes" => envelope })
     enveloped = Sketchup::Group.new(576, Sketchup::Entities.new([]), :name => "DG-envelope")
     STORE.write(enveloped, record.merge("id" => "bad"))
-    @model.entities << enveloped
+    empty = Sketchup::Group.new(577, Sketchup::Entities.new([]), :name => "DG-empty")
+    nameless = { "example.notes" => envelope.merge("references" => nil) }
+    STORE.write(empty, record.merge("id" => "bad", "extension_data" => nameless))
+    @model.entities << enveloped << empty
     [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
       refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
       assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
