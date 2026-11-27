@@ -221,6 +221,21 @@ class DuctingGroupTest < PhComposerTestCase
                  linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
   end
 
+  # The engine reads an array-valued link as naming its member, so that group blocks every delete and is listed.
+  def test_a_group_naming_the_ventilator_in_an_array_blocks_its_delete_and_is_listed
+    listed = Sketchup::Group.new(575, Sketchup::Entities.new([]), :name => "DG-array")
+    STORE.write(listed, D::Group.new_record("dcg_NNNNNNNNNNNN", nil).merge("ventilator_id" => [@erv1]))
+    @model.entities << listed
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+    end
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [[], 0, ["DG-array"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
   def test_the_ventilators_read_walks_the_model_once
     @model.entities << ducting_group(573, "dcg_MMMMMMMMMMMM", @erv1, [edge(574)])
     before = @model.entities.each_count

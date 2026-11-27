@@ -128,19 +128,26 @@ module PhComposer
       LinkedNames = Struct.new(:unlinkable, :blocking, keyword_init: true)
 
       # Each linked record's id with its LinkedNames, each list sorted, from one Scan.walk: a group's own name, or for
-      # an unnamed one its label and path, as the panel labels it.
+      # an unnamed one its label and path, as the panel labels it. A group's links are the ids the engine's reference
+      # scan reads from its record, so one an invalid record names in a malformed value still blocks.
       def names_by_link(spec, walked)
         groups, _unreadable, invalid = walked
         found = Hash.new { |names, link| names[link] = LinkedNames.new(:unlinkable => [], :blocking => []) }
         [[groups, :unlinkable], [invalid, :blocking]].each do |found_groups, list|
           found_groups.each do |group|
-            link = group.record[spec.link_key]
-            found[link][list] << (group.name.empty? ? "#{spec.label} #{group.path.join('/')}" : group.name) if link
+            name = group.name.empty? ? "#{spec.label} #{group.path.join('/')}" : group.name
+            linked_ids(spec, group.record).each { |link| found[link][list] << name }
           end
         end
         found.transform_values do |names|
           LinkedNames.new(:unlinkable => sorted_names(names.unlinkable), :blocking => sorted_names(names.blocking))
         end
+      end
+
+      # The ids of `spec.link_kind` the engine's incoming-reference scan reads from a group record.
+      def linked_ids(spec, record)
+        spec.group_record_kind.referenced_targets(LineGroups.scannable(record))
+            .filter_map { |kind, id| id if kind == spec.link_kind }.uniq
       end
 
       def sorted_names(names)
