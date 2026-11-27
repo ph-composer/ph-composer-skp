@@ -331,6 +331,15 @@ the one change to the product.
 | D4-64 | Scope | For Ed 15: PHX 1.59.4 drops an exhaust ventilator's quantity, so WUFI-Passive and METr see one exhaust device per Fan | Keep PH-Composer's export, which sets the quantity on both honeybee-ph objects. Filed upstream as [PH-Tools/PHX#177](https://github.com/PH-Tools/PHX/issues/177); when it is fixed, bump the pin and assert the quantity in the Fan round trip | none |
 | D4-65 | Scope | `M01`'s load-order clause cannot be observed on the host: the export status and diagnostics record no module loads, and the case text ruled out the offline probe that covers it | The clause leaves the host case, and the offline `hvac_seam` probe of `tools/runtime/browser_check.py --translation` stands for it ([p4-01-contracts](evidence/p4-01-contracts.md)): in the shipped Pyodide page under Chromium 88, once a translation has installed the wheels, `stack.load` answers for `honeybee_ph` and then `honeybee_phhvac`, and a Room carries `ph_hvac`. Which of the two is imported first is asserted nowhere, offline or on the host: honeybee's core imports every installed `honeybee_*` extension when it first loads, so the first-import order is the stack's own. The host case keeps the export in the host's runtime and the reload of both Rooms' `ph_hvac`, and reruns over the bridge | case text; final sitting |
 
+Note on D4-65 and D4-52, 2026-11-27: two answers carry text from the review of the closeout PR (#607), written after
+Ed answered. Ed's answer to D4-65 was that the load-order clause moves to the offline test that covers it. The review
+then showed that no test covers first-import order: the `hvac_seam` probe runs after a translation, and honeybee's
+core imports its extensions itself. The row's sentences on what the probe shows and on the order being asserted
+nowhere come from that review, so D4-65 as worded is Ed's to confirm; a probe of first imports is follow-up 53 in
+[P4-15's evidence](evidence/p4-15-acceptance.md). Ed's answer to D4-52 was "rooms exact, random ids masked, energy
+lists as sets"; the exact normalisation ACCEPTANCE now states (which UUIDs, which collections, order inside a record
+kept) is the review's sharpening of it, taken from the comparator the repository already has.
+
 ## Ledger
 
 | Date | Event |
