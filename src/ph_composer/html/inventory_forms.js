@@ -20,14 +20,16 @@ function (RecordForm, request, snapshot, ui) {
     return form.settle(state);
   }
   /* What other features know about the uses of a section's records: each `usage(state, id, choice)` answers
-     `{ count, description, incomplete }`, `incomplete` saying why the uses are not all known (a referring record
-     that cannot be read), or null. `choice` is the replacement chosen so far: "" for none yet, "clear" to clear the
-     uses, or the replacement's id, so a description can say what that choice does to its uses. Every way into that
-     section's ReplacementForm lists the same uses: the owner's own (`options.usage`), then each contributed one. */
+     `{ count, description, incomplete, blocked }`, `incomplete` saying why the uses are not all known (a referring
+     record that cannot be read), or null, and `blocked` naming the uses no delete can move until they are repaired
+     (a referring record that fails its schema), or null. `choice` is the replacement chosen so far: "" for none yet,
+     "clear" to clear the uses, or the replacement's id, so a description can say what that choice does to its uses;
+     a source answering `blocked` words its description for a delete that cannot run. Every way into that section's
+     ReplacementForm lists the same uses: the owner's own (`options.usage`), then each contributed one. */
   var usageSources = Object.create(null);
   function contributeUsage(section, usage) { (usageSources[section] = usageSources[section] || []).push(usage); }
   /* Every source's uses as one: the counts summed, the descriptions of the sources with uses and every
-     `incomplete` joined; null when no source answers. */
+     `incomplete` and `blocked` joined; null when no source answers. */
   function combinedUsage(sources, state, id, choice) {
     var parts = sources.map(function (source) { return source(state, id, choice); }).filter(Boolean);
     if (!parts.length) return null;
@@ -36,8 +38,10 @@ function (RecordForm, request, snapshot, ui) {
         .map(function (part) { return part[key]; }).join(" ");
     }
     return { count: parts.reduce(function (sum, part) { return sum + (part.count || 0); }, 0),
-      description: joined("description", true), incomplete: joined("incomplete", false) || null };
+      description: joined("description", true), incomplete: joined("incomplete", false) || null,
+      blocked: joined("blocked", false) || null };
   }
+  var replacementForms = 0;
   function ReplacementForm(session, send, changed, options) {
     var self = this;
     this.options = options;
@@ -45,6 +49,7 @@ function (RecordForm, request, snapshot, ui) {
       action: this.options.section + ".delete", label: "delete-record", submitLabel: "Delete",
       pendingText: "Deleting...", failureText: "The record was not deleted.", destructive: true, changed: changed });
     this.explanation = ui.element("p");
+    this.explanation.id = "phc-replacement-reason-" + (++replacementForms);
     this.root.appendChild(this.explanation);
     this.uses = ui.element("p");
     this.root.appendChild(this.uses);
@@ -56,7 +61,7 @@ function (RecordForm, request, snapshot, ui) {
   }
   RecordForm.extend(ReplacementForm);
   ReplacementForm.prototype.updateButton = function () {
-    this.submitButton.disabled = !this.enabled || this.busy() || (this.inUse && !this.select.value);
+    this.submitButton.disabled = !this.enabled || this.busy() || this.blocked || (this.inUse && !this.select.value);
   };
   /* `allowClear` may be a function of the record: clearing is offered only while it answers true. */
   ReplacementForm.prototype.reconcile = function (record, records) {
@@ -74,7 +79,9 @@ function (RecordForm, request, snapshot, ui) {
     // the stored references either way. Nothing is cleared that may still be named.
     var unknown = usage && usage.incomplete;
     if (unknown) clear = false;
-    this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
+    // Uses no delete can move refuse it whatever is chosen, so the dialog offers no choice and says what to repair.
+    this.blocked = Boolean(usage && usage.blocked);
+    this.inUse = !this.blocked && Boolean(this.options.replacement && (this.options.alwaysReplacement ||
       (usage ? usage.count : record.use_count)));
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
     // The explanation names what the owner's uses are (`usedOn`), so it shows only while the owner reports some.
@@ -88,10 +95,23 @@ function (RecordForm, request, snapshot, ui) {
       this.explanation.textContent = "No other " + this.options.label + " can take its place. Cancel, create one, " +
         "then delete " + record.values.name + ".";
     }
+    if (this.blocked) {
+      this.explanation.hidden = false;
+      this.explanation.textContent = usage.blocked;
+    }
     var uses = (record.uses || []).map(function (use) { return use.name; }).join(", ");
     this.uses.textContent = [this.inUse ? (usage && usage.count ? usage.description : uses ? "Used by: " + uses :
-      "Choose a replacement or clear existing uses.") :
+      "Choose a replacement or clear existing uses.") : this.blocked ? (usage.count ? usage.description : "") :
       "Delete " + this.options.label + ' "' + record.values.name + '"?', unknown || ""].filter(Boolean).join(" ");
+    // A refresh that blocks the delete hides the select and holds Delete, so focus held on either moves to Cancel
+    // rather than falling to the body.
+    // Both actions are described by the reason while it holds Delete, so focus moved to Cancel hears why.
+    [this.cancel, this.submitButton].forEach(function (button) {
+      if (this.blocked) button.setAttribute("aria-describedby", this.explanation.id);
+      else button.removeAttribute("aria-describedby");
+    }, this);
+    var active = document.activeElement;
+    if (this.blocked && (active === this.select || active === this.submitButton)) this.cancel.focus();
     this.select.parentNode.hidden = !this.inUse;
     var selected = this.select.value;
     this.select.setAttribute("aria-label", "Replacement " + this.options.label.toLowerCase());
@@ -460,10 +480,17 @@ function (RecordForm, request, snapshot, ui) {
     if (this.trigger) {
       this.trigger.setAttribute("aria-expanded", "false");
       /* A completed request closes the form while the repaint still holds the cell disabled, and a disabled
-         button takes no focus: colorCell gives it back once the same repaint enables the cell. */
-      if (restoreFocus !== false && this.trigger.disabled) this.focusAfterPaint = this.trigger;
-      else if (restoreFocus !== false) this.trigger.focus();
+         button takes no focus: colorCell gives it back once the same repaint enables the cell. Focus the user
+         moved elsewhere while the request was out stays there. */
+      if (restoreFocus === false || !this.focusUnmoved()) this.focusAfterPaint = null;
+      else if (this.trigger.disabled) this.focusAfterPaint = this.trigger;
+      else this.trigger.focus();
     }
+  };
+  /* Whether focus is still the picker's to give back: inside it, on its trigger, or fallen to the body. */
+  ColorForm.prototype.focusUnmoved = function () {
+    var active = document.activeElement;
+    return !active || active === document.body || active === this.trigger || this.root.contains(active);
   };
   ColorForm.prototype.dispose = function () {
     this.enabled = false;
@@ -520,7 +547,7 @@ function (RecordForm, request, snapshot, ui) {
     td._color.disabled = !form.enabled || form.requests.busy();
     if (form.focusAfterPaint === td._color && !td._color.disabled) {
       form.focusAfterPaint = null;
-      td._color.focus();
+      if (form.focusUnmoved()) td._color.focus();
     }
   }
   return { contributeUsage: contributeUsage, ReplacementForm: ReplacementForm,

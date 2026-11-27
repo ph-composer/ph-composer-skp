@@ -974,8 +974,9 @@ with the snapshot section `ph_composer.ducting.ducts.selected`, each with `make_
 targets are `ph_composer.ducting.group` and `ph_composer.ducting.duct`, and the codes `ducting.outside_group`,
 `ducting.group_in_zone` and `ducting.group_nested`. A Ventilator delete with an id or null moves or clears the
 groups naming it through the registered reference retargeters; `ph_composer.ducting.ventilators` rows name
-those groups (`group_names`, `group_count`, API 1.110), which the Ventilators table's Delete lists through
-`inventory_forms.contributeUsage`. The
+those groups (`group_names`, `group_count`, API 1.110) and, apart, the groups whose record fails its schema but
+still names it (`blocking_group_names`, `blocking_group_count`, API 1.111), over which every delete refuses; the
+Ventilators table's Delete lists both through `inventory_forms.contributeUsage`, the second as `blocked`. The
 [ducting assignment walkthrough](../tools/examples/authoring/ducting_assignment_walkthrough.rb) draws loose lines,
 makes a group from them, opens it, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
 The bounded read `ph_composer.ducting.schedule` (with `compact`, `ph_composer.ducting.schedule.details` for its

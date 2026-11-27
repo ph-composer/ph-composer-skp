@@ -211,9 +211,9 @@
       "sha256": "0f9b7a2f4d34db403f2143833332c88c26eb4871596db8a95bac3e100e2c804c"
     },
     "html/features/ducting/ventilator_columns.js": {
-      "bytes": 3540,
+      "bytes": 4213,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "757be23a6d1f58fb10151f68b5875ee2f63b1161ad9001590de1c34bcaf44cf7"
+      "sha256": "4389413c5575dc47e503fbcb1a86cc8cc18780f3c86e980b55bd7f34c76f4f43"
     },
     "html/features/mechanical/electric_heaters.js": {
       "bytes": 5403,
@@ -656,9 +656,9 @@
       "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
-      "bytes": 28281,
+      "bytes": 30131,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2e758e9a4dc251b14aaa4c1be155cb705f6bd582bfff0fe729af1609df2aafa3"
+      "sha256": "a1e78a7eada0d1f80589ea4a5aedce092a0c9f6cfd5d03487a053569916f1f63"
     },
     "html/inventory_grid.js": {
       "bytes": 16516,

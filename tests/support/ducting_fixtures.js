@@ -24,11 +24,11 @@ function selected(id, values) {
 function ventilators() {
   var seven = [1, 2, 3, 4, 5, 6, 7].map(function (number) { return "Ducting group " + number; });
   return [{ ventilator_id: mechanical.ERV1.id, name: "ERV-1", outdoor_air_length_m: 2.5, exhaust_air_length_m: 1.8,
-    group_names: ["DG-1"], group_count: 1 },
+    group_names: ["DG-1"], group_count: 1, blocking_group_names: [], blocking_group_count: 0 },
   { ventilator_id: mechanical.ERV2.id, name: "ERV-2", outdoor_air_length_m: 2.5, exhaust_air_length_m: 3,
-    group_names: ["DG-2"], group_count: 1 },
+    group_names: ["DG-2"], group_count: 1, blocking_group_names: [], blocking_group_count: 0 },
   { ventilator_id: mechanical.ERV3.id, name: "ERV-3", outdoor_air_length_m: 0, exhaust_air_length_m: 0,
-    group_names: seven, group_count: 7 }];
+    group_names: seven, group_count: 7, blocking_group_names: [], blocking_group_count: 0 }];
 }
 function run(identifier, direction, ventilator, group, typeId, length, quantity, findings) {
   return { identifier: identifier, display_name: (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") + " 1",
@@ -51,7 +51,9 @@ function schedule() {
     // The schedule's rows carry no group names; the Ventilators read does.
     var scheduled = Object.assign({ findings: row.name === "ERV-3" ? [{ code: "ducting.run_missing",
       message: "ERV-3 has no Outdoor air run.", blocks_export: false, locate: {} }] : [] }, row);
-    delete scheduled.group_names; delete scheduled.group_count;
+    ["group_names", "group_count", "blocking_group_names", "blocking_group_count"].forEach(function (key) {
+      delete scheduled[key];
+    });
     return scheduled;
   }), types: [], unreadable: [], unreadable_total: 0 };
 }

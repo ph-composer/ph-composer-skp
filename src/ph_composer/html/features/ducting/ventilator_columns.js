@@ -1,7 +1,8 @@
 /* What ducting contributes to Ventilation › Ventilators, from the `ducting_ventilators` snapshot section: two
    duct-length columns (html/table_contributions.js), each Ventilator's Outdoor air and Exhaust air duct lengths,
    each line times its quantity, read only, a dash while it has no duct of that direction; and to its Delete, the
-   Ducting groups linked to it (inventory_forms.js usage), which a replacement takes and clearing leaves with none. */
+   Ducting groups linked to it (inventory_forms.js usage), which a replacement takes and clearing leaves with none,
+   and those whose record fails its schema but still names it, which block every delete until they are repaired. */
 PhComposerUI.define("features/ducting/ventilator_columns", ["snapshot", "workspace", "fields", "units",
   "unit_preferences", "inventory_forms", "features/mechanical/ventilators", "features/ducting/shared"],
 function (snapshot, ui, fields, units, preferences, forms, ventilators, shared) {
@@ -44,14 +45,22 @@ function (snapshot, ui, fields, units, preferences, forms, ventilators, shared) 
     if (more > 0) return names.join(", ") + " and " + more + " more";
     return names.length < 2 ? names.join("") : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
   }
-  /* The Ducting groups a Ventilator's Delete moves or unlinks, said for the choice made so far. */
+  /* The Ducting groups a Ventilator's Delete moves or unlinks, said for the choice made so far, and apart from them
+     the groups that block it, which no choice moves. */
   function linkedGroups(state, id, choice) {
     var row = ventilatorRow(state, id);
     if (!row) return null;
-    var total = row.group_count || 0, one = total === 1;
+    var total = row.group_count || 0, one = total === 1, blocking = row.blocking_group_count || 0;
+    var names = listed((row.group_names || []).slice(0, NAMED), total);
+    if (blocking) {
+      var single = blocking === 1;
+      return { count: total, description: total ? names + (one ? " is" : " are") + " linked to this Ventilator." : "",
+        blocked: listed((row.blocking_group_names || []).slice(0, NAMED), blocking) + " cannot be read and still " +
+          (single ? "names" : "name") + " this Ventilator. Repair " + (single ? "it" : "them") +
+          " before deleting the Ventilator." };
+    }
     if (!total) return { count: 0, description: "" };
-    var names = listed((row.group_names || []).slice(0, NAMED), total), lose = names + " will lose " +
-      (one ? "its" : "their") + " Ventilator";
+    var lose = names + " will lose " + (one ? "its" : "their") + " Ventilator";
     if (choice === "clear") return { count: total, description: lose + "." };
     if (choice) return { count: total, description: names + (one ? " moves" : " move") + " to the replacement." };
     return { count: total, description: lose + " unless you choose a replacement." };

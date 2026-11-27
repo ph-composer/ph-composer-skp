@@ -102,9 +102,15 @@ module PhComposer
         end)
       end
 
+      # The repair said follows each group's reason: a record failing its schema is repaired, a placement is changed.
       def refuse_stranded(spec, from, stranded)
+        invalid = stranded.count { |row| row["reason"] == "validation.failed" }
+        repairs = []
+        repairs << "repair #{invalid == stranded.length ? 'their records' : 'each record that fails its schema'}" \
+          if invalid.positive?
+        repairs << "unlock, make unique or move #{invalid.positive? ? 'the rest' : 'them'}" if invalid < stranded.length
         message = "#{stranded.length} #{spec.label}(s) name #{spec.link_label} #{from} where the delete cannot " \
-                  "rewrite them (locked, shared or nested); unlock, make unique or move them, then delete again."
+                  "rewrite them (locked, shared, nested or invalid); #{repairs.join(' and ')}, then delete again."
         raise CodedError.new("reference.in_use", message, "target_kind" => spec.link_kind, "id" => from,
                                                           "groups" => stranded.first(STRANDED_DETAIL),
                                                           "stranded" => stranded.length)
@@ -122,18 +128,40 @@ module PhComposer
                              "group_path" => held.fetch("path"))
       end
 
-      # Each linked record's id with the names of the groups naming it, sorted, as a delete of that record lists
-      # what it leaves: a group's own name, or for an unnamed one its label and path, as the panel labels it. It
-      # walks as `retarget` does, so a group whose record fails its schema but still names the record, which the
-      # delete refuses over, is listed too; Scan.walk leaves such a group out.
-      def names_by_link(spec, model)
-        found = Hash.new { |names, link| names[link] = [] }
-        GroupTarget.each_group(spec, model) do |group, path, _along|
-          record, = LineGroups.read(group, spec.group_store)
-          link = record && record[spec.link_key]
-          found[link] << (group.name.to_s.empty? ? "#{spec.label} #{path.join('/')}" : group.name.to_s) if link
+      # The groups naming one linked record, by name, as its delete lists them: `unlinkable`, the readable groups its
+      # retarget moves or clears, and `blocking`, the groups whose record fails its schema but still names it, over
+      # which the retarget refuses every delete until they are repaired.
+      LinkedNames = Struct.new(:unlinkable, :blocking, keyword_init: true)
+
+      # Each linked record's id with its LinkedNames, each list sorted, from one Scan.walk: a group's own name, or for
+      # an unnamed one its label and path, as the panel labels it. A group's links are the ids the engine's reference
+      # scan reads from its record, so one an invalid record names in a malformed value or in a readable extension
+      # envelope still blocks; a valid group lists only its own link, the one the retarget moves.
+      def names_by_link(spec, walked)
+        groups, _unreadable, invalid = walked
+        found = Hash.new { |names, link| names[link] = LinkedNames.new(:unlinkable => [], :blocking => []) }
+        [[groups, :unlinkable], [invalid, :blocking]].each do |found_groups, list|
+          found_groups.each do |group|
+            name = group.name.empty? ? "#{spec.label} #{group.path.join('/')}" : group.name
+            linked_ids(spec, group.record, :envelopes => list == :blocking).each { |link| found[link][list] << name }
+          end
         end
-        found.transform_values { |names| names.sort_by { |name| [name.sub(/\d+\z/, ""), name[/\d+\z/].to_i, name] } }
+        found.transform_values do |names|
+          LinkedNames.new(:unlinkable => sorted_names(names.unlinkable), :blocking => sorted_names(names.blocking))
+        end
+      end
+
+      # The ids of `spec.link_kind` a group record's core references name, and with `envelopes` its readable extension
+      # envelopes too, as the engine's incoming-reference scan reads them.
+      def linked_ids(spec, record, envelopes:)
+        record = LineGroups.scannable(record)
+        targets = spec.group_record_kind.referenced_targets(record)
+        targets += Records::Extension.envelope_targets(record) if envelopes
+        targets.filter_map { |kind, id| id if kind == spec.link_kind }.uniq
+      end
+
+      def sorted_names(names)
+        names.sort_by { |name| [name.sub(/\d+\z/, ""), name[/\d+\z/].to_i, name] }
       end
 
       # The containment rows (`{ path, zone }`, zone nil or named) for root-to-Group paths, a page at a time.

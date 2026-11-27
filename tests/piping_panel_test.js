@@ -131,6 +131,31 @@ test("Reset to default shows only while a Pipe Type's color differs from its ass
     assert.deepStrictEqual(focused, [false], "focus returns to the Colour cell once the repaint enables it");
   });
 
+test("a colour response that lands after focus moved elsewhere leaves focus where it went", function () {
+  var o = setup(TYPES), records = o.state.sections[TYPES].value.records, form = o.view(TYPES).colour;
+  Object.assign(records[1].values, { assigned_color: "#ff7f0e", color: "#123456" });
+  o.paint();
+  var cell = o.root.querySelector("[data-row-key=" + fixtures.PT2 + "]").querySelector(".col-color")._color;
+  form.open(records[1], cell);
+  press(form.reset);
+  var elsewhere = dom.element("input");
+  o.root.appendChild(elsewhere);
+  elsewhere.focus();
+  var focused = [];
+  cell.focus = function () { focused.push(this.disabled); };
+  act(o, last(o, TYPES + ".update"), { status: "completed", value: {} });
+  assert.strictEqual(form.root.hidden, true);
+  assert.deepStrictEqual(focused, [], "the late repaint does not pull focus back to the Colour cell");
+  assert.strictEqual(form.focusAfterPaint, null, "and holds no restore for a later repaint");
+  o.paint();
+  assert.deepStrictEqual(focused, []);
+  form.open(records[1], cell);
+  press(form.reset);
+  form.hex.blur();
+  act(o, last(o, TYPES + ".update"), { status: "completed", value: {} });
+  assert.deepStrictEqual(focused, [false], "focus fallen to the body while the request was out is given back");
+});
+
 test("the bar shows only the chosen role's values and Assign sends the selection's references and values",
   function () {
     var o = setup(), bar = o.view(PIPING).bar;

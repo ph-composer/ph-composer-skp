@@ -16,6 +16,10 @@ module PhComposer
       # endpoints in metres and `vertex_ids` its two vertices' persistent ids, in the same order; `shared` as the
       # occurrence's.
       Edge = Struct.new(:path, :group, :record, :points_m, :vertex_ids, :shared, keyword_init: true)
+      # A group whose stored record was read but fails its schema: its root-to-Group path, record and name. The walk
+      # lists it as unreadable and reads none of its Edges; a linked record's delete still meets it
+      # (GroupOperations.names_by_link).
+      Invalid = Struct.new(:path, :record, :name, keyword_init: true)
 
       module_function
 
@@ -38,12 +42,12 @@ module PhComposer
         [found, unreadable.sort_by { |row| row.fetch("path") }]
       end
 
-      # Every readable line group occurrence, and the groups that cannot be read, each as `{ path, code, message }`.
-      # Transforms compose from the root, so a context open or not gives world points
-      # (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit contexts").
+      # Every readable line group occurrence, the groups that cannot be read, each as `{ path, code, message }`, and
+      # among those each one whose record was read but fails its schema as an Invalid. Transforms compose from the
+      # root, so a context open or not gives world points (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit
+      # contexts").
       def walk(spec, model)
-        groups = []
-        unreadable = []
+        found = [[], [], []]
         pending = [[model.entities, [], Geom::Transformation.new, false]]
         until pending.empty?
           entities, path, transform, shared = pending.shift
@@ -54,11 +58,11 @@ module PhComposer
             current = path + [entity.persistent_id]
             placed = transform * entity.transformation
             inside = shared || shared?(entity)
-            read_group(spec, entity, current, placed, inside, groups, unreadable) if spec.group?(entity)
+            read_group(spec, entity, current, placed, inside, found) if spec.group?(entity)
             pending << [contents, current, placed, inside]
           end
         end
-        [groups, unreadable]
+        found
       end
 
       # An unreadable record's row, its message cut to MAX_MESSAGE.
@@ -66,9 +70,11 @@ module PhComposer
         { "path" => path, "code" => "record.unreadable", "message" => problem.to_s[0, MAX_MESSAGE] }
       end
 
-      def read_group(spec, entity, path, transform, shared, groups, unreadable)
+      def read_group(spec, entity, path, transform, shared, (groups, unreadable, invalid))
         record, problem = LineGroups.read(entity, spec.group_store)
-        problem ||= record && spec.group_record_kind.problems(record).first
+        if record && (problem = spec.group_record_kind.problems(record).first)
+          invalid << Invalid.new(:path => path, :record => record, :name => entity.name.to_s)
+        end
         return unreadable << unreadable_row(path, problem) if problem
 
         edges = entity.entities.select { |child| spec.edge?(child) }

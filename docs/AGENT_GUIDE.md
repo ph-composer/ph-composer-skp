@@ -1395,7 +1395,9 @@ with `ph_composer.ducting.groups.unlink`, sending each row's `reference` and its
 `expected_values`. Deleting a Ventilator a group names refuses unless `replacement_id` names another
 Ventilator, which the group then names, or is null, which unlinks it. `ph_composer.ducting.ventilators`
 lists each Ventilator's linked groups in `group_names` (the first 20) and `group_count`, so you can tell the
-user which groups a delete leaves unlinked.
+user which groups a delete leaves unlinked. A group whose record cannot be read but still names the
+Ventilator is listed apart, in `blocking_group_names` and `blocking_group_count`: every delete of that
+Ventilator refuses `reference.in_use` until the group is repaired.
 
 Only an Edge directly inside a Ducting group can be a duct. Select Edges in the open group natively, then
 read `ph_composer.ducting.ducts.selection`: each Edge's `reference`, its `group` with the Ventilator, its
@@ -1419,7 +1421,7 @@ record in `unreadable` blocks export too. Beside the runs are `totals` by direct
 `used_length_m`; these apply the quantity, so a line of quantity 2 counts twice. A Ventilator that serves
 a Zone and has no run of a direction carries the warning `ducting.run_missing`.
 `ph_composer.ducting.ventilators` reads the lengths and each Ventilator's linked groups (`group_names`,
-`group_count`), without the runs. `compact`,
+`group_count`, `blocking_group_names`, `blocking_group_count`), without the runs. `compact`,
 `ph_composer.ducting.schedule.details` (`part` `ventilators`, `types` or `unreadable`),
 `ph_composer.ducting.runs.members` and `ph_composer.ducting.runs.locate` work as piping's; a hidden duct
 or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store

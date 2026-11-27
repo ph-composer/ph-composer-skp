@@ -200,8 +200,73 @@ class DuctingGroupTest < PhComposerTestCase
     assert_match(/\[570\] still refers/, refusal["message"])
     rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
     linked = rows.find { |row| row["ventilator_id"] == @erv2 }
-    assert_equal [["Ducting group 570"], 1], linked.values_at("group_names", "group_count"),
-                 "a group the delete refuses over is named, though its record fails its schema"
+    assert_equal [[], 0, ["Ducting group 570"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count"),
+                 "a group whose record fails its schema but names the Ventilator blocks its delete, not unlinked"
+  end
+
+  # One schema-invalid group naming the Ventilator refuses every delete of it, beside a group the delete could move.
+  def test_a_group_failing_its_schema_blocks_every_delete_beside_one_the_delete_could_unlink
+    no_id = Sketchup::Group.new(571, Sketchup::Entities.new([]), :name => "DG-bad")
+    STORE.write(no_id, "schema_version" => 1, "ventilator_id" => @erv1)
+    @model.entities << ducting_group(572, "dcg_LLLLLLLLLLLL", @erv1) << no_id
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+      next if choice.empty?
+
+      assert_equal ["validation.failed"], refusal.dig("detail", "groups").map { |row| row["reason"] }
+      assert_match(/; repair their records, then delete again\.\z/, refusal["message"].split(" Nothing")[0])
+    end
+    assert_equal @erv1, ventilator_of(572)
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [["Ducting group 572"], 1, ["DG-bad"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
+  # The engine reads an array-valued link as naming its member, so that group blocks every delete and is listed.
+  def test_a_group_naming_the_ventilator_in_an_array_blocks_its_delete_and_is_listed
+    listed = Sketchup::Group.new(575, Sketchup::Entities.new([]), :name => "DG-array")
+    STORE.write(listed, D::Group.new_record("dcg_NNNNNNNNNNNN", nil).merge("ventilator_id" => [@erv1]))
+    @model.entities << listed
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+    end
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [[], 0, ["DG-array"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
+  # A Ventilator named only in a readable extension envelope of an invalid record still blocks every delete.
+  def test_an_invalid_group_naming_the_ventilator_in_an_extension_envelope_blocks_its_delete
+    envelope = { "schema_version" => 1, "payload" => { "serves" => @erv1 },
+                 "references" => [{ "path" => "$.serves", "target_kind" => PhComposer::Mechanical::VENTILATOR_KIND,
+                                    "cardinality" => "one" }] }
+    record = D::Group.new_record("dcg_PPPPPPPPPPPP", nil).merge("extension_data" => { "example.notes" => envelope })
+    enveloped = Sketchup::Group.new(576, Sketchup::Entities.new([]), :name => "DG-envelope")
+    STORE.write(enveloped, record.merge("id" => "bad"))
+    empty = Sketchup::Group.new(577, Sketchup::Entities.new([]), :name => "DG-empty")
+    nameless = { "example.notes" => envelope.merge("references" => nil) }
+    STORE.write(empty, record.merge("id" => "bad", "extension_data" => nameless))
+    @model.entities << enveloped << empty
+    [{}, { "replacement_id" => @erv2 }, { "replacement_id" => nil }].each do |choice|
+      refusal = invoke("#{VENTILATORS}.delete", { "id" => @erv1 }.merge(choice))
+      assert_equal %w[refused reference.in_use], refusal.values_at("status", "code"), choice.inspect
+    end
+    rows = query("ph_composer.ducting.ventilators", {}).fetch("ventilators")
+    linked = rows.find { |row| row["ventilator_id"] == @erv1 }
+    assert_equal [[], 0, ["DG-envelope"], 1],
+                 linked.values_at("group_names", "group_count", "blocking_group_names", "blocking_group_count")
+  end
+
+  def test_the_ventilators_read_walks_the_model_once
+    @model.entities << ducting_group(573, "dcg_MMMMMMMMMMMM", @erv1, [edge(574)])
+    before = @model.entities.each_count
+    query("ph_composer.ducting.ventilators", {})
+    assert_equal 1, @model.entities.each_count - before
   end
 
   def test_the_list_pages_the_occurrences_in_path_order

@@ -159,5 +159,22 @@ check({ name: "ducting", output }, async ({ newPage, step }) => {
       await page.keyboard.press("Escape");
     }
   }
+  step("the preview's Ventilator delete refuses over its Ducting groups without a replacement, as the host does");
+  const deleted = await host(`(() => {
+    const preview = window.previewHost, mechanical = preview.mechanical;
+    Object.keys(mechanical.serves).forEach(zone => { if (mechanical.serves[zone] === ${JSON.stringify(ERV2)}) {
+      delete mechanical.serves[zone]; } });
+    const link = () => preview.ducting.groups.filter(group => group.values.ventilator_id === ${JSON.stringify(ERV2)})
+      .map(group => group.name);
+    const remove = params => preview.apply({ name: "ph_composer.mechanical.ventilators.delete", params,
+      request_id: "check", session: preview.session, expected_revision: preview.revision });
+    const linked = link(), revision = preview.revision, plain = remove({ id: ${JSON.stringify(ERV2)} });
+    const kept = [linked.length > 0, JSON.stringify(link()) === JSON.stringify(linked), preview.revision === revision];
+    const cleared = remove({ id: ${JSON.stringify(ERV2)}, replacement_id: null });
+    return { plain: [plain.status, plain.code], kept, cleared: cleared.status, after: link() };
+  })()`);
+  assert.deepEqual(deleted, { plain: ["refused", "reference.in_use"], kept: [true, true, true], cleared: "completed",
+    after: [] });
+
   return `ducting browser checks passed; screenshots: ${output}`;
 });

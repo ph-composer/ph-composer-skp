@@ -334,7 +334,9 @@ Hot water flow stays in L/h per m².
 6. **Columns** hides Manufacturer, Model and Notes. The palette in the **Serves** header colours each Zone
    in the model by its Ventilator; a Zone with none stays uncoloured. **Duplicate** copies a Ventilator,
    and **Delete** asks which Ventilator takes its place on its Zones and Ducting groups, or clears them; it
-   names the Ducting groups that clearing leaves with no Ventilator.
+   names the Ducting groups that clearing leaves with no Ventilator. A Ducting group whose stored data cannot
+   be read but still names the Ventilator is listed on its own, and Delete stays unavailable until that group
+   is repaired.
 
 ## Add heat pumps
 

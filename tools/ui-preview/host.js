@@ -709,7 +709,8 @@
       var names = groups.filter(function (group) { return group.values.ventilator_id === record.id; })
         .map(function (group) { return group.name || "Ducting group " + group.path.join("/"); }).sort();
       return { ventilator_id: record.id, name: record.values.name, outdoor_air_length_m: length("outdoor_air"),
-        exhaust_air_length_m: length("exhaust_air"), group_names: names.slice(0, 20), group_count: names.length };
+        exhaust_air_length_m: length("exhaust_air"), group_names: names.slice(0, 20), group_count: names.length,
+        blocking_group_names: [], blocking_group_count: 0 };
     });
   };
   /* The ducting reads, answered on the next turn as the host does. Synthetic; Ruby builds the runs from the Model. */
@@ -734,11 +735,13 @@
               return host.mechanical.serves[zone] === row.ventilator_id;
             }) && !row[direction + "_length_m"];
           });
-          return Object.assign({ findings: missing.map(function (direction) {
-            return { code: "ducting.run_missing", blocks_export: false, locate: {},
-              message: row.name + " has no " + (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") +
-                " run." };
-          }) }, row);
+          // The schedule's rows carry the lengths and findings; the group names are the Ventilators read's alone.
+          return { ventilator_id: row.ventilator_id, name: row.name, outdoor_air_length_m: row.outdoor_air_length_m,
+            exhaust_air_length_m: row.exhaust_air_length_m, findings: missing.map(function (direction) {
+              return { code: "ducting.run_missing", blocks_export: false, locate: {},
+                message: row.name + " has no " + (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") +
+                  " run." };
+            }) };
         }), types: [], unreadable: [], unreadable_total: 0 };
       }
       host.publish("query.result", { request_id: payload.request_id, session: payload.session,
@@ -1212,7 +1215,11 @@
       var using = Object.keys(served).filter(function (zone) { return served[zone] === target.id; });
       var members = collection === "hot_water_systems" ? hotWater.heaters.concat(hotWater.tanks).filter(
         function (member) { return member.values.hot_water_system_id === target.id; }) : [];
-      if ((using.length || members.length) && params.replacement_id === undefined) {
+      // A Ventilator's Ducting groups name it too, so a delete without a replacement refuses over them as the host's.
+      var linkedGroups = collection === "ventilators" ? this.ducting.groups.filter(function (group) {
+        return group.values.ventilator_id === target.id;
+      }) : [];
+      if ((using.length || members.length || linkedGroups.length) && params.replacement_id === undefined) {
         return refused("reference.in_use", target.values.name + " is in use. " + NOTHING_WRITTEN, this.revision);
       }
       if (members.length && !params.replacement_id) {
@@ -1224,11 +1231,7 @@
       });
       members.forEach(function (member) { member.values.hot_water_system_id = params.replacement_id; });
       // A Ventilator's Ducting groups move to the replacement or are unlinked, as the host's retargeter does.
-      if (collection === "ventilators") {
-        this.ducting.groups.forEach(function (group) {
-          if (group.values.ventilator_id === target.id) group.values.ventilator_id = params.replacement_id || null;
-        });
-      }
+      linkedGroups.forEach(function (group) { group.values.ventilator_id = params.replacement_id || null; });
       records.splice(records.indexOf(target), 1);
     } else if ((name === "serves.assign" || name === "serves.clear") && listSlots[params.slot]) {
       var lists = listSlots[params.slot], chosen = params.zones.map(zoneOf);

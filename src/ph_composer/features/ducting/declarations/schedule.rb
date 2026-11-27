@@ -59,10 +59,23 @@ module PhComposer
         "locate" => Shapes.described({ "type" => "object" }, "The view command and params opening the Ventilator: " \
                                                              "ph_composer.mechanical.locate.")
       })
-      LINKED_VENTILATOR = Shapes.with(VENTILATOR, "group_names" => Shapes.list(Shapes::TEXT).merge(
-        "description" => "The first #{Scan::GROUP_NAMES} Ducting groups linked to it, by name, each cut to " \
-                         "#{OccurrencePath::NAME_CHARACTERS} characters."
-      ), "group_count" => Shapes.described(COUNT, "Every Ducting group linked to it."))
+      LINKED_VENTILATOR = Shapes.with(
+        VENTILATOR,
+        "group_names" => Shapes.list(Shapes::TEXT).merge(
+          "description" => "The first #{Scan::GROUP_NAMES} Ducting groups linked to it whose record passes its " \
+                           "schema, by name, each cut to #{OccurrencePath::NAME_CHARACTERS} characters. A delete " \
+                           "with a replacement or null moves or unlinks them; one locked, shared or nested still " \
+                           "refuses it."
+        ),
+        "group_count" => Shapes.described(COUNT, "Every linked Ducting group whose record passes its schema."),
+        "blocking_group_names" => Shapes.list(Shapes::TEXT).merge(
+          "description" => "The first #{Scan::GROUP_NAMES} Ducting groups whose record fails its schema but still " \
+                           "names it, cut as group_names are. Every delete of it refuses reference.in_use until " \
+                           "they are repaired."
+        ),
+        "blocking_group_count" => Shapes.described(COUNT, "Every Ducting group whose record fails its schema but " \
+                                                          "still names it.")
+      )
       SCHEDULE_VENTILATOR = Shapes.with(VENTILATOR, "findings" => Shapes.list(VENTILATOR_FINDING).merge(
         "description" => "ducting.run_missing when it serves a Zone and has no run of a direction."
       ))
