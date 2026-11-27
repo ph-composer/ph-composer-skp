@@ -613,3 +613,11 @@ and SketchUp was quit.
 The second hold, MS3 cases: no fault and no provider override; none of the four exported. Each save-and-reopen
 step quit SketchUp cleanly before the fresh launch. The Face in M13e's model was erased by the case itself, as
 recorded above.
+
+## D4-49 colour reset host check, 2026-11-27
+
+PR #605 head `8dd65b00`, RBZ built from it, fresh copy of the hold 3 fixture, native panel gestures under one
+full-screen hold with bridge reads between (`_private/host/phase-07-hold3/D4-49/NOTES.md`). A new Pipe Type's
+picker shows Cancel and Apply Color only. After a custom green (`#81a784`; assigned `#1F77B4`) the reopened picker
+shows "Reset to default" with the default swatch; clicking it stores `color` null and displays `#1F77B4`. One
+native Edit > Undo "Edit Pipe Type" restores `#81a784`. Pass. No ledger case owns this check; it is recorded here.
