@@ -349,6 +349,13 @@ test("a Ventilator's Delete lists the Ducting groups that block it apart and off
     Object.assign(rows[0], { blocking_group_names: ["DG-bad"], blocking_group_count: 1 });
     o.paint();
     assert.strictEqual(cancelled, 1, "a blocker arriving while the select has focus moves focus to Cancel");
+    Object.assign(rows[0], { blocking_group_names: [], blocking_group_count: 0 });
+    o.paint();
+    change(form.select, fixtures.mechanical.ERV2.id);
+    form.submitButton.focus();
+    Object.assign(rows[0], { blocking_group_names: ["DG-bad"], blocking_group_count: 1 });
+    o.paint();
+    assert.strictEqual(cancelled, 2, "and so does one arriving while Delete has focus");
     Object.assign(rows[2], { group_names: [], group_count: 0, blocking_group_names: ["DG-8", "DG-9"],
       blocking_group_count: 2 });
     o.paint();

@@ -101,8 +101,10 @@ function (RecordForm, request, snapshot, ui) {
     this.uses.textContent = [this.inUse ? (usage && usage.count ? usage.description : uses ? "Used by: " + uses :
       "Choose a replacement or clear existing uses.") : this.blocked ? (usage.count ? usage.description : "") :
       "Delete " + this.options.label + ' "' + record.values.name + '"?', unknown || ""].filter(Boolean).join(" ");
-    // A refresh that blocks the delete hides the select, so focus held there moves to Cancel rather than the body.
-    if (!this.inUse && !this.select.parentNode.hidden && document.activeElement === this.select) this.cancel.focus();
+    // A refresh that blocks the delete hides the select and holds Delete, so focus held on either moves to Cancel
+    // rather than falling to the body.
+    var active = document.activeElement;
+    if (this.blocked && (active === this.select || active === this.submitButton)) this.cancel.focus();
     this.select.parentNode.hidden = !this.inUse;
     var selected = this.select.value;
     this.select.setAttribute("aria-label", "Replacement " + this.options.label.toLowerCase());

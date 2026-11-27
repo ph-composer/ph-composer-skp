@@ -735,11 +735,13 @@
               return host.mechanical.serves[zone] === row.ventilator_id;
             }) && !row[direction + "_length_m"];
           });
-          return Object.assign({ findings: missing.map(function (direction) {
-            return { code: "ducting.run_missing", blocks_export: false, locate: {},
-              message: row.name + " has no " + (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") +
-                " run." };
-          }) }, row);
+          // The schedule's rows carry the lengths and findings; the group names are the Ventilators read's alone.
+          return { ventilator_id: row.ventilator_id, name: row.name, outdoor_air_length_m: row.outdoor_air_length_m,
+            exhaust_air_length_m: row.exhaust_air_length_m, findings: missing.map(function (direction) {
+              return { code: "ducting.run_missing", blocks_export: false, locate: {},
+                message: row.name + " has no " + (direction === "outdoor_air" ? "Outdoor air" : "Exhaust air") +
+                  " run." };
+            }) };
         }), types: [], unreadable: [], unreadable_total: 0 };
       }
       host.publish("query.result", { request_id: payload.request_id, session: payload.session,

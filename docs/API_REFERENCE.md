@@ -20010,12 +20010,12 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The first 20 Ducting groups linked to it that its delete moves to a replacement or unlinks, by name, each cut to 256 characters."
+            "description": "The first 20 Ducting groups linked to it whose record passes its schema, by name, each cut to 256 characters. A delete with a replacement or null moves or unlinks them; one locked, shared or nested still refuses it."
           },
           "group_count": {
             "type": "integer",
             "minimum": 0,
-            "description": "Every Ducting group its delete moves or unlinks."
+            "description": "Every linked Ducting group whose record passes its schema."
           },
           "blocking_group_names": {
             "type": "array",
@@ -20027,7 +20027,7 @@ Result:
           "blocking_group_count": {
             "type": "integer",
             "minimum": 0,
-            "description": "Every Ducting group blocking its delete."
+            "description": "Every Ducting group whose record fails its schema but still names it."
           }
         }
       }
