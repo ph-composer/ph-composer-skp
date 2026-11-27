@@ -89,7 +89,8 @@ module PhComposer
       # The colour a new type takes: the shared categorical ramp's first that no type of the kind draws in or would
       # return to once its colour is cleared.
       def next_color(records)
-        ColourBy::Palette.unused(records.flat_map { |record| [color(record), record["assigned_color"]] }.compact.uniq)
+        taken = records.flat_map { |record| [color(record), record["assigned_color"]] }.compact.uniq
+        ColourBy::Palette.unused(taken, :count => records.length)
       end
 
       # What keeps a type out of an export once a pipe uses it: insulation with no conductivity. A bare pipe needs

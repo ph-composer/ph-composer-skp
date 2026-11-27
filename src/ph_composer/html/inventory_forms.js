@@ -399,7 +399,8 @@ function (RecordForm, request, snapshot, ui) {
     this.record = JSON.parse(JSON.stringify(record));
     this.trigger = trigger;
     this.hex.value = record.values.color || (record.display || {}).color || "#ffffff";
-    this.initialColor = this.hex.value;
+    // Compared as the field is, in lower case, so a stored "#1F77B4" opened and left alone is not an edit.
+    this.initialColor = this.hex.value.trim().toLowerCase();
     this.title.textContent = "Color for " + record.values.name;
     this.error.textContent = "";
     this.root.setAttribute("aria-label", this.title.textContent);

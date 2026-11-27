@@ -1203,6 +1203,12 @@
         if (params.replacement_id) served[zone] = params.replacement_id; else delete served[zone];
       });
       members.forEach(function (member) { member.values.hot_water_system_id = params.replacement_id; });
+      // A Ventilator's Ducting groups move to the replacement or are unlinked, as the host's retargeter does.
+      if (collection === "ventilators") {
+        this.ducting.groups.forEach(function (group) {
+          if (group.values.ventilator_id === target.id) group.values.ventilator_id = params.replacement_id || null;
+        });
+      }
       records.splice(records.indexOf(target), 1);
     } else if ((name === "serves.assign" || name === "serves.clear") && listSlots[params.slot]) {
       var lists = listSlots[params.slot], chosen = params.zones.map(zoneOf);

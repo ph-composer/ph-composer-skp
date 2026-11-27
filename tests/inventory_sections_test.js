@@ -382,6 +382,15 @@ test("a modified color draft survives an outside navigation click", function () 
   assert.strictEqual(o.sent.length, 0);
 });
 
+test("a stored upper-case color opened and left alone closes on an outside click", function () {
+  var o = setup(), view = materials(o);
+  var record = JSON.parse(JSON.stringify(o.state.sections["ph_composer.assemblies.materials"].value.records[0]));
+  record.values.color = "#1F77B4";
+  view.color.open(record, view.inventory.scroll._table.rows.mat_a.cells.color._color);
+  view.color.dismissOutside({ target: o.roots.assemblies, preventDefault: function () {} });
+  assert.strictEqual(view.color.root.hidden, true, "an untouched color is no draft, whatever its case");
+});
+
 test("withdrawn create requests can reopen with an enabled Cancel after their feature returns", function () {
   var cases = [[function (o) { return materials(o).newMaterial; }, "ph_composer.assemblies.materials"]];
   cases.forEach(function (entry) {

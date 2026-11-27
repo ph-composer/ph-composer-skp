@@ -1418,7 +1418,8 @@ record in `unreadable` blocks export too. Beside the runs are `totals` by direct
 `outdoor_air_length_m` and `exhaust_air_length_m`, and one `types` row per Duct Type with its
 `used_length_m`; these apply the quantity, so a line of quantity 2 counts twice. A Ventilator that serves
 a Zone and has no run of a direction carries the warning `ducting.run_missing`.
-`ph_composer.ducting.ventilators` reads the lengths alone. `compact`,
+`ph_composer.ducting.ventilators` reads the lengths and each Ventilator's linked groups (`group_names`,
+`group_count`), without the runs. `compact`,
 `ph_composer.ducting.schedule.details` (`part` `ventilators`, `types` or `unreadable`),
 `ph_composer.ducting.runs.members` and `ph_composer.ducting.runs.locate` work as piping's; a hidden duct
 or group refuses `ducting.hidden`. Identifiers (`duct_` and a digest) follow the geometry; never store

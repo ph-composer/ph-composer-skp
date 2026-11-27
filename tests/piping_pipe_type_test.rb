@@ -95,6 +95,13 @@ class PipingPipeTypeTest < PhComposerTestCase
                                       values(create("name" => "PT-3")).fetch("assigned_color")]
   end
 
+  # Past the ramp's ten colours, new types keep cycling through it rather than repeating its first.
+  def test_types_past_the_ramp_keep_cycling_its_colours
+    ids = (1..12).map { |number| create("name" => "PT-#{number}") }
+    colours = ids.map { |id| values(id).fetch("assigned_color") }
+    assert_equal [10, colours.first(2)], [colours.first(10).uniq.length, colours.last(2)]
+  end
+
   def test_insulation_with_no_conductivity_blocks_the_type_and_a_bare_pipe_needs_none
     blocked = create("name" => "Unknown", "insulation_conductivity_w_mk" => nil)
     refute values(blocked).key?("insulation_conductivity_w_mk"), "a null on create leaves it absent"
