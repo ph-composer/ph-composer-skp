@@ -86,6 +86,18 @@ class ContextNavigationTest < PhComposerTestCase
     assert_nil @model.active_path
   end
 
+  # The refusal names a native tool by its menu name, and any tool whose host name has not been read only as a
+  # SketchUp tool.
+  def test_a_busy_tool_is_named_as_the_menu_names_it
+    @model.tools.use_native_tool("SketchTool")
+    line = view(OPEN, "path" => [100])
+    @model.tools.use_native_tool("UnreadNativeTool")
+    other = view(OPEN, "path" => [100])
+    assert_equal ["The Line tool is in use; the edit path moves once the user returns to Select. Nothing moved.",
+                  "A SketchUp tool is in use; the edit path moves once the user returns to Select. Nothing moved."],
+                 [line, other].map { |outcome| outcome["message"] }
+  end
+
   def test_a_locked_copy_or_a_users_tool_refuses_before_any_boundary_runs
     @volume.locked = false
     @model.active_path = [@zone, @space, @volume]

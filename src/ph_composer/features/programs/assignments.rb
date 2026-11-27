@@ -67,7 +67,9 @@ module PhComposer
         state = OccupancyState.read(request)
         target = targets!(state, [zone]).first
         if target.assignment.fetch("dwelling_id").nil?
-          raise CodedError.new("validation.failed", "Zone #{target.name} is in no Dwelling, so it holds no counts.")
+          raise CodedError.new("validation.failed",
+                               "#{Records::Names.titled('Zone',
+                                                        target.name)} is in no Dwelling, so it holds no counts.")
         end
 
         stage(request, proposal, { target => target.assignment.merge("bedrooms" => bedrooms,
@@ -83,8 +85,8 @@ module PhComposer
         targets = zones.empty? ? [] : targets!(state, zones)
         in_dwelling = targets.find { |zone| zone.assignment.fetch("dwelling_id") }
         if in_dwelling
-          raise CodedError.new("validation.failed", "Zone #{in_dwelling.name} is in a Dwelling; its Equipment Set is " \
-                                                    "the Dwelling's.")
+          raise CodedError.new("validation.failed", "#{Records::Names.titled('Zone', in_dwelling.name)} is in a " \
+                                                    "Dwelling; its Equipment Set is the Dwelling's.")
         end
 
         set_id = stored_id!(request, proposal, EQUIPMENT_SET_KIND, equipment_set_id)

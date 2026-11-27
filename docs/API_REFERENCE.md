@@ -1825,6 +1825,11 @@ Values:
             "color": {
               "type": "string",
               "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "assigned_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
             }
           }
         },
@@ -1897,6 +1902,11 @@ Values:
     "color": {
       "type": "string",
       "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "assigned_color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
     }
   }
 }
@@ -4755,6 +4765,11 @@ Values:
             "color": {
               "type": "string",
               "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "assigned_color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
             }
           }
         },
@@ -4819,6 +4834,11 @@ Values:
     "color": {
       "type": "string",
       "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "assigned_color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
     }
   }
 }
@@ -17165,6 +17185,11 @@ Result:
                       "color": {
                         "type": "string",
                         "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "assigned_color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                        "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                       }
                     }
                   },
@@ -17237,6 +17262,11 @@ Result:
               "color": {
                 "type": "string",
                 "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "assigned_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
               }
             }
           },
@@ -17547,6 +17577,11 @@ Result:
                       "color": {
                         "type": "string",
                         "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "assigned_color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                        "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                       }
                     }
                   },
@@ -17619,6 +17654,11 @@ Result:
               "color": {
                 "type": "string",
                 "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "assigned_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
               }
             }
           },
@@ -19897,7 +19937,7 @@ Example params:
 
 ### `ph_composer.ducting.ventilators`
 
-Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times its quantity, 0 with none, for the panel. It walks the Model. Owner: `ph_composer.ducting`.
+Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times its quantity, 0 with none, and the Ducting groups linked to it, for the panel. It walks the Model. Owner: `ph_composer.ducting`.
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.ducting.schedule.details` instead.
 
@@ -19933,7 +19973,9 @@ Result:
           "ventilator_id",
           "name",
           "outdoor_air_length_m",
-          "exhaust_air_length_m"
+          "exhaust_air_length_m",
+          "group_names",
+          "group_count"
         ],
         "properties": {
           "ventilator_id": {
@@ -19960,6 +20002,18 @@ Result:
               "type": "string"
             },
             "description": "The names cut to 256 characters; absent when none was."
+          },
+          "group_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The first 20 Ducting groups linked to it, by name, each cut to 256 characters."
+          },
+          "group_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Every Ducting group linked to it."
           }
         }
       }
@@ -33364,6 +33418,11 @@ Result:
                       "color": {
                         "type": "string",
                         "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "assigned_color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                        "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                       }
                     }
                   },
@@ -33428,6 +33487,11 @@ Result:
               "color": {
                 "type": "string",
                 "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "assigned_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
               }
             }
           },
@@ -33732,6 +33796,11 @@ Result:
                       "color": {
                         "type": "string",
                         "pattern": "^#[0-9A-Fa-f]{6}$"
+                      },
+                      "assigned_color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                        "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                       }
                     }
                   },
@@ -33796,6 +33865,11 @@ Result:
               "color": {
                 "type": "string",
                 "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "assigned_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
               }
             }
           },
@@ -77328,7 +77402,7 @@ Example params:
 
 ### `ph_composer.ducting.duct_types.create`
 
-Create one Duct Type. Unless values give them, it is a round duct of diameter_mm 160 with 25.4 mm of reflective insulation at 0.04 W/mK and no stored color; a rectangular one gives width_mm and height_mm and no diameter. A missing or other-shape dimension refuses params.invalid. Owner: `ph_composer.ducting`.
+Create one Duct Type. Unless values give them, it is a round duct of diameter_mm 160 with 25.4 mm of reflective insulation at 0.04 W/mK and no stored color, its assigned_color the next unused colour of the shared ramp; a rectangular one gives width_mm and height_mm and no diameter. A missing or other-shape dimension refuses params.invalid. Owner: `ph_composer.ducting`.
 
 Undo step: Create Duct Type. Creates one Model-owned definition.
 
@@ -77486,6 +77560,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -77558,6 +77637,11 @@ Params:
         "color": {
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "The new Duct Type's values; name is required and every other value takes its default."
@@ -77775,6 +77859,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -77860,6 +77949,14 @@ Params:
             "null"
           ],
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
@@ -78019,7 +78116,7 @@ Example params:
 
 ### `ph_composer.ducting.duct_types.update`
 
-Edit guarded values of one Duct Type; a changed expected value refuses and writes nothing. A new shape removes the old shape's dimensions and must give its own; a missing or other-shape dimension refuses params.invalid. A null color returns the type to its default colour. Owner: `ph_composer.ducting`.
+Edit guarded values of one Duct Type; a changed expected value refuses and writes nothing. A new shape removes the old shape's dimensions and must give its own; a missing or other-shape dimension refuses params.invalid. A null color returns the type to the colour it took when made. Owner: `ph_composer.ducting`.
 
 Undo step: Edit Duct Type. Updates one definition and preserves its metadata.
 
@@ -78293,6 +78390,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -78378,6 +78480,14 @@ Params:
             "null"
           ],
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
@@ -78812,7 +78922,7 @@ Example params:
 
 Wrap loose lines drawn in the open context in a new Ducting group linked to a Ventilator, where they are; the lines keep their ids and the edit path stays. Owner: `ph_composer.ducting`.
 
-Undo step: Make Ducting Group. Adds a Group with a Ducting group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay.
+Undo step: Make Ducting Group. Adds a Group named "Ducting group N" with a Ducting group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay. Erases any Face the lines alone close; a Face with an unselected Edge refuses as target.wrong_kind.
 
 Before calling: The Ventilator exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. ducts.selection reads make_refusal null over them.
 
@@ -78856,11 +78966,22 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "group_id"
+    "group_id",
+    "name",
+    "removed_faces"
   ],
   "properties": {
     "group_id": {
       "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "The new group's name, the first free \"<kind> group N\" of its kind."
+    },
+    "removed_faces": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The Faces the lines alone closed, erased in the same Undo step."
     }
   }
 }
@@ -91742,7 +91863,7 @@ Example params:
 
 Wrap loose lines drawn in the open context in a new Piping group linked to a Hot Water System, where they are; the lines keep their ids and the edit path stays. Owner: `ph_composer.piping`.
 
-Undo step: Make Piping Group. Adds a Group with a Piping group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay.
+Undo step: Make Piping Group. Adds a Group named "Piping group N" with a Piping group record in the lines' collection and moves the lines into it; their persistent ids and dictionaries stay. Erases any Face the lines alone close; a Face with an unselected Edge refuses as target.wrong_kind.
 
 Before calling: The Hot Water System exists. The lines are loose Edges bounding no Face, directly in the open context, outside every Zone and every Group another feature owns, reached through plain unlocked unshared Groups. pipes.selection reads make_refusal null over them.
 
@@ -91786,11 +91907,22 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "group_id"
+    "group_id",
+    "name",
+    "removed_faces"
   ],
   "properties": {
     "group_id": {
       "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "The new group's name, the first free \"<kind> group N\" of its kind."
+    },
+    "removed_faces": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The Faces the lines alone closed, erased in the same Undo step."
     }
   }
 }
@@ -91917,7 +92049,7 @@ Example params:
 
 ### `ph_composer.piping.pipe_types.create`
 
-Create one Pipe Type. Unless values give them, it is a 1/2 in (diameter_mm 12.7) Copper L pipe (material 2) with 12.7 mm of reflective insulation at 0.04 W/mK, insulation_quality 1, and no stored color. Owner: `ph_composer.piping`.
+Create one Pipe Type. Unless values give them, it is a 1/2 in (diameter_mm 12.7) Copper L pipe (material 2) with 12.7 mm of reflective insulation at 0.04 W/mK, insulation_quality 1, and no stored color; its assigned_color is the next unused colour of the shared ramp. Owner: `ph_composer.piping`.
 
 Undo step: Create Pipe Type. Creates one Model-owned definition.
 
@@ -92067,6 +92199,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -92131,6 +92268,11 @@ Params:
         "color": {
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "The new Pipe Type's values; name is required and every other value takes its default."
@@ -92339,6 +92481,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -92422,6 +92569,14 @@ Params:
             "null"
           ],
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
@@ -92702,7 +92857,7 @@ Params:
           "pattern": "^#[0-9A-Fa-f]{6}$"
         }
       },
-      "description": "The values to change; any not given stay. Null removes an optional value; a null color returns the type to its default colour."
+      "description": "The values to change; any not given stay. Null removes an optional value; a null color returns the type to the colour it took when made."
     },
     "expected_values": {
       "type": "object",
@@ -92845,6 +93000,11 @@ Params:
                 "color": {
                   "type": "string",
                   "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "assigned_color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$",
+                  "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
                 }
               }
             },
@@ -92928,6 +93088,14 @@ Params:
             "null"
           ],
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "assigned_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The colour the type took when it was made, the next unused one of the shared categorical ramp; a null color returns to it."
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
@@ -131316,3 +131484,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.107 | 2026-11-25 | ph_composer.ducting exports its ducts: the export section ph_composer.ducting.export.ducting appends each Ventilator's Outdoor air and Exhaust air runs to its ventilation systems, a run of quantity N as N elements, the query ph_composer.ducting.export_preflight lists its checks, and the code ducting.ventilator_unexported notes a Ventilator whose ducts no exported Zone takes. |
 | 1.108 | 2026-11-25 | ph_composer.ducting.schedule.all is the panel's whole schedule read, and the Colour-by modes ph_composer.ducting.by_direction and ph_composer.ducting.by_type colour each duct by its direction or Duct Type with legend lengths, quantity applied. |
 | 1.109 | 2026-11-26 | ph_composer.piping.groups.make and ph_composer.ducting.groups.make replace groups.create: they wrap loose lines drawn in the open context, named by edge_paths, in a new group with its linked record, and leave the edit path where it is, since SketchUp deletes an empty Group at commit. pipes.selection, pipes.selection_all, ducts.selection and ducts.selection_all add make_refusal, what groups.make over the selection meets. |
+| 1.110 | 2026-11-27 | groups.make (piping and ducting) names the new group the first free "Piping group N" or "Ducting group N" and erases, in the same Undo step, each Face the lines alone close; its result adds name and removed_faces. A Face with an unselected Edge still refuses target.wrong_kind. Pipe Types and Duct Types add assigned_color, the next unused colour of the shared categorical ramp, set on create and duplicate; a null color returns to it. ph_composer.ducting.ventilators rows add group_names and group_count. session.busy from ph_composer.context.open and ph_composer.context.root names a native tool by its menu name, or "A SketchUp tool". Messages quote a Zone's name after the word Zone. |

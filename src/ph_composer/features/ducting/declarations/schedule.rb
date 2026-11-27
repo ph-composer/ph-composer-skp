@@ -59,6 +59,10 @@ module PhComposer
         "locate" => Shapes.described({ "type" => "object" }, "The view command and params opening the Ventilator: " \
                                                              "ph_composer.mechanical.locate.")
       })
+      LINKED_VENTILATOR = Shapes.with(VENTILATOR, "group_names" => Shapes.list(Shapes::TEXT).merge(
+        "description" => "The first #{Scan::GROUP_NAMES} Ducting groups linked to it, by name, each cut to " \
+                         "#{OccurrencePath::NAME_CHARACTERS} characters."
+      ), "group_count" => Shapes.described(COUNT, "Every Ducting group linked to it."))
       SCHEDULE_VENTILATOR = Shapes.with(VENTILATOR, "findings" => Shapes.list(VENTILATOR_FINDING).merge(
         "description" => "ducting.run_missing when it serves a Zone and has no run of a direction."
       ))
@@ -127,10 +131,11 @@ module PhComposer
         end
         feature.query(VENTILATORS,
                       :description => "Every Ventilator's Outdoor air and Exhaust air duct lengths, each line times " \
-                                      "its quantity, 0 with none, for the panel. It walks the Model.",
+                                      "its quantity, 0 with none, and the Ducting groups linked to it, for the " \
+                                      "panel. It walks the Model.",
                       :response => { "bounded" => false, "prefer" => SchedulePages::DETAILS },
                       :refuses => READ, :params => Shapes::NONE,
-                      :result => Shapes.object({ "ventilators" => Shapes.list(VENTILATOR) }),
+                      :result => Shapes.object({ "ventilators" => Shapes.list(LINKED_VENTILATOR) }),
                       :examples => [{}]) { |request| Scan.ventilators(request) }
         feature.snapshot_section(VENTILATORS_SECTION, :query => VENTILATORS)
         Common.install_locate(feature, LINE_GROUP, LOCATE)

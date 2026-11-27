@@ -45,12 +45,16 @@ PhComposerUI.define("line_groups/assign_bar", ["request", "snapshot", "workspace
     this.make.className = "line-group-new";
     this.make.setAttribute("aria-label", "Make " + spec.label + " from selected lines");
     this.makeReason = ui.element("span", "line-group-bar-reason");
+    // Make and its reason wrap as one, so the reason's icon never starts a row of its own.
+    this.makeGroup = ui.element("span", "line-group-bar-make");
+    this.makeGroup.appendChild(this.make);
+    this.makeGroup.appendChild(this.makeReason);
     this.rows = []; this.writable = []; this.types = []; this.chosen = ""; this.makeRefusal = null;
   }
   /* Lays the bar out: the count and the type, the feature's `middle` controls, Assign with its reason and Clear,
      the feature's `end` controls, then Make <group> with its reason. */
   Bar.prototype.place = function (middle, end) {
-    [this.count, this.type].concat(middle, [this.assign, this.reason, this.clear], end, [this.make, this.makeReason])
+    [this.count, this.type].concat(middle, [this.assign, this.reason, this.clear], end, [this.makeGroup])
       .forEach(function (node) { this.root.appendChild(node); }, this);
   };
   Bar.prototype.changed = function () { this.paint(); };

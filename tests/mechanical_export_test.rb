@@ -121,7 +121,7 @@ class MechanicalExportTest < PhComposerTestCase
     assert_equal [zone_id("A")], ventilation(extraction).map { |row| row.fetch("zone_id") }
     assert_equal [["mechanical.zone_left_out", @erv.fetch("ERV-2")]], mechanical_notes(extraction),
                  "no unventilated or unserved finding for what leaves with Zone B"
-    assert_match(/ERV-2 serves Zone Zone B, which is in no Building Segment/,
+    assert_match(/ERV-2 serves Zone “Zone B”, which is in no Building Segment/,
                  extraction.findings.find { |row| row["code"] == "mechanical.zone_left_out" }.fetch("message"))
     assert_equal [["mechanical.zone_left_out", @erv.fetch("ERV-2"), false]],
                  preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }

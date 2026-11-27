@@ -260,7 +260,8 @@ Both take an optional `expected_path`, the path the client last read, and refuse
 (`target.not_found`), one that is locked or has a locked copy (`target.locked`, which SketchUp
 would refuse too), a Live Component (`target.wrong_kind`) and an entity open now that the destination
 reaches through another copy of its parent (`target.shared_definition`), and both refuse `session.busy` while the user has a tool other than Select or a
-camera tool active, whose gesture a path change would end; each refusal comes before any boundary
+camera tool active, whose gesture a path change would end (the message names a native tool by its menu name
+from `ModelSession::TOOL_MENU_NAMES`, and any other as "A SketchUp tool"); each refusal comes before any boundary
 runs, with nothing moved. They enter through
 `EditContext`, so each feature's boundary runs: leaving an unprotected Volume, Spaces protects it in a
 transparent step joined to the move. SketchUp records a path change that leaves a Group as an Undo
@@ -937,7 +938,8 @@ are the catalog `ph_composer.piping.pipe_types`, with `list`, `all`, the snapsho
 `piping.insulation_conductivity_missing` for an insulated type with no conductivity. The
 [Pipe Types walkthrough](../tools/examples/authoring/pipe_types_walkthrough.rb) authors with the panel closed.
 Piping groups are `ph_composer.piping.groups` (`make`, which wraps selected loose lines in a new group where they
-are drawn and leaves the edit path, `link`, `unlink`, `list`, `all`) and pipes `ph_composer.piping.pipes` (`assign`
+are drawn, named the first free "Piping group N", erases the Faces the lines alone close in the same Undo step
+(API 1.110) and leaves the edit path, `link`, `unlink`, `list`, `all`) and pipes `ph_composer.piping.pipes` (`assign`
 and `clear` over explicit Edges, at most 250, and `selection`, `selection_all` with the snapshot section
 `ph_composer.piping.pipes.selected`, each with `make_refusal`, what `groups.make` over the selection meets); the
 reference targets are `ph_composer.piping.group` and `ph_composer.piping.pipe`, and the codes
@@ -966,12 +968,14 @@ requires Mechanical and Zones. Its Duct Types are the catalog `ph_composer.ducti
 `params.invalid`, and a row's `export_blockers` names `ducting.insulation_conductivity_missing` for an insulated type
 with no conductivity. The [Duct Types walkthrough](../tools/examples/authoring/duct_types_walkthrough.rb) authors
 with the panel closed. Ducting groups are `ph_composer.ducting.groups` (`make`, which wraps selected loose lines in a
-new group where they are drawn and leaves the edit path, `link`, `unlink`, `list`, `all`) and ducts
+new group where they are drawn, named as piping's are, and leaves the edit path, `link`, `unlink`, `list`, `all`) and ducts
 `ph_composer.ducting.ducts` (`assign` and `clear` over explicit Edges, at most 250, and `selection`, `selection_all`
 with the snapshot section `ph_composer.ducting.ducts.selected`, each with `make_refusal`); the reference
 targets are `ph_composer.ducting.group` and `ph_composer.ducting.duct`, and the codes `ducting.outside_group`,
 `ducting.group_in_zone` and `ducting.group_nested`. A Ventilator delete with an id or null moves or clears the
-groups naming it through the registered reference retargeters. The
+groups naming it through the registered reference retargeters; `ph_composer.ducting.ventilators` rows name
+those groups (`group_names`, `group_count`, API 1.110), which the Ventilators table's Delete lists through
+`inventory_forms.contributeUsage`. The
 [ducting assignment walkthrough](../tools/examples/authoring/ducting_assignment_walkthrough.rb) draws loose lines,
 makes a group from them, opens it, assigns and clears with the panel closed; [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "ERV ducting", is the recipe.
 The bounded read `ph_composer.ducting.schedule` (with `compact`, `ph_composer.ducting.schedule.details` for its

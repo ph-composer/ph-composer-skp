@@ -18,7 +18,8 @@ class PipeTypesWalkthroughTest < PhComposerTestCase
     model = Sketchup.active_model
     model.undo
     pt2 = PipeTypesWalkthrough::PT_1.merge("name" => "PT-2", "material" => 2, "diameter_mm" => 12.7,
-                                           "insulation_thickness_mm" => 0.0, "insulation_conductivity_w_mk" => 0.04)
+                                           "insulation_thickness_mm" => 0.0, "insulation_conductivity_w_mk" => 0.04,
+                                           "assigned_color" => "#FF7F0E")
     assert_equal PipeTypesWalkthrough::EXPECTED + [[pt2, {}]], PipeTypesWalkthrough.state
     4.times { model.undo }
     assert_empty PipeTypesWalkthrough.state

@@ -209,7 +209,9 @@ module Sketchup
       @paths = []
     end
 
-    def do_pick(x_value, y_value)
+    # The stub reaches no further for a wider aperture; it records the one each pick asked for.
+    def do_pick(x_value, y_value, aperture = 0)
+      (@view.apertures ||= []) << aperture
       found = @view.picks[[x_value, y_value]]
       @paths = found.nil? ? [] : (found.first.is_a?(Array) ? found : [found])
       @paths.length
@@ -291,7 +293,7 @@ module Sketchup
 
   class View
     attr_accessor :line_width, :drawing_color, :pick_result, :line_stipple, :tooltip
-    attr_accessor :model_units_per_pixel
+    attr_accessor :model_units_per_pixel, :apertures
     attr_reader :camera
     attr_reader :model, :draws, :screen_draws, :texts, :invalidations, :zoomed, :picks, :inferences, :input_draws
 
@@ -713,6 +715,11 @@ module Sketchup
       @faces << face unless @faces.include?(face)
     end
 
+    # Erasing a Face keeps its Edges, which then bound it no longer.
+    def detach_face(face)
+      @faces.delete(face)
+    end
+
     def transform!(transformation)
       @start.transform!(transformation)
       @end.transform!(transformation)
@@ -886,6 +893,7 @@ module Sketchup
 
       erased = entities.flatten
       erased.each { |entity| delete(entity) }
+      erased.grep(Face).each { |face| face.edges.each { |edge| edge.detach_face(face) } }
       heal_holes(erased.grep(Edge))
       true
     end

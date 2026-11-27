@@ -26,11 +26,15 @@ module PhComposer
           "make_refusal" => make_refusal(spec, request, others, contained) }.merge(ignored(others))
       end
 
-      # What Make <group> meets over the whole selection, or nil when it can run with every selected line's path.
+      # What Make <group> meets over the whole selection, or nil when it can run with every selected line's path. A
+      # selected Face the selected lines close, as a window selection over a filled loop takes, is one Make erases,
+      # so it is not counted against it.
       def make_refusal(spec, request, others, contained)
         model = request.model
-        Make.refusal(spec, model, Array(model.active_path), model.selection.to_a.grep(Sketchup::Edge),
-                     :others => others.length, :contained => contained)
+        edges = model.selection.to_a.grep(Sketchup::Edge)
+        closed = Make.closed_faces(edges).map(&:persistent_id)
+        counted = others.count { |entity| !(entity.is_a?(Sketchup::Face) && closed.include?(entity.persistent_id)) }
+        Make.refusal(spec, model, Array(model.active_path), edges, :others => counted, :contained => contained)
       end
 
       def ignored(others)
@@ -102,7 +106,8 @@ module PhComposer
         return nested if nested
         if zone
           return { "code" => spec.code(:group_in_zone),
-                   "message" => "The #{spec.label} sits inside Zone #{zone.fetch('name')}; move it out first." }
+                   "message" => "The #{spec.label} sits inside #{Records::Names.titled('Zone', zone.fetch('name'))}; " \
+                                "move it out first." }
         end
 
         GroupTarget.write_refusal(spec, parent) || stored

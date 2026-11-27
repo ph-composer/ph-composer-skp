@@ -17,12 +17,14 @@ module DuctTypesWalkthrough
   # not reflective, at 0.035 W/(m K). It was created Round, so its diameter must be gone.
   DT_2 = { "name" => "DT-2", "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" },
            "shape" => "rectangular", "width_mm" => 200.0, "height_mm" => 100.0, "insulation_thickness_mm" => 50.8,
-           "insulation_conductivity_w_mk" => 0.035, "insulation_reflective" => false }.freeze
+           "insulation_conductivity_w_mk" => 0.035, "insulation_reflective" => false,
+           "assigned_color" => "#FF7F0E" }.freeze
   # The catalog after `run`, one [values, user_data] per record in name order. The copy carries DT-2's values and
-  # user_data.
+  # user_data, and takes the next colour no type had: DT-1 took the ramp's first, DT-2 its second.
   EXPECTED = [
     [DT_2, USER_DATA],
-    [DT_2.merge("name" => "DT-2 (copy)", "source" => { "kind" => "derived" }), USER_DATA]
+    [DT_2.merge("name" => "DT-2 (copy)", "source" => { "kind" => "derived" }, "assigned_color" => "#2CA02C"),
+     USER_DATA]
   ].freeze
 
   module_function

@@ -285,3 +285,23 @@ test("the Ventilators table shows ducting's two duct lengths in the unit read, a
   o.modules.unit_preferences.set("unit_system", "IP"); o.paint();
   assert.match(header(), /Outdoor air duct.*ft/);
 });
+
+test("a Ventilator's Delete names the Ducting groups it leaves unlinked, for the choice made", function () {
+  var o = setup(VENTILATORS), form = o.view(VENTILATORS).table.replacement;
+  var records = o.state.sections[VENTILATORS].value.records;
+  form.open(records[2], records);
+  assert.strictEqual(form.inUse, true, "ERV-3 serves no Zone, and its groups are uses");
+  assert.ok(form.explanation.hidden, "no Zone uses it, so nothing says Zones move");
+  assert.strictEqual(form.uses.textContent, "Ducting group 1, Ducting group 2, Ducting group 3, Ducting group 4, " +
+    "Ducting group 5 and 2 more will lose their Ventilator unless you choose a replacement.");
+  change(form.select, "__clear__");
+  assert.strictEqual(form.uses.textContent, "Ducting group 1, Ducting group 2, Ducting group 3, Ducting group 4, " +
+    "Ducting group 5 and 2 more will lose their Ventilator.");
+  form.submit();
+  assert.strictEqual(clone(last(o, VENTILATORS + ".delete").payload.params).replacement_id, null);
+  form.open(records[0], records);
+  assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 will lose its Ventilator unless you choose a " +
+    "replacement.");
+  change(form.select, fixtures.mechanical.ERV2.id);
+  assert.strictEqual(form.uses.textContent, "Serves Zone A. DG-1 moves to the replacement.");
+});

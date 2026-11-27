@@ -19,7 +19,7 @@ class DuctTypesWalkthroughTest < PhComposerTestCase
     model.undo
     dt1 = { "name" => "DT-1", "notes" => "", "datasheet_links" => [], "source" => { "kind" => "manual" },
             "shape" => "round", "diameter_mm" => 160.0, "insulation_thickness_mm" => 25.4,
-            "insulation_conductivity_w_mk" => 0.04, "insulation_reflective" => true }
+            "insulation_conductivity_w_mk" => 0.04, "insulation_reflective" => true, "assigned_color" => "#1F77B4" }
     assert_equal [[dt1, {}]] + DuctTypesWalkthrough::EXPECTED, DuctTypesWalkthrough.state
     model.undo
     model.undo

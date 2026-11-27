@@ -84,6 +84,20 @@ class DuctingScheduleTest < PhComposerTestCase
     query(read).fetch("records").to_h { |row| [row.fetch("id"), row.fetch("used_length_m").round(3)] }
   end
 
+  # Each Ventilator row names the Ducting groups linked to it, from the groups rather than their ducts, so a group
+  # with no duct assigned yet is named too; an unnamed group reads its label and path, as the panel shows it.
+  def test_each_ventilator_row_names_the_ducting_groups_linked_to_it
+    the_case
+    @group.name = "Ducting group 1"
+    @model.entities << ducting_group(800, "dcg_DG3000000003", @erv1, [Sketchup::Edge.new(next_id, point([0, 0, 0]),
+                                                                                         point([0, 1, 0]))])
+    rows = query("ventilators").fetch("ventilators").to_h do |row|
+      [row.fetch("name"), row.values_at("group_names", "group_count")]
+    end
+    assert_equal({ "ERV-1" => [["Ducting group 1", "Ducting group 800"], 2], "ERV-2" => [["Ducting group 700"], 1] },
+                 rows)
+  end
+
   def test_the_schedule_reads_the_case_in_world_metres_with_each_ventilators_lengths_and_used_lengths
     the_case
     result = query("schedule")
@@ -99,7 +113,7 @@ class DuctingScheduleTest < PhComposerTestCase
     assert_equal [4, 0, [], nil], result.values_at("total", "unreadable_total", "unreadable", "next_cursor")
     assert_equal({ "ERV-1" => [2.5, 1.8], "ERV-2" => [2.5, 3.0] }, lengths(result.fetch("ventilators")))
     assert_equal result.fetch("ventilators").map { |row| row.reject { |key, _value| key == "findings" } },
-                 query("ventilators").fetch("ventilators")
+                 query("ventilators").fetch("ventilators").map { |row| row.reject { |key| key.start_with?("group_") } }
     assert_equal [{ @dt1 => 4.3, @dt2 => 5.5 }] * 2, [used("duct_types.all"), used("duct_types.list")]
 
     locate = API.view(:context => @context, :name => "#{PREFIX}.runs.locate",

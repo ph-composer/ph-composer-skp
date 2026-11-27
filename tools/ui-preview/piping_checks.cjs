@@ -97,7 +97,20 @@ check({ name: "piping", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => window.previewHost.piping.groups[2].values.hot_water_system_id !== null);
   const make = bar.getByRole("button", { name: "Make Piping group from selected lines" });
   assert.equal(await make.isDisabled(), true, "lines already in a Piping group cannot make one");
-  await bar.getByRole("button", { name: "Why Make Piping group is unavailable" }).waitFor();
+  const why = bar.getByRole("button", { name: "Why Make Piping group is unavailable" });
+  await why.waitFor();
+  // The reason's icon stays beside Make Piping group however the bar wraps: at the panel's sizes and at every
+  // width where Make is the last control that fits on a row.
+  const widths = [[360, 520], [420, 732], [1280, 800]];
+  for (let width = 1200; width <= 1500; width += 10) widths.push([width, 800]);
+  for (const [width, height] of widths) {
+    await setPanelSize(page, width, height);
+    const [button, icon] = [await make.boundingBox(), await why.boundingBox()];
+    assert.ok(Math.abs((button.y + button.height / 2) - (icon.y + icon.height / 2)) < 4 &&
+      icon.x >= button.x + button.width, `the Make reason sits beside Make at ${width} x ${height}`);
+  }
+  await setPanelSize(page, 1280, 800);
+  await page.screenshot({ path: path.join(output, "make-reason.png") });
   await host(`(() => {
     window.previewHost.piping.selected = [801, 802].map(id => ({ path: [id], reference: null, group: null,
       reason: "outside_group", values: {}, copied: false, record_problem: null, write_refusal: null }));

@@ -84,10 +84,11 @@ class LineGroupsTest < PhComposerTestCase
     loose.each { |edge| @model.entities << edge }
     record = { "id" => "prg_BBBBBBBBBBBB", "schema_version" => 1, "owner_id" => nil, "user_data" => {},
                "extension_data" => {} }
-    step = L::MakeStep.new(:spec => SPEC, :record => record, :parent_path => [], :edge_ids => [801, 802])
+    step = L::MakeStep.new(:spec => SPEC, :record => record, :name => "Probe group 1", :parent_path => [],
+                           :edge_ids => [801, 802])
     operate { step.apply(@model, nil) }
     made = @model.entities.to_a.find { |entity| GROUP_STORE.read(entity) == record }
-    assert_equal [loose, nil], [made.entities.to_a, @model.active_path]
+    assert_equal [loose, nil, "Probe group 1"], [made.entities.to_a, @model.active_path, made.name]
     assert_equal [[801, 802], [EDGE_STORE.read(loose.first)] * 2],
                  [made.entities.map(&:persistent_id), made.entities.map { |edge| EDGE_STORE.read(edge) }]
     assert_equal ["probe_group", "make_probe_group", [made.persistent_id]],
@@ -103,7 +104,9 @@ class LineGroupsTest < PhComposerTestCase
     @model.entities << line(801)
     record = { "id" => "prg_BBBBBBBBBBBB", "schema_version" => 1, "owner_id" => nil, "user_data" => {},
                "extension_data" => {} }
-    make = ->(ids) { L::MakeStep.new(:spec => SPEC, :record => record, :parent_path => [], :edge_ids => ids) }
+    make = lambda do |ids|
+      L::MakeStep.new(:spec => SPEC, :record => record, :name => "Probe group 1", :parent_path => [], :edge_ids => ids)
+    end
     @model.active_path = [@group]
     assert_refused("target.edit_path_changed") { make.call([801]).apply(@model, nil) }
     @model.active_path = nil
@@ -171,7 +174,7 @@ class LineGroupsTest < PhComposerTestCase
                   { "size" => 1 }, 1],
                  [row.dig("reference", "entity_path"), row.fetch("group"), row.fetch("values"), read["ignored_total"]]
     assert_equal({ "code" => "probe.group_in_zone",
-                   "message" => "The Probe group sits inside Zone Zone A; move it out first." }, row["write_refusal"])
+                   "message" => "The Probe group sits inside Zone “Zone A”; move it out first." }, row["write_refusal"])
     free = L::Selection.all(SPEC, request("test.line_groups.selection"), :limit => 250, :contained => ->(_paths) { [] })
     assert L::Selection.assignable?(free.fetch("edges").first)
     assert_refused("gesture.too_large") do

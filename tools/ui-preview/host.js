@@ -154,11 +154,16 @@
       { code: feature + ".group_nested", message: "The lines are already in a " + label + "." };
   }
 
-  /* The new group a groups.make adds over the selected loose lines, which leave the selection as they move in. */
-  function madeGroup(data, id, path, link, count) {
-    data.groups.push(Object.assign({ path: path, reference: { group_id: id, group_path: path }, name: "",
-      values: link, copied: false, findings: [], record_problem: null, write_refusal: null }, count));
+  /* The new group a groups.make adds over the selected loose lines, which leave the selection as they move in,
+     named the first free "<label> N" as the host names it; answers the make's result. */
+  function madeGroup(data, id, path, link, count, label) {
+    var taken = data.groups.map(function (group) { return group.name.toLowerCase(); }), number = 1;
+    while (taken.indexOf((label + " " + number).toLowerCase()) >= 0) number += 1;
+    data.groups.push(Object.assign({ path: path, reference: { group_id: id, group_path: path },
+      name: label + " " + number, values: link, copied: false, findings: [], record_problem: null,
+      write_refusal: null }, count));
     data.selected = [];
+    return { id: id, group_id: id, name: label + " " + number, removed_faces: 0 };
   }
 
   Host.prototype.publish = function (type, payload) {
@@ -597,7 +602,7 @@
   };
   /* Pipe Types, the pipe assignment on the selected lines and the Piping groups, kept to what the pills send. */
   Host.prototype.pipingAction = function (payload) {
-    var data = this.piping, params = payload.params, name = payload.name.slice(PIPING.length), id;
+    var data = this.piping, params = payload.params, name = payload.name.slice(PIPING.length), id, made;
     var target = data.types.filter(function (record) { return record.id === params.id; })[0];
     function copy(value) { return JSON.parse(JSON.stringify(value)); }
     if (params.id && !target) return refused("target.not_found", "That Pipe Type is unavailable.", this.revision);
@@ -633,8 +638,8 @@
       });
     } else if (name === "groups.make") {
       id = "ppg_preview" + String(++this.sequence).padStart(5, "0");
-      madeGroup(data, id, [9000 + this.sequence], { hot_water_system_id: params.hot_water_system_id },
-        { pipe_count: 0 });
+      made = madeGroup(data, id, [9000 + this.sequence], { hot_water_system_id: params.hot_water_system_id },
+        { pipe_count: 0 }, "Piping group");
     } else if (name === "groups.link" || name === "groups.unlink") {
       params.targets.forEach(function (row) {
         data.groups.forEach(function (group) {
@@ -645,7 +650,7 @@
     } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
     this.revision += 1;
     return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
-      value: { id: id, group_id: id }, affected: [], findings: [], detail: null };
+      value: made || { id: id, group_id: id }, affected: [], findings: [], detail: null };
   };
 
   /* The fixture's duct runs with each type's current name, a missing type's null, and the Ventilator their group
@@ -676,13 +681,16 @@
   };
   /* Every Ventilator's two duct lengths, 0 with none. */
   Host.prototype.ductVentilatorRows = function () {
-    var runs = this.ductRuns();
+    var runs = this.ductRuns(), groups = this.ducting.groups;
     return this.mechanical.ventilators.map(function (record) {
       function length(direction) {
         return counted(runs, function (run) { return run.ventilator_id === record.id && run.direction === direction; });
       }
+      // The groups linked to it by name, an unnamed one by its label and path, as the host lists them.
+      var names = groups.filter(function (group) { return group.values.ventilator_id === record.id; })
+        .map(function (group) { return group.name || "Ducting group " + group.path.join("/"); }).sort();
       return { ventilator_id: record.id, name: record.values.name, outdoor_air_length_m: length("outdoor_air"),
-        exhaust_air_length_m: length("exhaust_air") };
+        exhaust_air_length_m: length("exhaust_air"), group_names: names.slice(0, 20), group_count: names.length };
     });
   };
   /* The ducting reads, answered on the next turn as the host does. Synthetic; Ruby builds the runs from the Model. */
@@ -720,7 +728,7 @@
   };
   /* Duct Types, the duct assignment on the selected lines and the Ducting groups, kept to what the pills send. */
   Host.prototype.ductingAction = function (payload) {
-    var data = this.ducting, params = payload.params, name = payload.name.slice(DUCTING.length), id;
+    var data = this.ducting, params = payload.params, name = payload.name.slice(DUCTING.length), id, made;
     var target = data.types.filter(function (record) { return record.id === params.id; })[0];
     function copy(value) { return JSON.parse(JSON.stringify(value)); }
     if (params.id && !target) return refused("target.not_found", "That Duct Type is unavailable.", this.revision);
@@ -759,7 +767,8 @@
       });
     } else if (name === "groups.make") {
       id = "dcg_preview" + String(++this.sequence).padStart(5, "0");
-      madeGroup(data, id, [9500 + this.sequence], { ventilator_id: params.ventilator_id }, { duct_count: 0 });
+      made = madeGroup(data, id, [9500 + this.sequence], { ventilator_id: params.ventilator_id }, { duct_count: 0 },
+        "Ducting group");
     } else if (name === "groups.link" || name === "groups.unlink") {
       params.targets.forEach(function (row) {
         data.groups.forEach(function (group) {
@@ -771,7 +780,7 @@
     } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
     this.revision += 1;
     return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
-      value: { id: id, group_id: id }, affected: [], findings: [], detail: null };
+      value: made || { id: id, group_id: id }, affected: [], findings: [], detail: null };
   };
 
   /* Thermal Bridge Type records and Edge assignment, kept to what the tab sends. Synthetic outcomes. */
@@ -1227,7 +1236,7 @@
         })[0];
         if (filled) {
           var other = items.filter(function (record) { return record.id === map[filled.id]; })[0];
-          return refused("mechanical.slot_filled", "Zone " + filled.values.name + " is served by " +
+          return refused("mechanical.slot_filled", "Zone \u201C" + filled.values.name + "\u201D is served by " +
             (other ? other.values.name : "another item") + ". Replace it to assign. " + NOTHING_WRITTEN,
           this.revision);
         }

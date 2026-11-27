@@ -57,6 +57,17 @@ class PipingPipeToolTest < PhComposerTestCase
     assert_equal [@copper, "branch", nil], values(@edges[0]), "a click reassigns, dropping the trunk's values"
   end
 
+  # The tool picks with the wider line aperture, on hover and on press; the stub only records what it asked for.
+  def test_the_tool_picks_lines_with_the_line_aperture
+    tool.choose(@pex, "trunk")
+    point(0, [@group, @edges[0]])
+    @view.apertures = []
+    move(0)
+    click(0)
+    assert_equal [PhComposer::Pick::LINE_APERTURE], @view.apertures.uniq
+    assert_equal [@pex, "trunk"], values(@edges[0]).first(2)
+  end
+
   def test_the_armed_values_are_the_tools_own_copy
     chosen = { "multiplier" => 12 }
     tool.choose(@pex, "trunk", chosen)

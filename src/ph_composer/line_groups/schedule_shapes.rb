@@ -5,8 +5,8 @@ require_relative "spec"
 module PhComposer
   module LineGroups
     # What every line group's schedule declares alike, worded by the spec's Edge noun: a finding, the parts of a run
-    # row that name its Edges, an unreadable record, a run's members a page at a time and runs.locate. The feature
-    # declares the rest of its schedule, whose rows and lists are its own.
+    # row that name its Edges, an unreadable record, a run's members a page at a time and runs.locate; and Make's
+    # result. The feature declares the rest of its schedule, whose rows and lists are its own.
     module ScheduleShapes
       extend SchemaShapes
 
@@ -18,6 +18,11 @@ module PhComposer
         "identifier" => TEXT,
         "members" => list(object({ "index" => COUNT.merge("description" => "Its place in the run."), "path" => PATH })),
         "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
+      }).freeze
+      MAKE_RESULT = object({
+        "group_id" => TEXT,
+        "name" => described(TEXT, "The new group's name, the first free \"<kind> group N\" of its kind."),
+        "removed_faces" => described(COUNT, "The Faces the lines alone closed, erased in the same Undo step.")
       }).freeze
       LOCATE_RESULT = object({ "path" => PATH.merge("description" => "The edit path afterwards."),
                                "selected" => COUNT }).freeze

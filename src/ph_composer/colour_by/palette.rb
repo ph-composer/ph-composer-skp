@@ -26,6 +26,14 @@ module PhComposer
 
       module_function
 
+      # The first ramp colour, as "#RRGGBB", that none of `colours` (hex, any case) takes, so a new record reads
+      # apart from those made before it; with every one taken, the ramp again by count.
+      def unused(colours)
+        taken = colours.map { |colour| colour.to_s.upcase }
+        hexes = RAMP.map { |rgb| format("#%02X%02X%02X", *rgb) }
+        hexes.find { |hex| !taken.include?(hex) } || hexes[taken.length % hexes.length]
+      end
+
       # A colour function over a fixed table: the mode's own hues, nil for anything else.
       def fixed(table)
         frozen = table.freeze

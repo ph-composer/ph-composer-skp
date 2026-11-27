@@ -79,10 +79,10 @@ module PhComposer
           id = zone.slot(SLOT)
           if id.nil?
             Finding.new(:code => Codes::ZONE_NO_HOT_WATER, :record_id => zone.id, :blocks => false,
-                        :message => "Zone #{zone.label} has no Hot Water System.")
+                        :message => "#{zone.titled} has no Hot Water System.")
           elsif !systems.key?(id) && !unreadable.include?(id)
             Finding.new(:code => Codes::ITEM_MISSING, :record_id => zone.id, :blocks => true,
-                        :message => "#{SLOT} on Zone #{zone.label} names #{id}, which is not in the Model.")
+                        :message => "#{SLOT} on #{zone.titled} names #{id}, which is not in the Model.")
           end
         end
       end

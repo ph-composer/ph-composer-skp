@@ -211,9 +211,9 @@
       "sha256": "0f9b7a2f4d34db403f2143833332c88c26eb4871596db8a95bac3e100e2c804c"
     },
     "html/features/ducting/ventilator_columns.js": {
-      "bytes": 2110,
+      "bytes": 3540,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b91e290260910d29fe57f95c4f031731db81cc513f741d4cd2379f0a1632a577"
+      "sha256": "757be23a6d1f58fb10151f68b5875ee2f63b1161ad9001590de1c34bcaf44cf7"
     },
     "html/features/mechanical/electric_heaters.js": {
       "bytes": 5403,
@@ -656,9 +656,9 @@
       "sha256": "c04222ddf853da69c8b806dc6175aeb5ebab264e4494b296b006afe6bb65814b"
     },
     "html/inventory_forms.js": {
-      "bytes": 24062,
+      "bytes": 25591,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "7ca546e08c23ff14e85577fa97d8d706930b506ca111fabda8c7b67d2acee28b"
+      "sha256": "345b51f61375ed9e6f7c5a36f36498ce77773cc7fed693daaa10a1625c95c7fc"
     },
     "html/inventory_grid.js": {
       "bytes": 16516,
@@ -726,24 +726,24 @@
       "sha256": "32a94d159fec4ad46489552205e09ac3763ec0e234bb5f50cd8b5df8fa185d7d"
     },
     "html/line_groups/assign_bar.js": {
-      "bytes": 10340,
+      "bytes": 10576,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "cf7bb75529348bc979c021327cfd503690a6fa4b33460deb5969b11b209088e2"
+      "sha256": "658a4fda20cb01351f3b393f801f8a6b0492b25742a8be9eee717becfd206906"
     },
     "html/line_groups/groups.js": {
-      "bytes": 7953,
+      "bytes": 8033,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "bf15d8e4661f1ff12405148f53558b59b244ca0357f6e1f834fb8d70e56fab50"
+      "sha256": "e46c1ba2a87711e83e66e07e0594b6a35324674f83276ad7b2ac1d7f022b3dc4"
     },
     "html/line_groups/line_groups.css": {
-      "bytes": 3207,
+      "bytes": 3455,
       "mime": "text/css; charset=utf-8",
-      "sha256": "02fe15cc6d7bdea38febc368229460a0e22be8cd005125b8e11fead96066595a"
+      "sha256": "82da043d0f06e06496bcce64cebca8b46852b5d1a48ed6e94daec5eca8c4cfe0"
     },
     "html/line_groups/pill.js": {
-      "bytes": 3251,
+      "bytes": 3430,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b6be45c3c60caf28308ca578624883ae8e7ec717e0e65d3b17f2b617b07e092a"
+      "sha256": "315252f3845495761243d31a45af2052d6885b6124e358299bcf2d50769a7032"
     },
     "html/line_groups/schedule.js": {
       "bytes": 12983,

@@ -38,6 +38,8 @@ module PhComposer
       def update(kind)
         patch = kind.descriptor.patch_schema
         patch["properties"].delete("source")
+        # A line type's assigned colour (Pipe and Duct Types) is set when it is made or copied, never by an edit.
+        patch["properties"].delete("assigned_color")
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
                  "values" => described(patch, "The values to change; any not given stay. Null removes an optional " \
                                               "value."),

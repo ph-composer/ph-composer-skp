@@ -58,8 +58,9 @@ module PhComposer
 
         code = { "unavailable" => "extension.unavailable", "invalid" => "extension.invalid" }
                .fetch(zone.status, "extension.schema_unsupported")
-        row(code, VentilationExport::SECTION, zone.id, "What serves Zone #{zone.name || zone.id} is #{zone.status}, " \
-                                                       "so the Model cannot be exported.", true,
+        named = Records::Names.titled("Zone", zone.name, zone.id)
+        row(code, VentilationExport::SECTION, zone.id, "What serves #{named} is #{zone.status}, so the Model cannot " \
+                                                       "be exported.", true,
             Locate.row_locate(zone.id, zone.id => zone.reference))
       end
 

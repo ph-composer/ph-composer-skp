@@ -85,7 +85,8 @@ module PhComposer
         feature.action("#{PREFIX}.create",
                        :description => "Create one #{KIND.label}. Unless values give them, it is a 1/2 in " \
                                        "(diameter_mm 12.7) Copper L pipe (material 2) with 12.7 mm of reflective " \
-                                       "insulation at 0.04 W/mK, insulation_quality 1, and no stored color.",
+                                       "insulation at 0.04 W/mK, insulation_quality 1, and no stored color; its " \
+                                       "assigned_color is the next unused colour of the shared ramp.",
                        :refuses => CREATE, :params => Shapes.create(KIND), :result => Shapes::RESULT,
                        :undo_name => "Create #{KIND.label}", :preconditions => [UNIQUE],
                        :side_effects => "Creates one Model-owned definition.",

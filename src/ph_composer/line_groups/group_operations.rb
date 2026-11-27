@@ -13,7 +13,9 @@ module PhComposer
       module_function
 
       # A new group, where the lines `edge_paths` name are drawn, wrapping them, with a new record naming `link_id`
-      # (Make). The edit path stays where it is. `limit` is the feature's Edge gesture limit.
+      # (Make). It takes the first free "<label> N" among its kind's groups, and the Faces the lines close
+      # (Make.closed_faces) are erased in the same operation. The edit path stays where it is. `limit` is the
+      # feature's Edge gesture limit.
       def make(spec, request, proposal, edge_paths, link_id, limit:)
         paths = edge_paths.uniq
         if paths.length > limit
@@ -29,10 +31,20 @@ module PhComposer
         id = Records::Identity.allocator(request, request.params).call(spec.group_record_kind.id_prefix)
         record = spec.validate_group!(spec.new_group(id, link_id))
         parent_path = containers.map(&:persistent_id)
-        proposal.add_step(MakeStep.new(:spec => spec, :record => record, :parent_path => parent_path,
-                                       :edge_ids => edges.map(&:persistent_id)),
+        name = free_name(spec, request.model)
+        faces = Make.closed_faces(edges)
+        proposal.add_step(MakeStep.new(:spec => spec, :record => record, :name => name, :parent_path => parent_path,
+                                       :edge_ids => edges.map(&:persistent_id),
+                                       :face_ids => faces.map(&:persistent_id)),
                           :scopes => [PhComposer::Operations::EntityScope.new(parent_path)])
-        { "group_id" => id }
+        { "group_id" => id, "name" => name, "removed_faces" => faces.length }
+      end
+
+      # The first free "<label> N" among the names of the feature's groups, wherever they sit.
+      def free_name(spec, model)
+        names = []
+        GroupTarget.each_group(spec, model) { |group, _path, _along| names << group.name.to_s }
+        Records::Names.numbered(spec.label, names)
       end
 
       # Sets each Group's linked record, or clears it with nil. A Group already naming it is left alone.
@@ -103,8 +115,21 @@ module PhComposer
         held = contained(spec, request, paths.uniq).find { |row| row["zone"] }
         return unless held
 
-        raise CodedError.new(spec.code(:group_in_zone), "#{spec.label} #{held.fetch('path').last} sits inside Zone " \
-                                                        "#{held.dig('zone', 'name')}; move it out of the Zone first.")
+        raise CodedError.new(spec.code(:group_in_zone), "#{spec.label} #{held.fetch('path').last} sits inside " \
+                                                        "#{Records::Names.titled('Zone', held.dig('zone', 'name'))}; " \
+                                                        "move it out of the Zone first.")
+      end
+
+      # Each linked record's id with the names of the groups naming it, sorted, as a delete of that record lists
+      # what it leaves: a group's own name, or for an unnamed one its label and path, as the panel labels it.
+      def names_by_link(spec, model)
+        found = Hash.new { |names, link| names[link] = [] }
+        GroupTarget.each_group(spec, model) do |group, path, _along|
+          record, = LineGroups.read(group, spec.group_store)
+          link = record && record[spec.link_key]
+          found[link] << (group.name.to_s.empty? ? "#{spec.label} #{path.join('/')}" : group.name.to_s) if link
+        end
+        found.transform_values { |names| names.sort_by { |name| [name.sub(/\d+\z/, ""), name[/\d+\z/].to_i, name] } }
       end
 
       # The containment rows (`{ path, zone }`, zone nil or named) for root-to-Group paths, a page at a time.
@@ -151,8 +176,8 @@ module PhComposer
         id = spec.group_identity(record)
         nested = GroupTarget.nested_refusal(spec, along[0...-1])
         in_zone = zone && { "code" => spec.code(:group_in_zone),
-                            "message" => "The #{spec.label} sits inside Zone #{zone.fetch('name')}; move it out " \
-                                         "first." }
+                            "message" => "The #{spec.label} sits inside " \
+                                         "#{Records::Names.titled('Zone', zone.fetch('name'))}; move it out first." }
         findings = []
         findings << spec.code(:group_in_zone) if zone
         findings << spec.code(:group_nested) if nested

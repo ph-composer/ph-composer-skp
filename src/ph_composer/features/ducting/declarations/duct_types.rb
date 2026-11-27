@@ -92,8 +92,9 @@ module PhComposer
         feature.action("#{PREFIX}.create",
                        :description => "Create one #{KIND.label}. Unless values give them, it is a round duct of " \
                                        "diameter_mm 160 with 25.4 mm of reflective insulation at 0.04 W/mK and no " \
-                                       "stored color; a rectangular one gives width_mm and height_mm and no " \
-                                       "diameter. A missing or other-shape dimension refuses params.invalid.",
+                                       "stored color, its assigned_color the next unused colour of the shared " \
+                                       "ramp; a rectangular one gives width_mm and height_mm and no diameter. A " \
+                                       "missing or other-shape dimension refuses params.invalid.",
                        :refuses => CREATE, :params => Shapes.create(KIND), :result => Shapes::RESULT,
                        :undo_name => "Create #{KIND.label}", :preconditions => [UNIQUE, SHAPED],
                        :side_effects => "Creates one Model-owned definition.",
@@ -105,7 +106,7 @@ module PhComposer
                        :description => "Edit guarded values of one #{KIND.label}; a changed expected value refuses " \
                                        "and writes nothing. A new shape removes the old shape's dimensions and " \
                                        "must give its own; a missing or other-shape dimension refuses " \
-                                       "params.invalid. A null color returns the type to its default colour.",
+                                       "params.invalid. A null color returns the type to the colour it took when made.",
                        :refuses => EDIT, :params => Shapes.update(KIND), :result => Shapes::RESULT,
                        :undo_name => "Edit #{KIND.label}",
                        :preconditions => EXISTS + ["A new name: #{UNIQUE}", SHAPED],

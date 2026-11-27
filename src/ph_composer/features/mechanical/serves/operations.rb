@@ -86,7 +86,7 @@ module PhComposer
           check_replacement!(request, kind, id, replacement)
           shared = users.group_by(&:id).values.find { |group| group.length > 1 }
           if shared
-            raise CodedError.new("target.ambiguous", "Zone #{label(shared.first)} has #{shared.length} occurrences " \
+            raise CodedError.new("target.ambiguous", "#{titled(shared.first)} has #{shared.length} occurrences " \
                                                      "sharing its id; make the copy independent first.")
           end
 
@@ -122,7 +122,7 @@ module PhComposer
             expected = target.fetch("expected_values", {})
             changed = expected.keys.reject { |key| zone.values[key] == expected[key] }
             unless changed.empty?
-              raise CodedError.new("target.changed", "What serves Zone #{label(zone)} has changed since it was read " \
+              raise CodedError.new("target.changed", "What serves #{titled(zone)} has changed since it was read " \
                                                      "(#{changed.join(', ')}).", "zone_id" => zone.id,
                                                                                  "fields" => changed)
             end
@@ -145,7 +145,7 @@ module PhComposer
           return if current.nil? || current == item_id
 
           name = item_name(request, slot.kind, current)
-          raise CodedError.new(Codes::SLOT_FILLED, "Zone #{label(zone)} is served by #{slot.label} #{name}; " \
+          raise CodedError.new(Codes::SLOT_FILLED, "#{titled(zone)} is served by #{slot.label} #{name}; " \
                                                    "assign with replace to use another.",
                                "zone_id" => zone.id, "slot" => slot.key, "current_id" => current)
         end
@@ -185,6 +185,10 @@ module PhComposer
 
         def label(zone)
           zone.name || zone.id
+        end
+
+        def titled(zone)
+          Records::Names.titled("Zone", zone.name, zone.id)
         end
       end
     end

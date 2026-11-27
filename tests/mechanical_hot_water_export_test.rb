@@ -182,7 +182,7 @@ class MechanicalHotWaterExportTest < PhComposerTestCase
     PhComposer::Zones::ZONE_STORE.write(group, record.merge("extension_data" => { M::Serves::NAMESPACE => envelope }))
     error = assert_raises(PhComposer::Export::Blocked) { extract }
     assert_equal "mechanical.item_missing", error.code
-    assert_match(/hot_water_system_id on Zone Zone B names hws_ZZZZZZZZZZZZ/, error.message)
+    assert_match(/hot_water_system_id on Zone “Zone B” names hws_ZZZZZZZZZZZZ/, error.message)
     assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
                     ["mechanical.item_missing", zone_id("B"), true]
   end

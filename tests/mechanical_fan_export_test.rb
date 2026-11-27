@@ -82,7 +82,7 @@ class MechanicalFanExportTest < PhComposerTestCase
                     [@ids.fetch("F-2"), zone_id("C")]
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("F-2")]], notes(extraction)
     assert_includes extraction.findings.find { |row| row["code"] == "mechanical.zone_without_spaces" }.fetch("message"),
-                    "F-2 serves Zone Zone C, which has no Spaces. PHX reads a Fan through a Room's Spaces, so a " \
+                    "F-2 serves Zone “Zone C”, which has no Spaces. PHX reads a Fan through a Room's Spaces, so a " \
                     "Building Segment's WUFI-Passive and METr model gets F-2 only through another Room it serves in " \
                     "that Segment"
     assert_equal [["mechanical.zone_without_spaces", @ids.fetch("F-2"), false]],
@@ -126,7 +126,7 @@ class MechanicalFanExportTest < PhComposerTestCase
     PhComposer::Zones::ZONE_STORE.write(group, record.merge("extension_data" => { M::Serves::NAMESPACE => envelope }))
     error = assert_raises(PhComposer::Export::Blocked) { extract }
     assert_equal "mechanical.item_missing", error.code
-    assert_match(/fan_ids on Zone Zone B names fan_ZZZZZZZZZZZZ, which is not in the Model/, error.message)
+    assert_match(/fan_ids on Zone “Zone B” names fan_ZZZZZZZZZZZZ, which is not in the Model/, error.message)
     assert_includes preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") },
                     ["mechanical.item_missing", zone_id("B"), true]
   end

@@ -333,7 +333,8 @@ Hot water flow stays in L/h per m².
    each row, blank until you enter them. The chevron is filled while either is set.
 6. **Columns** hides Manufacturer, Model and Notes. The palette in the **Serves** header colours each Zone
    in the model by its Ventilator; a Zone with none stays uncoloured. **Duplicate** copies a Ventilator,
-   and **Delete** asks which Ventilator takes its place on its Zones, or clears them.
+   and **Delete** asks which Ventilator takes its place on its Zones and Ducting groups, or clears them; it
+   names the Ducting groups that clearing leaves with no Ventilator.
 
 ## Add heat pumps
 
@@ -449,13 +450,16 @@ into the Hot Water System it belongs to. Scripts and assistants reach the same s
    asks for a Tag; the new type is a 1/2 in Copper L pipe with 12.7 mm of reflective insulation at
    0.04 W/(m K). Edit each value in its cell. **Used length** is the drawn length of the pipes using the
    type. A type with insulation and no conductivity cannot export once a pipe uses it; a bare pipe needs
-   none. Deleting a type in use asks for another to take its place, or clears it from those pipes.
+   none. Deleting a type in use asks for another to take its place, or clears it from those pipes. Each new
+   type takes a colour no other Pipe Type uses; its **Colour** cell changes it.
 2. Draw the pipes with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
    A tree (a trunk, its branches and their twigs) belongs in one group; a riser can be drawn once and given
    a multiplier. Select the lines, then use the **Piping** pill. **Make Piping group** asks for the Hot
    Water System the pipes serve and wraps the selected lines in a new Piping group where they are drawn, as
-   one Undo step. It waits until the selection is loose lines alone, and its alert mark says what to select
-   instead. To draw more pipes later, double-click the group to open it and draw inside it.
+   one Undo step, named Piping group 1, 2 and so on. When SketchUp has filled a closed loop of the lines with
+   a Face, Make removes that Face in the same step and says so. It waits until the selection is loose lines
+   alone, and its alert mark says what to select instead; a Face that also uses a line you did not select
+   stops it, so erase that Face, keep its lines and make the group again. To draw more pipes later, double-click the group to open it and draw inside it.
 3. Select lines in the open group, then choose a Pipe Type and a role in the bar above the groups:
    **Trunk**, **Branch**, **Twig** or **Recirculation**. A trunk also takes a **Multiplier** (how many
    identical risers it stands for) and **Demand recirculation**; a recirculation pipe takes its **Water
@@ -488,12 +492,16 @@ never the room-side supply and extract ducts. Scripts and assistants reach the s
    its cell. Changing the **Shape** asks for the new shape's sizes before anything changes. **Used length**
    is the length of the ducts using the type, each line counted as many times as its quantity. A type
    with insulation and no conductivity cannot export once a duct uses it; a bare duct needs none.
-   Deleting a type in use asks for another to take its place, or clears it from those ducts.
+   Deleting a type in use asks for another to take its place, or clears it from those ducts. Each new type
+   takes a colour no other Duct Type uses; its **Colour** cell changes it.
 2. Draw the ducts with SketchUp's own Line tool, snapping to the model, as loose lines outside every Zone.
    One group per ventilator holds both of its runs. Select the lines, then use the **Ducting** pill. **Make
    Ducting group** asks for the Ventilator the ducts belong to and wraps the selected lines in a new Ducting
-   group where they are drawn, as one Undo step. It waits until the selection is loose lines alone, and its
-   alert mark says what to select instead. To draw more ducts later, double-click the group to open it and
+   group where they are drawn, as one Undo step, named Ducting group 1, 2 and so on. When SketchUp has filled
+   a closed loop of the lines with a Face, Make removes that Face in the same step and says so. It waits
+   until the selection is loose lines alone, and its alert mark says what to select instead; a Face that
+   also uses a line you did not select stops it, so erase that Face, keep its lines and make the group
+   again. To draw more ducts later, double-click the group to open it and
    draw inside it. For identical units, copy the group, or give its lines a quantity.
 3. Select lines in the open group, then choose a Duct Type, **Outdoor air** or **Exhaust air**, and a
    **Quantity** (how many identical ducts each line stands for, 1 unless you change it) in the bar above

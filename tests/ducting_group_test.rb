@@ -39,6 +39,8 @@ class DuctingGroupTest < PhComposerTestCase
     assert_match(/\Adcg_[A-Za-z0-9]{12}\z/, id)
     groups = @model.entities.to_a.select { |entity| STORE.marks?(entity) }
     assert_equal 1, groups.length
+    assert_equal [["Ducting group 1", 0], "Ducting group 1"],
+                 [result["value"].values_at("name", "removed_faces"), groups.first.name]
     assert_equal({ "id" => id, "schema_version" => 1, "ventilator_id" => @erv1, "user_data" => {},
                    "extension_data" => {} }, STORE.read(groups.first))
     assert_equal [lines, 2, nil], [groups.first.entities.to_a, lines.last.get_attribute("user.notes", "kept"),

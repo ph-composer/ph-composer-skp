@@ -39,6 +39,8 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal [lines, 1, nil], [groups.first.entities.to_a, lines.first.get_attribute("user.notes", "kept"),
                                    @model.active_path]
     assert_equal [["Make Piping Group", true, :committed]], @model.operations.drop(steps)
+    assert_equal [["Piping group 1", 0], "Piping group 1"],
+                 [result["value"].values_at("name", "removed_faces"), groups.first.name]
     assert_equal [{ "group_id" => id, "group_path" => [groups.first.persistent_id] }, 0, false, [], nil],
                  all.first.values_at("reference", "pipe_count", "copied", "findings", "write_refusal")
     assert_equal %w[refused target.not_found], make([[801]], "hws_ZZZZZZZZZZZZ").values_at("status", "code")
@@ -47,10 +49,48 @@ class PipingGroupTest < PhComposerTestCase
     assert_equal [801, 802, 803], @model.entities.to_a.grep(Sketchup::Edge).map(&:persistent_id)
   end
 
+  # A planar loop SketchUp filled with a Face still makes a group: Make erases the Faces its lines alone close in its
+  # own operation, says how many, and one Undo brings back the Face and the loose lines. Nothing else is touched.
+  def test_make_erases_the_faces_its_lines_close_in_the_same_undo_step
+    loop_lines = [811, 812, 813, 814].map { |id| edge(id) }
+    filled = Sketchup::Face.new(819, :edges => loop_lines)
+    other = Sketchup::Face.new(829, :edges => [edge(821), edge(822)])
+    [*loop_lines, filled, other, *other.edges].each { |entity| @model.entities << entity }
+    first = piping_group(520, "ppg_CCCCCCCCCCCC", @hws1, [edge(521)])
+    first.name = "Piping group 1"
+    @model.entities << first
+    steps = @model.operations.length
+    @model.selection.add(loop_lines + [filled])
+    assert_equal [nil, nil], make_refusals, "a selected Face its lines close is no obstacle"
+    result = make(loop_lines.map { |line| [line.persistent_id] }, @hws1)
+    assert_equal [["Piping group 2", 1], [["Make Piping Group", true, :committed]]],
+                 [result["value"].values_at("name", "removed_faces"), @model.operations.drop(steps)]
+    made = all_groups.find { |group| group.name == "Piping group 2" }
+    assert_equal [[811, 812, 813, 814], [], [other]], [made.entities.map(&:persistent_id),
+                                                       loop_lines.flat_map(&:faces), other.edges.first.faces]
+    assert_equal [520, 821, 822, 829, made.persistent_id].sort, @model.entities.map(&:persistent_id).sort
+    @model.undo
+    assert_equal [520, 811, 812, 813, 814, 819, 821, 822, 829], @model.entities.map(&:persistent_id).sort
+    restored = @model.entities.to_a.find { |entity| entity.persistent_id == 811 }
+    assert_equal [819], restored.faces.map(&:persistent_id)
+  end
+
+  # A Face with any line outside the selection still refuses, naming the fix, and writes nothing.
+  def test_make_refuses_a_face_bounded_by_an_unselected_line_and_names_the_fix
+    loop_lines = [811, 812, 813, 814].map { |id| edge(id) }
+    filled = Sketchup::Face.new(819, :edges => loop_lines)
+    [*loop_lines, filled].each { |entity| @model.entities << entity }
+    result = make(loop_lines.first(3).map { |line| [line.persistent_id] }, @hws1)
+    assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
+    assert_equal "A selected line bounds a Face drawn with lines outside the selection; erase the Face, keep its " \
+                 "lines, then Make Piping group again. Nothing was written.", result["message"]
+    assert_equal [[], [811, 812, 813, 814, 819]], [all_groups, @model.entities.map(&:persistent_id)]
+  end
+
   # Each refusal writes nothing: no group, and every line where it was.
   def test_make_refuses_lines_it_cannot_wrap_and_writes_nothing
-    face = Sketchup::Face.new(890)
-    bounding = edge(891).tap { |line| line.attach_face(face) }
+    bounding = edge(891)
+    face = Sketchup::Face.new(890, :edges => [bounding, edge(892)])
     plain = Sketchup::Group.new(600, Sketchup::Entities.new([edge(601)]))
     inner = Sketchup::Group.new(110, Sketchup::Entities.new([edge(111)]))
     zone = zone_group(100, [edge(101), inner])
