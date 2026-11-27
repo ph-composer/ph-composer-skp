@@ -1177,28 +1177,28 @@ blend's Segment, by name, and whether it cools, which the Segment settings expor
 projection come from one plan per export.
 
 **Electric Heater export.** `ph_composer.mechanical.export.electric_heaters` (section version 1,
-`features/mechanical/electric_heater_export.rb`) requires the Zones section, the Ventilator export (for the
-Zones) and the Spaces export, whose projection gives each exported Zone's `space_count`. Its records are `ElectricHeaterPlan`'s pairs, pure Ruby: one per (Electric Heater, exported Zone) whose
-`heater_ids` names it, id `<ehr id>_<zon id>`, `identifier` the heater's id, `display_name` its Tag,
-`percent_coverage` and `user_data`; a Zone holding two heaters gives two pairs. An exported Zone naming a heater that
-is not stored blocks with `mechanical.item_missing`; a heater serving no Zone, a served Zone in no Building Segment and a
-heater on two Segments are notes (`mechanical.item_unserved`, `zone_left_out`, `item_across_segments`), and so is a
-heater serving an exported Zone that no Space names (`mechanical.zone_without_spaces`, once per heater, as the Pump
-export notes it below): PHX reads heating systems through a Room's Spaces. The Python
-section (`ElectricHeaterSection`, required for export) builds each pair's own `PhHeatingDirectElectric` and adds every
-heater serving a Room with `add_heating_system`. Its result rows (`electric_heaters`) carry the pair's ids, the Zone's
-name, the identifier, the coverage and `digest`; honeybee-ph reloads heating systems sharing an identifier by keeping
-the last, so `conformance` compares each reloaded Room's heater with its own row's digest, and no Room may hold a
-heating system the run did not report. The preflight adds the heater rows under this section: a blocking row per
-unreadable heater and per metadata problem, then the plan's findings, a heater's carrying `locate` with
-`electric_heater_ids`.
+`features/mechanical/electric_heater_export.rb`) requires the Zones section, the Ventilator export (for the Zones) and
+the Spaces export, whose projection gives each exported Zone's `space_count`. Its records are `ElectricHeaterPlan`'s
+pairs, pure Ruby: one per (Electric Heater, exported Zone) whose `heater_ids` names it, id `<ehr id>_<zon id>`,
+`identifier` the heater's id, `display_name` its Tag, `percent_coverage` and `user_data`; a Zone holding two heaters
+gives two pairs. An exported Zone naming a heater that is not stored blocks with `mechanical.item_missing`; a heater
+serving no Zone, a served Zone in no Building Segment and a heater on two Segments are notes
+(`mechanical.item_unserved`, `zone_left_out`, `item_across_segments`), and so is a heater serving an exported Zone
+that no Space names (`mechanical.zone_without_spaces`, once per heater, as the Pump export notes it below): PHX reads
+heating systems through a Room's Spaces. The Python section (`ElectricHeaterSection`, required for export) builds each
+pair's own `PhHeatingDirectElectric` and adds every heater serving a Room with `add_heating_system`. Its result rows
+(`electric_heaters`) carry the pair's ids, the Zone's name, the identifier, the coverage and `digest`; honeybee-ph
+reloads heating systems sharing an identifier by keeping the last, so `conformance` compares each reloaded Room's
+heater with its own row's digest, and no Room may hold a heating system the run did not report. The preflight adds the
+heater rows under this section: a blocking row per unreadable heater and per metadata problem, then the plan's
+findings, a heater's carrying `locate` with `electric_heater_ids`.
 
 **Pump export.** `ph_composer.mechanical.export.pumps` (section version 1, `features/mechanical/pump_export.rb`)
 requires the Zones section, the Ventilator export (for the Zones) and the Spaces export, whose projection gives each
 exported Zone's `space_count`. Its records are `PumpPlan`'s pairs, pure Ruby: one per (Pump, exported Zone) whose
 `pump_ids` names it, id `<pmp id>_<zon id>`, `identifier` the pump's id, `display_name` its Tag, its values under the
-record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export.
-It notes `mechanical.zone_without_spaces` once per pump, naming each served exported Zone that no Space names
+record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export does,
+`mechanical.zone_without_spaces` included, once per pump, naming each served exported Zone that no Space names
 (`ExportZones.spaceless_findings`, which takes a family's slot and label so another family PHX reads through Spaces
 reports the same): PHX reads supportive devices through a Room's Spaces, so such a Room carries the pump in the HBJSON
 and PHX reads it only through another Room it serves in the same Building Segment. The pair is still written. The preflight counts Spaces from

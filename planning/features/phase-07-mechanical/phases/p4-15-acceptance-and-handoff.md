@@ -19,7 +19,8 @@ Behavior owner: the three PRDs' "Acceptance shape". Register: [ACCEPTANCE](../AC
    Chromium 88 checks, the packaged inventory and the footprint through `vendor.py --check`
    against its keys: the 28,000,000 byte ceiling, and the growth allowance over the baseline
    Phase 6 reset to 26,093,959 at its entry (F37). The ceiling is the nearer limit. At the phase
-   close, reset the baseline by a recorded decision.
+   close, reset the baseline by a recorded decision. D4-50 (2026-11-27) is that decision: baseline
+   27,987,931, ceiling 30,000,000, the allowance unchanged.
 2. **Integrated host run.** Fresh process, normal installed RBZ, the reference model: author two
    Ventilators, the Hot Water System and one item of each later family (heat pumps, electric
    heaters, pumps, fans) from scratch through the panel; set a Building Segment's mechanical

@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from test_electric_heater_sections import EH_2, ZONE_B, document, records, reloaded, run
+from test_electric_heater_sections import EH_2, ZONE_B, document, heating, records, reloaded, run
 from test_site_phx_round_trip import xml_builder
 
 create_project = pytest.importorskip("PHX.from_HBJSON.create_project")
@@ -57,5 +57,6 @@ def test_a_heater_only_on_a_room_with_no_spaces_does_not_reach_phx() -> None:
     for row in records(value):
         if row["item_id"] == EH_2:
             row["zone_id"], row["id"] = ZONE_B, f"{EH_2}_{ZONE_B}"
+    assert sum(EH_2 in systems for systems in heating(run(value)).values()) == 1, "the HBJSON still carries it"
     [variant] = converted(value).variants
     assert sorted(device.display_name for device in electric_heaters(variant)) == ["EH-1"]
