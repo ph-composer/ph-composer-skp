@@ -61,6 +61,21 @@ class MechanicalElectricHeaterExportTest < PhComposerTestCase
     write_or_compare(RESULT_FIELDS, X::RESULT_FIELDS)
   end
 
+  def test_a_heater_on_a_zone_with_no_spaces_is_noted_and_still_written
+    reference(:zone_c => true)
+    completed(assign(%w[C], @ids.fetch("EH-2")))
+    extraction = extract
+    assert_includes heaters(extraction).map { |row| row.values_at("item_id", "zone_id") },
+                    [@ids.fetch("EH-2"), zone_id("C")]
+    assert_equal [["mechanical.zone_without_spaces", @ids.fetch("EH-2")]], notes(extraction)
+    assert_includes extraction.findings.find { |row| row["code"] == "mechanical.zone_without_spaces" }.fetch("message"),
+                    "EH-2 serves Zone “Zone C”, which has no Spaces. PHX reads an Electric Heater through a Room's " \
+                    "Spaces, so a Building Segment's WUFI-Passive and METr model gets EH-2 only through another Room " \
+                    "it serves in that Segment"
+    assert_equal [["mechanical.zone_without_spaces", @ids.fetch("EH-2"), false]],
+                 preflight_rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
+  end
+
   def test_an_unserved_heater_a_left_out_zone_and_two_segments_are_noted_and_never_block
     reference(:segment_b => "Annex")
     spare = create("name" => "EH-9")
@@ -142,9 +157,11 @@ class MechanicalElectricHeaterExportTest < PhComposerTestCase
 
   private
 
-  def reference(segment_b: "Main")
+  # With `zone_c`, Zone C with no Space beside them in the Main Segment.
+  def reference(segment_b: "Main", zone_c: false)
     @model.entities << box(1000, "A", "Zone A", "Main", [0, 5, 0, 4]) <<
       box(2000, "B", "Zone B", segment_b, [6, 10, 0, 4])
+    @model.entities << box(3000, "C", "Zone C", "Main", [11, 15, 0, 4], :space => false) if zone_c
     adopt_zone_options
     create({ "name" => "EH-1", "percent_coverage" => 0.6 }, USER_DATA)
     create("name" => "EH-2")

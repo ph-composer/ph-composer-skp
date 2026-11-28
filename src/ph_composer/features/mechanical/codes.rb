@@ -48,9 +48,10 @@ module PhComposer
                                  "exports it as one system and PHX splits it for WUFI-Passive.",
         SEGMENT_COOLING_MISMATCH => "A Building Segment's mechanical cooling switch disagrees with its blended heat " \
                                     "pump: on with no heat pump cooling in its export, or off with a blend that cools.",
-        ZONE_WITHOUT_SPACES => "An item PHX reads through a Room's Spaces (a Pump or a Fan) serves an exported Zone " \
-                               "with no Spaces: the HBJSON carries it on that Room, and WUFI-Passive and METr get it " \
-                               "only through another Room it serves in the same Building Segment."
+        ZONE_WITHOUT_SPACES => "An item PHX reads through a Room's Spaces (a Pump, a Fan or an Electric Heater) " \
+                               "serves an exported Zone with no Spaces: the HBJSON carries it on that Room, and " \
+                               "WUFI-Passive and METr get it only through another Room it serves in the same " \
+                               "Building Segment."
       }.freeze
 
       module_function

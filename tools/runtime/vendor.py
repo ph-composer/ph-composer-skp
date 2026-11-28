@@ -147,7 +147,9 @@ MIME_TYPES = {
 # were raised by D3a-20 (2026-10-16) and again by D4c-33 (2026-11-18, the Climate packet's DECISIONS). The
 # installed size may grow at most `installed_growth_bytes` past `installed_baseline_bytes`, the size at the
 # last phase close: more needs a recorded decision, and each phase close resets the baseline. Reset at the
-# Programs phase's entry to the size measured on `main` at 4d346ab4 (C4a-14, 2026-11-20).
+# Programs phase's entry to the size measured on `main` at 4d346ab4 (C4a-14, 2026-11-20), and at the Mechanical
+# phase's close to the size measured on `main` at 6cad268e, with the ceiling raised from 28,000,000 (D4-50,
+# 2026-11-27, the Mechanical packet's DECISIONS).
 GATES: dict[str, Any] = {
     "panel_ready_target_ms": 1_000,
     "panel_ready_ceiling_ms": 2_000,
@@ -156,8 +158,8 @@ GATES: dict[str, Any] = {
     "warm_round_trip_target_ms": 20,
     "warm_round_trip_ceiling_ms": 100,
     "installed_target_bytes": 24_000_000,
-    "installed_ceiling_bytes": 28_000_000,
-    "installed_baseline_bytes": 26_093_959,
+    "installed_ceiling_bytes": 30_000_000,
+    "installed_baseline_bytes": 27_987_931,
     "installed_growth_bytes": 2_500_000,
     "boot_deadline_ms": 15_000,
     "pump_target_ms": 20,

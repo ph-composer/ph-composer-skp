@@ -1177,26 +1177,28 @@ blend's Segment, by name, and whether it cools, which the Segment settings expor
 projection come from one plan per export.
 
 **Electric Heater export.** `ph_composer.mechanical.export.electric_heaters` (section version 1,
-`features/mechanical/electric_heater_export.rb`) requires the Zones section and the Ventilator export (for the
-Zones). Its records are `ElectricHeaterPlan`'s pairs, pure Ruby: one per (Electric Heater, exported Zone) whose
-`heater_ids` names it, id `<ehr id>_<zon id>`, `identifier` the heater's id, `display_name` its Tag,
-`percent_coverage` and `user_data`; a Zone holding two heaters gives two pairs. An exported Zone naming a heater that
-is not stored blocks with `mechanical.item_missing`; a heater serving no Zone, a served Zone in no Building Segment and a
-heater on two Segments are notes (`mechanical.item_unserved`, `zone_left_out`, `item_across_segments`). The Python
-section (`ElectricHeaterSection`, required for export) builds each pair's own `PhHeatingDirectElectric` and adds every
-heater serving a Room with `add_heating_system`. Its result rows (`electric_heaters`) carry the pair's ids, the Zone's
-name, the identifier, the coverage and `digest`; honeybee-ph reloads heating systems sharing an identifier by keeping
-the last, so `conformance` compares each reloaded Room's heater with its own row's digest, and no Room may hold a
-heating system the run did not report. The preflight adds the heater rows under this section: a blocking row per
-unreadable heater and per metadata problem, then the plan's findings, a heater's carrying `locate` with
-`electric_heater_ids`.
+`features/mechanical/electric_heater_export.rb`) requires the Zones section, the Ventilator export (for the Zones) and
+the Spaces export, whose projection gives each exported Zone's `space_count`. Its records are `ElectricHeaterPlan`'s
+pairs, pure Ruby: one per (Electric Heater, exported Zone) whose `heater_ids` names it, id `<ehr id>_<zon id>`,
+`identifier` the heater's id, `display_name` its Tag, `percent_coverage` and `user_data`; a Zone holding two heaters
+gives two pairs. An exported Zone naming a heater that is not stored blocks with `mechanical.item_missing`; a heater
+serving no Zone, a served Zone in no Building Segment and a heater on two Segments are notes
+(`mechanical.item_unserved`, `zone_left_out`, `item_across_segments`), and so is a heater serving an exported Zone
+that no Space names (`mechanical.zone_without_spaces`, once per heater, as the Pump export notes it below): PHX reads
+heating systems through a Room's Spaces. The Python section (`ElectricHeaterSection`, required for export) builds each
+pair's own `PhHeatingDirectElectric` and adds every heater serving a Room with `add_heating_system`. Its result rows
+(`electric_heaters`) carry the pair's ids, the Zone's name, the identifier, the coverage and `digest`; honeybee-ph
+reloads heating systems sharing an identifier by keeping the last, so `conformance` compares each reloaded Room's
+heater with its own row's digest, and no Room may hold a heating system the run did not report. The preflight adds the
+heater rows under this section: a blocking row per unreadable heater and per metadata problem, then the plan's
+findings, a heater's carrying `locate` with `electric_heater_ids`.
 
 **Pump export.** `ph_composer.mechanical.export.pumps` (section version 1, `features/mechanical/pump_export.rb`)
 requires the Zones section, the Ventilator export (for the Zones) and the Spaces export, whose projection gives each
 exported Zone's `space_count`. Its records are `PumpPlan`'s pairs, pure Ruby: one per (Pump, exported Zone) whose
 `pump_ids` names it, id `<pmp id>_<zon id>`, `identifier` the pump's id, `display_name` its Tag, its values under the
-record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export,
-and notes `mechanical.zone_without_spaces` once per pump, naming each served exported Zone that no Space names
+record's names with the usage profile resolved, and `user_data`. It notes and blocks as the Electric Heater export does,
+`mechanical.zone_without_spaces` included, once per pump, naming each served exported Zone that no Space names
 (`ExportZones.spaceless_findings`, which takes a family's slot and label so another family PHX reads through Spaces
 reports the same): PHX reads supportive devices through a Room's Spaces, so such a Room carries the pump in the HBJSON
 and PHX reads it only through another Room it serves in the same Building Segment. The pair is still written. The preflight counts Spaces from
@@ -1208,7 +1210,7 @@ the pair's ids, the Zone's name, the identifier, the values and `digest`; `confo
 pump with its own row's digest, and no Room may hold a supportive device under a Pump id the run did not report
 (another section's supportive devices are not its to check). The preflight adds the pump rows under this section, a
 pump's carrying `locate` with `pump_ids`. The export's and the preflight's Spaces reads are `ExportZones.spaced` and
-`ExportZones.live_spaced`, which the Fan export calls too.
+`ExportZones.live_spaced`, which the Fan and Electric Heater exports call too.
 
 **Fan export.** `ph_composer.mechanical.export.fans` (section version 1, `features/mechanical/fan_export.rb`) requires
 the same sections as the Pump export. Its records are `FanPlan`'s pairs: one per (Fan, exported Zone) whose `fan_ids`
@@ -1442,7 +1444,9 @@ walk and selection rows follow Piping groups' and pipes' rules (see "Hot water p
   reach refuses the whole delete as `reference.in_use`. A Ventilator delete with an id or null moves or clears the
   Ducting groups naming it through ducting's retargeter `ph_composer.ducting.groups.retarget_ventilator`; a group
   whose record fails its schema but still names it, in its link or in a readable extension envelope, strands every
-  delete as `reference.in_use` (the refusal says to repair the record), so
+  delete as `reference.in_use` (where the retargeter, which a delete with a replacement or null runs, cannot rewrite
+  a group because its record fails its schema, its refusal says to repair the record; a group it does not match, one
+  naming the id only in a malformed link or an envelope, refuses through the engine's reference scan), so
   `ph_composer.ducting.ventilators` lists such groups apart from the linked ones (`blocking_group_names`), from the
   same one walk as its lengths, and the Delete offers no choice while any remains. A duct's
   `quantity` is at most 10,000 (P4-14d), so a length times it stays finite; a stored record above it is unreadable.

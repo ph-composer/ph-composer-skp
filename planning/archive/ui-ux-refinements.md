@@ -309,6 +309,11 @@ Assemblies-screen paint and native/public paint choices agree. Face type selects
 Boundary and Attached zone select Boundary condition, and Assembly selects Assembly. This choice
 is remembered and survives Stop/Escape; a later manual Colour-by override is preserved. Bare native
 tool activation without a concrete choice retains the existing temporary fallback behavior.
+
+Note, 2026-11-27: "survives Stop/Escape" no longer holds. Since #286 (2026-10-21) a paint tool leases its
+Colour-by mode and gives back the mode from before painting when it stops, unless the user picked another
+meanwhile (`context/EXTENSIBILITY.md`, "Give the Colour-by mode back"). The `UXR-COLOUR` case text follows the
+lease, by Phase 7 decision D4-38.
 No new command/schema or record mutation is introduced. The feature-owned ColourModes helper
 keeps the shared Colour-by service free of field knowledge and keeps ClassifyTool within its existing
 300-line complexity limit. Focused Ruby tests pass 50 cases / 302 assertions on Ruby 3.2.2 and 2.7.2;

@@ -45,6 +45,15 @@ keys in `tools/runtime/vendor.py` are unchanged. With the growth allowance kept 
 binding limit, leaving 56,756 bytes for the next phase, so the reset also needs Ed's call on the ceiling or the
 allowance.
 
+**Closeout, 2026-11-27 ([D4-50](../DECISIONS.md#part-7-closeout-decisions-2026-11-27)).** The table above is the
+2026-11-25 measurement against the old keys. #592 to #606 added 44,687 bytes to it. Ed reset the baseline to
+27,987,931 bytes, the size put to him for `main` at `6cad268e`, raised the ceiling to 30,000,000 and kept the growth
+allowance at 2,500,000. On the closeout branch `make rbz rbz-check` reads "RBZ verified: 878 files, 9110858 bytes,
+27987937 bytes installed" with only the keys changed (6 bytes over the figure put to Ed; P4-10 saw the same 6 bytes
+between its Ruby 3.2.2 and 2.7.2 builds). On the PR's last code commit, `01c212b5`, `make ci` reads "RBZ verified:
+878 files, 9111308 bytes, 27989751 bytes installed" with D4-63's finding, its guide lines and the API notes: 1,820
+over the new baseline and 2,010,249 under the new ceiling.
+
 ## Step 3: the register
 
 Each row's offline evidence is its stage's evidence file; nothing is Pass. "Sitting" is the batch D4-31 sets.
@@ -78,10 +87,23 @@ Each row's offline evidence is its stage's evidence file; nothing is Pass. "Sitt
 | M16 | P4-08b, post-cap fixes | [p4-08b-segment-mechanical-settings](p4-08b-segment-mechanical-settings.md), [post-cap-review](post-cap-review.md) | MS3 | `M16` | |
 
 One clause needs a word at the sitting. The cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e` and `M16` ask that save,
-reopen and re-export give the same HBJSON (`M14e` already narrows it to the same ventilation systems). P4-13d's review noted, not reproduced, that two Python processes give canonical HBJSON differing in
+reopen and re-export give the same HBJSON (`M14e` already narrows it to the same ventilation systems). P4-13d's review noted that two Python processes give canonical HBJSON differing in
 `team` identifiers, `bldg_segments` and list order, so a whole-file byte comparison cannot hold; P4-13d compared the
-hot water systems and piping, which were identical. The sitting should compare those clauses' sections, not the
-file's bytes, unless Ed rules otherwise ("For Ed" below).
+hot water systems and piping, which were identical. The MS1 sitting reproduced the difference
+([phase-07-ms1](../../../native-acceptance/evidence/phase-07-ms1.md)), and Ed ruled on 2026-11-27 that those clauses
+compare by section (D4-52): `rooms` exact, honeybee-ph's random identifiers masked, the `properties.energy` lists as
+sets.
+
+**Re-export pairs, read at closeout on 2026-11-27.** Each of the nine cases saved its first export and its re-export
+after save and a fresh-process reopen in the private run directories of MS1 to MS3. Read as files, every pair
+(`M04`, `M06`, `M08`, `M09`, `M10`, `M11`, `M13d`, `M14e`, `M16`) has equal byte length and `rooms` exactly equal,
+and the two files are equal in full once normalised as [ACCEPTANCE](../ACCEPTANCE.md) states above its register
+(the normalisation of `comparable_result` in `tools/runtime/browser_check.py`): the 30 UUIDs under
+`properties.ph.team` and `properties.ph.bldg_segments` (55 in `M08` and `M16`, which have two Segments) masked
+wherever they repeat, and the seven unordered `properties.energy` collections compared as sets of whole records,
+with the order inside each record kept. This is a read of saved files, not a ledger result: the sittings recorded
+narrower comparisons (the sections each case names), every one of those rows is stale, and D4-52's comparison is
+what the reruns at the final sitting record.
 
 ## Owed host cases, by sitting
 
@@ -117,6 +139,34 @@ recorded the assigned cases as below ([phase-07-ms1](../../../native-acceptance/
 `M13d`, `M14d` and `M14e` are Pass today; the fix to the create step stales them. The unknown clauses of `M05`,
 `M07`, `M08` and `M16` need a rerun, not yet assigned to a sitting; `M10`'s waits on decision 3 below (its
 re-export differs in list order only). The 48 stale cases not assigned to a sitting are unchanged.
+
+### Closeout screening, 2026-11-27 (D4-51)
+
+Recomputed on `main` at `6cad268e` with `acceptance_ledger.py status` and each case's `paths` against
+`git diff 73936d2a^ 6cad268e`: 70 stale cases outside M01 to M16 name a path Phase 7 changed, the 48 above and 22
+more since #592 (`AW03`, `AW09`, `AW09M`, `AW10G`, `AW10H`, `PG02`, `PG04`, `PG07`, `PG07b`, `PG08`, `PG11`, `PG11b`,
+`R11H`, `S01`, `S05`, `S08`, `S09`, `SD03`, `SD05`, `T06`, `T07`, `UXK1`), mostly through #604's quoted Zone names,
+`colour_by/palette.rb` and the busy message. Phase 7 modified 43 shipped files that predate it. Read by diff, two of
+those changes alter what an older case observes, and the final sitting repeats the cases whose text is the changed
+behaviour:
+
+| Behaviour changed | Repeated at the final sitting |
+| --- | --- |
+| Spaces' export projection leaves out the Spaces of a Zone in no Building Segment and gives every Zone holding a Space a row with its `space_count` (`features/spaces/export.rb`), which Programs reads for net volume and iCFA | `PG03` (the left-out Zone, its Spaces and Edges absent from the HBJSON) and `S10` (the Spaces export and reload) |
+| The shared Delete dialog and inventory table (`html/inventory_forms.js`, `html/inventory.js`): usage combined from several contributors, Clear offered per record, a blocked state | `T05` (delete with a replacement on a Types tab); `HGUI`, `PTAB` and the `UXR` cases are in the sitting already |
+
+Not repeated, and left `needs_recheck` with their last outcome, since the ledger has no waived state:
+
+- the cases over code rewritten with the same result intended: default names through `Records::Names.numbered`, the
+  delete-in-use scan, name comparison by Unicode fold (#592) and the thermal-bridge chain rule moved to
+  `core/edge_runs.rb`;
+- the export-only cases, because the nine new Python sections run in every M export case and in `M15`;
+- Climate's cases, changed by addition only;
+- the agent cases, because `M15` records an agent client session per new family;
+- the cases that name only files every stage touched (`extension.rb`, `shell/api.rb`, `index.html`, shared kit files).
+
+Phase 7 closes on M01 to M16 ([ACCEPTANCE](../ACCEPTANCE.md), "Completion boundary"). `M15`'s last clause names
+`PG03`, `S10` and `T05`.
 
 ## Steps 4 and 5: context and product documents
 
@@ -189,23 +239,27 @@ Rows marked "not re-verified" were collected from the evidence files and not che
 
 ### Decisions
 
-| # | Item | Source |
-| --- | --- | --- |
-| 1 | Reset the installed-size baseline to this head's size (proposed above), and say whether the 2,500,000 growth allowance or the 28,000,000 ceiling moves; under the ceiling the next phase has the headroom above | This file, step 1; stage document step 1 |
-| 2 | Which of the 48 stale cases Phase 7's changes name the MS3 sitting repeats (no stage document names them) | This file, "Owed host cases" |
-| 3 | "Same HBJSON" on re-export (cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e`, `M16`): compare the sections, as P4-13d did, or the whole file, which differs across Python processes (noted in review, not reproduced) | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 |
-| 4 | A duct run of quantity N exports as N identical elements, so METr lists N rows of quantity 1; built as inferred. The alternative is carrying it in `user_data` | p4-14e-ducting-export, "Recorded at implementation"; phases/p4-14-erv-ducting, "Inferred in planning" |
-| 5 | Whether a Ventilator's own Quantity should multiply its ducts (a Ventilator of Quantity 40 exports the ducts drawn for it) | phases/p4-14-erv-ducting, "Inferred in planning" |
-| 6 | A large duct quantity multiplies the HBJSON, each element once per served Room; only the 10,000 cap bounds it | p4-14e-ducting-export, "Review" (not re-verified) |
-| 7 | `ducting.group_unlinked`'s Locate opens the group and selects that run's ducts, not the Group (a conductor decision; selecting the Group needs a new view command) | p4-14d-duct-runs-and-schedule, "Inferred beyond the stage doc"; p4-14e-ducting-export |
-| 8 | P4-13 inference: a pipe tree lives in one Piping group, so a riser group with per-floor branch groups does not export | phases/p4-13-hot-water-piping, "Inferred in planning" |
-| 9 | P4-13 inference: recirculation temperature and hours, and a trunk's multiplier and demand recirculation, sit on the pipe assignment, not on the group or System | phases/p4-13-hot-water-piping, "Inferred in planning" |
-| 10 | P4-13 inference, built in P4-13e: the Systems table's recirculation field moved from Mechanical to piping, removing a shipped API field | phases/p4-13-hot-water-piping; phases/p4-13e-piping-view, "Inferred in planning" |
-| 11 | The Hot Water System delete routes foreign referrers through the generic `request.retarget_references` (a conductor decision at P4-13b, reused by the Ventilator delete) | p4-13b-piping-groups-and-assignment, "Inferred beyond the stage doc" |
-| 12 | Three estimator expressions kept faithfully in the heat pump blend: HSPF weighted by cooling share; the HSPF derating's temperature term; v25.1.2's SEER branch picked by the entered SEER | p4-08-heat-pumps, "Departures and choices" |
-| 13 | Summer ventilation's omitted values export honeybee-ph's class defaults (extract fan power 0.0 Wh/m³, night minimum 0.0 °C), not the Grasshopper component's (0.65 Wh/m³, 22 °C) | p4-08b-segment-mechanical-settings, "For Ed's judgment" |
-| 14 | An Electric Heater on a Zone with no Spaces reaches the HBJSON but not PHX; Pumps and Fans have a finding for this, heaters none | p4-09-electric-heaters, "For Ed's judgment" |
-| 15 | A Fan's linked supportive device takes its quantity, but PHX 1.59.4 drops the exhaust ventilator's, so WUFI-Passive and METr see one exhaust device per Fan | p4-11-fans, "Departures and choices"; metr-export STATUS |
+All fifteen were answered by Ed on 2026-11-27, each as recommended, after a second read against `main` at
+`6cad268e`; the answers are [DECISIONS, Part 7](../DECISIONS.md#part-7-closeout-decisions-2026-11-27), D4-50 to
+D4-64 in this order. Rows 1 to 3 were stale by then and are corrected below; row 6 was verified.
+
+| # | Item | Source | Answer, 2026-11-27 |
+| --- | --- | --- | --- |
+| 1 | Reset the installed-size baseline and say whether the 2,500,000 growth allowance or the 28,000,000 ceiling moves. Corrected 2026-11-27: #592 to #606 took the size on `main` to 27,987,931 bytes at `6cad268e`, about 12 KB under the ceiling, not the 27,943,244 and 56,756 proposed above | This file, step 1; stage document step 1 | D4-50: baseline 27,987,931, ceiling 30,000,000, allowance unchanged |
+| 2 | Which of the stale cases Phase 7's changes name the final sitting repeats (no stage document names them). Corrected 2026-11-27: 70 on `6cad268e`, the 48 above and 22 more | This file, "Owed host cases" and "Closeout screening" | D4-51: `PG03`, `S10` and `T05`; the rest stay `needs_recheck` |
+| 3 | "Same HBJSON" on re-export (cases `M04`, `M06`, `M08` to `M11`, `M13d`, `M14e`, `M16`): compare the sections, as P4-13d did, or the whole file, which differs across Python processes. Corrected 2026-11-27: the difference is reproduced (MS1's evidence, and the nine saved pairs, "Re-export pairs" above): random identifiers on honeybee-ph objects the export never names, and list order under `properties.energy`; `rooms` is identical | p4-13d-piping-export, "Review"; ACCEPTANCE M04, M14e, M16 | D4-52: by section, `rooms` exact, random identifiers masked, energy lists as sets |
+| 4 | A duct run of quantity N exports as N identical elements, so METr lists N rows of quantity 1; built as inferred. The alternative is carrying it in `user_data` | p4-14e-ducting-export, "Recorded at implementation"; phases/p4-14-erv-ducting, "Inferred in planning" | D4-53: keep |
+| 5 | Whether a Ventilator's own Quantity should multiply its ducts (a Ventilator of Quantity 40 exports the ducts drawn for it) | phases/p4-14-erv-ducting, "Inferred in planning" | D4-54: keep; the ducts are one unit's |
+| 6 | A large duct quantity multiplies the HBJSON, each element once per served Room; only the 10,000 cap bounds it | p4-14e-ducting-export, "Review" (verified 2026-11-27) | D4-55: keep the cap |
+| 7 | `ducting.group_unlinked`'s Locate opens the group and selects that run's ducts, not the Group (a conductor decision; selecting the Group needs a new view command) | p4-14d-duct-runs-and-schedule, "Inferred beyond the stage doc"; p4-14e-ducting-export | D4-56: keep |
+| 8 | P4-13 inference: a pipe tree lives in one Piping group, so a riser group with per-floor branch groups does not export | phases/p4-13-hot-water-piping, "Inferred in planning" | D4-57: keep; cross-group risers are follow-up 43 |
+| 9 | P4-13 inference: recirculation temperature and hours, and a trunk's multiplier and demand recirculation, sit on the pipe assignment, not on the group or System | phases/p4-13-hot-water-piping, "Inferred in planning" | D4-58: keep |
+| 10 | P4-13 inference, built in P4-13e: the Systems table's recirculation field moved from Mechanical to piping, removing a shipped API field | phases/p4-13-hot-water-piping; phases/p4-13e-piping-view, "Inferred in planning" | D4-59: keep |
+| 11 | The Hot Water System delete routes foreign referrers through the generic `request.retarget_references` (a conductor decision at P4-13b, reused by the Ventilator delete) | p4-13b-piping-groups-and-assignment, "Inferred beyond the stage doc" | D4-60: keep |
+| 12 | Three estimator expressions kept faithfully in the heat pump blend: HSPF weighted by cooling share; the HSPF derating's temperature term; v25.1.2's SEER branch picked by the entered SEER | p4-08-heat-pumps, "Departures and choices" | D4-61: keep, faithful to v25.1.2 |
+| 13 | Summer ventilation's omitted values export honeybee-ph's class defaults (extract fan power 0.0 Wh/m³, night minimum 0.0 °C), not the Grasshopper component's (0.65 Wh/m³, 22 °C) | p4-08b-segment-mechanical-settings, "For Ed's judgment" | D4-62: keep the class defaults; revisit when PHX writes them |
+| 14 | An Electric Heater on a Zone with no Spaces reaches the HBJSON but not PHX; Pumps and Fans have a finding for this, heaters none | p4-09-electric-heaters, "For Ed's judgment" | D4-63: change, built in the closeout PR; follow-up 44 for the other families |
+| 15 | A Fan's linked supportive device takes its quantity, but PHX 1.59.4 drops the exhaust ventilator's, so WUFI-Passive and METr see one exhaust device per Fan | p4-11-fans, "Departures and choices"; metr-export STATUS | D4-64: keep; PH-Tools/PHX#177 filed |
 
 ### Follow-ups
 
@@ -213,7 +267,7 @@ Rows marked "not re-verified" were collected from the evidence files and not che
 | --- | --- | --- |
 | 16 | `17b07275`, #590's last commit, merged past its cap. A read-only `codex -m gpt-6.2-sol review --commit` on 2026-11-25 found one live P3: the citation lint flags valid compact SVG path data such as `M12.5.6v16` (no shipped file has it today). P4-01's `dd8a3ad7` and P4-02's `603bf5e5` were among the eighteen #589 read (its table cites both); a second read of each found nothing live beyond row 21 | post-cap-review, "Live findings"; this stage's review |
 | 17 | The agent `discover` index is past its 20 KiB budget (`Discovery::INDEX_BYTES`), so it answers counts, not names; raise the budget or trim the index | p4-05-systems-tab, "Departures and choices"; the stage brief |
-| 18 | Upstream, PH-Tools/PHX: the exhaust ventilator's quantity is dropped (row 15) | p4-11-fans |
+| 18 | Upstream, PH-Tools/PHX: the exhaust ventilator's quantity is dropped (row 15). Filed 2026-11-27 as [PH-Tools/PHX#177](https://github.com/PH-Tools/PHX/issues/177); when it is fixed, bump the pin and assert the quantity in the Fan round trip (D4-64) | p4-11-fans |
 | 19 | Upstream, honeybee-ph: recirculation runs of 3.3 m and 1.7 m at 24 h read 23 h (`int()` truncation); Ruby matches the export on purpose | p4-13c-tree-and-schedule; p4-13d-piping-export |
 | 20 | Upstream, honeybee_ph#135 (open): the calculation-method field; `piping_calc_method` is a guessed attribute until it lands | p4-06-hot-water-records; STATUS, "Deferred" |
 | 21 | `Records::Names.unique!` compares case in ASCII only (`casecmp`) while `copy_name` uses `downcase`, so with `ÉRV` and `érv (copy)` a Duplicate skips to `ÉRV (copy 2)` though `ÉRV (copy)` is accepted; left to #321, which has since merged without changing it (checked on `main` 2026-11-25) | p4-13a-pipe-types; post-cap-review |
@@ -237,6 +291,19 @@ Rows marked "not re-verified" were collected from the evidence files and not che
 | 39 | A refused duct Assign keeps its quantity draft | post-cap-review, "Follow-ups, not in this PR" |
 | 40 | Carry canonical values through the clipboard past the parser's nanounit | post-cap-review, "Declined in cycle 2" |
 | 41 | The recirculation heat loss coefficient is not shown, and distribution pipes export at 60 °C and 24 h; what METr does with them is metr-export's | phases/p4-13-hot-water-piping; metr-export STATUS |
+| 42 | Installed size: keep one copy of the licence text that `vendor/licenses/` and `LICENSE.txt` repeat, about 173 KB, with `THIRD_PARTY_NOTICES.md` reworded; needs a licensing judgment | DECISIONS D4-50 (not re-verified) |
+| 43 | Cross-group pipe risers: a riser drawn in one Piping group taking branches drawn in other groups, one per floor. Today a branch in another group raises the blocking `piping.branch_unconnected` | DECISIONS D4-57 |
+| 44 | The no-Spaces finding (`mechanical.zone_without_spaces`) for heat pumps, tanks and hot water heaters, which PHX also reads through a Room's Spaces; D4-63 gave it to Electric Heaters only | DECISIONS D4-63 |
+| 45 | A deterministic export: fixed identifiers on the honeybee-ph objects the export never names and sorted `properties.energy` lists, so a re-export is byte-identical. Every canonical hash moves and every export host case goes stale | DECISIONS D4-52; metr-export STATUS |
+| 46 | A valid Ducting group that is locked, shared or nested blocks a Ventilator delete but `ducting.ventilators` lists it among the linked groups, not the blocking ones | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 47 | The repair guidance for a System or Ventilator delete stranded by an invalid Piping or Ducting group comes only from the retargeter, when it records `validation.failed` for a group it matched: a delete with a replacement or null, over a group whose link holds the id. A delete with neither, a group that names the record only in a malformed link or an extension envelope, and an invalid group that is also locked do not get it. The API 1.111 note is scoped to that in the closeout PR; the refusals themselves are unchanged | Codex review of `5f29e2c1` and `ae92b7ac`, 2026-11-27 |
+| 48 | Thermal Bridge Types and Assemblies have no colour reset: their reads name no default colour, so the shared picker shows none (D4-49) | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 49 | The busy notice maps only the Line tool to its menu name; Push/Pull, Move and Rotate fall back to "A SketchUp tool", and Rotate's host name carries a bracket ("Rotate (RotateTool)") (D4-45) | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 50 | A Pipe Type or Duct Type stored before #604 has no assigned colour (D4-43) | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 51 | Codex's declined refactor of the one Model walk in `ducting.ventilators` to a named result | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 52 | No JavaScript test covers the plural Make notice, "Removed 2 Faces" (D4-39) | Recorded at closeout, 2026-11-27 (not re-verified) |
+| 53 | Nothing asserts which of `honeybee_ph` and `honeybee_phhvac` is imported first in the export runtime (D4-65): the `hvac_seam` probe runs after a translation, and honeybee's core imports every installed extension when it first loads. A probe that records first imports in a fresh Pyodide runtime would settle it, if the order is ever shown to matter | Codex review of #607, 2026-11-27 |
+| 54 | The user guide and the agent guide say a Pump or a Fan warns on "a Zone with no Spaces"; the finding is for an exported Zone, and a Zone in no Building Segment gets `mechanical.zone_left_out`. The Electric Heater lines say "exported" since the closeout PR | Codex review of #607, cycle 2, 2026-11-27 |
 
 ## Review
 

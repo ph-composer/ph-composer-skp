@@ -6,13 +6,14 @@ module PhComposer
     # exported Zone) pair, as ElectricHeaterPlan works it out, for the Python section that adds each heater to its
     # served Room as a PhHeatingDirectElectric (python/ph_composer_translation/mechanical_sections.py). The Serves
     # payload is claimed once, by the Ventilator export, whose projection gives every Zone with its slots; this
-    # section requires that one and reads it. It reads each heater with its `user_data`, which the heating system
-    # carries.
+    # section requires that one and reads it, and Spaces' projection for the Zones a Space names. It reads each
+    # heater with its `user_data`, which the heating system carries.
     #
     # The preflight's Electric Heater rows come from the same plan (`preflight_rows`).
     module ElectricHeaterExport
       SECTION = "#{FEATURE_ID}.export.electric_heaters"
       ZONES = Zones::ExportProjection::SECTION
+      SPACES = Spaces::ExportProjection::SECTION
       # One result row per pair: what conformance reads back. `digest` is the SHA-256 of the heating system's
       # honeybee-ph dictionary as translated, which conformance compares with each reloaded Room's own. The Python
       # section's test holds its rows to these keys (tests/fixtures/mechanical/electric_heater_result_fields.json).
@@ -23,14 +24,16 @@ module PhComposer
       module_function
 
       def install(feature)
-        feature.export_contributor(SECTION, :section_version => 1, :requires => [ZONES, VentilationExport::SECTION],
+        feature.export_contributor(SECTION, :section_version => 1,
+                                            :requires => [ZONES, VentilationExport::SECTION, SPACES],
                                             :result => RESULT) { |reader| records(reader) }
       end
 
       # The pairs, once the plan finds nothing blocking; every other finding is a note.
       def records(reader)
         heaters = reader.records(ELECTRIC_HEATER_KIND, :user_data => true).to_h { |row| [row.fetch("id"), row] }
-        plan = ElectricHeaterPlan.call(:zones => reader.section(VentilationExport::SECTION), :heaters => heaters)
+        plan = ElectricHeaterPlan.call(:zones => reader.section(VentilationExport::SECTION), :heaters => heaters,
+                                       :spaced => ExportZones.spaced(reader))
         VentilationExport.raise_blocking!(plan.findings)
         plan.findings.each { |finding| reader.note(finding.code, finding.record_id, finding.message) }
         plan.pairs
@@ -39,7 +42,8 @@ module PhComposer
       # The preflight's Electric Heater rows: a blocking row for each unreadable heater and each metadata problem the
       # export refuses (a reserved `user_data` key, an extension payload it cannot leave out), then the plan's
       # findings over the live Model, each with the code and object the export notes. `zones` are the live
-      # ExportZones and `references` each Zone's occurrence reference by id.
+      # ExportZones and `references` each Zone's occurrence reference by id. The Zones a Space names come from the
+      # Spaces read.
       def preflight_rows(request, zones, references)
         engine = request.engine
         records, unreadable = DefinitionLists.read(engine, ELECTRIC_HEATER_KIND,
@@ -49,7 +53,8 @@ module PhComposer
         end
         rows.concat(Export::MetadataCheck.findings(request, records, :section => SECTION, :user_data => true))
         heaters = records.to_h { |record| [record.fetch("id"), record] }
-        plan = ElectricHeaterPlan.call(:zones => zones, :heaters => heaters,
+        spaced = ExportZones.live_spaced(request, zones, references, ElectricHeaterPlan::SLOT)
+        plan = ElectricHeaterPlan.call(:zones => zones, :heaters => heaters, :spaced => spaced,
                                        :unreadable => unreadable.map { |row| row.fetch("id") })
         rows + plan.findings.map do |found|
           Preflight.row(found.code, SECTION, found.record_id, found.message, found.blocks,

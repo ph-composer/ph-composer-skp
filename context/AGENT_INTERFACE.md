@@ -915,8 +915,9 @@ the export writes them to the Segment's `BldgSegment`, and the preflight warns, 
 where a Segment's mechanical cooling switch disagrees with its blended heat pump. Since API 1.95 Electric Heaters
 are the catalog `ph_composer.mechanical.electric_heaters` (`list`, `all`, a snapshot section, `create`, `update`,
 `duplicate` and `delete` with `replacement_id`); they serve Zones through the list slot `heater_ids`, the export adds
-each to every Room it serves as a direct electric heating system, the preflight lists its findings, and `locate`
-takes `electric_heater_ids`. Since API 1.96 Pumps are the catalog `ph_composer.mechanical.pumps`, with the same
+each to every Room it serves as a direct electric heating system, the preflight lists its findings (with
+`mechanical.zone_without_spaces` for a served Zone with no Spaces since API 1.112), and `locate` takes
+`electric_heater_ids`. Since API 1.96 Pumps are the catalog `ph_composer.mechanical.pumps`, with the same
 operations; they serve Zones through the list slot `pump_ids`, the export adds each to every Room it serves as a
 supportive device, the preflight lists its findings with `mechanical.zone_without_spaces` for a served Zone with no
 Spaces, and `locate` takes `pump_ids`. Since API 1.97 Fans are the catalog `ph_composer.mechanical.fans`, with the

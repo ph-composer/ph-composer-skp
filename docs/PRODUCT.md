@@ -437,6 +437,8 @@ Hot water flow stays in L/h per m².
    against a heat pump.
 3. Click a row's **Serves** cell to choose its Zones, as for a Ventilator. A Zone may have several
    heaters, so assigning one never replaces another; unchecking a Zone takes only this heater off it.
+   PHX reads a heater through a Room's Spaces, so the Export pane warns when a heater serves an exported
+   Zone with no Spaces.
 4. Deleting a heater that serves Zones asks which heater takes its place on them, or clears it from them.
 
 ## Draw hot water piping

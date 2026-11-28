@@ -1131,13 +1131,16 @@ each heater serves under `zones`, and `findings`: `mechanical.item_unserved` whe
 
 The export adds to each served Zone's Room one direct electric heating system per heater serving it,
 under the heater's id, with its Tag, coverage and `user_data`, so every Room one heater serves carries
-the same system and PHX makes one device per heater in each Building Segment it serves.
+the same system. PHX reads heating systems through each Room's Spaces and makes one device per heater
+in each Building Segment it serves; a Room with no Spaces gives it none.
 
 1. Before exporting, read `ph_composer.mechanical.preflight`; its heater rows name the Electric Heater
    export as their `section`. `mechanical.item_missing` blocks: a Zone the export writes names a heater
    that is not in the Model. `mechanical.item_unserved` names a heater that serves no Zone, `mechanical.zone_left_out` a
-   served Zone in no Building Segment, and `mechanical.item_across_segments` a heater on Zones in two
-   Building Segments; none of these blocks. A row about a heater carries `locate` with
+   served Zone in no Building Segment, `mechanical.item_across_segments` a heater on Zones in two
+   Building Segments, and `mechanical.zone_without_spaces` the served exported Zones with no Spaces, once per heater,
+   whose Rooms carry it in the HBJSON while PHX reads it only through another Room it serves in the same
+   Building Segment; none of these blocks. A row about a heater carries `locate` with
    `electric_heater_ids`.
 2. Export, then read back. The result gives `electric_heaters`, one row per (heater, Zone) pair:
    `identifier`, `display_name`, `percent_coverage` and `digest`. In the HBJSON each of those Rooms has

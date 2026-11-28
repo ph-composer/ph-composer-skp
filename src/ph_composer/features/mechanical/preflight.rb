@@ -23,8 +23,8 @@ module PhComposer
                                             "serving Zones in two Building Segments, a Tank with no free slot, " \
                                             "Hot Water Systems pooled in one Building Segment, and the heat pump " \
                                             "blend's: a climate it cannot read, an unpaired unit, an incomplete " \
-                                            "outdoor model and cooling over 200 kW; a Pump or a Fan serving a Zone " \
-                                            "with no Spaces; and a Building Segment whose " \
+                                            "outdoor model and cooling over 200 kW; a Pump, a Fan or an Electric " \
+                                            "Heater serving a Zone with no Spaces; and a Building Segment whose " \
                                             "mechanical cooling switch disagrees with its blended heat pump.",
                             :refuses => [], :params => Shapes::NONE,
                             :result => PhComposer::Export::PREFLIGHT_RESULT, :examples => [{}]) do |request|
